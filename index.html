@@ -40,31 +40,31 @@
       <div class="age-gate-title" style="font-size:2.2rem;margin-bottom:8px;">¡Bienvenid@! 🔥</div>
       <p class="age-gate-sub">Para comprar tickets y guardar tu historial, ¿tienes cuenta en Frate?</p>
       <div class="age-gate-choice-btns">
-        <button class="btn-rojo" id="age-btn-register">CREAR CUENTA NUEVA</button>
-        <button class="btn-dorado" id="age-btn-login">YA TENGO CUENTA</button>
-        <button class="btn-ghost" id="age-btn-skip">Entrar sin cuenta →</button>
+        <button class="btn-rojo" onclick="ageShowStep('age-s4')">CREAR CUENTA NUEVA</button>
+        <button class="btn-dorado" onclick="ageShowStep('age-s3')">YA TENGO CUENTA</button>
+        <button class="btn-ghost" onclick="ageDismiss()">Entrar sin cuenta →</button>
       </div>
     </div>
 
     <!-- PASO 3: Login -->
     <div class="age-step" id="age-s3">
-      <button class="age-back-btn" data-back="age-s2">← Volver</button>
+      <button class="age-back-btn" onclick="ageShowStep('age-s2')">← Volver</button>
       <div class="age-gate-title" style="font-size:2rem;margin-bottom:20px;">Iniciar sesión</div>
-      <form class="age-gate-form" id="age-login-form" style="gap:14px;">
+      <form class="age-gate-form" id="age-login-form" style="gap:14px;" onsubmit="event.preventDefault();ageDoLogin()">
         <label>Email</label>
         <input type="email" id="agl-email" placeholder="tu@email.com" required />
         <label>Contraseña</label>
         <input type="password" id="agl-pass" placeholder="••••••••" required />
         <div class="age-gate-error" id="agl-error"></div>
-        <button type="submit" class="btn-rojo" id="agl-submit">ENTRAR</button>
+        <button type="button" class="btn-rojo" id="agl-submit" onclick="ageDoLogin()">ENTRAR</button>
       </form>
     </div>
 
     <!-- PASO 4: Registro -->
     <div class="age-step" id="age-s4">
-      <button class="age-back-btn" data-back="age-s2">← Volver</button>
+      <button class="age-back-btn" onclick="ageShowStep('age-s2')">← Volver</button>
       <div class="age-gate-title" style="font-size:1.8rem;margin-bottom:20px;">Crear cuenta</div>
-      <form class="age-gate-form" id="age-register-form" style="gap:12px;">
+      <form class="age-gate-form" id="age-register-form" style="gap:12px;" onsubmit="event.preventDefault();ageDoRegister()">
         <label>Nombre completo</label>
         <input type="text" id="agr-nombre" placeholder="Tu nombre" required />
         <label>Email</label>
@@ -91,7 +91,7 @@
         <label>Contraseña <span style="color:#555;font-size:0.65rem;">(mín. 6 caracteres)</span></label>
         <input type="password" id="agr-pass" placeholder="••••••••" required />
         <div class="age-gate-error" id="agr-error"></div>
-        <button type="submit" class="btn-rojo" id="agr-submit">CREAR CUENTA</button>
+        <button type="button" class="btn-rojo" id="agr-submit" onclick="ageDoRegister()">CREAR CUENTA</button>
       </form>
     </div>
 
@@ -100,8 +100,8 @@
       <div class="age-success">
         <div class="age-success-icon">🎉</div>
         <div class="age-gate-title" style="font-size:2rem;margin-bottom:12px;">¡Listo!</div>
-        <p class="age-gate-sub" id="age-success-msg">Cuenta creada. Bienvenid@ a Frate.</p>
-        <button class="btn-rojo" id="age-enter-btn" style="margin-top:20px;">ENTRAR A FRATE 🔥</button>
+        <p class="age-gate-sub" id="age-success-msg">Bienvenid@ a Frate.</p>
+        <button class="btn-rojo" onclick="ageDismiss()" style="margin-top:20px;">ENTRAR A FRATE 🔥</button>
       </div>
     </div>
 
@@ -1077,6 +1077,90 @@
 <script src="frate-popups.js"></script>
 <script src="frate-cuenta.js"></script>
 <script>
+// ── AGE GATE — funciones globales (independientes de frate-app.js) ──
+function ageShowStep(id) {
+  document.querySelectorAll('.age-step').forEach(function(s){ s.classList.remove('active'); });
+  var el = document.getElementById(id);
+  if (el) el.classList.add('active');
+}
+
+function ageDismiss() {
+  try { localStorage.setItem('frate_age_ok', JSON.stringify(true)); } catch(e) {}
+  var gate = document.getElementById('age-gate');
+  if (!gate) return;
+  gate.style.opacity = '0';
+  gate.style.transition = 'opacity 0.6s ease';
+  setTimeout(function() {
+    gate.classList.add('hidden');
+    gate.style.opacity = '';
+    gate.style.transition = '';
+  }, 600);
+  if (typeof updateNavUser === 'function') updateNavUser();
+}
+
+async function ageDoLogin() {
+  var email = (document.getElementById('agl-email') || {}).value || '';
+  var pass  = (document.getElementById('agl-pass')  || {}).value || '';
+  var errEl = document.getElementById('agl-error');
+  var btn   = document.getElementById('agl-submit');
+  email = email.trim();
+  if (errEl) { errEl.textContent = ''; errEl.style.display = 'none'; }
+  if (!email || !pass) {
+    if (errEl) { errEl.textContent = 'Ingresa tu email y contraseña.'; errEl.style.display = 'block'; }
+    return;
+  }
+  if (btn) { btn.disabled = true; btn.textContent = 'Ingresando...'; }
+  try {
+    var session = (typeof sbSignIn === 'function') ? await sbSignIn(email, pass) : null;
+    var nombre = session ? session.nombre : email.split('@')[0];
+    var msg = document.getElementById('age-success-msg');
+    if (msg) msg.textContent = '¡Hola de vuelta, ' + nombre + '! 🔥';
+    ageShowStep('age-s5');
+  } catch(err) {
+    var txt = (err && err.message) ? err.message : 'Error al iniciar sesión.';
+    if (txt.toLowerCase().includes('invalid')) txt = 'Email o contraseña incorrectos.';
+    if (errEl) { errEl.textContent = txt; errEl.style.display = 'block'; }
+  } finally {
+    if (btn) { btn.disabled = false; btn.textContent = 'ENTRAR'; }
+  }
+}
+
+async function ageDoRegister() {
+  var nombre     = ((document.getElementById('agr-nombre') || {}).value || '').trim();
+  var email      = ((document.getElementById('agr-email')  || {}).value || '').trim();
+  var pass       = (document.getElementById('agr-pass')    || {}).value || '';
+  var telefono   = ((document.getElementById('agr-tel')    || {}).value || '').trim();
+  var rut        = ((document.getElementById('agr-rut')    || {}).value || '').trim();
+  var universidad= (document.getElementById('agr-univ')    || {}).value || '';
+  var errEl = document.getElementById('agr-error');
+  var btn   = document.getElementById('agr-submit');
+  if (errEl) { errEl.textContent = ''; errEl.style.display = 'none'; }
+  if (!nombre || !email || !pass) {
+    if (errEl) { errEl.textContent = 'Nombre, email y contraseña son obligatorios.'; errEl.style.display = 'block'; }
+    return;
+  }
+  if (pass.length < 6) {
+    if (errEl) { errEl.textContent = 'La contraseña debe tener al menos 6 caracteres.'; errEl.style.display = 'block'; }
+    return;
+  }
+  if (btn) { btn.disabled = true; btn.textContent = 'Creando cuenta...'; }
+  try {
+    if (typeof sbSignUp === 'function') {
+      await sbSignUp({ nombre: nombre, email: email, password: pass, telefono: telefono, rut: rut, universidad: universidad });
+      try { await sbSignIn(email, pass); } catch(_) {}
+    }
+    var msg = document.getElementById('age-success-msg');
+    if (msg) msg.textContent = '¡Cuenta creada, ' + nombre + '! Bienvenid@ a Frate 🎉';
+    ageShowStep('age-s5');
+  } catch(err) {
+    var txt = (err && err.message) ? err.message : 'Error al crear la cuenta.';
+    if (txt.toLowerCase().includes('already')) txt = 'Este email ya tiene cuenta. Usa "Ya tengo cuenta".';
+    if (errEl) { errEl.textContent = txt; errEl.style.display = 'block'; }
+  } finally {
+    if (btn) { btn.disabled = false; btn.textContent = 'CREAR CUENTA'; }
+  }
+}
+
 // ── Override initAmbientes con datos correctos (FUEGO/AIRE/TIERRA) ──
 function initAmbientes() {
   const data = [
