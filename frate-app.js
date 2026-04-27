@@ -193,7 +193,7 @@ function initAuthModal() {
     if (!user) { showToast('Email o contraseña incorrectos.'); return; }
     // Migrate old plain-text password to hash
     if (user.password) { user.pwHash = user.password.split('').reduce((h,c)=>((h<<5)-h+c.charCodeAt(0))|0,0).toString(36); delete user.password; const us=Storage.get('frate_users')||[]; const i=us.findIndex(u=>u.email===email); if(i>=0){us[i]=user;Storage.set('frate_users',us);} }
-    const {pwHash, ...safeUser} = user;
+    const safeUser = Object.assign({}, user); delete safeUser.pwHash; delete safeUser.password;
     Storage.set('frate_session', safeUser);
     closeAuthModal();
     updateNavUser();
@@ -228,7 +228,7 @@ function initAuthModal() {
     };
     users.push(newUser);
     Storage.set('frate_users', users);
-    const {pwHash, ...safeSession} = newUser;
+    const safeSession = Object.assign({}, newUser); delete safeSession.pwHash;
     Storage.set('frate_session', safeSession);
     closeAuthModal();
     updateNavUser();

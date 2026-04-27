@@ -65,29 +65,39 @@
       <button class="age-back-btn" onclick="ageShowStep('age-s2')">← Volver</button>
       <div class="age-gate-title" style="font-size:1.8rem;margin-bottom:20px;">Crear cuenta</div>
       <form class="age-gate-form" id="age-register-form" style="gap:12px;" onsubmit="event.preventDefault();ageDoRegister()">
-        <label>Nombre completo</label>
-        <input type="text" id="agr-nombre" placeholder="Tu nombre" required />
+        <div class="age-gate-form-row">
+          <div>
+            <label>Nombres</label>
+            <input type="text" id="agr-nombres" placeholder="Tus nombres" required />
+          </div>
+          <div>
+            <label>Apellidos</label>
+            <input type="text" id="agr-apellidos" placeholder="Tus apellidos" required />
+          </div>
+        </div>
         <label>Email</label>
         <input type="email" id="agr-email" placeholder="tu@email.com" required />
         <div class="age-gate-form-row">
           <div>
             <label>Teléfono</label>
-            <input type="tel" id="agr-tel" placeholder="+56 9 xxxx xxxx" />
+            <input type="tel" id="agr-tel" placeholder="+569 xxxx xxxx" value="+569" />
           </div>
           <div>
             <label>RUT</label>
-            <input type="text" id="agr-rut" placeholder="12.345.678-9" />
+            <input type="text" id="agr-rut" placeholder="12.345.678-9" maxlength="12"
+              oninput="rutFormat(this)" onblur="rutCheck(this)" autocomplete="off" />
           </div>
         </div>
-        <label>Universidad</label>
-        <select id="agr-univ">
-          <option value="">Selecciona tu universidad</option>
-          <option>Universidad de Chile</option>
-          <option>PUC</option><option>USACH</option>
-          <option>UDP</option><option>UNAB</option>
-          <option>UTEM</option><option>Universidad Central</option>
-          <option>UAH</option><option>Otra</option>
+        <label>Institución de Estudios</label>
+        <select id="agr-inst" onchange="ageCarreras(this)" required>
+          <option value="">Selecciona tu institución</option>
         </select>
+        <div id="agr-carrera-wrap" style="display:none;">
+          <label style="display:block;margin-bottom:6px;">Carrera</label>
+          <select id="agr-carrera">
+            <option value="">Selecciona tu carrera</option>
+          </select>
+        </div>
         <label>Contraseña <span style="color:#555;font-size:0.65rem;">(mín. 6 caracteres)</span></label>
         <input type="password" id="agr-pass" placeholder="••••••••" required />
         <div class="age-gate-error" id="agr-error"></div>
@@ -1125,18 +1135,127 @@ async function ageDoLogin() {
   }
 }
 
+// ── RUT ──────────────────────────────────────────────────────
+function rutFormat(inp) {
+  var v = inp.value.replace(/[^0-9kK]/g,'').toUpperCase();
+  if (!v) { inp.value=''; return; }
+  var dv = v.slice(-1), body = v.slice(0,-1), fmt='', cnt=0;
+  for (var i=body.length-1;i>=0;i--,cnt++) { if(cnt>0&&cnt%3===0) fmt='.'+fmt; fmt=body[i]+fmt; }
+  inp.value = (fmt||'') + (body?'-':'') + dv;
+}
+function rutCheck(inp) {
+  var v = inp.value.replace(/[^0-9kK]/g,'').toUpperCase();
+  if (v.length < 2) return;
+  var dv=v.slice(-1), body=v.slice(0,-1), s=0, m=2;
+  for (var i=body.length-1;i>=0;i--) { s+=parseInt(body[i])*m; m=m===7?2:m+1; }
+  var exp=11-(s%11), ok=(exp===11?'0':exp===10?'K':String(exp))===dv;
+  inp.style.borderColor = ok ? '#555' : '#E8363D';
+  if (!ok) inp.title='RUT inválido — verifica el dígito verificador';
+  else inp.title='';
+}
+
+// ── INSTITUCIONES ────────────────────────────────────────────
+var INST_DATA = [
+  {g:'── Universidades Tradicionales (CRUCH) ──', disabled:true, c:[]},
+  {g:'Universidad de Chile',c:['Actuación','Agronomía','Arquitectura','Arte','Astronomía','Biología','Bioquímica','Ciencia Política','Contabilidad y Auditoría','Danza','Derecho','Diseño','Economía','Educación Parvularia','Educación Física','Enfermería','Filosofía','Física','Fonoaudiología','Geografía','Geología','Historia','Ing. Civil','Ing. Civil Eléctrica','Ing. Civil en Biotecnología','Ing. Civil en Computación','Ing. Civil en Geofísica','Ing. Civil Industrial','Ing. Civil Matemático','Ing. Civil Mecánica','Ing. Civil de Minas','Ing. Civil Química','Ing. Comercial','Ing. Forestal','Kinesiología','Letras Hispánicas','Letras Inglés','Matemáticas','Medicina','Musicología','Nutrición y Dietética','Obstetricia y Puericultura','Odontología','Periodismo','Psicología','Química','Química y Farmacia','Sociología','Teatro','Tecnología Médica','Terapia Ocupacional','Trabajo Social','Veterinaria','Otro']},
+  {g:'Pontificia Universidad Católica de Chile (PUC)',c:['Actuación','Agronomía e Ing. Forestal','Arquitectura','Arte','Astrofísica','Biología','Bioquímica','Ciencia Política','Comunicaciones','Construcción Civil','Contabilidad y Gestión','Derecho','Diseño','Economía','Educación Básica','Educación Física','Educación Parvularia','Enfermería','Estadística','Filosofía','Física','Fonoaudiología','Geografía','Historia','Ing. Civil','Ing. Civil Eléctrica','Ing. Civil Industrial','Ing. Civil Matemático','Ing. Civil Mecánica','Ing. Civil Química','Ing. Comercial','Ing. de Construcción','Ing. en Bioprocesos','Kinesiología','Letras Hispánicas','Letras Inglés','Matemáticas','Medicina','Medicina Veterinaria','Música','Nutrición y Dietética','Obstetricia','Odontología','Pedagogía','Periodismo','Psicología','Química','Química y Farmacia','Sociología','Teología','Tecnología Médica','Terapia Ocupacional','Trabajo Social','Otro']},
+  {g:'Universidad de Santiago de Chile (USACH)',c:['Administración Pública','Arquitectura','Biología','Bioquímica','Ciencia Política','Contabilidad y Auditoría','Derecho','Educación Diferencial','Educación Física','Enfermería','Física','Historia','Ing. Civil','Ing. Civil Eléctrica','Ing. Civil Industrial','Ing. Civil en Metalurgia','Ing. Civil Química','Ing. Comercial','Ing. Ejecución Eléctrica','Ing. Ejecución Industrial','Ing. Ejecución Mecánica','Ing. Ejecución Química','Ing. en Administración','Ing. en Biotecnología','Ing. en Computación','Ing. en Minas','Kinesiología','Matemáticas','Medicina','Música','Nutrición y Dietética','Obstetricia','Odontología','Pedagogía','Periodismo','Psicología','Química','Sociología','Tecnología Médica','Trabajo Social','Otro']},
+  {g:'Pontificia Universidad Católica de Valparaíso (PUCV)',c:['Agronomía','Arquitectura','Biología Marina','Ciencias Náuticas','Comercio Internacional','Contabilidad y Auditoría','Derecho','Educación Parvularia','Enfermería','Filosofía','Física','Fonoaudiología','Historia','Ing. Civil','Ing. Civil Industrial','Ing. Civil Informática','Ing. Comercial','Kinesiología','Matemáticas','Medicina','Nutrición y Dietética','Obstetricia','Odontología','Pedagogía','Periodismo','Psicología','Sociología','Tecnología Médica','Trabajo Social','Otro']},
+  {g:'Universidad Técnica Federico Santa María (UTFSM)',c:['Auditoría e Ing. en Control de Gestión','Ing. Civil','Ing. Civil Electrónica','Ing. Civil Industrial','Ing. Civil Informática','Ing. Civil Mecánica','Ing. Civil Telemática','Ing. Civil en Minas','Ing. Civil Química','Ing. Comercial','Ing. en Administración de Empresas','Ing. en Diseño de Productos','Ing. en Gestión Empresarial','Ing. en Informática','Ing. en Negocios Internacionales','Otro']},
+  {g:'Universidad de Concepción (UdeC)',c:['Agronomía','Arquitectura','Biología','Bioquímica','Ciencias Forestales','Contabilidad','Derecho','Educación Básica','Educación Diferencial','Educación Física','Enfermería','Farmacia','Filosofía','Física','Fonoaudiología','Historia','Ing. Civil','Ing. Civil Eléctrica','Ing. Civil Industrial','Ing. Civil Informática','Ing. Civil Mecánica','Ing. Civil Química','Ing. Comercial','Kinesiología','Matemáticas','Medicina','Medicina Veterinaria','Nutrición','Obstetricia','Odontología','Pedagogía','Periodismo','Psicología','Sociología','Tecnología Médica','Trabajo Social','Otro']},
+  {g:'Universidad Austral de Chile (UACh)',c:['Agronomía','Arquitectura','Biología','Biología Marina','Ciencias Forestales','Contabilidad y Auditoría','Derecho','Educación Básica','Enfermería','Historia','Ing. Civil','Ing. Civil Industrial','Ing. Civil en Informática','Ing. Civil Mecánica','Ing. Comercial','Kinesiología','Medicina','Medicina Veterinaria','Nutrición','Obstetricia','Odontología','Pedagogía','Psicología','Tecnología Médica','Trabajo Social','Otro']},
+  {g:'Universidad de Valparaíso (UV)',c:['Arquitectura','Ciencias Políticas','Contabilidad y Auditoría','Derecho','Educación Física','Enfermería','Filosofía','Fonoaudiología','Historia','Ing. Civil','Ing. Civil Informática','Ing. Civil Industrial','Ing. Comercial','Kinesiología','Medicina','Música','Obstetricia','Odontología','Pedagogía','Periodismo','Psicología','Sociología','Tecnología Médica','Trabajo Social','Otro']},
+  {g:'Universidad del Bío-Bío (UBB)',c:['Arquitectura','Contabilidad y Auditoría','Derecho','Diseño Industrial','Educación Básica','Educación Física','Enfermería','Historia','Ing. Civil','Ing. Civil Industrial','Ing. Civil Informática','Ing. Civil Mecánica','Ing. Comercial','Kinesiología','Nutrición y Dietética','Pedagogía','Psicología','Trabajo Social','Otro']},
+  {g:'Universidad de La Frontera (UFRO)',c:['Agronomía','Ciencias Forestales','Contabilidad y Auditoría','Derecho','Educación Básica','Educación Física','Enfermería','Historia','Ing. Civil','Ing. Civil Industrial','Ing. Comercial','Kinesiología','Medicina','Nutrición','Obstetricia','Odontología','Pedagogía','Psicología','Tecnología Médica','Trabajo Social','Otro']},
+  {g:'Universidad de Talca (UTalca)',c:['Agronomía','Arquitectura','Contabilidad','Derecho','Enfermería','Fonoaudiología','Ing. Civil','Ing. Civil Industrial','Ing. Civil Informática','Ing. Comercial','Ing. en Bioinformática','Kinesiología','Medicina','Nutrición','Odontología','Pedagogía','Psicología','Otro']},
+  {g:'Universidad de La Serena (ULS)',c:['Agronomía','Arquitectura','Contabilidad y Auditoría','Derecho','Educación','Enfermería','Historia','Ing. Civil','Ing. Civil Industrial','Ing. Comercial','Kinesiología','Obstetricia','Pedagogía','Psicología','Trabajo Social','Otro']},
+  {g:'Universidad de Antofagasta (UA)',c:['Biología','Biología Marina','Contabilidad y Auditoría','Derecho','Educación','Enfermería','Ing. Civil','Ing. Civil Industrial','Ing. Civil en Minas','Ing. Comercial','Kinesiología','Medicina','Nutrición','Odontología','Pedagogía','Psicología','Tecnología Médica','Trabajo Social','Otro']},
+  {g:'Universidad de Atacama (UDA)',c:['Contabilidad y Auditoría','Ing. Civil','Ing. Civil de Minas','Ing. Civil Industrial','Ing. Comercial','Pedagogía','Otro']},
+  {g:'Universidad Católica del Norte (UCN)',c:['Agronomía','Arquitectura','Biología Marina','Contabilidad y Auditoría','Derecho','Educación','Enfermería','Ing. Civil','Ing. Civil de Minas','Ing. Civil Informática','Ing. Comercial','Kinesiología','Medicina','Odontología','Pedagogía','Psicología','Otro']},
+  {g:'Universidad de Magallanes (UMAG)',c:['Contabilidad y Auditoría','Derecho','Enfermería','Ing. Civil','Ing. Civil Industrial','Ing. Comercial','Pedagogía','Psicología','Otro']},
+  {g:'Universidad Arturo Prat (UNAP)',c:['Ciencias del Mar','Contabilidad y Auditoría','Derecho','Enfermería','Ing. Civil Industrial','Ing. Comercial','Pedagogía','Trabajo Social','Otro']},
+  {g:'Universidad Metropolitana de Ciencias de la Educación (UMCE)',c:['Educación Básica','Educación Diferencial','Educación Física','Educación Parvularia','Pedagogía en Biología','Pedagogía en Castellano','Pedagogía en Filosofía','Pedagogía en Física','Pedagogía en Historia','Pedagogía en Inglés','Pedagogía en Matemáticas','Pedagogía en Música','Otro']},
+  {g:'Universidad de Playa Ancha (UPLA)',c:['Artes Visuales','Ciencias de la Actividad Física','Comunicación Audiovisual','Educación Básica','Educación Diferencial','Educación Física','Historia','Periodismo','Trabajo Social','Otro']},
+  {g:'Universidad Tecnológica Metropolitana (UTEM)',c:['Administración de Empresas','Arquitectura','Contabilidad y Auditoría','Diseño','Ing. Civil Industrial','Ing. en Administración','Ing. en Gestión de la Información','Ing. en Informática','Ing. en Sonido','Trabajo Social','Otro']},
+  {g:'Universidad de Los Lagos (ULagos)',c:['Acuicultura','Administración Pública','Contabilidad y Auditoría','Derecho','Educación','Enfermería','Ing. Comercial','Obstetricia','Pedagogía','Trabajo Social','Otro']},
+  {g:'Universidad de Aysén',c:['Administración Pública','Enfermería','Ing. en Recursos Naturales','Pedagogía','Trabajo Social','Otro']},
+  {g:'Universidad de O\'Higgins',c:['Agronomía','Derecho','Educación','Enfermería','Ing. Civil Industrial','Medicina','Pedagogía','Psicología','Otro']},
+  {g:'── Universidades Privadas ──', disabled:true, c:[]},
+  {g:'Universidad Diego Portales (UDP)',c:['Actuación','Arquitectura','Contabilidad y Auditoría','Derecho','Diseño','Educación','Enfermería','Fonoaudiología','Historia','Ing. Civil Industrial','Ing. Comercial','Kinesiología','Medicina','Medicina Veterinaria','Nutrición','Obstetricia','Odontología','Periodismo','Psicología','Publicidad','Sociología','Tecnología Médica','Trabajo Social','Otro']},
+  {g:'Universidad Andrés Bello (UNAB)',c:['Arquitectura','Biología','Comunicación Audiovisual','Contabilidad y Auditoría','Derecho','Diseño','Educación Parvularia','Educación Física','Enfermería','Fonoaudiología','Historia','Ing. Civil','Ing. Civil Industrial','Ing. Civil Informática','Ing. Comercial','Ing. en Administración','Kinesiología','Letras','Medicina','Medicina Veterinaria','Nutrición y Dietética','Obstetricia','Odontología','Pedagogía','Periodismo','Psicología','Publicidad','Tecnología Médica','Terapia Ocupacional','Trabajo Social','Otro']},
+  {g:'Universidad del Desarrollo (UDD)',c:['Arquitectura','Contabilidad','Derecho','Diseño','Enfermería','Fonoaudiología','Ing. Civil','Ing. Comercial','Kinesiología','Medicina','Medicina Veterinaria','Nutrición','Obstetricia','Odontología','Periodismo','Psicología','Publicidad','Tecnología Médica','Otro']},
+  {g:'Universidad Adolfo Ibáñez (UAI)',c:['Arquitectura','Derecho','Diseño','Economía','Ing. Civil Industrial','Ing. Comercial','Ing. en Computación','Ing. en Diseño','Periodismo','Psicología','Sociología','Otro']},
+  {g:'Universidad Alberto Hurtado (UAH)',c:['Contabilidad y Auditoría','Derecho','Educación','Filosofía','Historia','Ing. Comercial','Periodismo','Psicología','Sociología','Trabajo Social','Otro']},
+  {g:'Universidad Mayor',c:['Agronomía','Arquitectura','Ciencias de la Actividad Física','Comunicación','Contabilidad','Derecho','Diseño','Educación','Enfermería','Fonoaudiología','Historia','Ing. Civil Industrial','Ing. Comercial','Kinesiología','Medicina','Medicina Veterinaria','Música','Nutrición','Obstetricia','Odontología','Periodismo','Psicología','Publicidad','Tecnología Médica','Otro']},
+  {g:'Universidad Finis Terrae (UFT)',c:['Actuación','Arquitectura','Derecho','Diseño','Enfermería','Ing. Comercial','Medicina','Música','Nutrición','Odontología','Periodismo','Psicología','Otro']},
+  {g:'Universidad Santo Tomás (UST)',c:['Administración de Empresas','Arquitectura','Contabilidad','Derecho','Diseño Gráfico','Educación','Enfermería','Ing. Civil Industrial','Ing. Comercial','Ing. en Informática','Kinesiología','Medicina Veterinaria','Nutrición','Obstetricia','Pedagogía','Periodismo','Psicología','Trabajo Social','Otro']},
+  {g:'Universidad Autónoma de Chile',c:['Arquitectura','Contabilidad','Derecho','Educación','Enfermería','Fonoaudiología','Ing. Comercial','Ing. en Informática','Kinesiología','Medicina','Obstetricia','Odontología','Pedagogía','Psicología','Tecnología Médica','Trabajo Social','Otro']},
+  {g:'Universidad San Sebastián (USS)',c:['Arquitectura','Contabilidad','Derecho','Educación','Enfermería','Fonoaudiología','Ing. Comercial','Kinesiología','Medicina','Medicina Veterinaria','Nutrición','Obstetricia','Odontología','Pedagogía','Psicología','Tecnología Médica','Trabajo Social','Otro']},
+  {g:'Universidad Bernardo O\'Higgins (UBO)',c:['Arquitectura','Contabilidad','Derecho','Educación','Enfermería','Ing. Comercial','Ing. en Informática','Kinesiología','Obstetricia','Pedagogía','Psicología','Trabajo Social','Otro']},
+  {g:'Universidad Central de Chile',c:['Arquitectura','Artes Visuales','Ciencias Políticas','Contabilidad','Derecho','Diseño','Educación','Enfermería','Ing. Civil Industrial','Ing. Comercial','Ing. en Informática','Kinesiología','Música','Obstetricia','Pedagogía','Periodismo','Psicología','Sociología','Trabajo Social','Otro']},
+  {g:'Universidad UNIACC',c:['Actuación','Comunicación Audiovisual','Comunicación Digital','Diseño Gráfico','Fotografía','Periodismo','Producción Audiovisual','Publicidad','Otro']},
+  {g:'Universidad Internacional SEK',c:['Arquitectura','Contabilidad','Derecho','Educación','Ing. Civil','Ing. Comercial','Psicología','Otro']},
+  {g:'Universidad Los Leones',c:['Contabilidad','Derecho','Educación','Enfermería','Ing. Comercial','Kinesiología','Nutrición','Psicología','Trabajo Social','Otro']},
+  {g:'Universidad del Pacífico',c:['Administración de Empresas','Contabilidad','Derecho','Educación','Ing. Comercial','Nutrición','Psicología','Otro']},
+  {g:'Universidad La República',c:['Administración de Empresas','Contabilidad','Derecho','Educación','Ing. Comercial','Trabajo Social','Otro']},
+  {g:'── Institutos Profesionales ──', disabled:true, c:[]},
+  {g:'DUOC UC',c:['Administración de Empresas','Animación Digital','Arquitectura','Automatización y Robótica','Comunicación Audiovisual','Construcción','Contabilidad','Diseño Gráfico','Diseño de Vestuario','Electricidad','Electrónica','Enfermería','Gastronomía','Informática','Ing. en Administración','Ing. en Computación e Informática','Ing. en Conectividad y Redes','Ing. en Electricidad','Ing. en Electrónica','Ing. en Gestión Industrial','Ing. en Logística','Mecánica Automotriz','Mecatrónica','Minería','Nutrición y Dietética','Publicidad','Radiología','Turismo y Hotelería','Otro']},
+  {g:'INACAP',c:['Administración de Empresas','Animación Digital','Automatización Industrial','Comunicación Audiovisual','Construcción','Contabilidad','Diseño Gráfico','Electricidad Industrial','Enfermería','Gastronomía','Ing. en Administración','Ing. en Biotecnología','Ing. en Computación','Ing. en Construcción','Ing. en Electricidad','Ing. en Electrónica','Ing. en Gestión Industrial','Ing. en Logística','Ing. en Minas','Ing. en Redes y Comunicaciones','Mecánica Automotriz','Mecánica Industrial','Nutrición','Prevención de Riesgos','Refrigeración y Climatización','Turismo','Otro']},
+  {g:'Instituto Profesional AIEP',c:['Administración de Empresas','Animación','Comunicación Audiovisual','Contabilidad','Diseño Gráfico','Educación','Enfermería','Fonoaudiología','Ing. en Administración','Ing. en Computación','Kinesiología','Nutrición','Periodismo','Psicopedagogía','Publicidad','Tecnología Médica','Terapia Ocupacional','Trabajo Social','Turismo','Otro']},
+  {g:'IPChile',c:['Administración de Empresas','Animación Digital','Comunicación Audiovisual','Contabilidad','Diseño Gráfico','Educación','Ing. en Administración','Ing. en Computación','Publicidad','Turismo','Otro']},
+  {g:'Instituto Profesional Santo Tomás',c:['Administración','Comunicación Audiovisual','Contabilidad','Diseño','Educación','Electricidad','Enfermería','Gastronomía','Informática','Mecánica','Otro']},
+  {g:'Instituto IACC',c:['Administración de Empresas','Contabilidad','Diseño Gráfico','Ing. en Computación e Informática','Ing. en Redes','Marketing','Otro']},
+  {g:'Instituto Profesional Los Leones',c:['Administración','Contabilidad','Enfermería','Ing. en Administración','Ing. en Informática','Nutrición','Trabajo Social','Otro']},
+  {g:'Instituto Profesional Providencia',c:['Administración de Empresas','Contabilidad','Enfermería','Ing. en Administración','Publicidad','Trabajo Social','Otro']},
+  {g:'Escuela Moderna de Música',c:['Composición','Dirección Coral','Musicoterapia','Pedagogía Musical','Producción Musical','Otro']},
+];
+
+function ageCarreras(sel) {
+  var wrap = document.getElementById('agr-carrera-wrap');
+  var carSel = document.getElementById('agr-carrera');
+  var val = sel.value;
+  if (!val || val === 'NO SOY ESTUDIANTE') { wrap.style.display='none'; return; }
+  var inst = null;
+  for (var i=0;i<INST_DATA.length;i++) { if (INST_DATA[i].g===val){inst=INST_DATA[i];break;} }
+  if (!inst || !inst.c || !inst.c.length) { wrap.style.display='none'; return; }
+  carSel.innerHTML = '<option value="">Selecciona tu carrera</option>' +
+    inst.c.map(function(c){ return '<option value="'+c+'">'+c+'</option>'; }).join('');
+  wrap.style.display = 'block';
+}
+
+document.addEventListener('DOMContentLoaded', function() {
+  var sel = document.getElementById('agr-inst');
+  if (!sel) return;
+  sel.innerHTML = '<option value="">Selecciona tu institución</option>';
+  INST_DATA.forEach(function(inst) {
+    var opt = document.createElement('option');
+    opt.value = inst.disabled ? '' : inst.g;
+    opt.textContent = inst.g;
+    if (inst.disabled) { opt.disabled = true; opt.style.color='#555'; opt.style.fontWeight='bold'; }
+    sel.appendChild(opt);
+  });
+  // NO SOY ESTUDIANTE al final
+  var noEst = document.createElement('option');
+  noEst.value = 'NO SOY ESTUDIANTE';
+  noEst.textContent = 'NO SOY ESTUDIANTE';
+  sel.appendChild(noEst);
+});
+
 async function ageDoRegister() {
-  var nombre     = ((document.getElementById('agr-nombre') || {}).value || '').trim();
-  var email      = ((document.getElementById('agr-email')  || {}).value || '').trim();
-  var pass       = (document.getElementById('agr-pass')    || {}).value || '';
-  var telefono   = ((document.getElementById('agr-tel')    || {}).value || '').trim();
-  var rut        = ((document.getElementById('agr-rut')    || {}).value || '').trim();
-  var universidad= (document.getElementById('agr-univ')    || {}).value || '';
+  var nombres    = ((document.getElementById('agr-nombres')   || {}).value || '').trim();
+  var apellidos  = ((document.getElementById('agr-apellidos') || {}).value || '').trim();
+  var nombre     = (nombres + ' ' + apellidos).trim();
+  var email      = ((document.getElementById('agr-email')     || {}).value || '').trim();
+  var pass       = (document.getElementById('agr-pass')       || {}).value || '';
+  var telefono   = ((document.getElementById('agr-tel')       || {}).value || '').trim();
+  var rut        = ((document.getElementById('agr-rut')       || {}).value || '').trim();
+  var universidad= ((document.getElementById('agr-inst')      || {}).value || '');
+  var carrera    = ((document.getElementById('agr-carrera')   || {}).value || '');
   var errEl = document.getElementById('agr-error');
   var btn   = document.getElementById('agr-submit');
   if (errEl) { errEl.textContent = ''; errEl.style.display = 'none'; }
-  if (!nombre || !email || !pass) {
-    if (errEl) { errEl.textContent = 'Nombre, email y contraseña son obligatorios.'; errEl.style.display = 'block'; }
+  if (!nombres || !email || !pass) {
+    if (errEl) { errEl.textContent = 'Nombres, email y contraseña son obligatorios.'; errEl.style.display = 'block'; }
     return;
   }
   if (pass.length < 6) {
@@ -1146,11 +1265,11 @@ async function ageDoRegister() {
   if (btn) { btn.disabled = true; btn.textContent = 'Creando cuenta...'; }
   try {
     if (typeof sbSignUp === 'function') {
-      await sbSignUp({ nombre: nombre, email: email, password: pass, telefono: telefono, rut: rut, universidad: universidad });
+      await sbSignUp({ nombre:nombre, email:email, password:pass, telefono:telefono, rut:rut, universidad:universidad, carrera:carrera });
       try { await sbSignIn(email, pass); } catch(_) {}
     }
     var msg = document.getElementById('age-success-msg');
-    if (msg) msg.textContent = '¡Cuenta creada, ' + nombre + '! Bienvenid@ a Frate 🎉';
+    if (msg) msg.textContent = '¡Cuenta creada, ' + nombres + '! Bienvenid@ a Frate 🎉';
     ageShowStep('age-s5');
   } catch(err) {
     var txt = (err && err.message) ? err.message : 'Error al crear la cuenta.';
