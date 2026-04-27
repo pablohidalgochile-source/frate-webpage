@@ -31,7 +31,7 @@
         <label for="age-birth-input">Fecha de nacimiento</label>
         <input type="date" id="age-birth-input" required />
         <div class="age-gate-error" id="age-error"></div>
-        <button type="button" class="btn-rojo" id="age-verify-btn">VERIFICAR EDAD</button>
+        <button type="button" class="btn-rojo" id="age-verify-btn" onclick="(function(){var inp=document.getElementById('age-birth-input');var err=document.getElementById('age-error');err.style.display='none';if(!inp||!inp.value){err.textContent='Ingresa tu fecha de nacimiento.';err.style.display='block';return;}var b=new Date(inp.value+'T12:00:00');var t=new Date();var a=t.getFullYear()-b.getFullYear();var m=t.getMonth()-b.getMonth();if(m<0||(m===0&&t.getDate()<b.getDate()))a--;if(a<18){err.textContent='Debes ser mayor de 18 años para ingresar.';err.style.display='block';return;}document.querySelectorAll('.age-step').forEach(function(s){s.classList.remove('active');});document.getElementById('age-s2').classList.add('active');})()">VERIFICAR EDAD</button>
       </form>
     </div>
 
