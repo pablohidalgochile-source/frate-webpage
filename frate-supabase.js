@@ -60,7 +60,8 @@ async function sbSignIn(emailOrUser, password) {
     telefono:    profile?.telefono    || '',
     rut:         profile?.rut         || '',
     universidad: profile?.universidad || '',
-    carrera:     profile?.carrera     || ''
+    carrera:     profile?.carrera     || '',
+    rol:         profile?.rol         || 'usuario'
   };
   Storage.set('frate_session', session);
   return session;
@@ -84,13 +85,15 @@ async function sbRestoreSession() {
   const session = {
     id:          user.id,
     email:       user.email,
-    nombre:      (nombres + ' ' + apellidos).trim() || user.email.split('@')[0],
+    username:    profile?.username    || '',
+    nombre:      profile?.username    || (nombres + ' ' + apellidos).trim() || user.email.split('@')[0],
     nombres,
     apellidos,
     telefono:    profile?.telefono    || '',
     rut:         profile?.rut         || '',
     universidad: profile?.universidad || '',
-    carrera:     profile?.carrera     || ''
+    carrera:     profile?.carrera     || '',
+    rol:         profile?.rol         || 'usuario'
   };
   Storage.set('frate_session', session);
   return session;

@@ -1,0 +1,1214 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" /><meta name="viewport" content="width=device-width,initial-scale=1.0" />
+  <title>Frate Admin — Panel de Control</title>
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Barlow+Condensed:wght@700;900&display=swap" rel="stylesheet" />
+  <style>
+    :root{--bg:#0d0d0f;--bg2:#111113;--bg3:#18181b;--border:#27272a;--border2:#3f3f46;--text:#fafafa;--muted:#71717a;--muted2:#52525b;--rojo:#E8363D;--dorado:#D4A832;--verde:#22c55e;--azul:#3b82f6;--r:4px;--font:'Inter',sans-serif;--disp:'Barlow Condensed',sans-serif;}
+    *{box-sizing:border-box;margin:0;padding:0;}
+    html,body{height:100%;}
+    body{background:var(--bg);color:var(--text);font-family:var(--font);font-size:14px;display:flex;height:100vh;overflow:hidden;}
+    /* SIDEBAR */
+    #sb{width:220px;flex-shrink:0;background:var(--bg2);border-right:1px solid var(--border);display:flex;flex-direction:column;height:100vh;overflow-y:auto;}
+    .sb-logo{padding:16px;border-bottom:1px solid var(--border);display:flex;align-items:center;gap:10px;}
+    .sb-badge{width:32px;height:32px;background:var(--rojo);border-radius:6px;display:flex;align-items:center;justify-content:center;font-family:var(--disp);font-weight:900;font-size:1rem;color:#fff;flex-shrink:0;}
+    .sb-name{font-weight:700;font-size:0.88rem;}.sb-sub{font-size:0.6rem;color:var(--muted);}
+    .sb-sect{padding:10px 12px 4px;font-size:0.58rem;letter-spacing:3px;text-transform:uppercase;color:var(--muted2);}
+    .sb-nav{flex:1;padding:6px;}
+    .ni{display:flex;align-items:center;gap:8px;padding:8px 10px;border-radius:4px;cursor:pointer;font-size:0.82rem;color:var(--muted);transition:all .15s;margin-bottom:1px;border:none;background:none;width:100%;text-align:left;font-family:var(--font);}
+    .ni:hover{background:var(--bg3);color:var(--text);}
+    .ni.active{background:rgba(232,54,61,.12);color:var(--rojo);}
+    .ni-icon{width:18px;text-align:center;font-size:0.9rem;}
+    .ni-badge{margin-left:auto;background:var(--rojo);color:#fff;font-size:0.58rem;font-weight:700;padding:1px 5px;border-radius:8px;}
+    .sb-foot{padding:10px 12px;border-top:1px solid var(--border);font-size:0.72rem;color:var(--muted);}
+    .sb-foot a{color:var(--rojo);text-decoration:none;}
+    /* MAIN */
+    #main{flex:1;display:flex;flex-direction:column;overflow:hidden;}
+    #topbar{height:52px;flex-shrink:0;background:var(--bg2);border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between;padding:0 20px;}
+    .tb-title{font-family:var(--disp);font-weight:900;font-size:1.2rem;letter-spacing:-.5px;}
+    .tb-actions{display:flex;gap:6px;align-items:center;}
+    #content{flex:1;overflow-y:auto;padding:20px;}
+    /* BUTTONS */
+    .btn{padding:7px 14px;border-radius:var(--r);border:none;cursor:pointer;font-family:var(--font);font-size:0.78rem;font-weight:500;transition:all .15s;display:inline-flex;align-items:center;gap:5px;}
+    .btn-p{background:var(--rojo);color:#fff;}.btn-p:hover{background:#c42d34;}
+    .btn-s{background:var(--bg3);color:var(--text);border:1px solid var(--border);}.btn-s:hover{border-color:var(--border2);}
+    .btn-g{background:none;color:var(--muted);border:1px solid var(--border);}.btn-g:hover{color:var(--text);}
+    .btn-ok{background:rgba(34,197,94,.1);color:var(--verde);border:1px solid rgba(34,197,94,.3);}
+    .btn-del{background:rgba(232,54,61,.1);color:var(--rojo);border:1px solid rgba(232,54,61,.2);}
+    .btn-gold{background:rgba(212,168,50,.1);color:var(--dorado);border:1px solid rgba(212,168,50,.3);}
+    .btn-sm{padding:4px 9px;font-size:0.72rem;}
+    /* CARDS */
+    .card{background:var(--bg2);border:1px solid var(--border);border-radius:var(--r);}
+    .ch{padding:14px 18px;border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between;}
+    .ct{font-weight:600;font-size:0.88rem;}
+    .cb{padding:18px;}
+    /* KPI */
+    .kpi-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin-bottom:20px;}
+    .kpi{background:var(--bg2);border:1px solid var(--border);border-radius:var(--r);padding:14px 18px;border-top:3px solid transparent;}
+    .kpi-l{font-size:0.65rem;letter-spacing:2px;text-transform:uppercase;color:var(--muted);margin-bottom:6px;}
+    .kpi-v{font-family:var(--disp);font-weight:900;font-size:1.8rem;line-height:1;margin-bottom:4px;}
+    .kpi-s{font-size:0.7rem;color:var(--muted);}
+    /* TABLE */
+    .tw{overflow-x:auto;}
+    table{width:100%;border-collapse:collapse;}
+    th{padding:8px 12px;text-align:left;font-size:0.62rem;letter-spacing:2px;text-transform:uppercase;color:var(--muted);border-bottom:1px solid var(--border);white-space:nowrap;}
+    td{padding:10px 12px;border-bottom:1px solid var(--border);font-size:0.8rem;vertical-align:middle;}
+    tr:last-child td{border-bottom:none;}
+    tr:hover td{background:rgba(255,255,255,.015);}
+    .tb{font-weight:600;color:var(--text);}
+    .tm{color:var(--muted);}
+    /* BADGES */
+    .badge{display:inline-block;padding:2px 7px;border-radius:3px;font-size:0.62rem;font-weight:600;}
+    .b-g{background:rgba(34,197,94,.1);color:var(--verde);border:1px solid rgba(34,197,94,.2);}
+    .b-r{background:rgba(232,54,61,.1);color:var(--rojo);border:1px solid rgba(232,54,61,.2);}
+    .b-o{background:rgba(212,168,50,.1);color:var(--dorado);border:1px solid rgba(212,168,50,.2);}
+    .b-b{background:rgba(59,130,246,.1);color:var(--azul);border:1px solid rgba(59,130,246,.2);}
+    .b-gr{background:rgba(113,113,122,.1);color:var(--muted);border:1px solid var(--border);}
+    /* FORMS */
+    .fg{display:flex;flex-direction:column;gap:5px;margin-bottom:12px;}
+    .fg label{font-size:0.68rem;font-weight:500;color:var(--muted);}
+    .fg input,.fg select,.fg textarea{background:var(--bg3);border:1px solid var(--border);color:var(--text);padding:8px 10px;border-radius:var(--r);font-family:var(--font);font-size:0.82rem;outline:none;transition:border-color .15s;width:100%;color-scheme:dark;}
+    .fg input:focus,.fg select:focus,.fg textarea:focus{border-color:var(--rojo);}
+    .fg textarea{resize:vertical;min-height:70px;}
+    .form-2{display:grid;grid-template-columns:1fr 1fr;gap:10px;}
+    .form-3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px;}
+    .form-4{display:grid;grid-template-columns:1fr 1fr 1fr 1fr;gap:10px;}
+    /* MODAL */
+    .mo{position:fixed;inset:0;background:rgba(0,0,0,.82);z-index:1000;display:flex;align-items:center;justify-content:center;padding:20px;opacity:0;pointer-events:none;transition:opacity .2s;}
+    .mo.open{opacity:1;pointer-events:all;}
+    .mb{background:var(--bg2);border:1px solid var(--border);border-radius:var(--r);width:100%;max-width:620px;max-height:88vh;overflow-y:auto;}
+    .mh{padding:14px 18px;border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between;}
+    .mht{font-weight:600;font-size:0.9rem;}
+    .mc{background:none;border:none;color:var(--muted);cursor:pointer;font-size:1rem;}
+    .mc:hover{color:var(--text);}
+    .mbody{padding:18px;}
+    .mfoot{padding:12px 18px;border-top:1px solid var(--border);display:flex;gap:6px;justify-content:flex-end;}
+    /* TABS */
+    .tabs{display:flex;border-bottom:1px solid var(--border);margin-bottom:18px;gap:0;overflow-x:auto;}
+    .tab{padding:9px 14px;font-size:0.78rem;color:var(--muted);cursor:pointer;border-bottom:2px solid transparent;margin-bottom:-1px;transition:all .15s;white-space:nowrap;background:none;border-top:none;border-left:none;border-right:none;font-family:var(--font);}
+    .tab:hover{color:var(--text);}
+    .tab.active{color:var(--text);border-bottom-color:var(--rojo);}
+    /* PANEL */
+    .panel{display:none;}.panel.active{display:block;}
+    /* TOGGLE */
+    .toggle-row{display:flex;align-items:center;justify-content:space-between;padding:10px 0;border-bottom:1px solid var(--border);}
+    .sw{position:relative;width:40px;height:22px;flex-shrink:0;}
+    .sw input{opacity:0;width:0;height:0;}
+    .sl{position:absolute;inset:0;background:#2a2a2c;border-radius:11px;cursor:pointer;transition:all .2s;}
+    .sl:before{content:'';position:absolute;width:16px;height:16px;border-radius:50%;background:#555;bottom:3px;left:3px;transition:all .2s;}
+    .sw input:checked+.sl{background:rgba(232,54,61,.3);border:1px solid var(--rojo);}
+    .sw input:checked+.sl:before{background:var(--rojo);transform:translateX(18px);}
+    /* CODE */
+    .code{background:var(--bg);border:1px solid var(--border);border-radius:var(--r);padding:14px;font-family:monospace;font-size:0.72rem;color:#a3e635;white-space:pre-wrap;overflow-x:auto;max-height:260px;overflow-y:auto;}
+    /* TOAST */
+    #toast{position:fixed;bottom:20px;right:20px;background:var(--bg3);border:1px solid var(--border);color:var(--text);padding:10px 18px;border-radius:var(--r);font-size:0.8rem;z-index:9999;opacity:0;transform:translateY(6px);transition:all .25s;pointer-events:none;}
+    #toast.show{opacity:1;transform:translateY(0);}
+    /* TICKET TYPE TABLE */
+    .tt-row{display:grid;grid-template-columns:2.5fr 1fr 1fr 1fr 1fr 1fr 1fr 1fr auto;gap:6px;align-items:center;padding:12px 16px;border-bottom:1px solid var(--border);font-size:0.8rem;}
+    .tt-row:hover{background:rgba(255,255,255,.015);}
+    .tt-header{font-size:0.6rem;letter-spacing:2px;text-transform:uppercase;color:var(--muted);padding:8px 16px;border-bottom:1px solid var(--border);display:grid;grid-template-columns:2.5fr 1fr 1fr 1fr 1fr 1fr 1fr 1fr auto;gap:6px;}
+    .tt-nombre{font-weight:600;}
+    .tt-estado-badge{font-size:0.6rem;padding:2px 6px;border-radius:3px;}
+    /* IA Panel */
+    .ia-idea{background:var(--bg3);border:1px solid var(--border);border-radius:var(--r);padding:14px;margin-bottom:8px;}
+    .ia-idea-tag{font-size:0.6rem;letter-spacing:2px;text-transform:uppercase;color:var(--rojo);margin-bottom:6px;}
+    .ia-idea-text{font-size:0.82rem;color:var(--text);line-height:1.6;}
+    /* Upload area */
+    .upload-area{border:2px dashed var(--border);border-radius:var(--r);padding:32px;text-align:center;cursor:pointer;transition:all .2s;}
+    .upload-area:hover{border-color:var(--rojo);background:rgba(232,54,61,.04);}
+    /* LOGIN SCREEN */
+    #admin-login{position:fixed;inset:0;background:var(--bg);z-index:9000;display:flex;align-items:center;justify-content:center;}
+    .login-box{background:var(--bg2);border:1px solid var(--border);border-radius:8px;padding:40px;width:380px;text-align:center;}
+    .login-logo{font-family:var(--disp);font-weight:900;font-size:2rem;color:var(--rojo);margin-bottom:4px;}
+    .login-sub{font-size:0.72rem;color:var(--muted);margin-bottom:28px;}
+    .login-box .fg input{text-align:left;}
+    .login-error{color:var(--rojo);font-size:0.78rem;margin-top:8px;min-height:20px;}
+    /* Responsive */
+    @media(max-width:900px){#sb{display:none;}.kpi-grid{grid-template-columns:repeat(2,1fr);}}
+    @media(max-width:600px){.kpi-grid{grid-template-columns:1fr;}.form-2,.form-3,.form-4{grid-template-columns:1fr;}}
+  </style>
+</head>
+<body>
+
+<!-- ══ LOGIN OVERLAY ══════════════════════════════════════════ -->
+<div id="admin-login">
+  <div class="login-box">
+    <div class="login-logo">FRATE</div>
+    <div class="login-sub">Panel de administración · Acceso restringido</div>
+    <div class="fg"><label>Email</label><input type="email" id="al-email" placeholder="admin@frate.cl" autocomplete="username" /></div>
+    <div class="fg"><label>Contraseña</label><input type="password" id="al-pass" placeholder="••••••••" autocomplete="current-password" onkeydown="if(event.key==='Enter')adminLogin()" /></div>
+    <div class="login-error" id="al-error"></div>
+    <button class="btn btn-p" style="width:100%;margin-top:12px;padding:12px;font-size:0.88rem;" onclick="adminLogin()" id="al-btn">ENTRAR</button>
+    <div style="margin-top:18px;font-size:0.72rem;color:var(--muted);">
+      <a href="/" style="color:var(--rojo);text-decoration:none;">← Volver a frate.cl</a>
+    </div>
+  </div>
+</div>
+
+<!-- SIDEBAR -->
+<div id="sb">
+  <div class="sb-logo">
+    <div class="sb-badge">F</div>
+    <div><div class="sb-name">Frate Admin</div><div class="sb-sub" id="admin-user-label">—</div></div>
+  </div>
+  <nav class="sb-nav">
+    <div class="sb-sect">Dashboard</div>
+    <button class="ni active" onclick="go('dashboard')"><span class="ni-icon">📊</span>Resumen</button>
+    <div class="sb-sect">Eventos & Tickets</div>
+    <button class="ni" onclick="go('eventos')"><span class="ni-icon">🎵</span>Eventos<span class="ni-badge" id="nb-eventos">0</span></button>
+    <button class="ni" onclick="go('tickets-tipos')"><span class="ni-icon">🎟️</span>Tipos de Ticket</button>
+    <button class="ni" onclick="go('cortesias')"><span class="ni-icon">🎁</span>Cortesías</button>
+    <button class="ni" onclick="go('ordenes')"><span class="ni-icon">📦</span>Órdenes<span class="ni-badge" id="nb-ordenes">0</span></button>
+    <div class="sb-sect">Contenido</div>
+    <button class="ni" onclick="go('ambientes')"><span class="ni-icon">🏠</span>Ambientes</button>
+    <button class="ni" onclick="go('media')"><span class="ni-icon">📸</span>Galería & Media</button>
+    <button class="ni" onclick="go('webeum')"><span class="ni-icon">▶️</span>WEBEUM</button>
+    <button class="ni" onclick="go('tiendita')"><span class="ni-icon">🛍️</span>La Tiendita</button>
+    <button class="ni" onclick="go('carta')"><span class="ni-icon">🍹</span>Carta</button>
+    <div class="sb-sect">Comunidad</div>
+    <button class="ni" onclick="go('usuarios')"><span class="ni-icon">👥</span>Usuarios<span class="ni-badge" id="nb-usuarios">0</span></button>
+    <button class="ni" onclick="go('reservas')"><span class="ni-icon">📋</span>Reservas<span class="ni-badge" id="nb-reservas">0</span></button>
+    <button class="ni" onclick="go('puntos')"><span class="ni-icon">⭐</span>Puntos & Premios</button>
+    <div class="sb-sect">Herramientas</div>
+    <button class="ni" onclick="go('ia')"><span class="ni-icon">🤖</span>IA & Marketing</button>
+    <button class="ni" onclick="go('exportar')"><span class="ni-icon">⚙️</span>Exportar</button>
+  </nav>
+  <div class="sb-foot">
+    frate.cl/admin<br/>
+    <a href="https://frate.cl" target="_blank">→ Ver frate.cl</a> ·
+    <a href="#" onclick="adminLogout()" style="color:var(--muted)">Salir</a>
+  </div>
+</div>
+
+<!-- MAIN -->
+<div id="main">
+  <div id="topbar">
+    <div class="tb-title" id="tb-title">Resumen</div>
+    <div class="tb-actions">
+      <span id="sync-status" style="font-size:0.7rem;color:var(--muted);"></span>
+      <button class="btn btn-s btn-sm" onclick="syncAll()">↻ Sync</button>
+      <button class="btn btn-p btn-sm" onclick="go('eventos');setTimeout(()=>openModal('modal-evento'),100)">+ Evento</button>
+    </div>
+  </div>
+  <div id="content">
+
+    <!-- DASHBOARD -->
+    <div class="panel active" id="p-dashboard">
+      <div class="kpi-grid">
+        <div class="kpi" style="border-top-color:var(--rojo)"><div class="kpi-l">Tickets vendidos hoy</div><div class="kpi-v" id="k-tickets" style="color:var(--rojo)">—</div><div class="kpi-s">órdenes</div></div>
+        <div class="kpi" style="border-top-color:var(--dorado)"><div class="kpi-l">Ingresos hoy</div><div class="kpi-v" id="k-ingresos" style="color:var(--dorado)">—</div><div class="kpi-s">ticket online</div></div>
+        <div class="kpi" style="border-top-color:var(--verde)"><div class="kpi-l">Usuarios registrados</div><div class="kpi-v" id="k-usuarios" style="color:var(--verde)">—</div><div class="kpi-s">cuentas</div></div>
+        <div class="kpi" style="border-top-color:var(--azul)"><div class="kpi-l">Reservas pendientes</div><div class="kpi-v" id="k-reservas" style="color:var(--azul)">—</div><div class="kpi-s">sin confirmar</div></div>
+      </div>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:14px;">
+        <div class="card"><div class="ch"><span class="ct">Últimas órdenes</span><button class="btn btn-g btn-sm" onclick="go('ordenes')">Ver todas</button></div><div class="tw"><table><thead><tr><th>ID</th><th>Comprador</th><th>Total</th><th>Estado</th></tr></thead><tbody id="d-orders"></tbody></table></div></div>
+        <div class="card"><div class="ch"><span class="ct">Eventos activos</span><button class="btn btn-g btn-sm" onclick="go('eventos')">Gestionar</button></div><div class="tw"><table><thead><tr><th>Evento</th><th>Fecha</th><th>Min. precio</th></tr></thead><tbody id="d-eventos"></tbody></table></div></div>
+      </div>
+    </div>
+
+    <!-- EVENTOS -->
+    <div class="panel" id="p-eventos">
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:18px;">
+        <h2 style="font-family:var(--disp);font-weight:900;font-size:1.6rem;">EVENTOS</h2>
+        <button class="btn btn-p" onclick="openModal('modal-evento');resetEventoForm()">+ Nuevo evento</button>
+      </div>
+      <div class="card"><div class="tw"><table><thead><tr><th>Evento</th><th>Fecha</th><th>Ambiente</th><th>DJs</th><th>Tickets</th><th>Estado</th><th>Acciones</th></tr></thead><tbody id="tb-eventos"></tbody></table></div></div>
+    </div>
+
+    <!-- TIPOS DE TICKET -->
+    <div class="panel" id="p-tickets-tipos">
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px;">
+        <div>
+          <h2 style="font-family:var(--disp);font-weight:900;font-size:1.6rem;">TIPOS DE TICKET</h2>
+          <div style="font-size:0.75rem;color:var(--muted);margin-top:4px;">Selecciona un evento para gestionar sus tickets</div>
+        </div>
+        <div style="display:flex;gap:8px;align-items:center;">
+          <select id="tt-evento-sel" onchange="renderTiposTicket()" style="background:var(--bg3);border:1px solid var(--border);color:var(--text);padding:7px 12px;border-radius:var(--r);font-family:var(--font);font-size:0.82rem;outline:none;"></select>
+          <button class="btn btn-p btn-sm" onclick="openTicketTypeModal()">+ Agregar tipo</button>
+        </div>
+      </div>
+      <div class="card">
+        <div class="tt-header"><span>Nombre del ticket</span><span>Disponibles</span><span>Comprados</span><span>Devueltos</span><span>Cortesías</span><span>Validados</span><span>Valor</span><span>Total</span><span></span></div>
+        <div id="tt-list"></div>
+      </div>
+    </div>
+
+    <!-- CORTESÍAS -->
+    <div class="panel" id="p-cortesias">
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:18px;">
+        <h2 style="font-family:var(--disp);font-weight:900;font-size:1.6rem;">CORTESÍAS</h2>
+        <button class="btn btn-p" onclick="openModal('modal-cortesia')">+ Nueva cortesía</button>
+      </div>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-bottom:18px;">
+        <div class="card"><div class="ch"><span class="ct">Cortesías activas</span></div><div class="cb" style="font-size:2rem;font-family:var(--disp);font-weight:900;color:var(--dorado);" id="c-count">0</div></div>
+        <div class="card"><div class="ch"><span class="ct">Cortesías usadas</span></div><div class="cb" style="font-size:2rem;font-family:var(--disp);font-weight:900;color:var(--verde);" id="c-used">0</div></div>
+      </div>
+      <div class="card"><div class="tw"><table><thead><tr><th>Beneficiario</th><th>Email</th><th>Evento</th><th>Tipo</th><th>Cant.</th><th>Código</th><th>Estado</th><th>Acciones</th></tr></thead><tbody id="tb-cortesias"></tbody></table></div></div>
+    </div>
+
+    <!-- ÓRDENES -->
+    <div class="panel" id="p-ordenes">
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:18px;">
+        <h2 style="font-family:var(--disp);font-weight:900;font-size:1.6rem;">ÓRDENES & VALIDACIÓN</h2>
+      </div>
+      <div class="tabs">
+        <button class="tab active" onclick="switchTab(this,'ot-ordenes')">Todas las órdenes</button>
+        <button class="tab" onclick="switchTab(this,'ot-validar')">Validar QR</button>
+      </div>
+      <div id="ot-ordenes">
+        <div class="card"><div class="tw"><table><thead><tr><th>ID</th><th>Comprador</th><th>Evento</th><th>Entradas</th><th>Total</th><th>Estado</th><th>Fecha</th><th>Acciones</th></tr></thead><tbody id="tb-ordenes"></tbody></table></div></div>
+      </div>
+      <div id="ot-validar" style="display:none">
+        <div class="card cb" style="max-width:420px;margin:0 auto;text-align:center;">
+          <div style="font-size:2.5rem;margin-bottom:12px;">📷</div>
+          <h3 style="margin-bottom:8px;font-weight:600;">Validar entrada</h3>
+          <p style="color:var(--muted);font-size:0.8rem;margin-bottom:16px;">Ingresa el código del QR o del ticket</p>
+          <div style="display:flex;gap:8px;margin-bottom:12px;">
+            <input type="text" id="qr-input" placeholder="FCC-XXXXXX" style="flex:1;background:var(--bg3);border:1px solid var(--border);color:var(--text);padding:8px 12px;border-radius:var(--r);font-size:0.9rem;text-transform:uppercase;outline:none;" />
+            <button class="btn btn-p" onclick="validateQR()">Validar</button>
+          </div>
+          <div id="qr-result"></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- AMBIENTES -->
+    <div class="panel" id="p-ambientes">
+      <h2 style="font-family:var(--disp);font-weight:900;font-size:1.6rem;margin-bottom:18px;">AMBIENTES</h2>
+      <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:12px;" id="amb-cards"></div>
+    </div>
+
+    <!-- MEDIA -->
+    <div class="panel" id="p-media">
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:18px;">
+        <h2 style="font-family:var(--disp);font-weight:900;font-size:1.6rem;">GALERÍA & MEDIA</h2>
+        <button class="btn btn-p" onclick="openModal('modal-media')">+ Agregar foto/video</button>
+      </div>
+      <div class="tabs">
+        <button class="tab active" onclick="switchTab(this,'mt-fotos')">Fotos</button>
+        <button class="tab" onclick="switchTab(this,'mt-videos')">Videos</button>
+        <button class="tab" onclick="switchTab(this,'mt-hero')">Video Hero</button>
+      </div>
+      <div id="mt-fotos">
+        <div class="card cb">
+          <div class="upload-area" id="upload-fotos-area">
+            <div style="font-size:2rem;margin-bottom:8px;">📸</div>
+            <div style="font-weight:600;margin-bottom:4px;">Subir fotos de la galería</div>
+            <div style="font-size:0.75rem;color:var(--muted);margin-bottom:12px;">JPG, PNG, WebP · Máx. 10MB por foto</div>
+            <input type="file" id="foto-input" multiple accept="image/*" style="display:none" onchange="uploadFotos(this.files)" />
+            <button class="btn btn-s" onclick="document.getElementById('foto-input').click()">Seleccionar archivos</button>
+          </div>
+          <div id="fotos-grid" style="display:grid;grid-template-columns:repeat(auto-fill,minmax(140px,1fr));gap:8px;margin-top:16px;"></div>
+        </div>
+      </div>
+      <div id="mt-videos" style="display:none">
+        <div class="card cb">
+          <div class="fg"><label>URL de YouTube / Vimeo</label><input type="url" id="vid-url" placeholder="https://youtube.com/watch?v=..." /></div>
+          <div class="fg"><label>Sección</label><select id="vid-sec"><option>WEBEUM</option><option>Galería</option></select></div>
+          <button class="btn btn-p" onclick="saveVideo()">Agregar video</button>
+        </div>
+      </div>
+      <div id="mt-hero" style="display:none">
+        <div class="card cb">
+          <div style="background:rgba(212,168,50,.06);border:1px solid rgba(212,168,50,.2);border-radius:var(--r);padding:14px;margin-bottom:16px;">
+            <div style="color:var(--dorado);font-weight:600;margin-bottom:4px;">Video Hero del sitio web</div>
+            <div style="font-size:0.78rem;color:var(--muted);">Este video aparece de fondo en la pantalla principal de frate.cl</div>
+          </div>
+          <div class="upload-area">
+            <div style="font-size:2rem;margin-bottom:8px;">🎬</div>
+            <div style="font-weight:600;margin-bottom:4px;">hero-video.mp4</div>
+            <div style="font-size:0.75rem;color:var(--muted);margin-bottom:12px;">MP4 o WebM · Máx. 50MB · 1920×1080 / 30s loop</div>
+            <input type="file" id="hero-input" accept="video/*" style="display:none" onchange="uploadHero(this.files[0])" />
+            <button class="btn btn-s" onclick="document.getElementById('hero-input').click()">Subir video</button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- WEBEUM -->
+    <div class="panel" id="p-webeum">
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:18px;">
+        <h2 style="font-family:var(--disp);font-weight:900;font-size:1.6rem;">WEBEUM HUMANUM EST</h2>
+        <button class="btn btn-p" onclick="openModal('modal-webeum')">+ Episodio</button>
+      </div>
+      <div class="card"><div class="tw"><table><thead><tr><th>#</th><th>Título</th><th>Fecha</th><th>Duración</th><th>URL</th><th>Acciones</th></tr></thead><tbody id="tb-webeum"></tbody></table></div></div>
+    </div>
+
+    <!-- TIENDITA -->
+    <div class="panel" id="p-tiendita">
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:18px;">
+        <h2 style="font-family:var(--disp);font-weight:900;font-size:1.6rem;">LA TIENDITA</h2>
+        <button class="btn btn-p" onclick="openModal('modal-tiendita')">+ Producto</button>
+      </div>
+      <div class="card"><div class="tw"><table><thead><tr><th>Producto</th><th>Categoría</th><th>Precio</th><th>Stock</th><th>Estado</th><th>Acciones</th></tr></thead><tbody id="tb-tiendita"></tbody></table></div></div>
+    </div>
+
+    <!-- CARTA -->
+    <div class="panel" id="p-carta">
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:18px;">
+        <h2 style="font-family:var(--disp);font-weight:900;font-size:1.6rem;">CARTA DE TRAGOS</h2>
+        <button class="btn btn-p" onclick="openModal('modal-carta')">+ Ítem</button>
+      </div>
+      <div class="card"><div class="tw"><table><thead><tr><th>Nombre</th><th>Categoría</th><th>Descripción</th><th>Precio</th><th>Disponible</th><th>Acciones</th></tr></thead><tbody id="tb-carta"></tbody></table></div></div>
+    </div>
+
+    <!-- USUARIOS -->
+    <div class="panel" id="p-usuarios">
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:18px;">
+        <h2 style="font-family:var(--disp);font-weight:900;font-size:1.6rem;">USUARIOS</h2>
+        <div style="display:flex;gap:6px;">
+          <button class="btn btn-g btn-sm" onclick="exportCSV()">↓ CSV</button>
+          <button class="btn btn-gold btn-sm" onclick="openModal('modal-regalo')">🎁 Enviar regalo</button>
+        </div>
+      </div>
+      <div class="card"><div class="tw"><table><thead><tr><th>Username</th><th>Nombre</th><th>Email</th><th>RUT</th><th>Teléfono</th><th>Universidad</th><th>Rol</th><th>Registro</th><th>Acciones</th></tr></thead><tbody id="tb-usuarios"></tbody></table></div></div>
+    </div>
+
+    <!-- RESERVAS -->
+    <div class="panel" id="p-reservas">
+      <h2 style="font-family:var(--disp);font-weight:900;font-size:1.6rem;margin-bottom:18px;">RESERVAS</h2>
+      <div class="card"><div class="tw"><table><thead><tr><th>Nombre</th><th>Tipo</th><th>Fecha</th><th>Personas</th><th>Teléfono</th><th>Estado</th><th>Acciones</th></tr></thead><tbody id="tb-reservas"></tbody></table></div></div>
+    </div>
+
+    <!-- PUNTOS & PREMIOS -->
+    <div class="panel" id="p-puntos">
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:18px;">
+        <h2 style="font-family:var(--disp);font-weight:900;font-size:1.6rem;">PUNTOS & PREMIOS</h2>
+      </div>
+      <div class="card">
+        <div class="ch"><span class="ct">Ranking de usuarios por órdenes</span></div>
+        <div class="tw"><table><thead><tr><th>#</th><th>Usuario</th><th>Email</th><th>Órdenes</th><th>Total gastado</th><th>Acciones</th></tr></thead><tbody id="tb-puntos-ranking"></tbody></table></div>
+      </div>
+    </div>
+
+    <!-- IA & MARKETING -->
+    <div class="panel" id="p-ia">
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:18px;">
+        <h2 style="font-family:var(--disp);font-weight:900;font-size:1.6rem;">IA & MARKETING</h2>
+      </div>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:14px;">
+        <div>
+          <div class="card cb" style="margin-bottom:14px;">
+            <div style="font-size:0.65rem;letter-spacing:2px;text-transform:uppercase;color:var(--rojo);margin-bottom:10px;">Generador de copy para redes</div>
+            <div class="fg"><label>Tipo de publicación</label>
+              <select id="ia-tipo"><option>Anuncio de evento</option><option>Preventa agotada</option><option>Reminder 24hs antes</option><option>Post-evento</option><option>WEBEUM nuevo episodio</option><option>Promoción tiendita</option></select>
+            </div>
+            <div class="fg"><label>Evento o contexto</label><input type="text" id="ia-contexto" placeholder="TRAP JUEVES · 1 Mayo · DJ KRE" /></div>
+            <div class="fg"><label>Tono</label><select id="ia-tono"><option>Urbano / Calle</option><option>Universitario / Fresco</option><option>Urgente / FOMO</option><option>Íntimo / Comunidad</option></select></div>
+            <button class="btn btn-p" style="width:100%" onclick="generateCopy()">✨ Generar</button>
+          </div>
+          <div class="card cb">
+            <div style="font-size:0.65rem;letter-spacing:2px;text-transform:uppercase;color:var(--rojo);margin-bottom:10px;">Copy generado</div>
+            <div id="ia-copy-result" style="background:var(--bg);border:1px solid var(--border);border-radius:var(--r);padding:12px;min-height:80px;font-size:0.82rem;color:var(--text);line-height:1.7;white-space:pre-wrap;">Presiona "Generar" para obtener copy...</div>
+            <button class="btn btn-g btn-sm" style="margin-top:8px;" onclick="copiarCopy()">Copiar</button>
+          </div>
+        </div>
+        <div class="card cb">
+          <div style="font-size:0.65rem;letter-spacing:2px;text-transform:uppercase;color:var(--rojo);margin-bottom:10px;">Ideas y estrategias</div>
+          <div class="ia-idea"><div class="ia-idea-tag">Crecimiento IG</div><div class="ia-idea-text">Publica Reels del "antes y después" de la noche: llegada vacía del local vs. pista llena a las 2am.</div></div>
+          <div class="ia-idea"><div class="ia-idea-tag">WEBEUM</div><div class="ia-idea-text">Crea un episodio "La semana más intensa de Frate" mostrando operación real y momentos entre bambalinas.</div></div>
+          <div class="ia-idea"><div class="ia-idea-tag">Comunidad</div><div class="ia-idea-text">"#FratePassport" — tarjeta digital que registra cuántas noches llevas en Frate. A las 10, 25, 50 noches obtienes recompensas.</div></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- EXPORTAR -->
+    <div class="panel" id="p-exportar">
+      <h2 style="font-family:var(--disp);font-weight:900;font-size:1.6rem;margin-bottom:18px;">EXPORTAR DATOS</h2>
+      <div style="display:grid;gap:14px;">
+        <div class="card"><div class="ch"><span class="ct">Exportar usuarios (CSV)</span><button class="btn btn-p btn-sm" onclick="exportCSV()">Descargar CSV</button></div><div class="cb"><p style="color:var(--muted);font-size:0.8rem;">Descarga todos los usuarios registrados con sus datos completos.</p></div></div>
+        <div class="card"><div class="ch"><span class="ct">Exportar órdenes (CSV)</span><button class="btn btn-p btn-sm" onclick="exportOrdenesCSV()">Descargar CSV</button></div><div class="cb"><p style="color:var(--muted);font-size:0.8rem;">Descarga todas las órdenes con detalle de ítems.</p></div></div>
+      </div>
+    </div>
+
+  </div><!-- /content -->
+</div><!-- /main -->
+
+<!-- ══ MODALES ═════════════════════════════════════════════════ -->
+<!-- Evento -->
+<div class="mo" id="modal-evento"><div class="mb">
+  <div class="mh"><span class="mht" id="me-title">Nuevo evento</span><button class="mc" onclick="closeModal('modal-evento')">✕</button></div>
+  <div class="mbody">
+    <input type="hidden" id="ev-id" value="" />
+    <div class="form-2"><div class="fg"><label>Nombre del evento</label><input type="text" id="ev-nombre" placeholder="TRAP JUEVES" /></div><div class="fg"><label>Ambiente</label><select id="ev-ambiente"><option value="Fuego">Fuego</option><option value="Aire">Aire</option><option value="Tierra">Tierra</option></select></div></div>
+    <div class="form-2"><div class="fg"><label>Fecha (YYYY-MM-DD)</label><input type="date" id="ev-fecha" style="color-scheme:dark" /></div><div class="fg"><label>Hora</label><input type="text" id="ev-hora" placeholder="23:00" /></div></div>
+    <div class="fg"><label>DJs / Lineup (separados por coma)</label><input type="text" id="ev-djs" placeholder="DJ KRE, BASTIAN" /></div>
+    <div class="form-2">
+      <div class="fg"><label>Descripción</label><textarea id="ev-desc" placeholder="La noche de trap más esperada..."></textarea></div>
+      <div class="fg"><label>URL imagen (opcional)</label><input type="url" id="ev-img" placeholder="https://..." /></div>
+    </div>
+    <div class="toggle-row"><span style="font-size:0.82rem;">Evento activo (visible en frate.cl)</span><label class="sw"><input type="checkbox" id="ev-activo" checked><span class="sl"></span></label></div>
+  </div>
+  <div class="mfoot"><button class="btn btn-g" onclick="closeModal('modal-evento')">Cancelar</button><button class="btn btn-p" onclick="saveEvento()">Guardar evento</button></div>
+</div></div>
+
+<!-- Ticket Type -->
+<div class="mo" id="modal-tt"><div class="mb">
+  <div class="mh"><span class="mht">Tipo de Ticket</span><button class="mc" onclick="closeModal('modal-tt')">✕</button></div>
+  <div class="mbody">
+    <input type="hidden" id="tt-id" value="" />
+    <div class="fg"><label>Nombre del ticket</label><input type="text" id="tt-nombre" placeholder="Pre-Venta GRAL. MUJER" /></div>
+    <div class="fg"><label>Descripción</label><textarea id="tt-desc" placeholder="Exclusivo para mujeres. Al ingreso presenta C.I..."></textarea></div>
+    <div class="form-2"><div class="fg"><label>Estado</label><select id="tt-estado"><option>Activo</option><option>Agotado</option><option>Cerrado</option><option>Venta solo RRPP</option><option>Solo venta WEB</option><option>Oculto</option></select></div><div class="fg"><label>Máx. por compra</label><input type="number" id="tt-max" placeholder="6" /></div></div>
+    <div class="form-3"><div class="fg"><label>Precio (CLP)</label><input type="number" id="tt-precio" placeholder="9000" /></div><div class="fg"><label>Cant. disponible</label><input type="number" id="tt-disp" placeholder="100" /></div><div class="fg"><label>Solo web</label><select id="tt-soloWeb"><option value="true">Sí</option><option value="false">No</option></select></div></div>
+  </div>
+  <div class="mfoot"><button class="btn btn-g" onclick="closeModal('modal-tt')">Cancelar</button><button class="btn btn-p" onclick="saveTT()">Guardar tipo</button></div>
+</div></div>
+
+<!-- Cortesía -->
+<div class="mo" id="modal-cortesia"><div class="mb">
+  <div class="mh"><span class="mht">Nueva cortesía</span><button class="mc" onclick="closeModal('modal-cortesia')">✕</button></div>
+  <div class="mbody">
+    <div class="form-2"><div class="fg"><label>Nombre beneficiario</label><input type="text" id="co-nombre" placeholder="Nombre completo" /></div><div class="fg"><label>Email</label><input type="email" id="co-email" placeholder="email@ejemplo.com" /></div></div>
+    <div class="form-2"><div class="fg"><label>RUT</label><input type="text" id="co-rut" placeholder="12.345.678-9" /></div><div class="fg"><label>Teléfono</label><input type="tel" id="co-tel" placeholder="+569 xxxx xxxx" /></div></div>
+    <div class="form-2"><div class="fg"><label>Evento</label><select id="co-evento"></select></div><div class="fg"><label>Cantidad</label><input type="number" id="co-cant" value="1" min="1" /></div></div>
+    <div class="fg"><label>Motivo</label><select id="co-motivo"><option>Staff</option><option>Artista / DJ</option><option>RRPP</option><option>Concurso RRSS</option><option>Prensa</option><option>Cumpleaños especial</option><option>VIP / Sponsor</option><option>Otro</option></select></div>
+  </div>
+  <div class="mfoot"><button class="btn btn-g" onclick="closeModal('modal-cortesia')">Cancelar</button><button class="btn btn-p" onclick="saveCortesia()">Generar cortesía</button></div>
+</div></div>
+
+<!-- WEBEUM -->
+<div class="mo" id="modal-webeum"><div class="mb">
+  <div class="mh"><span class="mht">Episodio WEBEUM</span><button class="mc" onclick="closeModal('modal-webeum')">✕</button></div>
+  <div class="mbody">
+    <div class="fg"><label>Título</label><input type="text" id="we-titulo" placeholder="EP. 48 — Nombre del episodio" /></div>
+    <div class="fg"><label>URL YouTube</label><input type="url" id="we-url" placeholder="https://youtube.com/watch?v=..." /></div>
+    <div class="form-2"><div class="fg"><label>Fecha</label><input type="date" id="we-fecha" style="color-scheme:dark" /></div><div class="fg"><label>Duración</label><input type="text" id="we-dur" placeholder="12:34" /></div></div>
+  </div>
+  <div class="mfoot"><button class="btn btn-g" onclick="closeModal('modal-webeum')">Cancelar</button><button class="btn btn-p" onclick="saveWebeum()">Agregar</button></div>
+</div></div>
+
+<!-- Tiendita -->
+<div class="mo" id="modal-tiendita"><div class="mb">
+  <div class="mh"><span class="mht">Producto Tiendita</span><button class="mc" onclick="closeModal('modal-tiendita')">✕</button></div>
+  <div class="mbody">
+    <div class="form-2"><div class="fg"><label>Nombre</label><input type="text" id="ti-nombre" placeholder="Polera FRATE Classic" /></div><div class="fg"><label>Categoría</label><select id="ti-cat"><option>Ropa</option><option>Accesorios</option><option>Coleccionables</option></select></div></div>
+    <div class="fg"><label>Descripción</label><textarea id="ti-desc"></textarea></div>
+    <div class="form-3"><div class="fg"><label>Precio (CLP)</label><input type="number" id="ti-precio" /></div><div class="fg"><label>Stock</label><input type="number" id="ti-stock" /></div><div class="fg"><label>URL imagen</label><input type="url" id="ti-img" /></div></div>
+    <div class="form-2"><div class="fg"><label>Tallas (coma)</label><input type="text" id="ti-tallas" placeholder="S,M,L,XL" /></div><div class="fg"><label>Colores (coma)</label><input type="text" id="ti-colores" placeholder="Negro,Blanco" /></div></div>
+  </div>
+  <div class="mfoot"><button class="btn btn-g" onclick="closeModal('modal-tiendita')">Cancelar</button><button class="btn btn-p" onclick="saveTiendita()">Guardar</button></div>
+</div></div>
+
+<!-- Carta -->
+<div class="mo" id="modal-carta"><div class="mb">
+  <div class="mh"><span class="mht">Ítem Carta</span><button class="mc" onclick="closeModal('modal-carta')">✕</button></div>
+  <div class="mbody">
+    <div class="form-2"><div class="fg"><label>Nombre</label><input type="text" id="ca-nombre" placeholder="Frate Sour" /></div><div class="fg"><label>Categoría</label><select id="ca-cat"><option>Cócteles Firma</option><option>Cervezas</option><option>Shots & Chupitos</option><option>Sin Alcohol</option><option>Paquetes VIP</option></select></div></div>
+    <div class="fg"><label>Descripción</label><input type="text" id="ca-desc" placeholder="Pisco premium, limón, clara..." /></div>
+    <div class="form-2"><div class="fg"><label>Precio (CLP)</label><input type="number" id="ca-precio" /></div><div class="fg"><label>Disponible</label><select id="ca-disp"><option value="true">Sí</option><option value="false">No</option></select></div></div>
+  </div>
+  <div class="mfoot"><button class="btn btn-g" onclick="closeModal('modal-carta')">Cancelar</button><button class="btn btn-p" onclick="saveCarta()">Guardar</button></div>
+</div></div>
+
+<!-- Regalo usuario -->
+<div class="mo" id="modal-regalo"><div class="mb">
+  <div class="mh"><span class="mht">🎁 Enviar mensaje a usuario</span><button class="mc" onclick="closeModal('modal-regalo')">✕</button></div>
+  <div class="mbody">
+    <div class="fg"><label>Seleccionar usuario</label><select id="rg-usuario"></select></div>
+    <div class="fg"><label>Mensaje</label><textarea id="rg-msg" placeholder="¡Gracias por ser parte de Frate!..."></textarea></div>
+  </div>
+  <div class="mfoot"><button class="btn btn-g" onclick="closeModal('modal-regalo')">Cancelar</button><button class="btn btn-p" onclick="enviarRegalo()">Enviar</button></div>
+</div></div>
+
+<!-- Media -->
+<div class="mo" id="modal-media"><div class="mb">
+  <div class="mh"><span class="mht">Agregar foto/video</span><button class="mc" onclick="closeModal('modal-media')">✕</button></div>
+  <div class="mbody">
+    <div class="fg"><label>URL del archivo (o sube desde la pestaña Fotos)</label><input type="url" id="med-url" placeholder="https://..." /></div>
+    <div class="form-2"><div class="fg"><label>Ambiente</label><select id="med-ambiente"><option>Fuego</option><option>Aire</option><option>Tierra</option><option>General</option></select></div><div class="fg"><label>Tipo</label><select id="med-tipo"><option>foto</option><option>video</option></select></div></div>
+  </div>
+  <div class="mfoot"><button class="btn btn-g" onclick="closeModal('modal-media')">Cancelar</button><button class="btn btn-p" onclick="saveMedia()">Guardar</button></div>
+</div></div>
+
+<div id="toast"></div>
+
+<script>
+// ═══════════════════════════════════════════════════════════════
+// FRATE ADMIN — Supabase Backend v1
+// ═══════════════════════════════════════════════════════════════
+
+const SUPABASE_URL  = 'https://ydwlpraoaaijlfssevoh.supabase.co';
+const SUPABASE_ANON = 'sb_publishable_-_7GeDU_h84zf2v--lWQaQ_15ZFxOWt';
+const sb = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON);
+
+// ── UTILS ────────────────────────────────────────────────────
+const LS = { get: k => { try { return JSON.parse(localStorage.getItem(k)); } catch { return null; } }, set: (k,v) => localStorage.setItem(k,JSON.stringify(v)) };
+function clp(n) { return '$' + (n||0).toLocaleString('es-CL'); }
+function showToast(msg, err) {
+  const t = document.getElementById('toast');
+  t.textContent = msg;
+  t.style.borderColor = err ? 'rgba(232,54,61,.4)' : '';
+  t.classList.add('show');
+  setTimeout(() => t.classList.remove('show'), 3000);
+}
+function openModal(id) { document.getElementById(id)?.classList.add('open'); }
+function closeModal(id) { document.getElementById(id)?.classList.remove('open'); }
+document.querySelectorAll('.mo').forEach(m => m.addEventListener('click', e => { if (e.target === m) m.classList.remove('open'); }));
+function setSyncStatus(msg) { const el = document.getElementById('sync-status'); if(el) el.textContent = msg; }
+
+// ── AUTH ─────────────────────────────────────────────────────
+async function adminLogin() {
+  const email = document.getElementById('al-email').value.trim();
+  const pass  = document.getElementById('al-pass').value;
+  const errEl = document.getElementById('al-error');
+  const btn   = document.getElementById('al-btn');
+  errEl.textContent = '';
+  if (!email || !pass) { errEl.textContent = 'Ingresa email y contraseña.'; return; }
+  btn.disabled = true; btn.textContent = 'Verificando...';
+  try {
+    const { data, error } = await sb.auth.signInWithPassword({ email, password: pass });
+    if (error) throw error;
+    // Verify admin role
+    const { data: profile } = await sb.from('clientes').select('rol, nombres, apellidos, username').eq('id', data.user.id).single();
+    if (!profile || profile.rol !== 'admin') {
+      await sb.auth.signOut();
+      throw new Error('Sin permisos de administrador. Contacta al superadmin.');
+    }
+    const name = profile.username ? '@'+profile.username : ((profile.nombres||'') + ' ' + (profile.apellidos||'')).trim() || email.split('@')[0];
+    document.getElementById('admin-user-label').textContent = name;
+    document.getElementById('admin-login').style.display = 'none';
+    await initAdmin();
+  } catch(err) {
+    errEl.textContent = (err&&err.message) || 'Error de acceso.';
+  } finally {
+    btn.disabled = false; btn.textContent = 'ENTRAR';
+  }
+}
+
+async function adminLogout() {
+  await sb.auth.signOut();
+  document.getElementById('admin-login').style.display = 'flex';
+  document.getElementById('al-pass').value = '';
+}
+
+async function checkSession() {
+  const { data } = await sb.auth.getSession();
+  if (!data.session) return;
+  const { data: profile } = await sb.from('clientes').select('rol, nombres, apellidos, username').eq('id', data.session.user.id).single();
+  if (!profile || profile.rol !== 'admin') return;
+  const name = profile.username ? '@'+profile.username : ((profile.nombres||'') + ' ' + (profile.apellidos||'')).trim() || data.session.user.email.split('@')[0];
+  document.getElementById('admin-user-label').textContent = name;
+  document.getElementById('admin-login').style.display = 'none';
+  await initAdmin();
+}
+
+// ── NAV ──────────────────────────────────────────────────────
+const panelTitles = { dashboard:'Resumen', eventos:'Eventos', 'tickets-tipos':'Tipos de Ticket', cortesias:'Cortesías', ordenes:'Órdenes & Validación', ambientes:'Ambientes', media:'Galería & Media', webeum:'WEBEUM', tiendita:'La Tiendita', carta:'Carta', usuarios:'Usuarios', reservas:'Reservas', puntos:'Puntos & Premios', ia:'IA & Marketing', exportar:'Exportar' };
+
+function go(name) {
+  document.querySelectorAll('.panel').forEach(p => p.classList.remove('active'));
+  document.querySelectorAll('.ni').forEach(n => n.classList.remove('active'));
+  document.getElementById('p-' + name)?.classList.add('active');
+  document.querySelectorAll('.ni').forEach(n => { if(n.getAttribute('onclick')?.includes(`'${name}'`)) n.classList.add('active'); });
+  document.getElementById('tb-title').textContent = panelTitles[name] || name;
+  render(name);
+}
+
+function switchTab(el, tabId) {
+  const tabs = el.closest('.tabs').querySelectorAll('.tab');
+  tabs.forEach(t => t.classList.remove('active')); el.classList.add('active');
+  const allTabs = ['ot-ordenes','ot-validar','mt-fotos','mt-videos','mt-hero'];
+  allTabs.forEach(id => { const e=document.getElementById(id); if(e) e.style.display = id===tabId?'block':'none'; });
+}
+
+function render(name) {
+  if(name==='dashboard') renderDash();
+  else if(name==='eventos') renderEventos();
+  else if(name==='tickets-tipos') renderTiposTicketPanel();
+  else if(name==='cortesias') renderCortesias();
+  else if(name==='ordenes') renderOrdenes();
+  else if(name==='ambientes') renderAmbientes();
+  else if(name==='webeum') renderWebeum();
+  else if(name==='tiendita') renderTiendita();
+  else if(name==='carta') renderCarta();
+  else if(name==='usuarios') renderUsuarios();
+  else if(name==='reservas') renderReservas();
+  else if(name==='puntos') renderPuntos();
+  else if(name==='media') renderMedia();
+}
+
+async function syncAll() {
+  setSyncStatus('Sincronizando...');
+  const active = document.querySelector('.panel.active')?.id?.replace('p-','') || 'dashboard';
+  await render(active);
+  setSyncStatus('Actualizado ' + new Date().toLocaleTimeString('es-CL'));
+}
+
+// ── DASHBOARD ────────────────────────────────────────────────
+async function renderDash() {
+  setSyncStatus('Cargando...');
+  try {
+    const today = new Date().toISOString().split('T')[0];
+    const [{ count: totalUsers }, { count: pendRes }, { data: evs }, { data: recentOrders }] = await Promise.all([
+      sb.from('clientes').select('*', { count:'exact', head:true }),
+      sb.from('reservas').select('*', { count:'exact', head:true }).eq('estado','pendiente'),
+      sb.from('eventos').select('id,nombre,fecha,activo').eq('activo',true).order('fecha').limit(4),
+      sb.from('pedidos').select('id,nombre_cliente,email_cliente,total,estado,created_at,items_pedido(nombre_evento)').order('created_at',{ascending:false}).limit(6)
+    ]);
+    const todayOrders = recentOrders?.filter(o => o.created_at?.startsWith(today)) || [];
+    const totalHoy = todayOrders.reduce((s,o)=>s+(o.total||0), 0);
+
+    document.getElementById('k-tickets').textContent = todayOrders.length;
+    document.getElementById('k-ingresos').textContent = clp(totalHoy);
+    document.getElementById('k-usuarios').textContent = totalUsers || 0;
+    document.getElementById('k-reservas').textContent = pendRes || 0;
+    document.getElementById('nb-usuarios').textContent = totalUsers || 0;
+    document.getElementById('nb-reservas').textContent = pendRes || 0;
+    document.getElementById('nb-eventos').textContent = evs?.length || 0;
+
+    // Últimas órdenes
+    const dob = document.getElementById('d-orders');
+    dob.innerHTML = recentOrders?.length
+      ? recentOrders.map(o=>`<tr><td class="tb" style="font-family:monospace;font-size:0.7rem;color:var(--dorado)">#${o.id}</td><td class="tm">${o.nombre_cliente||o.email_cliente||'—'}</td><td style="color:var(--dorado)">${clp(o.total)}</td><td><span class="badge b-g">${o.estado}</span></td></tr>`).join('')
+      : `<tr><td colspan="4" style="text-align:center;color:var(--muted);padding:20px">Sin órdenes</td></tr>`;
+
+    // Eventos activos
+    const dev = document.getElementById('d-eventos');
+    dev.innerHTML = evs?.map(ev=>`<tr><td class="tb">${ev.nombre}</td><td class="tm">${ev.fecha}</td><td style="color:var(--dorado)">—</td></tr>`).join('')
+      || `<tr><td colspan="3" style="text-align:center;color:var(--muted);padding:20px">Sin eventos</td></tr>`;
+
+    setSyncStatus('');
+  } catch(e) { setSyncStatus('Error'); showToast('Error al cargar dashboard', true); console.error(e); }
+}
+
+// ── EVENTOS ──────────────────────────────────────────────────
+async function renderEventos() {
+  const tbody = document.getElementById('tb-eventos');
+  tbody.innerHTML = `<tr><td colspan="7" style="text-align:center;color:var(--muted);padding:20px">Cargando...</td></tr>`;
+  try {
+    const { data: evs, error } = await sb.from('eventos').select('*, tipos_ticket(*)').order('fecha', { ascending: true });
+    if (error) throw error;
+    document.getElementById('nb-eventos').textContent = evs?.length || 0;
+    tbody.innerHTML = evs?.length
+      ? evs.map(ev=>`
+        <tr>
+          <td class="tb">${ev.nombre}</td>
+          <td class="tm">${ev.fecha} · ${ev.hora||''}h</td>
+          <td><span class="badge b-${ev.ambiente==='Fuego'?'r':ev.ambiente==='Aire'?'o':'b'}">${ev.ambiente||'—'}</span></td>
+          <td class="tm" style="font-size:0.72rem;">${Array.isArray(ev.djs)?ev.djs.join(', '):(ev.djs||'—')}</td>
+          <td><span class="badge b-b">${ev.tipos_ticket?.length||0} tipos</span></td>
+          <td><span class="badge ${ev.activo?'b-g':'b-gr'}">${ev.activo?'Activo':'Inactivo'}</span></td>
+          <td><div style="display:flex;gap:4px;">
+            <button class="btn btn-g btn-sm" onclick="editEvento(${ev.id})">Editar</button>
+            <button class="btn btn-s btn-sm" onclick="go('tickets-tipos');setTimeout(()=>{document.getElementById('tt-evento-sel').value=${ev.id};renderTiposTicket()},200)">Tickets</button>
+            <button class="btn btn-del btn-sm" onclick="deleteEvento(${ev.id})">×</button>
+          </div></td>
+        </tr>`).join('')
+      : `<tr><td colspan="7" style="text-align:center;color:var(--muted);padding:24px">Sin eventos — crea el primero</td></tr>`;
+  } catch(e) { tbody.innerHTML=`<tr><td colspan="7" style="color:var(--rojo);padding:16px">Error: ${e.message}</td></tr>`; }
+}
+
+// ── EVENTOS CRUD ─────────────────────────────────────────────
+function resetEventoForm() {
+  document.getElementById('ev-id').value = '';
+  document.getElementById('me-title').textContent = 'Nuevo evento';
+  ['ev-nombre','ev-fecha','ev-hora','ev-djs','ev-desc','ev-img'].forEach(id => { const el=document.getElementById(id); if(el) el.value=''; });
+  document.getElementById('ev-ambiente').value = 'Fuego';
+  document.getElementById('ev-activo').checked = true;
+}
+
+async function editEvento(evId) {
+  const { data: ev } = await sb.from('eventos').select('*').eq('id', evId).single();
+  if (!ev) return;
+  document.getElementById('ev-id').value = ev.id;
+  document.getElementById('me-title').textContent = 'Editar evento';
+  document.getElementById('ev-nombre').value = ev.nombre || '';
+  document.getElementById('ev-fecha').value = ev.fecha || '';
+  document.getElementById('ev-hora').value = ev.hora || '';
+  document.getElementById('ev-djs').value = Array.isArray(ev.djs) ? ev.djs.join(', ') : (ev.djs||'');
+  document.getElementById('ev-ambiente').value = ev.ambiente || 'Fuego';
+  document.getElementById('ev-desc').value = ev.descripcion || '';
+  document.getElementById('ev-img').value = ev.imagen_url || '';
+  document.getElementById('ev-activo').checked = ev.activo !== false;
+  openModal('modal-evento');
+}
+
+async function saveEvento() {
+  const evId  = document.getElementById('ev-id').value;
+  const nombre = document.getElementById('ev-nombre').value.trim();
+  if (!nombre) { showToast('Ingresa un nombre', true); return; }
+  const data = {
+    nombre,
+    fecha:       document.getElementById('ev-fecha').value || null,
+    hora:        document.getElementById('ev-hora').value || '23:00',
+    djs:         document.getElementById('ev-djs').value.split(',').map(s=>s.trim()).filter(Boolean),
+    ambiente:    document.getElementById('ev-ambiente').value,
+    descripcion: document.getElementById('ev-desc').value,
+    imagen_url:  document.getElementById('ev-img').value || null,
+    activo:      document.getElementById('ev-activo').checked
+  };
+  try {
+    if (evId) {
+      const { error } = await sb.from('eventos').update(data).eq('id', evId);
+      if (error) throw error;
+      showToast('✅ Evento actualizado');
+    } else {
+      const { error } = await sb.from('eventos').insert(data);
+      if (error) throw error;
+      showToast('✅ Evento creado — ahora agrega tipos de ticket');
+    }
+    closeModal('modal-evento');
+    renderEventos();
+    populateEventoSelects();
+  } catch(e) { showToast('Error: '+e.message, true); }
+}
+
+async function deleteEvento(evId) {
+  if (!confirm('¿Eliminar este evento y todos sus tickets?')) return;
+  try {
+    await sb.from('tipos_ticket').delete().eq('evento_id', evId);
+    const { error } = await sb.from('eventos').delete().eq('id', evId);
+    if (error) throw error;
+    showToast('Evento eliminado');
+    renderEventos();
+  } catch(e) { showToast('Error: '+e.message, true); }
+}
+
+// ── TIPOS DE TICKET ──────────────────────────────────────────
+async function renderTiposTicketPanel() {
+  const { data: evs } = await sb.from('eventos').select('id,nombre').order('fecha');
+  const sel = document.getElementById('tt-evento-sel');
+  if (sel && evs?.length) {
+    sel.innerHTML = evs.map(ev=>`<option value="${ev.id}">${ev.nombre}</option>`).join('');
+    renderTiposTicket();
+  } else if (sel) {
+    sel.innerHTML = '<option>Sin eventos</option>';
+    document.getElementById('tt-list').innerHTML = '<div style="padding:24px;text-align:center;color:var(--muted);">Crea un evento primero</div>';
+  }
+}
+
+async function renderTiposTicket() {
+  const sel = document.getElementById('tt-evento-sel');
+  const evId = parseInt(sel?.value);
+  if (!evId) return;
+  const list = document.getElementById('tt-list');
+  list.innerHTML = '<div style="padding:20px;text-align:center;color:var(--muted);">Cargando...</div>';
+  const { data: tickets } = await sb.from('tipos_ticket').select('*').eq('evento_id', evId).order('id');
+  if (!tickets?.length) { list.innerHTML='<div style="padding:24px;text-align:center;color:var(--muted);">Sin tipos de ticket — agrega el primero</div>'; return; }
+  const estadoColor = { 'Activo':'b-g', 'Agotado':'b-r', 'Cerrado':'b-gr', 'Oculto':'b-gr', 'Solo venta WEB':'b-b', 'Venta solo RRPP':'b-gr' };
+  list.innerHTML = tickets.map(tt=>`
+    <div class="tt-row">
+      <div><div class="tt-nombre">${tt.nombre}</div><span class="badge ${estadoColor[tt.estado]||'b-gr'} tt-estado-badge">${tt.estado}</span>${tt.solo_web?'<span class="badge b-b tt-estado-badge" style="margin-left:4px;">WEB</span>':''}</div>
+      <div>${tt.disponible}</div>
+      <div>—</div><div>—</div><div>—</div><div>—</div>
+      <div style="color:var(--dorado)">${clp(tt.precio)}</div>
+      <div style="color:var(--verde)">${clp(tt.precio*(tt.disponible||0))}</div>
+      <div style="display:flex;gap:4px;">
+        <button class="btn btn-del btn-sm" onclick="toggleTTEstado(${tt.id},'${tt.estado}')">${tt.estado==='Activo'?'CERRAR':'ABRIR'}</button>
+        <button class="btn btn-g btn-sm" onclick="editTT(${tt.id})">EDITAR</button>
+        <button class="btn btn-del btn-sm" onclick="deleteTT(${tt.id})">×</button>
+      </div>
+    </div>`).join('');
+}
+
+let editingTTId = null;
+function openTicketTypeModal(ttId) {
+  editingTTId = ttId || null;
+  if (!ttId) {
+    ['tt-id','tt-nombre','tt-desc','tt-precio','tt-disp'].forEach(id => { const el=document.getElementById(id); if(el) el.value=''; });
+    document.getElementById('tt-max').value = 6;
+    document.getElementById('tt-estado').value = 'Activo';
+    document.getElementById('tt-soloWeb').value = 'true';
+  }
+  openModal('modal-tt');
+}
+
+async function editTT(ttId) {
+  const { data: tt } = await sb.from('tipos_ticket').select('*').eq('id', ttId).single();
+  if (!tt) return;
+  editingTTId = ttId;
+  document.getElementById('tt-id').value = tt.id;
+  document.getElementById('tt-nombre').value = tt.nombre || '';
+  document.getElementById('tt-desc').value = tt.descripcion || '';
+  document.getElementById('tt-estado').value = tt.estado || 'Activo';
+  document.getElementById('tt-precio').value = tt.precio || '';
+  document.getElementById('tt-disp').value = tt.disponible || '';
+  document.getElementById('tt-max').value = tt.max_por_compra || 6;
+  document.getElementById('tt-soloWeb').value = tt.solo_web ? 'true' : 'false';
+  openModal('modal-tt');
+}
+
+async function saveTT() {
+  const evId = parseInt(document.getElementById('tt-evento-sel')?.value);
+  const nombre = document.getElementById('tt-nombre').value.trim();
+  if (!nombre) { showToast('Ingresa un nombre', true); return; }
+  const data = {
+    evento_id:     evId,
+    nombre,
+    descripcion:   document.getElementById('tt-desc').value.trim(),
+    estado:        document.getElementById('tt-estado').value,
+    precio:        parseInt(document.getElementById('tt-precio').value) || 0,
+    disponible:    parseInt(document.getElementById('tt-disp').value) || 0,
+    max_por_compra:parseInt(document.getElementById('tt-max').value) || 6,
+    solo_web:      document.getElementById('tt-soloWeb').value === 'true'
+  };
+  try {
+    if (editingTTId) {
+      const { error } = await sb.from('tipos_ticket').update(data).eq('id', editingTTId);
+      if (error) throw error;
+    } else {
+      const { error } = await sb.from('tipos_ticket').insert(data);
+      if (error) throw error;
+    }
+    closeModal('modal-tt'); renderTiposTicket(); showToast('✅ Tipo de ticket guardado');
+    editingTTId = null;
+  } catch(e) { showToast('Error: '+e.message, true); }
+}
+
+async function toggleTTEstado(ttId, estadoActual) {
+  const nuevoEstado = estadoActual === 'Activo' ? 'Cerrado' : 'Activo';
+  await sb.from('tipos_ticket').update({ estado: nuevoEstado }).eq('id', ttId);
+  renderTiposTicket(); showToast('Estado actualizado → ' + nuevoEstado);
+}
+
+async function deleteTT(ttId) {
+  if (!confirm('¿Eliminar este tipo de ticket?')) return;
+  await sb.from('tipos_ticket').delete().eq('id', ttId);
+  renderTiposTicket(); showToast('Eliminado');
+}
+
+// ── CORTESÍAS (localStorage) ─────────────────────────────────
+function getCortesias() { return LS.get('admin_cortesias') || []; }
+function renderCortesias() {
+  const list = getCortesias();
+  document.getElementById('c-count').textContent = list.filter(c=>c.estado==='activa').length;
+  document.getElementById('c-used').textContent  = list.filter(c=>c.estado==='usada').length;
+  const tbody = document.getElementById('tb-cortesias');
+  tbody.innerHTML = list.length
+    ? list.map((c,i)=>`<tr><td class="tb">${c.nombre}</td><td class="tm">${c.email}</td><td>${c.evento||'—'}</td><td class="tm">${c.motivo}</td><td>${c.cantidad}</td><td style="font-family:monospace;color:var(--dorado)">${c.codigo}</td><td><span class="badge ${c.estado==='activa'?'b-g':c.estado==='usada'?'b-gr':'b-r'}">${c.estado}</span></td><td><button class="btn btn-del btn-sm" onclick="deleteCortesia(${i})">×</button></td></tr>`).join('')
+    : `<tr><td colspan="8" style="text-align:center;color:var(--muted);padding:20px">Sin cortesías</td></tr>`;
+}
+async function saveCortesia() {
+  const { data: evs } = await sb.from('eventos').select('id,nombre').order('fecha');
+  const evId = parseInt(document.getElementById('co-evento').value);
+  const ev = evs?.find(e=>e.id===evId);
+  const codigo = 'COR-'+Math.random().toString(36).toUpperCase().slice(2,8);
+  const list = getCortesias();
+  list.push({ nombre:document.getElementById('co-nombre').value, email:document.getElementById('co-email').value, rut:document.getElementById('co-rut').value, tel:document.getElementById('co-tel').value, evento:ev?.nombre||'—', eventoId:evId, cantidad:parseInt(document.getElementById('co-cant').value)||1, motivo:document.getElementById('co-motivo').value, codigo, estado:'activa', createdAt:new Date().toISOString() });
+  LS.set('admin_cortesias', list); closeModal('modal-cortesia'); renderCortesias(); showToast('✅ Cortesía generada: '+codigo);
+}
+function deleteCortesia(i) { const l=getCortesias(); l.splice(i,1); LS.set('admin_cortesias',l); renderCortesias(); }
+
+// ── ÓRDENES ──────────────────────────────────────────────────
+async function renderOrdenes() {
+  const tbody = document.getElementById('tb-ordenes');
+  tbody.innerHTML = `<tr><td colspan="8" style="text-align:center;color:var(--muted);padding:20px">Cargando...</td></tr>`;
+  try {
+    const { data: orders, error } = await sb.from('pedidos')
+      .select('*, items_pedido(nombre_evento,nombre_ticket,cantidad,precio_unitario)')
+      .order('created_at', { ascending: false }).limit(100);
+    if (error) throw error;
+    document.getElementById('nb-ordenes').textContent = orders?.length || 0;
+    tbody.innerHTML = orders?.length
+      ? orders.map(o => {
+          const totalItems = o.items_pedido?.reduce((s,i)=>s+(i.cantidad||0), 0) || 0;
+          const firstItem  = o.items_pedido?.[0];
+          const fecha = o.created_at ? new Date(o.created_at).toLocaleDateString('es-CL') : '—';
+          const estadoColor = o.estado==='pagado'?'b-g':o.estado==='pendiente'?'b-o':'b-gr';
+          return `<tr>
+            <td class="tb" style="font-family:monospace;font-size:0.7rem;color:var(--dorado)">#${o.id}</td>
+            <td><div class="tb">${o.nombre_cliente||'—'}</div><div class="tm" style="font-size:0.7rem">${o.email_cliente||''}</div></td>
+            <td>${firstItem?.nombre_evento||'—'}</td>
+            <td>${totalItems}</td>
+            <td class="tb" style="color:var(--dorado)">${clp(o.total)}</td>
+            <td><span class="badge ${estadoColor}">${o.estado}</span></td>
+            <td class="tm">${fecha}</td>
+            <td><button class="btn btn-ok btn-sm" onclick="verOrden(${o.id})">Ver</button>
+                <button class="btn btn-g btn-sm" onclick="marcarPagado(${o.id},'${o.estado}')">💳</button></td>
+          </tr>`;
+        }).join('')
+      : `<tr><td colspan="8" style="text-align:center;color:var(--muted);padding:24px">Sin órdenes aún</td></tr>`;
+  } catch(e) { tbody.innerHTML=`<tr><td colspan="8" style="color:var(--rojo);padding:16px">Error: ${e.message}</td></tr>`; }
+}
+
+async function verOrden(id) {
+  const { data } = await sb.from('pedidos').select('*, items_pedido(*)').eq('id',id).single();
+  if (!data) return;
+  alert(`Orden #${data.id}\nComprador: ${data.nombre_cliente} (${data.email_cliente})\nTotal: ${clp(data.total)}\nEstado: ${data.estado}\n\nItems:\n${data.items_pedido?.map(i=>`  · ${i.nombre_ticket} x${i.cantidad} — ${clp(i.precio_unitario*i.cantidad)}`).join('\n')}`);
+}
+
+async function marcarPagado(id, estadoActual) {
+  const nuevoEstado = estadoActual === 'pagado' ? 'pendiente' : 'pagado';
+  await sb.from('pedidos').update({ estado: nuevoEstado }).eq('id', id);
+  renderOrdenes(); showToast('Estado → ' + nuevoEstado);
+}
+
+async function validateQR() {
+  const code = document.getElementById('qr-input').value.trim().toUpperCase();
+  const result = document.getElementById('qr-result');
+  if (!code) { result.innerHTML=`<div style="padding:14px;background:rgba(232,54,61,.1);border:1px solid rgba(232,54,61,.3);border-radius:4px;color:var(--rojo)">Ingresa un código</div>`; return; }
+  // QR validation: lookup in pedidos
+  const { data: order } = await sb.from('pedidos').select('*,items_pedido(*)').eq('id', code.replace('FCC-','')).maybeSingle();
+  if (!order) { result.innerHTML=`<div style="padding:14px;background:rgba(232,54,61,.1);border:1px solid rgba(232,54,61,.3);border-radius:4px;color:var(--rojo)">❌ Ticket no encontrado</div>`; return; }
+  result.innerHTML=`<div style="padding:14px;background:rgba(34,197,94,.1);border:1px solid rgba(34,197,94,.3);border-radius:4px;"><div style="color:var(--verde);font-weight:600;margin-bottom:6px">✅ Válido — Ingreso autorizado</div><div style="font-size:0.78rem;color:var(--muted);line-height:1.8">Comprador: <strong style="color:var(--text)">${order.nombre_cliente}</strong><br/>Total: <strong style="color:var(--text)">${clp(order.total)}</strong><br/>Estado: <strong style="color:var(--text)">${order.estado}</strong></div></div>`;
+}
+
+// ── USUARIOS ─────────────────────────────────────────────────
+async function renderUsuarios() {
+  const tbody = document.getElementById('tb-usuarios');
+  tbody.innerHTML = `<tr><td colspan="9" style="text-align:center;color:var(--muted);padding:20px">Cargando...</td></tr>`;
+  try {
+    const { data: users, error } = await sb.from('clientes').select('*').order('created_at', { ascending: false });
+    if (error) throw error;
+    document.getElementById('nb-usuarios').textContent = users?.length || 0;
+    // Populate regalo select
+    const rg = document.getElementById('rg-usuario');
+    if (rg) rg.innerHTML = users?.map(u=>`<option value="${u.id}">${u.username?'@'+u.username:((u.nombres||'') + ' ' + (u.apellidos||'')).trim()} — ${u.email}</option>`).join('') || '';
+    tbody.innerHTML = users?.length
+      ? users.map(u=>{
+          const nombre = u.username ? '@'+u.username : ((u.nombres||'') + ' ' + (u.apellidos||'')).trim() || '—';
+          const nombreCompleto = ((u.nombres||'') + ' ' + (u.apellidos||'')).trim() || '—';
+          const fecha = u.created_at ? new Date(u.created_at).toLocaleDateString('es-CL') : '—';
+          return `<tr>
+            <td class="tb" style="color:var(--rojo)">${u.username?'@'+u.username:'—'}</td>
+            <td class="tb">${nombreCompleto}</td>
+            <td class="tm">${u.email||'—'}</td>
+            <td class="tm" style="font-family:monospace;font-size:0.7rem">${u.rut||'—'}</td>
+            <td><a href="https://wa.me/${(u.telefono||'').replace(/\D/g,'')}" target="_blank" style="color:var(--verde);text-decoration:none">${u.telefono||'—'}</a></td>
+            <td class="tm">${u.universidad||'—'}</td>
+            <td><span class="badge ${u.rol==='admin'?'b-r':'b-gr'}">${u.rol||'usuario'}</span></td>
+            <td class="tm">${fecha}</td>
+            <td><button class="btn btn-g btn-sm" onclick="toggleAdmin('${u.id}','${u.rol||'usuario'}')">${u.rol==='admin'?'Quitar admin':'Hacer admin'}</button></td>
+          </tr>`;
+        }).join('')
+      : `<tr><td colspan="9" style="text-align:center;color:var(--muted);padding:24px">Sin usuarios registrados</td></tr>`;
+  } catch(e) { tbody.innerHTML=`<tr><td colspan="9" style="color:var(--rojo);padding:16px">Error: ${e.message}</td></tr>`; }
+}
+
+async function toggleAdmin(userId, currentRol) {
+  const nuevoRol = currentRol === 'admin' ? 'usuario' : 'admin';
+  if (!confirm(`¿Cambiar rol de este usuario a "${nuevoRol}"?`)) return;
+  const { error } = await sb.from('clientes').update({ rol: nuevoRol }).eq('id', userId);
+  if (error) { showToast('Error: '+error.message, true); return; }
+  showToast(`✅ Rol actualizado → ${nuevoRol}`);
+  renderUsuarios();
+}
+
+// ── RESERVAS ─────────────────────────────────────────────────
+async function renderReservas() {
+  const tbody = document.getElementById('tb-reservas');
+  tbody.innerHTML = `<tr><td colspan="7" style="text-align:center;color:var(--muted);padding:20px">Cargando...</td></tr>`;
+  try {
+    const { data: res, error } = await sb.from('reservas').select('*').order('created_at', { ascending: false });
+    if (error) throw error;
+    const pendRes = res?.filter(r=>r.estado==='pendiente').length || 0;
+    document.getElementById('nb-reservas').textContent = pendRes;
+    tbody.innerHTML = res?.length
+      ? res.map(r=>`<tr>
+          <td class="tb">${r.nombre}</td>
+          <td><span class="badge b-o">${r.tipo||'—'}</span></td>
+          <td class="tm">${r.fecha||'—'}</td>
+          <td>${r.personas||'—'}</td>
+          <td><a href="https://wa.me/${(r.telefono||'').replace(/\D/g,'')}" target="_blank" style="color:var(--verde);text-decoration:none">${r.telefono||'—'}</a></td>
+          <td><select onchange="updateReserva(${r.id},this.value)" style="background:var(--bg3);border:1px solid var(--border);color:var(--text);padding:4px 8px;border-radius:4px;font-size:0.72rem;">
+            <option ${r.estado==='pendiente'?'selected':''} value="pendiente">Pendiente</option>
+            <option ${r.estado==='confirmada'?'selected':''} value="confirmada">Confirmada</option>
+            <option ${r.estado==='cancelada'?'selected':''} value="cancelada">Cancelada</option>
+          </select></td>
+          <td><a href="https://wa.me/${(r.telefono||'').replace(/\D/g,'')}?text=Hola+${encodeURIComponent(r.nombre||'')}%2C+tu+reserva+en+Frate+está+confirmada." target="_blank" class="btn btn-ok btn-sm">💬 WA</a></td>
+        </tr>`).join('')
+      : `<tr><td colspan="7" style="text-align:center;color:var(--muted);padding:24px">Sin reservas</td></tr>`;
+  } catch(e) { tbody.innerHTML=`<tr><td colspan="7" style="color:var(--rojo);padding:16px">Error: ${e.message}</td></tr>`; }
+}
+
+async function updateReserva(id, estado) {
+  const { error } = await sb.from('reservas').update({ estado }).eq('id', id);
+  if (error) { showToast('Error: '+error.message, true); return; }
+  showToast('Estado actualizado → '+estado);
+  const pendRes = document.getElementById('nb-reservas');
+  if (pendRes) {
+    const { count } = await sb.from('reservas').select('*',{count:'exact',head:true}).eq('estado','pendiente');
+    pendRes.textContent = count || 0;
+  }
+}
+
+// ── PUNTOS ───────────────────────────────────────────────────
+async function renderPuntos() {
+  const tbody = document.getElementById('tb-puntos-ranking');
+  tbody.innerHTML = `<tr><td colspan="6" style="text-align:center;color:var(--muted);padding:20px">Cargando...</td></tr>`;
+  try {
+    const { data: pedidos } = await sb.from('pedidos').select('cliente_id,nombre_cliente,email_cliente,total').eq('estado','pagado');
+    const { data: users } = await sb.from('clientes').select('id,nombres,apellidos,username,email');
+    const ranked = {};
+    pedidos?.forEach(p => {
+      if (!p.cliente_id) return;
+      if (!ranked[p.cliente_id]) ranked[p.cliente_id] = { total:0, count:0 };
+      ranked[p.cliente_id].total += p.total||0;
+      ranked[p.cliente_id].count++;
+    });
+    const userMap = {};
+    users?.forEach(u => { userMap[u.id] = u; });
+    const sorted = Object.entries(ranked).sort((a,b)=>b[1].total-a[1].total).slice(0,10);
+    tbody.innerHTML = sorted.length
+      ? sorted.map(([uid, d], i)=>{
+          const u = userMap[uid] || {};
+          const name = u.username ? '@'+u.username : ((u.nombres||'')+ ' '+(u.apellidos||'')).trim() || '—';
+          const medal = i===0?'🥇':i===1?'🥈':i===2?'🥉':'#'+(i+1);
+          return `<tr><td class="tb" style="color:var(--dorado)">${medal}</td><td class="tb">${name}</td><td class="tm">${u.email||'—'}</td><td>${d.count}</td><td style="color:var(--dorado);font-weight:700">${clp(d.total)}</td><td><button class="btn btn-gold btn-sm" onclick="openModal('modal-regalo')">🎁</button></td></tr>`;
+        }).join('')
+      : `<tr><td colspan="6" style="text-align:center;color:var(--muted);padding:20px">Sin datos de compras</td></tr>`;
+  } catch(e) { console.error(e); }
+}
+
+// ── AMBIENTES ────────────────────────────────────────────────
+function renderAmbientes() {
+  const data=[{nombre:'FUEGO',musica:'Reggaeton · Urban · Trap',cap:'350 personas',color:'#E8363D',icon:'🔥',desc:'La pista principal. El corazón del carrete.'},{nombre:'AIRE',musica:'Nacional Hits · Afrobeats',cap:'200 personas',color:'#D4A832',icon:'🌬️',desc:'El espacio donde suena lo nuestro.'},{nombre:'TIERRA',musica:'Guaracha · Dembow',cap:'150 personas',color:'#8B1A1E',icon:'🌿',desc:'La terraza de la casita. Bajo las estrellas.'}];
+  document.getElementById('amb-cards').innerHTML=data.map(a=>`<div class="card"><div style="padding:14px 18px;border-bottom:1px solid var(--border);border-top:3px solid ${a.color};display:flex;align-items:center;gap:10px;"><span style="font-size:1.4rem">${a.icon}</span><div><div style="font-family:var(--disp);font-weight:900;font-size:1.2rem">${a.nombre}</div><div style="font-size:0.68rem;color:var(--muted)">${a.cap}</div></div></div><div class="cb"><div style="font-size:0.75rem;color:var(--muted);margin-bottom:6px">${a.desc}</div><div style="font-size:0.68rem;color:${a.color};letter-spacing:1px;text-transform:uppercase">${a.musica}</div></div></div>`).join('');
+}
+
+// ── MEDIA / FOTOS ────────────────────────────────────────────
+async function renderMedia() {
+  try {
+    const { data: files } = await sb.storage.from('frate-media').list('galeria', { limit: 50 });
+    const grid = document.getElementById('fotos-grid');
+    if (!files?.length) { grid.innerHTML='<div style="color:var(--muted);font-size:0.8rem;">Sin fotos subidas aún</div>'; return; }
+    const { data: { publicUrl: base } } = sb.storage.from('frate-media').getPublicUrl('galeria/x');
+    const baseUrl = base.replace('/galeria/x','');
+    grid.innerHTML = files.map(f=>`
+      <div style="position:relative;border-radius:4px;overflow:hidden;aspect-ratio:1;">
+        <img src="${baseUrl}/galeria/${f.name}" style="width:100%;height:100%;object-fit:cover;" loading="lazy" />
+        <button onclick="deleteFoto('${f.name}')" style="position:absolute;top:4px;right:4px;background:rgba(0,0,0,.7);border:none;color:#fff;border-radius:50%;width:22px;height:22px;cursor:pointer;font-size:0.7rem;">×</button>
+      </div>`).join('');
+  } catch(e) { console.log('Storage no configurado:', e.message); }
+}
+
+async function uploadFotos(files) {
+  if (!files?.length) return;
+  showToast(`Subiendo ${files.length} foto(s)...`);
+  let ok = 0;
+  for (const file of files) {
+    const fname = `${Date.now()}-${file.name.replace(/\s/g,'_')}`;
+    const { error } = await sb.storage.from('frate-media').upload(`galeria/${fname}`, file);
+    if (!error) ok++;
+  }
+  showToast(`✅ ${ok}/${files.length} fotos subidas`);
+  renderMedia();
+}
+
+async function deleteFoto(name) {
+  if (!confirm('¿Eliminar esta foto?')) return;
+  await sb.storage.from('frate-media').remove([`galeria/${name}`]);
+  showToast('Foto eliminada'); renderMedia();
+}
+
+async function uploadHero(file) {
+  if (!file) return;
+  showToast('Subiendo video hero...');
+  const { error } = await sb.storage.from('frate-media').upload('hero-video.mp4', file, { upsert: true });
+  if (error) { showToast('Error: '+error.message, true); return; }
+  showToast('✅ Video hero actualizado en Supabase Storage');
+}
+
+function saveVideo() { showToast('Video guardado — conectar con WEBEUM'); }
+async function saveMedia() {
+  const url = document.getElementById('med-url').value.trim();
+  if (!url) { showToast('Ingresa una URL', true); return; }
+  showToast('✅ URL de media guardada'); closeModal('modal-media');
+}
+
+// ── WEBEUM ───────────────────────────────────────────────────
+function getWebeum()  { return LS.get('admin_webeum') || []; }
+function renderWebeum() {
+  const eps=getWebeum(); const tbody=document.getElementById('tb-webeum');
+  tbody.innerHTML=eps.length
+    ? eps.map((ep,i)=>`<tr><td class="tb" style="color:var(--rojo)">EP.${eps.length-i}</td><td class="tb">${ep.titulo}</td><td class="tm">${ep.fecha}</td><td class="tm">${ep.duracion}</td><td><a href="${ep.url}" target="_blank" style="color:var(--azul);font-size:0.72rem;text-decoration:none">${ep.url?.substring(0,35)}...</a></td><td><div style="display:flex;gap:4px"><a href="${ep.url}" target="_blank" class="btn btn-g btn-sm">▶</a><button class="btn btn-del btn-sm" onclick="deleteWebeum(${i})">×</button></div></td></tr>`).join('')
+    : `<tr><td colspan="6" style="text-align:center;color:var(--muted);padding:20px">Sin episodios</td></tr>`;
+}
+function saveWebeum() {
+  const eps=getWebeum(); const f=document.getElementById('we-fecha').value;
+  eps.unshift({id:Date.now(),titulo:document.getElementById('we-titulo').value,url:document.getElementById('we-url').value,fecha:f?new Date(f).toLocaleDateString('es-CL',{day:'numeric',month:'short',year:'numeric'}):'',duracion:document.getElementById('we-dur').value});
+  LS.set('admin_webeum',eps); closeModal('modal-webeum'); renderWebeum(); showToast('✅ Episodio agregado');
+}
+function deleteWebeum(i) { const eps=getWebeum(); eps.splice(i,1); LS.set('admin_webeum',eps); renderWebeum(); }
+
+// ── TIENDITA ─────────────────────────────────────────────────
+function getTiendita(){ return LS.get('admin_tiendita') || []; }
+function renderTiendita() {
+  const items=getTiendita(); const tbody=document.getElementById('tb-tiendita');
+  tbody.innerHTML=items.length
+    ? items.map((p,i)=>`<tr><td class="tb">${p.nombre}</td><td class="tm">${p.categoria}</td><td style="color:var(--dorado)">${clp(p.precio)}</td><td>${p.stock||'—'}</td><td><span class="badge ${p.disponible?'b-g':'b-gr'}">${p.disponible?'Disponible':'Sin stock'}</span></td><td><button class="btn btn-del btn-sm" onclick="deleteTiendita(${i})">×</button></td></tr>`).join('')
+    : `<tr><td colspan="6" style="text-align:center;color:var(--muted);padding:20px">Sin productos</td></tr>`;
+}
+function saveTiendita() {
+  const items=getTiendita();
+  items.push({id:'t'+Date.now(),nombre:document.getElementById('ti-nombre').value,categoria:document.getElementById('ti-cat').value,descripcion:document.getElementById('ti-desc').value,precio:parseInt(document.getElementById('ti-precio').value)||0,stock:parseInt(document.getElementById('ti-stock').value)||0,disponible:true,imagen_color:'#111',tallas:document.getElementById('ti-tallas').value.split(',').map(s=>s.trim()),colores:document.getElementById('ti-colores').value.split(',').map(s=>s.trim())});
+  LS.set('admin_tiendita',items); closeModal('modal-tiendita'); renderTiendita(); showToast('✅ Producto guardado');
+}
+function deleteTiendita(i){const l=getTiendita();l.splice(i,1);LS.set('admin_tiendita',l);renderTiendita();}
+
+// ── CARTA ────────────────────────────────────────────────────
+function getCarta(){ return LS.get('admin_carta') || []; }
+function renderCarta() {
+  const items=getCarta(); const tbody=document.getElementById('tb-carta');
+  tbody.innerHTML=items.length
+    ? items.map((c,i)=>`<tr><td class="tb">${c.nombre}</td><td class="tm">${c.categoria}</td><td class="tm">${c.descripcion}</td><td style="color:var(--dorado)">${clp(c.precio)}</td><td><span class="badge ${c.disponible?'b-g':'b-gr'}">${c.disponible?'Disponible':'No'}</span></td><td><button class="btn btn-del btn-sm" onclick="deleteCarta(${i})">×</button></td></tr>`).join('')
+    : `<tr><td colspan="6" style="text-align:center;color:var(--muted);padding:20px">Sin ítems</td></tr>`;
+}
+function saveCarta() {
+  const items=getCarta();
+  items.push({id:'c'+Date.now(),nombre:document.getElementById('ca-nombre').value,categoria:document.getElementById('ca-cat').value,descripcion:document.getElementById('ca-desc').value,precio:parseInt(document.getElementById('ca-precio').value)||0,disponible:document.getElementById('ca-disp').value==='true'});
+  LS.set('admin_carta',items); closeModal('modal-carta'); renderCarta(); showToast('✅ Ítem guardado');
+}
+function deleteCarta(i){const l=getCarta();l.splice(i,1);LS.set('admin_carta',l);renderCarta();}
+
+// ── REGALO ───────────────────────────────────────────────────
+function enviarRegalo() { showToast('✅ Función de regalo — próximamente con email'); closeModal('modal-regalo'); }
+
+// ── EXPORT ───────────────────────────────────────────────────
+async function exportCSV() {
+  const { data: users } = await sb.from('clientes').select('*').order('created_at', { ascending: false });
+  if (!users?.length) { showToast('Sin usuarios para exportar', true); return; }
+  const rows = ['Username,Nombres,Apellidos,Email,RUT,Teléfono,Universidad,Carrera,Rol,Registro',
+    ...users.map(u=>`"${u.username||''}","${u.nombres||''}","${u.apellidos||''}","${u.email||''}","${u.rut||''}","${u.telefono||''}","${u.universidad||''}","${u.carrera||''}","${u.rol||'usuario'}","${u.created_at?.split('T')[0]||''}"`)
+  ].join('\n');
+  const a=document.createElement('a'); a.href='data:text/csv;charset=utf-8,﻿'+encodeURIComponent(rows); a.download='frate-usuarios.csv'; a.click(); showToast('✅ CSV exportado');
+}
+
+async function exportOrdenesCSV() {
+  const { data: orders } = await sb.from('pedidos').select('*, items_pedido(*)').order('created_at', { ascending: false });
+  if (!orders?.length) { showToast('Sin órdenes para exportar', true); return; }
+  const rows = ['ID,Comprador,Email,Total,Estado,Fecha',
+    ...orders.map(o=>`${o.id},"${o.nombre_cliente||''}","${o.email_cliente||''}",${o.total},"${o.estado}","${o.created_at?.split('T')[0]||''}"`)
+  ].join('\n');
+  const a=document.createElement('a'); a.href='data:text/csv;charset=utf-8,﻿'+encodeURIComponent(rows); a.download='frate-ordenes.csv'; a.click(); showToast('✅ CSV exportado');
+}
+
+// ── IA ───────────────────────────────────────────────────────
+const copies = {
+  'Anuncio de evento': (ctx) => `🔥 ${ctx}\n\nEsta es LA noche.\nLa que no se puede perder.\n\n📍 Pío Nono #430 · Bellavista\n🎟️ Tickets en frate.cl\n\n#Frate #CarreteUniversitario #Santiago`,
+  'Preventa agotada': (ctx) => `⚠️ SE AGOTÓ LA PREVENTA\n\n${ctx}\n\nLos que esperaron, esperaron de más.\nQuedan entradas generales.\n\n📍 Pío Nono #430 · 23:00 hrs`,
+  'Reminder 24hs antes': (ctx) => `⏰ MAÑANA ES EL DÍA\n\n${ctx}\n\n¿Tienes tu ticket?\nSi no, es ahora o nunca.\n\n🎟️ frate.cl`,
+  'Post-evento': (ctx) => `Qué noche. 🔥\n\n${ctx} fue de esas que no se olvidan.\nGracias a todos los que estuvieron.\n\nLa próxima ya está en camino.`,
+  'WEBEUM nuevo episodio': (ctx) => `NUEVO EPISODIO 🎬\nWEBEUM HUMANUM EST\n${ctx}\n\nDocumentamos cada noche.\nYA DISPONIBLE en YouTube 👆\n\n#WEBEUM #Frate`,
+  'Promoción tiendita': (ctx) => `🛍️ LA TIENDITA DE FRATE\n\n${ctx}\n\nStock limitado — disponible en frate.cl\n\n#FrateMerch`
+};
+function generateCopy() {
+  const tipo=document.getElementById('ia-tipo').value;
+  const ctx=document.getElementById('ia-contexto').value||'Fraternidad Campus Central';
+  document.getElementById('ia-copy-result').textContent = (copies[tipo]?.(ctx)) || `Copy para: ${ctx}`;
+}
+function copiarCopy() { navigator.clipboard?.writeText(document.getElementById('ia-copy-result').textContent).then(()=>showToast('✅ Copiado')).catch(()=>showToast('Copia el texto manualmente')); }
+
+// ── POPULATE SELECTS ─────────────────────────────────────────
+async function populateEventoSelects() {
+  const { data: evs } = await sb.from('eventos').select('id,nombre').order('fecha');
+  ['tt-evento-sel','co-evento'].forEach(id => {
+    const el = document.getElementById(id);
+    if (el && evs?.length) el.innerHTML = evs.map(ev=>`<option value="${ev.id}">${ev.nombre}</option>`).join('');
+  });
+}
+
+// ── INIT ─────────────────────────────────────────────────────
+async function initAdmin() {
+  await renderDash();
+  await populateEventoSelects();
+}
+
+// Auto check session on load
+checkSession();
+</script>
+</body>
+</html>

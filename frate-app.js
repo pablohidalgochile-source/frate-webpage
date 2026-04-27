@@ -235,15 +235,19 @@ function initAuthModal() {
     showToast(`¡Bienvenido a Frate, ${nombre}! 🎉`);
   });
 
-  // Nav user button → abre Mi Cuenta si está logueado, si no abre login
-  $('#nav-user-btn')?.addEventListener('click', () => {
-    const session = Storage.get('frate_session');
-    if (session) {
-      if (typeof openCuenta === 'function') openCuenta();
-    } else {
-      openAuthModal('login');
-    }
-  });
+  // Nav user button: frate-cuenta.js gestiona esto vía onclick
+  // Solo asignamos aquí si frate-cuenta.js no está disponible
+  const navBtn = $('#nav-user-btn');
+  if (navBtn && !navBtn._cuentaHandler) {
+    navBtn.addEventListener('click', () => {
+      const session = Storage.get('frate_session');
+      if (session) {
+        if (typeof openCuenta === 'function') openCuenta();
+      } else {
+        openAuthModal('login');
+      }
+    });
+  }
 }
 
 function openAuthModal(tab = 'login') {

@@ -559,14 +559,16 @@ function initCuentaModule() {
   document.getElementById('ep-confirm-tickets')?.removeEventListener('click', confirmMultiTickets);
   document.getElementById('ep-confirm-tickets')?.addEventListener('click', confirmMultiTickets);
 
-  // Nav user button → open Mi Cuenta if logged in
+  // Nav user button → abre Mi Cuenta si logueado, login si no
   const navUserBtn = document.getElementById('nav-user-btn');
   if (navUserBtn) {
-    navUserBtn.onclick = () => {
+    navUserBtn._cuentaHandler = true;
+    navUserBtn.onclick = null; // limpia cualquier handler previo
+    navUserBtn.addEventListener('click', () => {
       const session = Storage.get('frate_session');
       if (session) openCuenta();
-      else openAuthModal('login');
-    };
+      else if (typeof openAuthModal === 'function') openAuthModal('login');
+    });
   }
 }
 

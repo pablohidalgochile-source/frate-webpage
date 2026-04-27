@@ -13,15 +13,47 @@ drop policy if exists "own"               on clientes;
 alter table clientes add column if not exists nombres     text;
 alter table clientes add column if not exists apellidos   text;
 alter table clientes add column if not exists username    text;
+alter table clientes add column if not exists rol         text default 'usuario';
 alter table clientes add column if not exists universidad text;
 alter table clientes add column if not exists carrera     text;
 alter table clientes add column if not exists telefono    text;
 alter table clientes add column if not exists rut         text;
 alter table clientes add column if not exists email       text;
 
--- Índice único en username (ignorando si ya existe)
+-- Índice único en username
 create unique index if not exists clientes_username_idx on clientes (username)
   where username is not null and username <> '';
+
+-- ── POLÍTICAS ADMIN (acceso total para usuarios con rol='admin') ──
+-- Clientes: admin ve todos
+drop policy if exists "admin_clientes_all" on clientes;
+create policy "admin_clientes_all" on clientes for all
+  using (exists (select 1 from clientes c2 where c2.id = auth.uid() and c2.rol = 'admin'));
+
+-- Pedidos: admin ve todos
+drop policy if exists "admin_pedidos_all" on pedidos;
+create policy "admin_pedidos_all" on pedidos for all
+  using (exists (select 1 from clientes where id = auth.uid() and rol = 'admin'));
+
+-- Items pedido: admin ve todos
+drop policy if exists "admin_items_all" on items_pedido;
+create policy "admin_items_all" on items_pedido for all
+  using (exists (select 1 from clientes where id = auth.uid() and rol = 'admin'));
+
+-- Reservas: admin ve todas
+drop policy if exists "admin_reservas_all" on reservas;
+create policy "admin_reservas_all" on reservas for all
+  using (exists (select 1 from clientes where id = auth.uid() and rol = 'admin'));
+
+-- Eventos: admin puede crear/editar/eliminar
+drop policy if exists "admin_eventos_all" on eventos;
+create policy "admin_eventos_all" on eventos for all
+  using (exists (select 1 from clientes where id = auth.uid() and rol = 'admin'));
+
+-- Tipos de ticket: admin CRUD
+drop policy if exists "admin_tickets_all" on tipos_ticket;
+create policy "admin_tickets_all" on tipos_ticket for all
+  using (exists (select 1 from clientes where id = auth.uid() and rol = 'admin'));
 
 alter table clientes enable row level security;
 create policy "cliente_select_own" on clientes for select using (auth.uid() = id);
