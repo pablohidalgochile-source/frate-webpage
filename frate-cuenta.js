@@ -71,16 +71,22 @@ function showCuentaTab(tab) {
   document.querySelectorAll('.cuenta-tab-panel').forEach(p => p.style.display = 'none');
   document.querySelector(`.cuenta-tab[data-tab="${tab}"]`)?.classList.add('active');
   document.getElementById(`cuenta-panel-${tab}`)?.style.setProperty('display', 'block');
+  // Cargar historial desde Supabase cuando se abre la tab de tickets
+  if (tab === 'tickets' && typeof cuentaCargarHistorial === 'function') {
+    cuentaCargarHistorial();
+  }
 }
 
 function renderCuenta(session) {
-  // Avatar + name
-  const initials = (session.nombre || 'U').split(' ').map(w => w[0]).join('').substring(0, 2).toUpperCase();
-  const avatar = document.getElementById('cuenta-avatar');
-  const nameEl = document.getElementById('cuenta-user-name');
+  // Avatar con iniciales
+  const nombre = session.nombres || session.nombre || '';
+  const apellido = session.apellidos || '';
+  const initials = ((nombre[0] || '') + (apellido[0] || nombre[1] || '')).toUpperCase() || 'FT';
+  const avatar  = document.getElementById('cuenta-avatar');
+  const nameEl  = document.getElementById('cuenta-user-name');
   const emailEl = document.getElementById('cuenta-user-email');
-  if (avatar) avatar.textContent = initials;
-  if (nameEl) nameEl.textContent = session.nombre || '—';
+  if (avatar)  avatar.textContent  = initials;
+  if (nameEl)  nameEl.textContent  = session.username ? '@' + session.username : (nombre + ' ' + apellido).trim() || '—';
   if (emailEl) emailEl.textContent = session.email || '—';
 
   // Puntos
@@ -90,15 +96,34 @@ function renderCuenta(session) {
   const puntosValorEl = document.getElementById('puntos-valor');
   if (puntosValorEl) puntosValorEl.textContent = puntos;
 
-  // Perfil fields
-  const fieldMap = { 'cp-nombre': 'nombre', 'cp-email': 'email', 'cp-rut': 'rut', 'cp-tel': 'telefono', 'cp-univ': 'univ', 'cp-carrera': 'carrera' };
-  Object.entries(fieldMap).forEach(([id, key]) => {
-    const el = document.getElementById(id);
-    if (el && session[key]) el.value = session[key];
-  });
+  // Campos de perfil
+  const set = (id, val) => { const el = document.getElementById(id); if (el && val) el.value = val; };
+  set('cp-username',  session.username  || '');
+  set('cp-nombres',   session.nombres   || '');
+  set('cp-apellidos', session.apellidos || '');
+  set('cp-email',     session.email     || '');
+  set('cp-rut',       session.rut       || '');
+  set('cp-tel',       session.telefono  || '');
 
-  // Historial de tickets
-  renderHistorialTickets(session);
+  // Institución — seleccionar en el dropdown
+  const instSel = document.getElementById('cp-inst');
+  if (instSel && session.universidad) {
+    instSel.value = session.universidad;
+    if (instSel.value !== session.universidad) {
+      // Valor no existe aún → añadir temporalmente
+      const opt = document.createElement('option');
+      opt.value = session.universidad; opt.textContent = session.universidad;
+      instSel.appendChild(opt); instSel.value = session.universidad;
+    }
+    if (typeof cuentaCarreras === 'function') cuentaCarreras(instSel);
+    // Seleccionar carrera después de poblar
+    setTimeout(() => {
+      const carSel = document.getElementById('cp-carrera');
+      if (carSel && session.carrera) carSel.value = session.carrera;
+    }, 50);
+  }
+
+  // Historial y membresías
   renderHistorialPuntos(session);
   renderMembresias(session);
 }
@@ -176,21 +201,10 @@ function suscribirMembresia(id) {
 }
 
 function savePerfil() {
-  const session = Storage.get('frate_session');
-  if (!session) return;
-  session.nombre = document.getElementById('cp-nombre')?.value || session.nombre;
-  session.rut = document.getElementById('cp-rut')?.value || session.rut;
-  session.telefono = document.getElementById('cp-tel')?.value || session.telefono;
-  session.univ = document.getElementById('cp-univ')?.value || session.univ;
-  session.carrera = document.getElementById('cp-carrera')?.value || session.carrera;
-  session.recibePromos = document.getElementById('toggle-promos')?.checked ?? true;
-  Storage.set('frate_session', session);
-  // Update in users array too
-  const users = Storage.get('frate_users') || [];
-  const idx = users.findIndex(u => u.email === session.email);
-  if (idx >= 0) { users[idx] = { ...users[idx], ...session }; Storage.set('frate_users', users); }
-  showToast('✅ Perfil actualizado');
-  updateNavUser();
+  // Delegar a la función global que también guarda en Supabase
+  if (typeof cuentaGuardarPerfil === 'function') {
+    cuentaGuardarPerfil();
+  }
 }
 
 function reprintTicket(orderId) {

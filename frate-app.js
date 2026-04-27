@@ -235,14 +235,11 @@ function initAuthModal() {
     showToast(`¡Bienvenido a Frate, ${nombre}! 🎉`);
   });
 
-  // Nav user button
+  // Nav user button → abre Mi Cuenta si está logueado, si no abre login
   $('#nav-user-btn')?.addEventListener('click', () => {
     const session = Storage.get('frate_session');
     if (session) {
-      // Logged in → show profile options
-      Storage.del('frate_session');
-      updateNavUser();
-      showToast('Sesión cerrada.');
+      if (typeof openCuenta === 'function') openCuenta();
     } else {
       openAuthModal('login');
     }
@@ -269,8 +266,9 @@ function updateNavUser() {
   if (!btn) return;
   const session = Storage.get('frate_session');
   if (session) {
-    btn.textContent = session.nombre.split(' ')[0] + ' ↗';
-    btn.title = 'Cerrar sesión';
+    const display = session.username ? '@' + session.username : (session.nombres || session.nombre || '').split(' ')[0];
+    btn.textContent = display + ' ↗';
+    btn.title = 'Mi cuenta';
   } else {
     btn.textContent = 'Mi cuenta';
     btn.title = '';

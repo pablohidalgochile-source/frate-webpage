@@ -961,22 +961,41 @@
     <div class="cuenta-tab-panel" id="cuenta-panel-perfil">
       <div class="cuenta-section-title">Mis datos</div>
       <div class="profile-grid">
-        <div class="profile-field full"><label>Nombre completo</label><input type="text" id="cp-nombre" placeholder="Tu nombre" /></div>
-        <div class="profile-field"><label>RUT</label><input type="text" id="cp-rut" class="rut-field" placeholder="12.345.678-9" /></div>
-        <div class="profile-field"><label>Teléfono</label><input type="tel" id="cp-tel" class="tel-field" placeholder="+569 " /></div>
-        <div class="profile-field full"><label>Email</label><input type="email" id="cp-email" readonly style="opacity:0.6;cursor:not-allowed;" /></div>
-        <div class="profile-field">
-          <label>Universidad</label>
-          <select id="cp-univ">
-            <option value="">Selecciona</option>
-            <option>Universidad de Chile</option><option>PUC</option><option>USACH</option>
-            <option>UDP</option><option>UNAB</option><option>UTEM</option>
-            <option>Universidad Central</option><option>UAH</option><option>Otra</option>
-          </select>
+        <!-- Username (solo lectura) -->
+        <div class="profile-field full">
+          <label style="display:flex;justify-content:space-between;">
+            Nombre de usuario
+            <span style="color:#555;font-size:0.65rem;font-weight:400;">no se puede cambiar</span>
+          </label>
+          <input type="text" id="cp-username" readonly
+            style="opacity:0.6;cursor:not-allowed;letter-spacing:1px;"
+            placeholder="@username" />
         </div>
-        <div class="profile-field"><label>Carrera</label><input type="text" id="cp-carrera" placeholder="Tu carrera" /></div>
+        <!-- Nombres y Apellidos -->
+        <div class="profile-field"><label>Nombres</label><input type="text" id="cp-nombres" placeholder="Tus nombres" /></div>
+        <div class="profile-field"><label>Apellidos</label><input type="text" id="cp-apellidos" placeholder="Tus apellidos" /></div>
+        <!-- Email (solo lectura) -->
+        <div class="profile-field full">
+          <label style="display:flex;justify-content:space-between;">
+            Email
+            <span style="color:#555;font-size:0.65rem;font-weight:400;">enlace de tu cuenta</span>
+          </label>
+          <input type="email" id="cp-email" readonly style="opacity:0.6;cursor:not-allowed;" />
+        </div>
+        <!-- RUT y Teléfono -->
+        <div class="profile-field"><label>RUT</label><input type="text" id="cp-rut" class="rut-field" placeholder="12.345.678-9" maxlength="12" oninput="rutFormat(this)" onblur="rutCheck(this)" /></div>
+        <div class="profile-field"><label>Teléfono</label><input type="tel" id="cp-tel" class="tel-field" placeholder="+569 " /></div>
+        <!-- Institución y Carrera -->
+        <div class="profile-field full">
+          <label>Institución de Estudios</label>
+          <select id="cp-inst" onchange="cuentaCarreras(this)"><option value="">Selecciona tu institución</option></select>
+        </div>
+        <div class="profile-field full" id="cp-carrera-wrap" style="display:none;">
+          <label>Carrera</label>
+          <select id="cp-carrera"><option value="">Selecciona tu carrera</option></select>
+        </div>
       </div>
-      <div class="promo-toggle-row">
+      <div class="promo-toggle-row" style="margin-top:20px;">
         <div class="promo-toggle-text">
           <div class="promo-toggle-label">Recibir promociones</div>
           <div class="promo-toggle-sub">Newsletter, descuentos y eventos exclusivos</div>
@@ -996,18 +1015,24 @@
           <span class="toggle-slider"></span>
         </label>
       </div>
+      <div class="age-gate-error" id="cp-error" style="margin:12px 0;display:none;"></div>
       <button id="save-perfil-btn" class="btn-rojo" style="width:100%;margin-top:20px;border:none;cursor:pointer;padding:14px;font-family:'Barlow Condensed',sans-serif;font-weight:900;font-size:1rem;letter-spacing:2px;text-transform:uppercase;border-radius:2px;">
         GUARDAR CAMBIOS
       </button>
-      <button onclick="Storage.del('frate_session');closeCuenta();updateNavUser();showToast('Sesión cerrada');" style="width:100%;margin-top:10px;background:none;border:1px solid #2a2a2c;color:var(--gris);padding:12px;font-family:var(--fuente-body);cursor:pointer;border-radius:2px;font-size:0.8rem;">
+      <button onclick="cuentaCerrarSesion()" style="width:100%;margin-top:10px;background:none;border:1px solid #2a2a2c;color:var(--gris);padding:12px;font-family:var(--fuente-body);cursor:pointer;border-radius:2px;font-size:0.8rem;">
         Cerrar sesión
       </button>
     </div>
 
     <!-- MIS TICKETS -->
     <div class="cuenta-tab-panel" id="cuenta-panel-tickets" style="display:none">
-      <div class="cuenta-section-title">Historial de compras</div>
-      <div id="historial-tickets-list"></div>
+      <div class="cuenta-section-title">Mis compras</div>
+      <div id="historial-tickets-list">
+        <div style="text-align:center;padding:32px;color:var(--gris);">
+          <div style="font-size:2rem;margin-bottom:8px;">🎟️</div>
+          <div>Cargando historial...</div>
+        </div>
+      </div>
     </div>
 
     <!-- PUNTOS -->
@@ -1251,7 +1276,120 @@ function poblarInstSelect(selId) {
 document.addEventListener('DOMContentLoaded', function() {
   poblarInstSelect('agr-inst');  // age gate
   poblarInstSelect('reg-inst');  // modal Mi Cuenta
+  poblarInstSelect('cp-inst');   // Mi Cuenta panel
 });
+
+// ── MI CUENTA: carrera dropdown ────────────────────────────────
+function cuentaCarreras(sel) {
+  var inst = INST_DATA.find(function(i){ return i.g === sel.value; });
+  var wrap = document.getElementById('cp-carrera-wrap');
+  var carSel = document.getElementById('cp-carrera');
+  if (!wrap || !carSel) return;
+  if (!inst || !inst.c || !inst.c.length) { wrap.style.display='none'; return; }
+  wrap.style.display='block';
+  carSel.innerHTML = '<option value="">Selecciona tu carrera</option>';
+  inst.c.forEach(function(c){
+    var o = document.createElement('option'); o.value=c; o.textContent=c; carSel.appendChild(o);
+  });
+  var otro = document.createElement('option'); otro.value='Otro'; otro.textContent='Otro'; carSel.appendChild(otro);
+}
+
+// ── MI CUENTA: cerrar sesión (también en Supabase) ─────────────
+async function cuentaCerrarSesion() {
+  try { if (typeof sbSignOut === 'function') await sbSignOut(); } catch(_) {}
+  Storage.del('frate_session');
+  if (typeof closeCuenta === 'function') closeCuenta();
+  if (typeof updateNavUser === 'function') updateNavUser();
+  if (typeof showToast === 'function') showToast('Sesión cerrada 👋');
+}
+
+// ── MI CUENTA: guardar perfil en Supabase ─────────────────────
+async function cuentaGuardarPerfil() {
+  var session = Storage.get('frate_session');
+  if (!session) return;
+  var btn = document.getElementById('save-perfil-btn');
+  var errEl = document.getElementById('cp-error');
+  if (errEl) { errEl.style.display='none'; errEl.textContent=''; }
+  var nombres  = ((document.getElementById('cp-nombres')  ||{}).value||'').trim();
+  var apellidos= ((document.getElementById('cp-apellidos')||{}).value||'').trim();
+  var telefono = ((document.getElementById('cp-tel')      ||{}).value||'').trim();
+  var rut      = ((document.getElementById('cp-rut')      ||{}).value||'').trim();
+  var inst     = ((document.getElementById('cp-inst')     ||{}).value||'');
+  var carrera  = ((document.getElementById('cp-carrera')  ||{}).value||'');
+  if (btn) { btn.disabled=true; btn.textContent='Guardando...'; }
+  try {
+    if (typeof sb !== 'undefined' && session.id) {
+      var updates = {};
+      if (nombres)   updates.nombres   = nombres;
+      if (apellidos) updates.apellidos = apellidos;
+      if (telefono)  updates.telefono  = telefono;
+      if (rut)       updates.rut       = rut;
+      if (inst)      updates.universidad= inst;
+      if (carrera)   updates.carrera   = carrera;
+      if (Object.keys(updates).length) {
+        var res = await sb.from('clientes').update(updates).eq('id', session.id);
+        if (res.error) throw res.error;
+      }
+    }
+    if (nombres)   session.nombres   = nombres;
+    if (apellidos) session.apellidos = apellidos;
+    if (telefono)  session.telefono  = telefono;
+    if (rut)       session.rut       = rut;
+    if (inst)      session.universidad= inst;
+    if (carrera)   session.carrera   = carrera;
+    Storage.set('frate_session', session);
+    if (typeof updateNavUser === 'function') updateNavUser();
+    if (typeof showToast === 'function') showToast('✅ Perfil actualizado');
+  } catch(err) {
+    if (errEl) { errEl.textContent=(err&&err.message)||'Error al guardar.'; errEl.style.display='block'; }
+  } finally {
+    if (btn) { btn.disabled=false; btn.textContent='GUARDAR CAMBIOS'; }
+  }
+}
+
+// ── MI CUENTA: cargar historial desde Supabase ────────────────
+async function cuentaCargarHistorial() {
+  var session = Storage.get('frate_session');
+  var container = document.getElementById('historial-tickets-list');
+  if (!container || !session) return;
+  try {
+    var pedidos = [];
+    if (typeof sbMisPedidos === 'function' && session.id) {
+      pedidos = await sbMisPedidos(session.id);
+    }
+    if (!pedidos || !pedidos.length) {
+      container.innerHTML = '<div style="text-align:center;padding:32px;color:var(--gris);"><div style="font-size:2rem;margin-bottom:8px;">🎟️</div><div>Aún no has comprado tickets</div><div style="font-size:0.75rem;margin-top:8px;"><a href="#tickets" onclick="closeCuenta()" style="color:var(--rojo);text-decoration:none;">Ver próximos eventos →</a></div></div>';
+      return;
+    }
+    var fmt = function(n){ return '$'+n.toLocaleString('es-CL'); };
+    container.innerHTML = pedidos.map(function(p){
+      var items = p.items_pedido||[];
+      var totalItems = items.reduce(function(s,i){return s+(i.cantidad||0);},0);
+      var firstItem = items[0];
+      var fecha = new Date(p.created_at).toLocaleDateString('es-CL',{day:'2-digit',month:'short',year:'numeric'});
+      var estadoColor = p.estado==='pagado'?'#22c55e':p.estado==='pendiente'?'#f59e0b':'var(--gris)';
+      return '<div style="background:var(--negro-3);border:1px solid #1a1a1c;border-radius:4px;padding:16px;margin-bottom:12px;">'
+        +'<div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:10px;">'
+        +'<div><div style="font-family:var(--fuente-display);font-weight:700;font-size:0.95rem;color:var(--blanco);">'+(firstItem?firstItem.nombre_evento:'Pedido #'+p.id)+'</div>'
+        +'<div style="font-size:0.7rem;color:var(--gris);margin-top:2px;">'+fecha+' · Pedido #'+p.id+'</div></div>'
+        +'<span style="font-size:0.6rem;letter-spacing:2px;text-transform:uppercase;padding:3px 8px;border-radius:20px;background:rgba(0,0,0,0.3);border:1px solid '+estadoColor+';color:'+estadoColor+';">'+p.estado+'</span>'
+        +'</div>'
+        +(items.length ? '<div style="margin-bottom:10px;">'+items.map(function(i){
+          return '<div style="display:flex;justify-content:space-between;font-size:0.8rem;padding:4px 0;border-top:1px solid #1a1a1c;">'
+            +'<span style="color:var(--gris);">'+i.nombre_ticket+' x'+i.cantidad+'</span>'
+            +'<span style="color:var(--blanco);">'+fmt(i.precio_unitario*i.cantidad)+'</span>'
+            +'</div>';
+        }).join('')+'</div>' : '')
+        +'<div style="display:flex;justify-content:space-between;align-items:center;">'
+        +'<span style="font-size:0.7rem;color:var(--gris);">'+totalItems+' entrada'+(totalItems!==1?'s':'')+'</span>'
+        +'<span style="font-family:var(--fuente-display);font-weight:900;font-size:1.1rem;color:var(--dorado);">'+fmt(p.total)+'</span>'
+        +'</div>'
+        +'</div>';
+    }).join('');
+  } catch(err) {
+    container.innerHTML = '<div style="text-align:center;padding:24px;color:var(--gris);font-size:0.8rem;">Error al cargar historial.</div>';
+  }
+}
 
 async function ageDoRegister() {
   var nombres    = ((document.getElementById('agr-nombres')   ||{}).value||'').trim();
