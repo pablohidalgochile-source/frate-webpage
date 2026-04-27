@@ -153,43 +153,43 @@
     </div>
 
     <div class="modal-form-panel" id="panel-register">
-      <form class="modal-form" id="register-form">
+      <form class="modal-form" id="register-form" onsubmit="event.preventDefault();modalDoRegister()">
         <div class="form-row">
           <div class="form-group">
-            <label>Nombre completo</label>
-            <input type="text" id="reg-nombre" placeholder="Tu nombre" required />
+            <label>Nombres</label>
+            <input type="text" id="reg-nombres" placeholder="Tus nombres" required />
+          </div>
+          <div class="form-group">
+            <label>Apellidos</label>
+            <input type="text" id="reg-apellidos" placeholder="Tus apellidos" required />
+          </div>
+        </div>
+        <div class="form-row">
+          <div class="form-group">
+            <label>Email</label>
+            <input type="email" id="reg-email" placeholder="tu@email.com" required />
           </div>
           <div class="form-group">
             <label>RUT</label>
-            <input type="text" id="reg-rut" placeholder="12.345.678-9" />
+            <input type="text" id="reg-rut" placeholder="12.345.678-9" maxlength="12"
+              oninput="rutFormat(this)" onblur="rutCheck(this)" autocomplete="off" />
           </div>
         </div>
         <div class="form-group">
-          <label>Email</label>
-          <input type="email" id="reg-email" placeholder="tu@email.com" required />
-        </div>
-        <div class="form-group">
           <label>Teléfono</label>
-          <input type="tel" id="reg-tel" placeholder="+56 9 xxxx xxxx" />
+          <input type="tel" id="reg-tel" value="+569" placeholder="+569 xxxx xxxx" />
         </div>
         <div class="form-group">
-          <label>Universidad</label>
-          <select id="reg-univ">
-            <option value="">Selecciona tu universidad</option>
-            <option>Universidad de Chile</option>
-            <option>PUC</option>
-            <option>USACH</option>
-            <option>UDP</option>
-            <option>UNAB</option>
-            <option>UTEM</option>
-            <option>Universidad Central</option>
-            <option>UAH</option>
-            <option>Otra</option>
+          <label>Institución de Estudios</label>
+          <select id="reg-inst" onchange="modalCarreras(this)">
+            <option value="">Selecciona tu institución</option>
           </select>
         </div>
-        <div class="form-group">
+        <div class="form-group" id="reg-carrera-wrap" style="display:none;">
           <label>Carrera</label>
-          <input type="text" id="reg-carrera" placeholder="Ingeniería, Derecho, Arte..." />
+          <select id="reg-carrera">
+            <option value="">Selecciona tu carrera</option>
+          </select>
         </div>
         <div class="form-row">
           <div class="form-group">
@@ -201,7 +201,8 @@
             <input type="password" id="reg-pass2" placeholder="Repite" required />
           </div>
         </div>
-        <button type="submit" class="btn-rojo">CREAR CUENTA</button>
+        <div class="age-gate-error" id="reg-error" style="margin-bottom:8px;"></div>
+        <button type="button" class="btn-rojo" onclick="modalDoRegister()">CREAR CUENTA</button>
       </form>
     </div>
   </div>
@@ -1223,22 +1224,25 @@ function ageCarreras(sel) {
   wrap.style.display = 'block';
 }
 
-document.addEventListener('DOMContentLoaded', function() {
-  var sel = document.getElementById('agr-inst');
+function poblarInstSelect(selId) {
+  var sel = document.getElementById(selId);
   if (!sel) return;
   sel.innerHTML = '<option value="">Selecciona tu institución</option>';
   INST_DATA.forEach(function(inst) {
     var opt = document.createElement('option');
     opt.value = inst.disabled ? '' : inst.g;
     opt.textContent = inst.g;
-    if (inst.disabled) { opt.disabled = true; opt.style.color='#555'; opt.style.fontWeight='bold'; }
+    if (inst.disabled) { opt.disabled=true; opt.style.color='#555'; opt.style.fontWeight='bold'; }
     sel.appendChild(opt);
   });
-  // NO SOY ESTUDIANTE al final
   var noEst = document.createElement('option');
   noEst.value = 'NO SOY ESTUDIANTE';
   noEst.textContent = 'NO SOY ESTUDIANTE';
   sel.appendChild(noEst);
+}
+document.addEventListener('DOMContentLoaded', function() {
+  poblarInstSelect('agr-inst');  // age gate
+  poblarInstSelect('reg-inst');  // modal Mi Cuenta
 });
 
 async function ageDoRegister() {
@@ -1277,6 +1281,61 @@ async function ageDoRegister() {
     if (errEl) { errEl.textContent = txt; errEl.style.display = 'block'; }
   } finally {
     if (btn) { btn.disabled = false; btn.textContent = 'CREAR CUENTA'; }
+  }
+}
+
+// ── MODAL REGISTRO — igual que age gate pero con IDs "reg-" ──
+function modalCarreras(sel) {
+  var wrap = document.getElementById('reg-carrera-wrap');
+  var carSel = document.getElementById('reg-carrera');
+  var val = sel.value;
+  if (!val || val === 'NO SOY ESTUDIANTE') { wrap.style.display='none'; return; }
+  var inst = null;
+  for (var i=0;i<INST_DATA.length;i++) { if(INST_DATA[i].g===val){inst=INST_DATA[i];break;} }
+  if (!inst||!inst.c||!inst.c.length) { wrap.style.display='none'; return; }
+  carSel.innerHTML = '<option value="">Selecciona tu carrera</option>' +
+    inst.c.map(function(c){ return '<option value="'+c+'">'+c+'</option>'; }).join('');
+  wrap.style.display = 'block';
+}
+
+async function modalDoRegister() {
+  var nombres   = ((document.getElementById('reg-nombres')   ||{}).value||'').trim();
+  var apellidos = ((document.getElementById('reg-apellidos') ||{}).value||'').trim();
+  var email     = ((document.getElementById('reg-email')     ||{}).value||'').trim();
+  var pass      =  (document.getElementById('reg-pass')      ||{}).value||'';
+  var pass2     =  (document.getElementById('reg-pass2')     ||{}).value||'';
+  var telefono  = ((document.getElementById('reg-tel')       ||{}).value||'').trim();
+  var rut       = ((document.getElementById('reg-rut')       ||{}).value||'').trim();
+  var inst      = ((document.getElementById('reg-inst')      ||{}).value||'');
+  var carrera   = ((document.getElementById('reg-carrera')   ||{}).value||'');
+  var errEl = document.getElementById('reg-error');
+  var btn   = document.querySelector('#register-form .btn-rojo');
+  if (errEl) { errEl.textContent=''; errEl.style.display='none'; }
+  if (!nombres||!email||!pass) {
+    if(errEl){errEl.textContent='Nombres, email y contraseña son obligatorios.';errEl.style.display='block';} return;
+  }
+  if (pass !== pass2) {
+    if(errEl){errEl.textContent='Las contraseñas no coinciden.';errEl.style.display='block';} return;
+  }
+  if (pass.length < 6) {
+    if(errEl){errEl.textContent='La contraseña debe tener al menos 6 caracteres.';errEl.style.display='block';} return;
+  }
+  if (btn) { btn.disabled=true; btn.textContent='Creando cuenta...'; }
+  try {
+    if (typeof sbSignUp === 'function') {
+      await sbSignUp({ nombres:nombres, apellidos:apellidos, email:email, password:pass,
+                       telefono:telefono, rut:rut, universidad:inst, carrera:carrera });
+      await sbSignIn(email, pass);
+    }
+    if (typeof closeAuthModal === 'function') closeAuthModal();
+    if (typeof updateNavUser  === 'function') updateNavUser();
+    if (typeof showToast      === 'function') showToast('¡Bienvenid@, '+nombres+'! 🔥');
+  } catch(err) {
+    var txt = (err&&err.message)||'Error al crear la cuenta.';
+    if (txt.toLowerCase().includes('already')) txt='Este email ya tiene cuenta. Usa "Iniciar sesión".';
+    if(errEl){errEl.textContent=txt;errEl.style.display='block';}
+  } finally {
+    if (btn) { btn.disabled=false; btn.textContent='CREAR CUENTA'; }
   }
 }
 
