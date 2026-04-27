@@ -1,0 +1,1444 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Fraternidad Campus Central | Discoteca Universitaria Santiago</title>
+  <meta name="description" content="La mejor discoteca urbana de Chile desde 2013. Compra tus tickets directamente. Trap, reggaeton y urbano en Santiago." />
+  <meta name="theme-color" content="#0A0A0B" />
+  <link rel="stylesheet" href="frate.css" />
+  <link rel="stylesheet" href="frate-cart.css" />
+  <link rel="stylesheet" href="frate-popups.css" />
+  <link rel="stylesheet" href="frate-cuenta.css" />
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+</head>
+<body>
+
+<!-- ══════════════════════════════════════════════
+     AGE GATE — flujo multi-paso
+════════════════════════════════════════════════ -->
+<div id="age-gate">
+  <div class="age-gate-inner">
+    <img src="assets/logo-insignia.png" alt="Fraternidad Campus Central"
+         style="height:100px;object-fit:contain;margin-bottom:20px;" />
+
+    <!-- PASO 1: Verificar edad -->
+    <div class="age-step active" id="age-s1">
+      <div class="age-gate-warning">Solo para mayores de 18 años · Chile</div>
+      <div class="age-gate-title">¿Cuántos<br/>años tienes?</div>
+      <p class="age-gate-sub">Ingresa tu fecha de nacimiento para continuar</p>
+      <form class="age-gate-form" id="age-gate-form" style="gap:16px;">
+        <label for="age-birth-input">Fecha de nacimiento</label>
+        <input type="date" id="age-birth-input" required />
+        <div class="age-gate-error" id="age-error"></div>
+        <button type="submit" class="btn-rojo">VERIFICAR EDAD</button>
+      </form>
+    </div>
+
+    <!-- PASO 2: Elegir cuenta -->
+    <div class="age-step" id="age-s2">
+      <div class="age-gate-title" style="font-size:2.2rem;margin-bottom:8px;">¡Bienvenid@! 🔥</div>
+      <p class="age-gate-sub">Para comprar tickets y guardar tu historial, ¿tienes cuenta en Frate?</p>
+      <div class="age-gate-choice-btns">
+        <button class="btn-rojo" id="age-btn-register">CREAR CUENTA NUEVA</button>
+        <button class="btn-dorado" id="age-btn-login">YA TENGO CUENTA</button>
+        <button class="btn-ghost" id="age-btn-skip">Entrar sin cuenta →</button>
+      </div>
+    </div>
+
+    <!-- PASO 3: Login -->
+    <div class="age-step" id="age-s3">
+      <button class="age-back-btn" data-back="age-s2">← Volver</button>
+      <div class="age-gate-title" style="font-size:2rem;margin-bottom:20px;">Iniciar sesión</div>
+      <form class="age-gate-form" id="age-login-form" style="gap:14px;">
+        <label>Email</label>
+        <input type="email" id="agl-email" placeholder="tu@email.com" required />
+        <label>Contraseña</label>
+        <input type="password" id="agl-pass" placeholder="••••••••" required />
+        <div class="age-gate-error" id="agl-error"></div>
+        <button type="submit" class="btn-rojo" id="agl-submit">ENTRAR</button>
+      </form>
+    </div>
+
+    <!-- PASO 4: Registro -->
+    <div class="age-step" id="age-s4">
+      <button class="age-back-btn" data-back="age-s2">← Volver</button>
+      <div class="age-gate-title" style="font-size:1.8rem;margin-bottom:20px;">Crear cuenta</div>
+      <form class="age-gate-form" id="age-register-form" style="gap:12px;">
+        <label>Nombre completo</label>
+        <input type="text" id="agr-nombre" placeholder="Tu nombre" required />
+        <label>Email</label>
+        <input type="email" id="agr-email" placeholder="tu@email.com" required />
+        <div class="age-gate-form-row">
+          <div>
+            <label>Teléfono</label>
+            <input type="tel" id="agr-tel" placeholder="+56 9 xxxx xxxx" />
+          </div>
+          <div>
+            <label>RUT</label>
+            <input type="text" id="agr-rut" placeholder="12.345.678-9" />
+          </div>
+        </div>
+        <label>Universidad</label>
+        <select id="agr-univ">
+          <option value="">Selecciona tu universidad</option>
+          <option>Universidad de Chile</option>
+          <option>PUC</option><option>USACH</option>
+          <option>UDP</option><option>UNAB</option>
+          <option>UTEM</option><option>Universidad Central</option>
+          <option>UAH</option><option>Otra</option>
+        </select>
+        <label>Contraseña <span style="color:#555;font-size:0.65rem;">(mín. 6 caracteres)</span></label>
+        <input type="password" id="agr-pass" placeholder="••••••••" required />
+        <div class="age-gate-error" id="agr-error"></div>
+        <button type="submit" class="btn-rojo" id="agr-submit">CREAR CUENTA</button>
+      </form>
+    </div>
+
+    <!-- PASO 5: Éxito -->
+    <div class="age-step" id="age-s5">
+      <div class="age-success">
+        <div class="age-success-icon">🎉</div>
+        <div class="age-gate-title" style="font-size:2rem;margin-bottom:12px;">¡Listo!</div>
+        <p class="age-gate-sub" id="age-success-msg">Cuenta creada. Bienvenid@ a Frate.</p>
+        <button class="btn-rojo" id="age-enter-btn" style="margin-top:20px;">ENTRAR A FRATE 🔥</button>
+      </div>
+    </div>
+
+    <p class="age-gate-disclaimer">
+      Al ingresar confirmas que eres mayor de 18 años y aceptas nuestros términos.<br/>
+      No conducir bajo los efectos del alcohol · +56 9 1234 5678
+    </p>
+  </div>
+</div>
+
+<!-- ══════════════════════════════════════════════
+     AUTH MODAL
+════════════════════════════════════════════════ -->
+<div class="modal-overlay" id="auth-modal">
+  <div class="modal-box">
+    <button class="modal-close" id="auth-modal-close">✕</button>
+    <div style="text-align:center;margin-bottom:24px;">
+      <img src="assets/logo-insignia.png" alt="Frate" style="height:56px;object-fit:contain;" />
+    </div>
+    <div class="modal-tabs">
+      <button class="modal-tab active" data-tab="login">Iniciar sesión</button>
+      <button class="modal-tab" data-tab="register">Crear cuenta</button>
+    </div>
+
+    <div class="modal-form-panel active" id="panel-login">
+      <form class="modal-form" id="login-form">
+        <div class="form-group">
+          <label>Email</label>
+          <input type="email" id="login-email" placeholder="tu@email.com" required />
+        </div>
+        <div class="form-group">
+          <label>Contraseña</label>
+          <input type="password" id="login-pass" placeholder="••••••••" required />
+        </div>
+        <button type="submit" class="btn-rojo">ENTRAR</button>
+        <div class="form-divider">o</div>
+        <button type="button" class="btn-dorado" onclick="document.querySelector('[data-tab=register]').click()">CREAR CUENTA NUEVA</button>
+      </form>
+    </div>
+
+    <div class="modal-form-panel" id="panel-register">
+      <form class="modal-form" id="register-form">
+        <div class="form-row">
+          <div class="form-group">
+            <label>Nombre completo</label>
+            <input type="text" id="reg-nombre" placeholder="Tu nombre" required />
+          </div>
+          <div class="form-group">
+            <label>RUT</label>
+            <input type="text" id="reg-rut" placeholder="12.345.678-9" />
+          </div>
+        </div>
+        <div class="form-group">
+          <label>Email</label>
+          <input type="email" id="reg-email" placeholder="tu@email.com" required />
+        </div>
+        <div class="form-group">
+          <label>Teléfono</label>
+          <input type="tel" id="reg-tel" placeholder="+56 9 xxxx xxxx" />
+        </div>
+        <div class="form-group">
+          <label>Universidad</label>
+          <select id="reg-univ">
+            <option value="">Selecciona tu universidad</option>
+            <option>Universidad de Chile</option>
+            <option>PUC</option>
+            <option>USACH</option>
+            <option>UDP</option>
+            <option>UNAB</option>
+            <option>UTEM</option>
+            <option>Universidad Central</option>
+            <option>UAH</option>
+            <option>Otra</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label>Carrera</label>
+          <input type="text" id="reg-carrera" placeholder="Ingeniería, Derecho, Arte..." />
+        </div>
+        <div class="form-row">
+          <div class="form-group">
+            <label>Contraseña</label>
+            <input type="password" id="reg-pass" placeholder="Mín. 6 caracteres" required />
+          </div>
+          <div class="form-group">
+            <label>Confirmar</label>
+            <input type="password" id="reg-pass2" placeholder="Repite" required />
+          </div>
+        </div>
+        <button type="submit" class="btn-rojo">CREAR CUENTA</button>
+      </form>
+    </div>
+  </div>
+</div>
+
+<!-- ══════════════════════════════════════════════
+     NAVBAR
+════════════════════════════════════════════════ -->
+<nav id="navbar">
+  <a class="nav-logo" href="#hero" style="display:flex;align-items:center;gap:10px;">
+    <img src="assets/logo-blanco.png" alt="Frate"
+         style="height:36px;object-fit:contain;"
+         onerror="this.style.display='none';this.nextElementSibling.style.display='block'" />
+    <span style="display:none;font-family:'Barlow Condensed',sans-serif;font-weight:900;font-size:1.4rem;color:#F0EDE8;">FRATE<span style="color:#E8363D">.</span></span>
+  </a>
+  <ul class="nav-links">
+    <li><a href="#eventos">Eventos</a></li>
+    <li><a href="#ambientes">Ambientes</a></li>
+    <li><a href="#reservas">Reservas</a></li>
+    <li><a href="#webeum">WEBEUM</a></li>
+    <li><a href="#tiendita">La Tiendita</a></li>
+    <li><a href="#carta">Carta</a></li>
+    <li><a href="#sobre">Nosotros</a></li>
+    <li><a href="#como-llegar">📍 Llegar</a></li>
+    <li><a href="#eventos" class="nav-cta">TICKETS</a></li>
+  </ul>
+  <div class="nav-right">
+    <button class="nav-user-btn" id="nav-user-btn">Mi cuenta</button>
+    <button class="nav-cart-btn" id="nav-cart-btn" aria-label="Carrito">
+      🎟️
+      <span class="cart-count" id="cart-count">0</span>
+    </button>
+    <button id="hamburger" aria-label="Menú">
+      <span></span><span></span><span></span>
+    </button>
+  </div>
+</nav>
+
+<!-- Mobile menu -->
+<div id="mobile-menu">
+  <button id="mobile-menu-close">✕</button>
+  <a href="#eventos">Eventos</a>
+  <a href="#ambientes">Ambientes</a>
+  <a href="#reservas">Reservas</a>
+  <a href="#webeum">WEBEUM</a>
+  <a href="#sobre">Nosotros</a>
+  <a href="#tiendita">La Tiendita</a>
+  <a href="#carta">Carta</a>
+  <a href="#como-llegar">📍 Cómo llegar</a>
+  <a href="#" onclick="openCart();return false;" style="color:var(--rojo)">🎟️ CARRITO</a>
+</div>
+
+<!-- ══════════════════════════════════════════════
+     CART DRAWER
+════════════════════════════════════════════════ -->
+<div class="cart-backdrop" id="cart-backdrop"></div>
+<div class="cart-drawer" id="cart-drawer">
+  <div class="cart-header">
+    <div>
+      <div class="cart-header-title">Tu carrito</div>
+      <div class="cart-header-sub">Tickets · frate.cl</div>
+    </div>
+    <button class="cart-close" id="cart-close-btn">✕</button>
+  </div>
+  <div class="cart-items" id="cart-items-list">
+    <div class="cart-empty">
+      <div class="cart-empty-icon">🎟️</div>
+      <div class="cart-empty-title">Tu carrito está vacío</div>
+      <p style="font-size:0.8rem;color:#444">Agrega tickets desde la sección de eventos</p>
+    </div>
+  </div>
+  <div class="cart-footer">
+    <div class="cart-total-row">
+      <span class="cart-total-label">Total</span>
+      <span class="cart-total-value" id="cart-total-value">$0</span>
+    </div>
+    <p class="cart-service-fee">+ 4% cargo por servicio al checkout</p>
+    <button class="cart-checkout-btn" id="cart-checkout-btn" disabled>
+      IR AL CHECKOUT →
+    </button>
+    <div class="cart-security">
+      <span class="cart-security-text">🔒 Pago seguro · Webpay · Mercado Pago</span>
+    </div>
+  </div>
+</div>
+
+<!-- ══════════════════════════════════════════════
+     CHECKOUT MODAL
+════════════════════════════════════════════════ -->
+<div class="checkout-overlay" id="checkout-overlay">
+  <div class="checkout-box">
+    <div class="checkout-header">
+      <div class="checkout-title">Checkout</div>
+      <div class="checkout-steps">
+        <span class="checkout-step active">Datos</span>
+        <span style="color:#333">→</span>
+        <span class="checkout-step">Pago</span>
+        <span style="color:#333">→</span>
+        <span class="checkout-step">Ticket</span>
+        <button class="cart-close" id="checkout-close-btn" style="margin-left:16px">✕</button>
+      </div>
+    </div>
+    <div class="checkout-body">
+      <div class="checkout-section-title">Resumen de tu orden</div>
+      <div class="checkout-order-summary" id="checkout-summary"></div>
+
+      <div class="checkout-section-title">Tus datos</div>
+      <div class="modal-form" style="gap:12px;margin-bottom:24px;">
+        <div class="form-row">
+          <div class="form-group">
+            <label>Nombre completo *</label>
+            <input type="text" id="co-nombre" placeholder="Tu nombre" required />
+          </div>
+          <div class="form-group">
+            <label>RUT</label>
+            <input type="text" id="co-rut" placeholder="12.345.678-9" />
+          </div>
+        </div>
+        <div class="form-row">
+          <div class="form-group">
+            <label>Email *</label>
+            <input type="email" id="co-email" placeholder="tu@email.com" required />
+          </div>
+          <div class="form-group">
+            <label>Teléfono *</label>
+            <input type="tel" id="co-tel" placeholder="+56 9 xxxx xxxx" required />
+          </div>
+        </div>
+      </div>
+
+      <div class="checkout-section-title">Método de pago</div>
+      <div class="checkout-payment-methods">
+        <button class="pay-method-btn selected" data-method="webpay">
+          <span class="pay-method-name">Webpay</span>
+          <span class="pay-method-sub">Débito / Crédito</span>
+        </button>
+        <button class="pay-method-btn" data-method="mercadopago">
+          <span class="pay-method-name">Mercado Pago</span>
+          <span class="pay-method-sub">App · Transferencia</span>
+        </button>
+        <button class="pay-method-btn" data-method="transferencia">
+          <span class="pay-method-name">Transferencia</span>
+          <span class="pay-method-sub">Banco directo</span>
+        </button>
+        <button class="pay-method-btn" data-method="efectivo">
+          <span class="pay-method-name">Efectivo</span>
+          <span class="pay-method-sub">Retiro en Frate</span>
+        </button>
+      </div>
+
+      <button class="checkout-confirm-btn" id="checkout-confirm-btn">
+        CONFIRMAR COMPRA
+      </button>
+      <p class="checkout-disclaimer">
+        Al comprar aceptas los términos y condiciones · Entrada válida solo para mayores de 18 años
+        · No se aceptan devoluciones · frate.cl
+      </p>
+    </div>
+  </div>
+</div>
+
+<!-- ══════════════════════════════════════════════
+     TICKET DIGITAL
+════════════════════════════════════════════════ -->
+<div class="ticket-overlay" id="ticket-overlay">
+  <div class="ticket-card">
+    <div class="ticket-top">
+      <img src="assets/logo-insignia.png" alt="Frate" class="ticket-logo-img" />
+      <div class="ticket-success-badge">✓ Compra confirmada</div>
+      <div class="ticket-evento-name" id="ticket-evento-name">NOMBRE EVENTO</div>
+      <div class="ticket-evento-date" id="ticket-evento-date">Fecha</div>
+      <div class="ticket-qr">
+        <canvas id="ticket-qr-canvas" width="140" height="140"></canvas>
+      </div>
+      <div class="ticket-code" id="ticket-order-id">FCC-XXXXXX</div>
+    </div>
+    <div class="ticket-bottom">
+      <div class="ticket-info-grid">
+        <div class="ticket-info-item">
+          <div class="ticket-info-label">Comprador</div>
+          <div class="ticket-info-value" id="ticket-buyer-name">—</div>
+        </div>
+        <div class="ticket-info-item">
+          <div class="ticket-info-label">Email</div>
+          <div class="ticket-info-value" id="ticket-buyer-email" style="font-size:0.8rem">—</div>
+        </div>
+        <div class="ticket-info-item">
+          <div class="ticket-info-label">Entradas</div>
+          <div class="ticket-info-value" id="ticket-qty">—</div>
+        </div>
+        <div class="ticket-info-item">
+          <div class="ticket-info-label">Ambiente</div>
+          <div class="ticket-info-value" id="ticket-ambiente">—</div>
+        </div>
+        <div class="ticket-info-item">
+          <div class="ticket-info-label">Total pagado</div>
+          <div class="ticket-info-value" id="ticket-total" style="color:var(--dorado)">—</div>
+        </div>
+        <div class="ticket-info-item">
+          <div class="ticket-info-label">Venue</div>
+          <div class="ticket-info-value">Santiago Centro</div>
+        </div>
+      </div>
+      <div class="ticket-actions">
+        <button class="ticket-action-btn" onclick="downloadTicket()">📧 Enviar al email</button>
+        <button class="ticket-action-btn primary" id="ticket-close-btn">LISTO 🔥</button>
+      </div>
+      <p style="font-size:0.65rem;color:#333;text-align:center;margin-top:16px;line-height:1.6">
+        Presenta este QR en la entrada · Solo válido para +18 · No conducir bajo los efectos del alcohol
+      </p>
+    </div>
+  </div>
+</div>
+
+<!-- ══════════════════════════════════════════════
+     HERO
+════════════════════════════════════════════════ -->
+<section id="hero">
+  <div class="hero-bg">
+    <!-- VIDEO BACKGROUND — reemplaza src con tu video real (.mp4 / .webm) -->
+    <!-- Sube el video a la carpeta assets/ y cambia el src -->
+    <video
+      id="hero-video"
+      autoplay muted loop playsinline
+      poster="assets/logo-insignia.png"
+      style="position:absolute;inset:0;width:100%;height:100%;object-fit:cover;opacity:0;transition:opacity 1.5s ease;"
+      oncanplay="this.style.opacity='1'"
+    >
+      <!-- Cuando tengas el video, agrega aquí: -->
+      <!-- <source src="assets/hero-video.mp4" type="video/mp4"> -->
+      <!-- <source src="assets/hero-video.webm" type="video/webm"> -->
+    </video>
+    <!-- Luces animadas CSS (activas mientras no hay video) -->
+    <div class="hero-lights"><div class="hero-light-3"></div></div>
+  </div>
+  <!-- Overlay que difumina el video: oscurece + blur suave -->
+  <div class="hero-overlay" style="backdrop-filter:blur(1px);-webkit-backdrop-filter:blur(1px);"></div>
+  <div class="hero-content">
+    <div style="margin-bottom:32px;">
+      <img src="assets/logo-insignia.png" alt="Fraternidad Campus Central"
+           style="height:140px;object-fit:contain;filter:drop-shadow(0 0 40px rgba(232,54,61,0.3));" />
+    </div>
+    <div class="hero-pill">Santiago de Chile · Desde 2013</div>
+    <h1 class="hero-title">
+      TU CAMPUS<br/>
+      <span class="accent">CENTRAL</span><br/>
+      DEL CARRETE
+    </h1>
+    <p class="hero-subtitle">Reggaeton · Afrobeats · Urban Hits · Trap · Guaracha · Dembow</p>
+    <div class="hero-ctas">
+      <button onclick="openTicketsPopup()" class="btn-hero-primary">🎟️ COMPRAR TICKETS</button>
+      <a href="#eventos" class="btn-hero-secondary">PRÓXIMOS EVENTOS</a>
+    </div>
+  </div>
+  <div class="hero-scroll">
+    <div class="hero-scroll-line"></div>
+    Scroll
+  </div>
+</section>
+
+<!-- ══════════════════════════════════════════════
+     EVENTOS
+════════════════════════════════════════════════ -->
+<section id="eventos">
+  <div class="section-inner">
+    <div class="section-label reveal">Esta semana en Frate</div>
+    <h2 class="section-title reveal">PRÓXIMOS<br/><span class="gold">EVENTOS</span></h2>
+    <div class="eventos-filters reveal">
+      <button class="filter-btn active" data-filter="Todos">Todos</button>
+      <button class="filter-btn" data-filter="Viernes">Viernes</button>
+      <button class="filter-btn" data-filter="Sábado">Sábado</button>
+      <button class="filter-btn" data-filter="Especiales">Especiales</button>
+    </div>
+    <div class="eventos-grid" id="eventos-grid"></div>
+    <div class="eventos-footer reveal">
+      <button class="btn-dorado" style="display:inline-block;max-width:320px;border:none;cursor:pointer;width:100%;padding:16px;"
+              onclick="showToast('Próximamente — calendario completo 📅')">
+        VER TODOS LOS EVENTOS
+      </button>
+    </div>
+  </div>
+</section>
+
+<!-- ══════════════════════════════════════════════
+     AMBIENTES
+════════════════════════════════════════════════ -->
+<section id="ambientes">
+  <div class="section-inner">
+    <div class="section-label reveal">El venue</div>
+    <h2 class="section-title reveal">TRES MUNDOS.<br/>UNA NOCHE.</h2>
+    <div class="ambientes-grid" id="ambientes-grid"></div>
+  </div>
+</section>
+
+<!-- ══════════════════════════════════════════════
+     RESERVAS
+════════════════════════════════════════════════ -->
+<section id="reservas">
+  <div class="section-inner">
+    <div class="section-label reveal">Servicios especiales</div>
+    <h2 class="section-title reveal">RESERVA<br/><span class="gold">TU NOCHE</span></h2>
+    <p class="reveal" style="color:var(--gris);font-size:0.95rem;max-width:600px;margin-bottom:48px;line-height:1.8">
+      Vive Frate al máximo. Selecciona el servicio que necesitas y te contactamos para armar tu noche perfecta.
+    </p>
+    <div class="reservas-opciones-grid reveal">
+      <div class="reserva-opcion-card" onclick="openReservaPopup('vip')">
+        <div class="reserva-opcion-card-emoji">👑</div>
+        <div class="reserva-opcion-card-nombre">RESERVAS & MESA VIP</div>
+        <div class="reserva-opcion-card-desc">Tu mesa, tu espacio, acceso prioritario y atención personalizada toda la noche.</div>
+        <div class="reserva-opcion-card-arrow">Solicitar →</div>
+      </div>
+      <div class="reserva-opcion-card" onclick="openReservaPopup('cumple')">
+        <div class="reserva-opcion-card-emoji">🎂</div>
+        <div class="reserva-opcion-card-nombre">CUMPLEAÑOS ESPECIAL</div>
+        <div class="reserva-opcion-card-desc">Celebra tu noche más importante en la pista más famosa de Chile.</div>
+        <div class="reserva-opcion-card-arrow">Solicitar →</div>
+      </div>
+      <div class="reserva-opcion-card" onclick="openReservaPopup('grupo')">
+        <div class="reserva-opcion-card-emoji">🎓</div>
+        <div class="reserva-opcion-card-nombre">GRUPO UNIVERSITARIO</div>
+        <div class="reserva-opcion-card-desc">Tarifas especiales para grupos de 10+ de tu carrera o facultad.</div>
+        <div class="reserva-opcion-card-arrow">Solicitar →</div>
+      </div>
+      <div class="reserva-opcion-card" onclick="openReservaPopup('convenio')">
+        <div class="reserva-opcion-card-emoji">🤝</div>
+        <div class="reserva-opcion-card-nombre">FRAT & FRIENDS</div>
+        <div class="reserva-opcion-card-desc">Convenios con universidades, centros de estudiantes y comunidades organizadas.</div>
+        <div class="reserva-opcion-card-arrow">Solicitar →</div>
+      </div>
+      <div class="reserva-opcion-card" onclick="openReservaPopup('despedida')" style="grid-column: 1 / -1;">
+        <div style="display:flex;align-items:center;gap:16px;flex-wrap:wrap;">
+          <div class="reserva-opcion-card-emoji">💍</div>
+          <div>
+            <div class="reserva-opcion-card-nombre">DESPEDIDAS DE SOLTER@S</div>
+            <div class="reserva-opcion-card-desc">La despedida que no se va a olvidar. Frate pone el ambiente y la energía.</div>
+          </div>
+          <div class="reserva-opcion-card-arrow" style="margin-left:auto">Solicitar →</div>
+        </div>
+      </div>
+    </div>
+    <a href="https://wa.me/56912345678?text=Hola%20Frate%2C%20quiero%20hacer%20una%20reserva" target="_blank"
+       class="reservas-whatsapp reveal" style="margin-top:32px;max-width:400px">
+      <span class="reservas-whatsapp-icon">💬</span>
+      <div>
+        <div class="reservas-whatsapp-text">Contactar directo por WhatsApp</div>
+        <div style="font-size:0.75rem;color:var(--gris)">Respuesta rápida · Lun–Sáb 14:00–02:00</div>
+      </div>
+    </a>
+  </div>
+</section>
+
+<!-- ══════════════════════════════════════════════
+     GALERÍA
+════════════════════════════════════════════════ -->
+<section id="galeria">
+  <div class="section-inner">
+    <div style="display:flex;align-items:flex-end;justify-content:space-between;margin-bottom:32px;flex-wrap:wrap;gap:16px">
+      <div>
+        <div class="section-label reveal">Momentos que no se olvidan</div>
+        <h2 class="section-title reveal" style="margin-bottom:0">ASÍ SE<br/>VIVE EN<br/><span class="gold">FRATE</span></h2>
+      </div>
+        <a href="https://www.instagram.com/fraternidadcampuscentral/" target="_blank" class="btn-dorado reveal" style="display:inline-block;max-width:260px">@fraternidadcampuscentral</a>
+    </div>
+    <div class="galeria-filters reveal">
+      <button class="filter-btn galeria-filter-btn active" data-filter="Todos">Todos</button>
+      <button class="filter-btn galeria-filter-btn" data-filter="Fuego">Fuego</button>
+      <button class="filter-btn galeria-filter-btn" data-filter="Aire">Aire</button>
+      <button class="filter-btn galeria-filter-btn" data-filter="Tierra">Tierra (Terraza)</button>
+    </div>
+    <div class="galeria-grid" id="galeria-grid"></div>
+  </div>
+</section>
+
+<!-- ══════════════════════════════════════════════
+     WEBEUM
+════════════════════════════════════════════════ -->
+<section id="webeum">
+  <div class="section-inner">
+    <div class="webeum-header">
+      <div>
+        <div class="section-label reveal">Serie documental</div>
+        <h2 class="section-title reveal" style="margin-bottom:8px">WEBEUM<br/><span style="color:var(--rojo)">HUMANUM EST</span></h2>
+        <p class="reveal" style="color:var(--gris);font-size:0.9rem;max-width:500px">
+          Documentamos cada noche. Guardamos cada momento.
+        </p>
+      </div>
+      <a href="https://youtube.com/@fratecc" target="_blank" class="btn-dorado reveal" style="display:inline-block;max-width:200px;flex-shrink:0">VER EN YT</a>
+    </div>
+    <div class="webeum-grid" id="webeum-grid"></div>
+  </div>
+</section>
+
+<!-- ══════════════════════════════════════════════
+     LA TIENDITA
+════════════════════════════════════════════════ -->
+<section id="tiendita">
+  <div class="section-inner">
+    <div style="display:flex;align-items:flex-end;justify-content:space-between;margin-bottom:40px;flex-wrap:wrap;gap:16px;">
+      <div>
+        <div class="section-label reveal">Merch oficial</div>
+        <h2 class="section-title reveal" style="margin-bottom:0;">LA<br/><span class="gold">TIENDITA</span></h2>
+      </div>
+      <button class="btn-dorado reveal" onclick="openCart()" style="border:none;cursor:pointer;max-width:200px;padding:14px 24px;font-family:'Barlow Condensed',sans-serif;font-weight:900;font-size:0.9rem;letter-spacing:2px;text-transform:uppercase;border-radius:2px;background:transparent;color:var(--dorado);border:1px solid var(--dorado);">
+        🛍️ VER CARRITO
+      </button>
+    </div>
+    <div class="tiendita-grid" id="tiendita-grid"></div>
+  </div>
+</section>
+
+<!-- ══════════════════════════════════════════════
+     CARTA
+════════════════════════════════════════════════ -->
+<section id="carta">
+  <div class="section-inner">
+    <div style="margin-bottom:40px;">
+      <div class="section-label reveal">Pre-compra en barra</div>
+      <h2 class="section-title reveal" style="margin-bottom:8px;">CARTA<br/><span class="gold">DE TRAGOS</span></h2>
+      <p class="reveal" style="color:var(--gris);font-size:0.9rem;max-width:500px;line-height:1.7;">
+        Compra tus tragos antes de llegar. Los retiras directo en la barra con tu QR — sin filas, sin esperas.
+      </p>
+    </div>
+    <div id="carta-container"></div>
+  </div>
+</section>
+
+<!-- ══════════════════════════════════════════════
+     CÓMO LLEGAR
+════════════════════════════════════════════════ -->
+<section id="como-llegar" style="background:var(--negro-2);padding:80px 0;">
+  <div class="section-inner" style="text-align:center;">
+    <div class="section-label reveal">Estamos en Bellavista</div>
+    <h2 class="section-title reveal" style="margin-bottom:8px;">CÓMO<br/><span class="gold">LLEGAR</span></h2>
+    <p class="reveal" style="color:var(--gris);font-size:0.95rem;max-width:500px;margin:0 auto 40px;line-height:1.7">
+      Pío Nono #430, Recoleta · A pasos del Cerro San Cristóbal, el funicular y el Zoológico de Santiago.
+    </p>
+    <!-- BIG NAV BUTTON -->
+    <div class="reveal" style="display:flex;gap:16px;justify-content:center;flex-wrap:wrap;margin-bottom:40px;">
+      <a href="https://waze.com/ul?ll=-33.4301594,-70.6364008&navigate=yes" target="_blank"
+         style="display:inline-flex;align-items:center;gap:12px;background:var(--rojo);color:#fff;padding:20px 40px;font-family:'Barlow Condensed',sans-serif;font-weight:900;font-size:1.3rem;letter-spacing:3px;text-transform:uppercase;text-decoration:none;border-radius:2px;transition:all 0.3s;position:relative;overflow:hidden;">
+        🚗 VEN A CASA · WAZE
+      </a>
+      <a href="https://www.google.com/maps/dir/?api=1&destination=Pi%C3%B3+Nono+430,+Recoleta,+Santiago" target="_blank"
+         style="display:inline-flex;align-items:center;gap:12px;background:transparent;color:var(--blanco);border:1px solid rgba(240,237,232,0.3);padding:20px 40px;font-family:'Barlow Condensed',sans-serif;font-weight:900;font-size:1.3rem;letter-spacing:3px;text-transform:uppercase;text-decoration:none;border-radius:2px;transition:all 0.3s;">
+        📍 GOOGLE MAPS
+      </a>
+    </div>
+    <!-- Mapa embed visual -->
+    <div class="reveal" style="max-width:700px;margin:0 auto;border:1px solid #1a1a1c;border-radius:2px;overflow:hidden;">
+      <iframe
+        src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3329.2!2d-70.6364008!3d-33.4301594!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x9662c59055236311%3A0x4be2a359e4358894!2sP%C3%ADo%20Nono%20430%2C%20Recoleta!5e0!3m2!1ses!2scl!4v1714000000000"
+        width="100%" height="300" style="border:0;display:block;filter:grayscale(1) invert(0.85) contrast(1.1);"
+        allowfullscreen="" loading="lazy" referrerpolicy="no-referrer-when-downgrade">
+      </iframe>
+    </div>
+    <div class="reveal" style="margin-top:20px;display:flex;gap:24px;justify-content:center;flex-wrap:wrap;font-size:0.75rem;color:var(--gris);">
+      <span>🚇 Metro Baquedano (5 min caminando)</span>
+      <span>🦁 Al lado del Zoológico de Santiago</span>
+      <span>⛰️ Acceso al Cerro San Cristóbal</span>
+      <span>🌙 Barrio Bellavista nocturno</span>
+    </div>
+  </div>
+</section>
+
+<!-- ══════════════════════════════════════════════
+     SOBRE NOSOTROS
+════════════════════════════════════════════════ -->
+<section id="sobre">
+  <div class="section-inner">
+    <div class="sobre-layout">
+      <div class="sobre-text">
+        <div class="section-label reveal">Quiénes somos</div>
+        <h2 class="section-title reveal">DESDE 2013,<br/>HACEMOS<br/><span class="gold">HISTORIA</span></h2>
+        <p class="reveal reveal-delay-1">
+          Fraternidad Campus Central es la discoteca de música urbana más antigua de Chile.
+          Nacimos en el corazón del <strong style="color:var(--blanco)">Barrio Bellavista</strong>,
+          el barrio bohemio más antiguo de Santiago, a pasos del Cerro San Cristóbal,
+          el funicular y el Zoológico Metropolitano.
+        </p>
+        <p class="reveal reveal-delay-2">
+          Cada fin de semana, de jueves a sábado, recibimos entre 2.500 y 3.000 personas.
+          Artistas internacionales como Jason Derulo, Jowell &amp; Randy, Bad Gyal, Álvaro Díaz
+          y más de 40 artistas extranjeros han pisado esta pista. Sellos como Sony y Rimas
+          confían en nosotros para lanzar productos y traer artistas.
+        </p>
+        <p class="reveal reveal-delay-3">
+          Somos el punto de encuentro y la banda sonora de historias, amores y amistades
+          de varias generaciones. ¿Y tú pisaste la pista más famosa de Chile?
+        </p>
+        <p class="reveal reveal-delay-4" style="color:var(--dorado)">
+          Lo que pasa en Frate, se queda en Frate.
+        </p>
+      </div>
+      <div id="stats-grid" class="stats-grid"></div>
+    </div>
+  </div>
+</section>
+
+<!-- ══════════════════════════════════════════════
+     FOOTER
+════════════════════════════════════════════════ -->
+<footer id="footer">
+  <div class="footer-inner">
+    <div class="footer-top">
+      <div>
+        <img src="assets/logo-insignia.png" alt="Fraternidad Campus Central"
+             style="height:80px;object-fit:contain;margin-bottom:16px;display:block;" />
+        <p class="footer-tagline">La discoteca urbana más antigua de Chile</p>
+        <p style="font-size:0.75rem;color:#555;margin-bottom:20px;line-height:1.6">Barrio Bellavista · Al lado del Cerro San Cristóbal</p>
+        <div class="footer-socials">
+          <a href="https://www.instagram.com/fraternidadcampuscentral/" target="_blank" class="footer-social" aria-label="Instagram">IG</a>
+          <a href="https://www.youtube.com/@fraternidadcampuscentral" target="_blank" class="footer-social" aria-label="YouTube">YT</a>
+          <a href="https://www.facebook.com/fraternidadclub" target="_blank" class="footer-social" aria-label="Facebook">FB</a>
+        </div>
+      </div>
+      <div>
+        <div class="footer-col-title">Navegar</div>
+        <ul class="footer-links">
+          <li><a href="#eventos">Eventos</a></li>
+          <li><a href="#ambientes">Ambientes</a></li>
+          <li><a href="#reservas">Reservas</a></li>
+          <li><a href="#webeum">WEBEUM</a></li>
+          <li><a href="#sobre">Nosotros</a></li>
+        </ul>
+      </div>
+      <div>
+        <div class="footer-col-title">Tickets & Reservas</div>
+        <ul class="footer-links">
+          <li><a href="#" onclick="openCart();return false;">🎟️ Mi carrito</a></li>
+          <li><a href="#" onclick="openReservaPopup('vip');return false;">Mesa VIP</a></li>
+          <li><a href="#" onclick="openReservaPopup('cumple');return false;">Cumpleaños</a></li>
+          <li><a href="#" onclick="openReservaPopup('grupo');return false;">Grupos Univ.</a></li>
+          <li><a href="#" onclick="openReservaPopup('despedida');return false;">Despedidas</a></li>
+        </ul>
+      </div>
+      <div>
+        <div class="footer-col-title">Ubicación</div>
+        <div class="footer-info">
+          <p><strong>Pío Nono #430</strong><br/>Recoleta, Región Metropolitana<br/>CP: 8420541</p>
+          <br/>
+          <a href="https://www.google.com/maps/place/P%C3%ADo+Nono+430,+8420541+Santiago" target="_blank"
+             style="color:var(--rojo);font-size:0.8rem;text-decoration:none;">
+            Ver en Google Maps →
+          </a>
+          <br/><br/>
+          <!-- Botones de navegación -->
+          <div style="display:flex;flex-direction:column;gap:8px;margin-top:8px;">
+            <a href="https://waze.com/ul?ll=-33.4301594,-70.6364008&navigate=yes" target="_blank"
+               style="display:flex;align-items:center;gap:8px;background:rgba(0,168,84,0.1);border:1px solid rgba(0,168,84,0.3);color:#00a854;padding:8px 12px;border-radius:2px;text-decoration:none;font-size:0.75rem;font-weight:600;transition:all 0.3s;">
+              🚗 Navegar con Waze
+            </a>
+            <a href="https://www.google.com/maps/dir/?api=1&destination=Pi%C3%B3+Nono+430,+Recoleta" target="_blank"
+               style="display:flex;align-items:center;gap:8px;background:rgba(66,133,244,0.1);border:1px solid rgba(66,133,244,0.3);color:#4285f4;padding:8px 12px;border-radius:2px;text-decoration:none;font-size:0.75rem;font-weight:600;transition:all 0.3s;">
+              📍 Abrir en Google Maps
+            </a>
+          </div>
+          <br/><br/>
+          <p><strong>Horarios</strong><br/>Jue–Sáb desde 23:00 hrs</p>
+          <br/>
+          <p><strong>Contacto</strong><br/>
+            <a href="https://www.instagram.com/fraternidadcampuscentral/" target="_blank"
+               style="color:var(--gris);text-decoration:none;">@fraternidadcampuscentral</a>
+          </p>
+        </div>
+      </div>
+    </div>
+    <div class="footer-bottom">
+      <p class="footer-copy">© 2025 Fraternidad Campus Central · frate.cl · Pío Nono #430, Recoleta</p>
+      <div class="footer-age">
+        <span class="footer-age-badge">+18</span>
+        No conducir bajo los efectos del alcohol
+      </div>
+    </div>
+  </div>
+</footer>
+
+<!-- Floating CTA -->
+<div id="floating-cta">
+  <button onclick="openCart()" class="btn-rojo" style="border:none;cursor:pointer;padding:14px 28px;font-size:0.85rem;font-family:'Barlow Condensed',sans-serif;font-weight:900;letter-spacing:2px;text-transform:uppercase;">
+    🎟️ CARRITO
+    <span id="floating-count" style="margin-left:8px;background:rgba(0,0,0,0.3);padding:2px 8px;border-radius:20px;font-size:0.75rem;"></span>
+  </button>
+</div>
+
+<!-- ══════════════════════════════════════════════
+     EVENT DETAIL POPUP
+════════════════════════════════════════════════ -->
+<div class="frate-popup" id="event-popup">
+  <div class="popup-box" style="max-width:620px">
+    <button class="popup-close-btn" id="ep-close">✕</button>
+    <div class="ep-hero">
+      <div class="ep-hero-bg"></div>
+      <div class="ep-hero-light"></div>
+      <div class="ep-hero-content">
+        <div class="ep-evento-tag">Próximo evento · frate.cl</div>
+        <div class="ep-evento-nombre" id="ep-nombre">NOMBRE EVENTO</div>
+      </div>
+    </div>
+    <div class="ep-body">
+      <div class="ep-meta-row">
+        <div class="ep-meta-item">
+          <span class="ep-meta-label">Fecha y hora</span>
+          <span class="ep-meta-value" id="ep-fecha">—</span>
+        </div>
+        <div class="ep-meta-item">
+          <span class="ep-meta-label">Lineup</span>
+          <span class="ep-meta-value" id="ep-djs">—</span>
+        </div>
+        <div class="ep-meta-item">
+          <span class="ep-meta-label">Ambiente</span>
+          <span class="ep-meta-value" id="ep-ambiente">—</span>
+        </div>
+      </div>
+
+      <div class="ep-precios">
+        <div class="ep-precio-card anticipada">
+          <div class="ep-precio-tipo">Anticipada</div>
+          <div class="ep-precio-valor" id="ep-anticipada">—</div>
+        </div>
+        <div class="ep-precio-card">
+          <div class="ep-precio-tipo">General</div>
+          <div class="ep-precio-valor" id="ep-general">—</div>
+        </div>
+      </div>
+
+      <div class="ep-social-row">
+        <a href="#" id="ep-ig-link" target="_blank" class="ep-social-btn">
+          📸 Instagram
+        </a>
+        <a href="https://www.youtube.com/@fraternidadcampuscentral" target="_blank" class="ep-social-btn">
+          ▶ WEBEUM
+        </a>
+      </div>
+
+      <div id="ep-buy-btns" style="display:flex;gap:10px;flex-wrap:wrap;">
+        <button class="ep-buy-btn" id="ep-open-tickets">🎟️ COMPRAR ENTRADAS</button>
+        <button class="ep-buy-btn secondary" onclick="openReservaPopup('vip');closeEventPopup()">👑 MESA VIP</button>
+      </div>
+
+      <!-- Ticket multi-type selector -->
+      <div id="ep-ticket-section">
+        <button class="ep-back-btn" onclick="showTicketSelector(false)">← Volver</button>
+        <div class="ep-ticket-section-title">Selecciona tus entradas</div>
+        <div id="ep-ticket-types" style="display:flex;flex-direction:column;gap:8px;margin-bottom:16px;"></div>
+        <div style="font-size:0.75rem;color:var(--dorado);text-align:center;margin-bottom:12px;" id="ep-ticket-total"></div>
+        <div class="ep-personas-title">Asigna cada entrada (nombre + RUT requeridos)</div>
+        <div id="ep-personas-list"></div>
+        <button class="ep-confirm-btn" id="ep-confirm-tickets">🎟️ AGREGAR AL CARRITO</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ══════════════════════════════════════════════
+     RESERVA SERVICE POPUP
+════════════════════════════════════════════════ -->
+<div class="frate-popup" id="reserva-popup">
+  <div class="popup-box" style="max-width:540px">
+    <button class="popup-close-btn" id="rp-close">✕</button>
+    <div class="rp-header">
+      <span class="rp-emoji" id="rp-emoji">👑</span>
+      <div class="rp-titulo" id="rp-titulo">RESERVA & MESA VIP</div>
+      <p class="rp-desc" id="rp-desc">Descripción del servicio.</p>
+    </div>
+    <div class="rp-body">
+      <div class="rp-detalles-title">Incluye</div>
+      <ul id="rp-detalles"></ul>
+
+      <div class="rp-form-title">Solicitar servicio</div>
+      <form id="rp-form" class="modal-form" style="gap:14px">
+        <input type="hidden" name="tipo_servicio" id="rp-tipo-hidden" />
+        <div class="form-row">
+          <div class="form-group">
+            <label>Nombre completo</label>
+            <input type="text" name="nombre" placeholder="Tu nombre" required />
+          </div>
+          <div class="form-group">
+            <label>Teléfono</label>
+            <input type="tel" name="telefono" placeholder="+56 9 xxxx xxxx" required />
+          </div>
+        </div>
+        <div class="form-row">
+          <div class="form-group">
+            <label>Fecha deseada</label>
+            <input type="date" name="fecha" style="color-scheme:dark" required />
+          </div>
+          <div class="form-group">
+            <label>N° de personas</label>
+            <input type="number" name="personas" min="1" placeholder="¿Cuántos?" />
+          </div>
+        </div>
+        <div class="form-group">
+          <label>Mensaje adicional</label>
+          <textarea name="mensaje" placeholder="Cuéntanos más detalles de tu evento..."></textarea>
+        </div>
+        <button type="submit" class="btn-rojo" style="width:100%;padding:16px;border:none;cursor:pointer;font-family:'Barlow Condensed',sans-serif;font-weight:900;font-size:1.1rem;letter-spacing:3px;text-transform:uppercase;border-radius:2px;background:var(--rojo);color:#fff;transition:background 0.3s;">
+          💬 ENVIAR POR WHATSAPP
+        </button>
+        <p style="font-size:0.7rem;color:#444;text-align:center;">Te contactamos en menos de 24 hrs · Lun–Sáb 14:00–02:00</p>
+      </form>
+    </div>
+  </div>
+</div>
+
+<!-- ══════════════════════════════════════════════
+     TICKETS POPUP (desde botón hero)
+════════════════════════════════════════════════ -->
+<div class="frate-popup" id="tickets-popup">
+  <div class="popup-box" style="max-width:640px">
+    <button class="popup-close-btn" id="tickets-popup-close">✕</button>
+    <div style="background:var(--negro);padding:28px 28px 20px;border-bottom:1px solid #1a1a1c;">
+      <div style="font-size:0.6rem;letter-spacing:4px;text-transform:uppercase;color:var(--rojo);margin-bottom:8px;">Esta semana en Frate</div>
+      <div style="font-family:'Barlow Condensed',sans-serif;font-weight:900;font-size:2rem;color:var(--blanco);line-height:1;">ELIGE TU NOCHE 🎟️</div>
+    </div>
+    <div style="padding:20px;display:flex;flex-direction:column;gap:8px;max-height:60vh;overflow-y:auto;" id="tickets-popup-list"></div>
+    <div style="padding:16px 20px;border-top:1px solid #1a1a1c;text-align:center;">
+      <a href="#eventos" onclick="closeTicketsPopup()" style="font-size:0.75rem;color:var(--gris);letter-spacing:2px;text-transform:uppercase;text-decoration:none;">
+        Ver todos los eventos →
+      </a>
+    </div>
+  </div>
+</div>
+
+<!-- ══════════════════════════════════════════════
+     MI CUENTA PANEL
+════════════════════════════════════════════════ -->
+<div class="cuenta-backdrop" id="cuenta-backdrop"></div>
+<div class="cuenta-panel" id="cuenta-panel">
+  <div class="cuenta-header">
+    <div class="cuenta-avatar" id="cuenta-avatar">U</div>
+    <div>
+      <div class="cuenta-user-name" id="cuenta-user-name">—</div>
+      <div class="cuenta-user-email" id="cuenta-user-email">—</div>
+    </div>
+    <div class="cuenta-puntos-badge" id="cuenta-puntos">0 pts</div>
+    <button class="cuenta-close" id="cuenta-close-btn">✕</button>
+  </div>
+  <div class="cuenta-tabs">
+    <button class="cuenta-tab active" data-tab="perfil">Perfil</button>
+    <button class="cuenta-tab" data-tab="tickets">Mis Tickets</button>
+    <button class="cuenta-tab" data-tab="puntos">Puntos</button>
+    <button class="cuenta-tab" data-tab="promos">Promos</button>
+    <button class="cuenta-tab" data-tab="membresia">Membresía</button>
+  </div>
+  <div class="cuenta-body">
+
+    <!-- PERFIL -->
+    <div class="cuenta-tab-panel" id="cuenta-panel-perfil">
+      <div class="cuenta-section-title">Mis datos</div>
+      <div class="profile-grid">
+        <div class="profile-field full"><label>Nombre completo</label><input type="text" id="cp-nombre" placeholder="Tu nombre" /></div>
+        <div class="profile-field"><label>RUT</label><input type="text" id="cp-rut" class="rut-field" placeholder="12.345.678-9" /></div>
+        <div class="profile-field"><label>Teléfono</label><input type="tel" id="cp-tel" class="tel-field" placeholder="+569 " /></div>
+        <div class="profile-field full"><label>Email</label><input type="email" id="cp-email" readonly style="opacity:0.6;cursor:not-allowed;" /></div>
+        <div class="profile-field">
+          <label>Universidad</label>
+          <select id="cp-univ">
+            <option value="">Selecciona</option>
+            <option>Universidad de Chile</option><option>PUC</option><option>USACH</option>
+            <option>UDP</option><option>UNAB</option><option>UTEM</option>
+            <option>Universidad Central</option><option>UAH</option><option>Otra</option>
+          </select>
+        </div>
+        <div class="profile-field"><label>Carrera</label><input type="text" id="cp-carrera" placeholder="Tu carrera" /></div>
+      </div>
+      <div class="promo-toggle-row">
+        <div class="promo-toggle-text">
+          <div class="promo-toggle-label">Recibir promociones</div>
+          <div class="promo-toggle-sub">Newsletter, descuentos y eventos exclusivos</div>
+        </div>
+        <label class="toggle-switch">
+          <input type="checkbox" id="toggle-promos" checked />
+          <span class="toggle-slider"></span>
+        </label>
+      </div>
+      <div class="promo-toggle-row">
+        <div class="promo-toggle-text">
+          <div class="promo-toggle-label">Notificaciones de eventos</div>
+          <div class="promo-toggle-sub">Aviso cuando hay nuevos eventos disponibles</div>
+        </div>
+        <label class="toggle-switch">
+          <input type="checkbox" id="toggle-eventos" checked />
+          <span class="toggle-slider"></span>
+        </label>
+      </div>
+      <button id="save-perfil-btn" class="btn-rojo" style="width:100%;margin-top:20px;border:none;cursor:pointer;padding:14px;font-family:'Barlow Condensed',sans-serif;font-weight:900;font-size:1rem;letter-spacing:2px;text-transform:uppercase;border-radius:2px;">
+        GUARDAR CAMBIOS
+      </button>
+      <button onclick="Storage.del('frate_session');closeCuenta();updateNavUser();showToast('Sesión cerrada');" style="width:100%;margin-top:10px;background:none;border:1px solid #2a2a2c;color:var(--gris);padding:12px;font-family:var(--fuente-body);cursor:pointer;border-radius:2px;font-size:0.8rem;">
+        Cerrar sesión
+      </button>
+    </div>
+
+    <!-- MIS TICKETS -->
+    <div class="cuenta-tab-panel" id="cuenta-panel-tickets" style="display:none">
+      <div class="cuenta-section-title">Historial de compras</div>
+      <div id="historial-tickets-list"></div>
+    </div>
+
+    <!-- PUNTOS -->
+    <div class="cuenta-tab-panel" id="cuenta-panel-puntos" style="display:none">
+      <div class="puntos-card">
+        <div class="puntos-valor" id="puntos-valor">0</div>
+        <div class="puntos-label">Frate Points</div>
+        <div class="puntos-equiv">100 pts = $1.000 de descuento en tu próxima compra</div>
+      </div>
+      <div class="cuenta-section-title">Historial de puntos</div>
+      <div class="puntos-history" id="puntos-history-list"></div>
+    </div>
+
+    <!-- PROMOS -->
+    <div class="cuenta-tab-panel" id="cuenta-panel-promos" style="display:none">
+      <div class="cuenta-section-title">Promociones del mes</div>
+      <div class="promo-banner">
+        <div class="promo-banner-icon">🔥</div>
+        <div class="promo-banner-text">
+          <div class="promo-banner-titulo">2x1 JUEVES DE MAYO</div>
+          <div class="promo-banner-desc">Compra 2 anticipadas y la segunda es al precio de boleto general</div>
+        </div>
+        <button class="promo-banner-cta" onclick="openTicketsPopup()">Usar</button>
+      </div>
+      <div class="promo-banner">
+        <div class="promo-banner-icon">🎓</div>
+        <div class="promo-banner-text">
+          <div class="promo-banner-titulo">DESCUENTO UNIVERSIDAD</div>
+          <div class="promo-banner-desc">-20% en todos los viernes de mayo con credencial universitaria</div>
+        </div>
+        <button class="promo-banner-cta" onclick="showToast('Promo activa — aplica automáticamente')">Ver más</button>
+      </div>
+      <div class="promo-banner" style="background:linear-gradient(90deg,rgba(212,168,50,0.15),var(--negro-3));border-color:rgba(212,168,50,0.3);">
+        <div class="promo-banner-icon">👑</div>
+        <div class="promo-banner-text">
+          <div class="promo-banner-titulo">MIEMBRO VIP — ACCESO ANTICIPADO</div>
+          <div class="promo-banner-desc">Suscriptores VIP pueden comprar 48hrs antes que el público general</div>
+        </div>
+        <button class="promo-banner-cta" onclick="showCuentaTab('membresia')" style="background:var(--dorado);color:var(--negro);">Ver</button>
+      </div>
+    </div>
+
+    <!-- MEMBRESÍA -->
+    <div class="cuenta-tab-panel" id="cuenta-panel-membresia" style="display:none">
+      <div class="cuenta-section-title">Elige tu membresía</div>
+      <div id="membresias-list"></div>
+    </div>
+
+  </div>
+</div>
+
+<!-- ══════════════════════════════════════════════
+     TIENDITA PRODUCT POPUP
+════════════════════════════════════════════════ -->
+<div class="frate-popup" id="tienda-popup">
+  <div class="popup-box" style="max-width:480px">
+    <button class="popup-close-btn" id="tp-close">✕</button>
+    <div style="padding:28px;border-bottom:1px solid #1a1a1c;">
+      <div class="ep-evento-tag" id="tp-categoria">Ropa</div>
+      <div style="font-family:var(--fuente-display);font-weight:900;font-size:1.8rem;color:var(--blanco);margin-bottom:8px;" id="tp-nombre">—</div>
+      <div style="font-size:0.85rem;color:var(--gris);line-height:1.6;margin-bottom:16px;" id="tp-desc">—</div>
+      <div style="font-family:var(--fuente-display);font-weight:900;font-size:2rem;color:var(--dorado);" id="tp-precio">—</div>
+    </div>
+    <div style="padding:24px;">
+      <div style="font-size:0.65rem;letter-spacing:3px;text-transform:uppercase;color:var(--gris);margin-bottom:8px;">Talla</div>
+      <div class="tiendita-selector" id="tp-tallas"></div>
+      <div style="font-size:0.65rem;letter-spacing:3px;text-transform:uppercase;color:var(--gris);margin:16px 0 8px;">Color</div>
+      <div class="tiendita-selector" id="tp-colores"></div>
+      <div style="display:flex;align-items:center;gap:12px;margin:20px 0 16px;">
+        <span style="font-size:0.65rem;letter-spacing:2px;text-transform:uppercase;color:var(--gris);">Cantidad</span>
+        <button class="qty-btn" id="tp-qty-down">−</button>
+        <span class="qty-num" id="tp-qty">1</span>
+        <button class="qty-btn" id="tp-qty-up">+</button>
+      </div>
+      <button class="btn-rojo" id="tp-add-cart-btn" onclick="addTiendaToCart()" style="width:100%;border:none;cursor:pointer;padding:14px;font-family:'Barlow Condensed',sans-serif;font-weight:900;font-size:1rem;letter-spacing:2px;text-transform:uppercase;border-radius:2px;">
+        🛍️ AGREGAR AL CARRITO
+      </button>
+    </div>
+  </div>
+</div>
+
+<script src="frate-data.js"></script>
+<script src="frate-supabase.js"></script>
+<script src="frate-app.js"></script>
+<script src="frate-cart.js"></script>
+<script src="frate-popups.js"></script>
+<script src="frate-cuenta.js"></script>
+<script>
+// ── Override initAmbientes con datos correctos (FUEGO/AIRE/TIERRA) ──
+function initAmbientes() {
+  const data = [
+    { id: "fuego", nombre: "FUEGO", descripcion: "El corazón del carrete. Reggaeton, urbano e internacional en su máxima expresión.", musica: "Reggaeton · Urban & World Hits · Trap", capacidad: "350 personas", color_acento: "#E8363D" },
+    { id: "aire",  nombre: "AIRE",  descripcion: "El espacio donde suena lo nuestro. Nacional hits, afrobeats y música chilena.", musica: "Nacional Hits · Afrobeats · Música Chilena", capacidad: "200 personas", color_acento: "#D4A832" },
+    { id: "tierra",nombre: "TIERRA",descripcion: "La terraza de la casita. Bajo las estrellas de Bellavista.", musica: "Ambient · Guaracha · Dembow", capacidad: "150 personas", color_acento: "#8B1A1E" }
+  ];
+  const grid = document.getElementById('ambientes-grid');
+  if (!grid) return;
+  grid.innerHTML = data.map((a, i) => `
+    <div class="ambiente-card reveal reveal-delay-${i+1}">
+      <div class="ambiente-placeholder" style="background:${a.id==='fuego'?'#0e0608':a.id==='aire'?'#060a0e':'#060c0a'};min-height:420px;">
+        <span style="font-size:0.7rem;color:#2a2a2c;z-index:1;position:relative">foto ${a.nombre.toLowerCase()}</span>
+      </div>
+      <div class="ambiente-overlay">
+        <div class="ambiente-musica">${a.musica}</div>
+        <div class="ambiente-nombre">${a.nombre}</div>
+        <div class="ambiente-desc">${a.descripcion}</div>
+        <div class="ambiente-capacidad">${a.capacidad}</div>
+      </div>
+    </div>
+  `).join('');
+  initReveal();
+}
+
+// ── Fix FRATE_EVENTOS ambiente names ──
+function fixEventoAmbientes() {
+  if (typeof FRATE_EVENTOS === 'undefined') return;
+  const map = { 'Barra Fuego':'Fuego', 'Barra Aire':'Aire', 'Barra Schop':'Tierra' };
+  const tiposDefecto = {
+    1: [
+      { id:"tt-1-1", nombre:"Pre-Venta MUJER", descripcion:"Exclusivo para mujeres. Presenta C.I. al ingreso.", precio:3000, disponible:80, estado:"Activo", soloWeb:true, maxPorCompra:4 },
+      { id:"tt-1-2", nombre:"Pre-Venta HOMBRE UNIVERSITARIO", descripcion:"Universitarios con C.I. + credencial institución.", precio:4000, disponible:50, estado:"Activo", soloWeb:true, maxPorCompra:4 },
+      { id:"tt-1-3", nombre:"General", descripcion:"Entrada general sin restricción.", precio:5000, disponible:100, estado:"Activo", soloWeb:true, maxPorCompra:6 }
+    ],
+    2: [
+      { id:"tt-2-1", nombre:"Pre-Venta PRO MUJER", descripcion:"Mejor precio anticipado para mujeres.", precio:4000, disponible:104, estado:"Activo", soloWeb:true, maxPorCompra:6 },
+      { id:"tt-2-2", nombre:"Pre-Venta REBAJADA MUJER", descripcion:"Precio especial limitado — agotado.", precio:3500, disponible:0, estado:"Agotado", soloWeb:true, maxPorCompra:4 },
+      { id:"tt-2-3", nombre:"Pre-Venta HOMBRE UNIV.", descripcion:"Universitarios con credencial.", precio:5000, disponible:52, estado:"Activo", soloWeb:true, maxPorCompra:4 },
+      { id:"tt-2-4", nombre:"General", descripcion:"Entrada general.", precio:6000, disponible:200, estado:"Activo", soloWeb:true, maxPorCompra:10 }
+    ],
+    3: [
+      { id:"tt-3-1", nombre:"Pre-Venta GRAL. MUJER", descripcion:"Para mujeres. Presenta C.I.", precio:5000, disponible:0, estado:"Agotado", soloWeb:true, maxPorCompra:4 },
+      { id:"tt-3-2", nombre:"Pre-Venta GRAL. HOMBRE UNIV.", descripcion:"Universitarios con credencial.", precio:6000, disponible:7, estado:"Activo", soloWeb:true, maxPorCompra:4 },
+      { id:"tt-3-3", nombre:"General", descripcion:"Entrada general.", precio:7000, disponible:150, estado:"Activo", soloWeb:true, maxPorCompra:6 }
+    ],
+    4: [
+      { id:"tt-4-1", nombre:"Pre-Venta Anticipada", descripcion:"Precio especial preventa.", precio:6000, disponible:80, estado:"Activo", soloWeb:true, maxPorCompra:6 },
+      { id:"tt-4-2", nombre:"General", descripcion:"Entrada general.", precio:8000, disponible:200, estado:"Activo", soloWeb:true, maxPorCompra:10 }
+    ]
+  };
+  FRATE_EVENTOS.forEach(ev => {
+    ev.ambiente = map[ev.ambiente] || ev.ambiente;
+    if (!ev.tiposTicket || !ev.tiposTicket.length) {
+      ev.tiposTicket = tiposDefecto[ev.id] || [];
+    }
+  });
+}
+
+// ── Override FRATE_STATS ──
+function initStats() {
+  const grid = document.getElementById('stats-grid');
+  if (!grid) return;
+  const stats = [
+    { numero:'13', label:'Años de historia' },
+    { numero:'+2.000', label:'Eventos realizados' },
+    { numero:'+2M', label:'Visitantes desde 2013' },
+    { numero:'3', label:'Ambientes únicos' }
+  ];
+  grid.innerHTML = stats.map((s,i) => `
+    <div class="stat-card reveal reveal-delay-${i+1}">
+      <div class="stat-num">${s.numero}</div>
+      <div class="stat-label">${s.label}</div>
+    </div>`).join('');
+  initReveal();
+}
+
+// ── Override initTiendita con datos hardcoded ──
+function initTiendita() {
+  const grid = document.getElementById('tiendita-grid');
+  if (!grid) return;
+  const emojis = { 'Ropa':'👕', 'Accesorios':'🧢', 'Coleccionables':'🎨' };
+  const data = [
+    { id:"t1", nombre:"Polera FRATE Classic", descripcion:"100% algodón. Logo bordado. Tallas S-XXL.", precio:18900, stock:50, categoria:"Ropa", imagen_color:"#1a0a0b", tallas:["S","M","L","XL","XXL"], colores:["Negro","Blanco","Rojo"] },
+    { id:"t2", nombre:"Gorra Snapback FRATE", descripcion:"Bordado insignia. Talla única regulable.", precio:14900, stock:30, categoria:"Accesorios", imagen_color:"#0a0a0b", tallas:["Única"], colores:["Negro","Dorado"] },
+    { id:"t3", nombre:"Hoodie FRATE Premium", descripcion:"Forro polar. Logo grande al pecho.", precio:29900, stock:20, categoria:"Ropa", imagen_color:"#0a0a0b", tallas:["S","M","L","XL"], colores:["Negro"] },
+    { id:"t4", nombre:"Tote Bag FRATE", descripcion:"Tela resistente 100% algodón.", precio:8900, stock:40, categoria:"Accesorios", imagen_color:"#0f0a00", tallas:["Única"], colores:["Natural","Negro"] },
+    { id:"t5", nombre:"Sticker Pack x5", descripcion:"5 stickers premium vinyl. Diseños exclusivos.", precio:3900, stock:100, categoria:"Coleccionables", imagen_color:"#0a0a12", tallas:["Única"], colores:["Multicolor"] },
+    { id:"t6", nombre:"Vaso Térmico FRATE", descripcion:"Acero inoxidable 500ml. Logo grabado.", precio:16900, stock:25, categoria:"Accesorios", imagen_color:"#0a120a", tallas:["Única"], colores:["Negro","Plateado"] }
+  ];
+  grid.innerHTML = data.map(p => `
+    <div class="tiendita-card" onclick="openTiendaPopup('${p.id}')">
+      <div class="tiendita-img" style="background:${p.imagen_color}">
+        <span style="position:relative;z-index:1;font-size:3rem;">${emojis[p.categoria]||'🛍️'}</span>
+      </div>
+      <div class="tiendita-info">
+        <div class="tiendita-categoria">${p.categoria}</div>
+        <div class="tiendita-nombre">${p.nombre}</div>
+        <div class="tiendita-desc">${p.descripcion}</div>
+        <div class="tiendita-precio-row">
+          <div class="tiendita-precio">$${p.precio.toLocaleString('es-CL')}</div>
+          <button class="tiendita-add-btn" onclick="event.stopPropagation();openTiendaPopup('${p.id}')">VER</button>
+        </div>
+      </div>
+    </div>`).join('');
+  // Store data for popup
+  window._tiendaData = data;
+}
+
+// ── Override initCarta con datos hardcoded ──
+function initCarta() {
+  const container = document.getElementById('carta-container');
+  if (!container) return;
+  const data = [
+    { categoria:"Cócteles Firma", items:[
+      { id:"c1", nombre:"Frate Sour", descripcion:"Pisco premium, limón, clara de huevo, hielo.", precio:6500 },
+      { id:"c2", nombre:"Campus Mule", descripcion:"Vodka, jengibre, limón, menta fresca.", precio:6000 },
+      { id:"c3", nombre:"Fuego Picante", descripcion:"Tequila, chile, limón, sal, jugo de tomate.", precio:7000 }
+    ]},
+    { categoria:"Cervezas", items:[
+      { id:"c4", nombre:"Schop Litro", descripcion:"Cerveza artesanal de barril. 1 litro.", precio:5500 },
+      { id:"c5", nombre:"Schop Medio", descripcion:"Cerveza artesanal de barril. 500cc.", precio:3500 },
+      { id:"c6", nombre:"Botella Importada", descripcion:"Selección importada 330cc.", precio:4500 }
+    ]},
+    { categoria:"Shots & Chupitos", items:[
+      { id:"c7", nombre:"Shot Clásico", descripcion:"Vodka, tequila o ron.", precio:2500 },
+      { id:"c8", nombre:"Chupito Frate", descripcion:"Combinación secreta de la casa.", precio:3000 }
+    ]},
+    { categoria:"Sin Alcohol", items:[
+      { id:"c9", nombre:"Jugo Natural", descripcion:"Naranja, maracuyá o piña. 300cc.", precio:2000 },
+      { id:"c10", nombre:"Agua Mineral", descripcion:"Con o sin gas. 500cc.", precio:1500 }
+    ]}
+  ];
+  container.innerHTML = data.map(cat => `
+    <div class="carta-categoria">
+      <div class="carta-cat-title">${cat.categoria}</div>
+      <div class="carta-items-grid">
+        ${cat.items.map(item => `
+          <div class="carta-item">
+            <div class="carta-item-info">
+              <div class="carta-item-nombre">${item.nombre}</div>
+              <div class="carta-item-desc">${item.descripcion}</div>
+            </div>
+            <div class="carta-item-right">
+              <div class="carta-item-precio">$${item.precio.toLocaleString('es-CL')}</div>
+              <button class="carta-add-btn" onclick="addCartaItemDirect('${item.id}','${item.nombre}',${item.precio})" title="Agregar">+</button>
+            </div>
+          </div>`).join('')}
+      </div>
+    </div>`).join('');
+}
+
+function addCartaItemDirect(id, nombre, precio) {
+  const existing = cart.find(c => c.tipo === 'carta' && c.productoId === id);
+  if (existing) existing.cantidad++;
+  else cart.push({ tipo:'carta', productoId:id, nombre, detalle:'Pre-compra en barra', precio, cantidad:1, personas:[] });
+  saveCart(); updateCartBadge(); renderCartItems();
+  showToast('🍹 ' + nombre + ' agregado al carrito');
+}
+
+function openTiendaPopup(prodId) {
+  const data = window._tiendaData || [];
+  const prod = data.find(p => p.id === prodId);
+  if (!prod) return;
+  const popup = document.getElementById('tienda-popup');
+  if (!popup) return;
+  document.getElementById('tp-nombre').textContent = prod.nombre;
+  document.getElementById('tp-categoria').textContent = prod.categoria;
+  document.getElementById('tp-desc').textContent = prod.descripcion;
+  document.getElementById('tp-precio').textContent = '$' + prod.precio.toLocaleString('es-CL');
+  const tallasEl = document.getElementById('tp-tallas');
+  tallasEl.innerHTML = prod.tallas.map(t => `<div class="ts-option" data-talla="${t}" onclick="selectTiendaOpt(this,'talla')">${t}</div>`).join('');
+  if (prod.tallas.length === 1) tallasEl.firstChild?.classList.add('selected');
+  const coloresEl = document.getElementById('tp-colores');
+  coloresEl.innerHTML = prod.colores.map(c => `<div class="ts-option" data-color="${c}" onclick="selectTiendaOpt(this,'color')">${c}</div>`).join('');
+  if (prod.colores.length === 1) coloresEl.firstChild?.classList.add('selected');
+  document.getElementById('tp-qty').textContent = '1';
+  popup.dataset.prodid = prodId;
+  popup.classList.add('open');
+  document.body.style.overflow = 'hidden';
+}
+
+// ── ticket-type card styles (injected) ──
+const ttStyles = document.createElement('style');
+ttStyles.textContent = `.ticket-type-card{background:var(--negro-3);border:1px solid #2a2a2c;border-radius:2px;padding:14px 16px;cursor:pointer;transition:all .2s;}.ticket-type-card:hover{border-color:#555;}.ticket-type-card.agotado{opacity:.5;cursor:not-allowed;}`;
+document.head.appendChild(ttStyles);
+
+// ── Override renderEventos para incluir selector de tickets ──
+function renderEventos(filter) {
+  filter = filter || 'Todos';
+  const grid = document.getElementById('eventos-grid');
+  if (!grid || typeof FRATE_EVENTOS === 'undefined') return;
+  function formatP(n) { return '$' + n.toLocaleString('es-CL'); }
+  const filtered = filter === 'Todos' ? FRATE_EVENTOS : FRATE_EVENTOS.filter(e => e.tipo === filter);
+  grid.innerHTML = filtered.map(ev => {
+    const parts = ev.fecha.split(' ');
+    const diaNom = parts[0], diaNum = parts[1], mes = parts.slice(2).join(' ');
+    return `
+    <div class="evento-card reveal" data-tipo="${ev.tipo}" data-evid="${ev.id}"
+         style="cursor:pointer;" onclick="openEventPopup(${ev.id})">
+      <div class="evento-fecha-block">
+        <div class="evento-dia">${diaNum}</div>
+        <div class="evento-mes">${diaNom}</div>
+        <div class="evento-mes">${mes}</div>
+      </div>
+      <div class="evento-info">
+        <div class="evento-nombre">${ev.nombre}</div>
+        <div class="evento-djs">${ev.djs.join(' · ')}</div>
+        <div class="evento-tags">
+          <span class="evento-tag">${ev.ambiente}</span>
+          <span class="evento-tag">${ev.hora} hrs</span>
+        </div>
+      </div>
+      <div class="evento-precios">
+        <div class="evento-precio-anticipada">Anticipada</div>
+        <div class="evento-precio-valor">${formatP(ev.precio_anticipada)}</div>
+        <button class="btn-ticket" onclick="event.stopPropagation();openEventPopup(${ev.id})">VER INFO →</button>
+      </div>
+    </div>`;
+  }).join('');
+  initReveal();
+}
+
+function openTicketsPopup() {
+  const popup = document.getElementById('tickets-popup');
+  if (!popup) return;
+  const list = document.getElementById('tickets-popup-list');
+  if (list && typeof FRATE_EVENTOS !== 'undefined') {
+    list.innerHTML = FRATE_EVENTOS.map(ev => `
+      <div onclick="closeTicketsPopup();openEventPopup(${ev.id})"
+           style="background:var(--negro-3);border:1px solid #1a1a1c;border-radius:2px;padding:18px 20px;cursor:pointer;display:grid;grid-template-columns:80px 1fr auto;gap:16px;align-items:center;transition:all 0.2s;"
+           onmouseover="this.style.borderColor='#E8363D';this.style.transform='translateX(4px)'"
+           onmouseout="this.style.borderColor='#1a1a1c';this.style.transform='translateX(0)'">
+        <div style="background:var(--negro);padding:12px;text-align:center;border-radius:2px;">
+          <div style="font-family:'Barlow Condensed',sans-serif;font-weight:900;font-size:1.8rem;color:var(--rojo);line-height:1;">${ev.fecha.split(' ')[1]}</div>
+          <div style="font-size:0.6rem;letter-spacing:2px;text-transform:uppercase;color:var(--gris);">${ev.fecha.split(' ')[0]}</div>
+        </div>
+        <div>
+          <div style="font-family:'Barlow Condensed',sans-serif;font-weight:900;font-size:1.3rem;color:var(--blanco);margin-bottom:4px;">${ev.nombre}</div>
+          <div style="font-size:0.75rem;color:var(--gris);margin-bottom:6px;">${ev.djs.join(' · ')}</div>
+          <span style="font-size:0.6rem;letter-spacing:2px;text-transform:uppercase;padding:3px 8px;border:1px solid #333;color:var(--gris);border-radius:2px;">${ev.ambiente}</span>
+        </div>
+        <div style="text-align:right;flex-shrink:0;">
+          <div style="font-size:0.6rem;letter-spacing:2px;color:var(--dorado);margin-bottom:4px;">Anticipada</div>
+          <div style="font-family:'Barlow Condensed',sans-serif;font-weight:900;font-size:1.4rem;color:var(--blanco);">$${ev.precio_anticipada.toLocaleString('es-CL')}</div>
+          <div style="font-size:0.65rem;color:#555;margin-top:2px;">General $${ev.precio_general.toLocaleString('es-CL')}</div>
+        </div>
+      </div>
+    `).join('');
+  }
+  popup.classList.add('open');
+  document.body.style.overflow = 'hidden';
+}
+
+function closeTicketsPopup() {
+  document.getElementById('tickets-popup')?.classList.remove('open');
+  document.body.style.overflow = '';
+}
+
+document.addEventListener('DOMContentLoaded', () => {
+  document.getElementById('tickets-popup-close')?.addEventListener('click', closeTicketsPopup);
+  document.getElementById('tickets-popup')?.addEventListener('click', e => {
+    if (e.target === document.getElementById('tickets-popup')) closeTicketsPopup();
+  });
+});
+
+function addTiendaToCart() {
+  const popup = document.getElementById('tienda-popup');
+  const prodId = popup?.dataset.prodid;
+  const data = window._tiendaData || [];
+  const prod = data.find(p => p.id === prodId);
+  if (!prod) return;
+  const talla = popup.querySelector('.ts-option[data-talla].selected')?.dataset.talla;
+  const color = popup.querySelector('.ts-option[data-color].selected')?.dataset.color;
+  const qty = parseInt(document.getElementById('tp-qty')?.textContent || '1');
+  if (prod.tallas.length > 1 && !talla) { showToast('Selecciona una talla'); return; }
+  if (prod.colores.length > 1 && !color) { showToast('Selecciona un color'); return; }
+  cart.push({ tipo:'merch', productoId:prodId, nombre:prod.nombre, detalle:[talla,color].filter(Boolean).join(' · '), precio:prod.precio, cantidad:qty, personas:[] });
+  saveCart(); updateCartBadge(); renderCartItems();
+  document.getElementById('tienda-popup')?.classList.remove('open');
+  document.body.style.overflow = '';
+  showToast('🛍️ ' + prod.nombre + ' agregado al carrito');
+}
+
+function syncFloatingCount() {
+  const fc = document.getElementById('floating-count');
+  if (!fc) return;
+  const count = cartItemCount();
+  fc.textContent = count > 0 ? count + (count === 1 ? ' ticket' : ' tickets') : '';
+}
+
+document.addEventListener('DOMContentLoaded', () => {
+  // Fix stale ambiente names from cached frate-data.js
+  fixEventoAmbientes();
+  initCart();
+  renderEventos('Todos');
+  updateCartBadge();
+  syncFloatingCount();
+  prefillFormsFromSession();
+
+  // Replace all stale confirm-ticket listeners (old frate-popups.js handler
+  // references ep-ticket-tipo/ep-ticket-qty which no longer exist) with the
+  // correct multi-type confirmMultiTickets from frate-cuenta.js.
+  const _epConfBtn = document.getElementById('ep-confirm-tickets');
+  if (_epConfBtn) {
+    const _newBtn = _epConfBtn.cloneNode(true);
+    _epConfBtn.parentNode.replaceChild(_newBtn, _epConfBtn);
+    _newBtn.addEventListener('click', confirmMultiTickets);
+  }
+});
+
+// Override openEventPopup to render multi-type tickets
+const _origOpenEventPopup = typeof openEventPopup === 'function' ? openEventPopup : null;
+function openEventPopup(evId) {
+  const ev = FRATE_EVENTOS.find(e => e.id === evId);
+  if (!ev) return;
+  const popup = document.getElementById('event-popup');
+  if (!popup) return;
+  document.getElementById('ep-nombre').textContent = ev.nombre;
+  document.getElementById('ep-fecha').textContent = ev.fecha + ' · ' + ev.hora + ' hrs';
+  document.getElementById('ep-djs').textContent = ev.djs.join(' · ');
+  document.getElementById('ep-ambiente').textContent = ev.ambiente;
+  const tt = ev.tiposTicket?.filter(t => t.soloWeb && t.estado === 'Activo');
+  const minP = tt?.length ? Math.min(...tt.map(t => t.precio)) : 0;
+  document.getElementById('ep-anticipada').textContent = minP ? '$' + minP.toLocaleString('es-CL') + '+' : '—';
+  document.getElementById('ep-general').textContent = ev.tiposTicket?.length + ' tipos';
+  const igLink = document.getElementById('ep-ig-link');
+  if (igLink) igLink.href = FRATE_CONFIG.instagram;
+  popup.dataset.evid = evId;
+  showTicketSelector(false);
+  window.ticketTypeQtys = {};
+  popup.classList.add('open');
+  document.body.style.overflow = 'hidden';
+}
+
+// Override showTicketSelector to render multi-type list
+const _origShowTicketSelector = typeof showTicketSelector === 'function' ? showTicketSelector : null;
+function showTicketSelector(show) {
+  const sel = document.getElementById('ep-ticket-section');
+  const btns = document.getElementById('ep-buy-btns');
+  if (sel) sel.style.display = show ? 'block' : 'none';
+  if (btns) btns.style.display = show ? 'none' : 'flex';
+  if (show) {
+    const evId = parseInt(document.getElementById('event-popup').dataset.evid);
+    const ev = FRATE_EVENTOS.find(e => e.id === evId);
+    if (ev) {
+      renderTicketTypes(ev);
+      renderPersonalizacionFormsV3(1);
+    }
+  }
+}
+
+// Watch qty changes → update personas list
+document.addEventListener('click', e => {
+  if (e.target.closest('.ticket-qty-inline .qty-btn')) {
+    const evId = parseInt(document.getElementById('event-popup').dataset.evid);
+    const ev = FRATE_EVENTOS.find(e2 => e2.id === evId);
+    if (!ev) return;
+    const totalQty = (ev.tiposTicket || []).reduce((s,tt) => s + (window.ticketTypeQtys?.[tt.id] || 0), 0);
+    if (totalQty > 0) renderPersonalizacionFormsV3(totalQty);
+  }
+});
+</script>
+</body>
+</html>

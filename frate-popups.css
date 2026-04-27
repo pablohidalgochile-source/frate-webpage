@@ -1,0 +1,249 @@
+/* ============================================================
+   FRATE POPUPS — Estilos para event popup, ticket personaliz., reservas
+   ============================================================ */
+
+/* ── BASE POPUP ── */
+.frate-popup {
+  position: fixed; inset: 0;
+  background: rgba(0,0,0,0.88);
+  z-index: 5000;
+  display: flex; align-items: center; justify-content: center;
+  padding: 24px;
+  opacity: 0; pointer-events: none;
+  transition: opacity 0.3s ease;
+  overflow-y: auto;
+}
+.frate-popup.open { opacity: 1; pointer-events: all; }
+.popup-box {
+  background: var(--negro-2);
+  border: 1px solid #222;
+  width: 100%; max-width: 600px;
+  border-radius: var(--radius);
+  overflow: hidden;
+  position: relative;
+  max-height: 90vh;
+  overflow-y: auto;
+}
+.popup-box::-webkit-scrollbar { width: 4px; }
+.popup-box::-webkit-scrollbar-thumb { background: #333; }
+.popup-close-btn {
+  position: absolute; top: 16px; right: 16px;
+  background: rgba(0,0,0,0.5); border: 1px solid #333;
+  color: var(--gris); width: 32px; height: 32px;
+  border-radius: 50%; display: flex; align-items: center; justify-content: center;
+  cursor: pointer; font-size: 0.9rem; z-index: 10;
+  transition: all var(--transicion);
+}
+.popup-close-btn:hover { border-color: var(--blanco); color: var(--blanco); }
+
+/* ── EVENT POPUP ── */
+.ep-hero {
+  height: 200px;
+  background: var(--negro);
+  position: relative;
+  overflow: hidden;
+  display: flex; align-items: flex-end;
+  padding: 24px;
+}
+.ep-hero-bg {
+  position: absolute; inset: 0;
+  background: repeating-linear-gradient(
+    135deg, transparent, transparent 10px,
+    rgba(255,255,255,0.012) 10px, rgba(255,255,255,0.012) 11px
+  );
+}
+.ep-hero-light {
+  position: absolute; inset: 0;
+  background: radial-gradient(circle at 30% 50%, rgba(232,54,61,0.25) 0%, transparent 60%),
+              radial-gradient(circle at 70% 30%, rgba(212,168,50,0.15) 0%, transparent 50%);
+}
+.ep-hero-content { position: relative; z-index: 1; }
+.ep-evento-tag {
+  font-size: 0.6rem; letter-spacing: 3px; text-transform: uppercase;
+  color: var(--rojo); margin-bottom: 8px;
+}
+.ep-evento-nombre {
+  font-family: var(--fuente-display);
+  font-weight: 900; font-size: 2rem;
+  color: var(--blanco); line-height: 1;
+}
+.ep-body { padding: 24px 28px; }
+.ep-meta-row {
+  display: flex; gap: 24px; flex-wrap: wrap;
+  margin-bottom: 20px; padding-bottom: 20px;
+  border-bottom: 1px solid #1a1a1c;
+}
+.ep-meta-item { display: flex; flex-direction: column; gap: 3px; }
+.ep-meta-label { font-size: 0.6rem; letter-spacing: 3px; text-transform: uppercase; color: var(--gris); }
+.ep-meta-value { font-size: 0.9rem; color: var(--blanco); font-weight: 500; }
+.ep-precios {
+  display: grid; grid-template-columns: 1fr 1fr;
+  gap: 8px; margin-bottom: 24px;
+}
+.ep-precio-card {
+  background: var(--negro-3);
+  border: 1px solid #1a1a1c;
+  padding: 14px;
+  border-radius: var(--radius);
+  text-align: center;
+}
+.ep-precio-tipo { font-size: 0.65rem; letter-spacing: 2px; text-transform: uppercase; color: var(--gris); margin-bottom: 6px; }
+.ep-precio-valor {
+  font-family: var(--fuente-display);
+  font-weight: 900; font-size: 1.6rem;
+  color: var(--blanco); line-height: 1;
+}
+.ep-precio-card.anticipada .ep-precio-valor { color: var(--dorado); }
+.ep-social-row {
+  display: flex; gap: 10px; margin-bottom: 24px;
+}
+.ep-social-btn {
+  display: flex; align-items: center; gap: 8px;
+  padding: 10px 16px;
+  background: var(--negro-3); border: 1px solid #2a2a2c;
+  color: var(--gris); text-decoration: none;
+  font-size: 0.75rem; letter-spacing: 1px; text-transform: uppercase;
+  border-radius: var(--radius);
+  transition: all var(--transicion);
+}
+.ep-social-btn:hover { border-color: var(--rojo); color: var(--blanco); }
+#ep-buy-btns {
+  display: flex; gap: 10px; flex-wrap: wrap;
+}
+.ep-buy-btn {
+  flex: 1; min-width: 160px;
+  padding: 14px; text-align: center;
+  background: var(--rojo); color: #fff;
+  border: none; cursor: pointer;
+  font-family: var(--fuente-display);
+  font-weight: 900; font-size: 1rem;
+  letter-spacing: 2px; text-transform: uppercase;
+  border-radius: var(--radius);
+  transition: all var(--transicion);
+}
+.ep-buy-btn:hover { background: #c42d34; }
+.ep-buy-btn.secondary {
+  background: transparent; border: 1px solid var(--dorado); color: var(--dorado);
+}
+.ep-buy-btn.secondary:hover { background: var(--dorado); color: var(--negro); }
+
+/* ── TICKET SECTION (dentro del popup de evento) ── */
+#ep-ticket-section { display: none; }
+.ep-ticket-section-title {
+  font-size: 0.65rem; letter-spacing: 3px; text-transform: uppercase;
+  color: var(--rojo); margin-bottom: 16px;
+}
+.ep-select-row {
+  display: flex; gap: 12px; flex-wrap: wrap;
+  margin-bottom: 20px;
+}
+.ep-select-row .form-group { flex: 1; min-width: 140px; }
+.ep-select-row select, .ep-select-row input {
+  background: var(--negro-3);
+  border: 1px solid #2a2a2c;
+  color: var(--blanco);
+  padding: 12px 14px;
+  font-family: var(--fuente-body);
+  font-size: 0.95rem;
+  border-radius: var(--radius);
+  width: 100%; outline: none;
+  color-scheme: dark;
+}
+.ep-select-row select:focus, .ep-select-row input:focus { border-color: var(--rojo); }
+.ep-personas-title {
+  font-size: 0.65rem; letter-spacing: 3px; text-transform: uppercase;
+  color: var(--gris); margin-bottom: 12px;
+}
+.persona-form input:focus {
+  border-color: var(--rojo) !important;
+}
+.ep-confirm-btn {
+  width: 100%; margin-top: 16px;
+  padding: 16px; background: var(--rojo); color: #fff;
+  border: none; cursor: pointer;
+  font-family: var(--fuente-display);
+  font-weight: 900; font-size: 1.1rem;
+  letter-spacing: 3px; text-transform: uppercase;
+  border-radius: var(--radius);
+  transition: all var(--transicion);
+}
+.ep-confirm-btn:hover { background: #c42d34; }
+.ep-back-btn {
+  background: none; border: none; color: var(--gris);
+  font-size: 0.75rem; cursor: pointer; letter-spacing: 1px;
+  text-transform: uppercase; margin-bottom: 16px;
+  padding: 0; transition: color var(--transicion);
+}
+.ep-back-btn:hover { color: var(--blanco); }
+.ep-max-notice {
+  font-size: 0.7rem; color: #444;
+  text-align: center; margin-top: 8px;
+}
+
+/* ── RESERVA SERVICE POPUP ── */
+.rp-header {
+  background: var(--negro);
+  padding: 32px 28px 24px;
+  border-bottom: 1px solid #1a1a1c;
+}
+.rp-emoji { font-size: 2.5rem; margin-bottom: 12px; display: block; }
+.rp-titulo {
+  font-family: var(--fuente-display);
+  font-weight: 900; font-size: 2rem;
+  line-height: 1; margin-bottom: 12px;
+}
+.rp-desc { font-size: 0.9rem; color: var(--gris); line-height: 1.7; }
+.rp-body { padding: 24px 28px; }
+.rp-detalles-title {
+  font-size: 0.6rem; letter-spacing: 3px; text-transform: uppercase;
+  color: var(--rojo); margin-bottom: 12px;
+}
+#rp-detalles { list-style: none; margin-bottom: 24px; padding: 0; }
+.rp-form-title {
+  font-size: 0.6rem; letter-spacing: 3px; text-transform: uppercase;
+  color: var(--rojo); margin-bottom: 16px;
+}
+
+/* ── OPCIONES DE RESERVA (en la sección principal) ── */
+.reservas-opciones-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 12px;
+}
+.reserva-opcion-card {
+  background: var(--negro-3);
+  border: 1px solid #1a1a1c;
+  padding: 20px;
+  cursor: pointer;
+  border-radius: var(--radius);
+  transition: all var(--transicion);
+  display: flex; flex-direction: column; gap: 8px;
+  position: relative; overflow: hidden;
+}
+.reserva-opcion-card::before {
+  content: '';
+  position: absolute; left: 0; top: 0; bottom: 0; width: 3px;
+  background: var(--rojo); opacity: 0;
+  transition: opacity var(--transicion);
+}
+.reserva-opcion-card:hover { border-color: #333; transform: translateY(-2px); }
+.reserva-opcion-card:hover::before { opacity: 1; }
+.reserva-opcion-card-emoji { font-size: 1.5rem; }
+.reserva-opcion-card-nombre {
+  font-family: var(--fuente-display);
+  font-weight: 700; font-size: 1rem;
+  color: var(--blanco); letter-spacing: 0.5px;
+}
+.reserva-opcion-card-desc { font-size: 0.78rem; color: var(--gris); line-height: 1.5; }
+.reserva-opcion-card-arrow {
+  font-size: 0.7rem; color: var(--rojo);
+  letter-spacing: 2px; text-transform: uppercase;
+  margin-top: 4px;
+}
+
+@media (max-width: 600px) {
+  .ep-precios { grid-template-columns: 1fr; }
+  .ep-hero { height: 160px; }
+  .ep-evento-nombre { font-size: 1.5rem; }
+  .reservas-opciones-grid { grid-template-columns: 1fr; }
+}
