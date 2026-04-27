@@ -1,31 +1,28 @@
 // ============================================================
-// FRATE SUPABASE — Cliente y autenticación real
+// FRATE SUPABASE — Cliente, auth y operaciones completas
 // ============================================================
 
-// ⚠️  REEMPLAZA estos dos valores con los de tu proyecto:
-//     supabase.com → tu proyecto → Settings → API
 const SUPABASE_URL  = 'https://ydwlpraoaaijlfssevoh.supabase.co';
 const SUPABASE_ANON = 'sb_publishable_-_7GeDU_h84zf2v--lWQaQ_15ZFxOWt';
 
 const sb = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON);
 
 // ── REGISTRO ─────────────────────────────────────────────────
-async function sbSignUp({ nombre, email, password, telefono, rut, universidad }) {
-  const { data, error } = await sb.auth.signUp({
-    email,
-    password,
-    options: { data: { nombre, telefono, rut, universidad } }
-  });
+async function sbSignUp({ nombres, apellidos, nombre, email, password, telefono, rut, universidad, carrera }) {
+  const { data, error } = await sb.auth.signUp({ email, password });
   if (error) throw error;
-
   if (data.user) {
+    const n = nombres || (nombre || '').split(' ')[0] || '';
+    const a = apellidos || (nombre || '').split(' ').slice(1).join(' ') || '';
     await sb.from('clientes').upsert({
       id:          data.user.id,
-      nombre:      nombre      || '',
+      nombres:     n,
+      apellidos:   a,
       email:       email       || '',
       telefono:    telefono    || '',
       rut:         rut         || '',
-      universidad: universidad || ''
+      universidad: universidad || '',
+      carrera:     carrera     || ''
     });
   }
   return data;
@@ -35,17 +32,20 @@ async function sbSignUp({ nombre, email, password, telefono, rut, universidad })
 async function sbSignIn(email, password) {
   const { data, error } = await sb.auth.signInWithPassword({ email, password });
   if (error) throw error;
-
   const { data: profile } = await sb.from('clientes')
     .select('*').eq('id', data.user.id).single();
-
+  const nombres   = profile?.nombres   || '';
+  const apellidos = profile?.apellidos || '';
   const session = {
-    id:        data.user.id,
-    email:     data.user.email,
-    nombre:    profile?.nombre    || email.split('@')[0],
-    telefono:  profile?.telefono  || '',
-    rut:       profile?.rut       || '',
-    univ:      profile?.universidad || ''
+    id:          data.user.id,
+    email:       data.user.email,
+    nombre:      (nombres + ' ' + apellidos).trim() || email.split('@')[0],
+    nombres,
+    apellidos,
+    telefono:    profile?.telefono    || '',
+    rut:         profile?.rut         || '',
+    universidad: profile?.universidad || '',
+    carrera:     profile?.carrera     || ''
   };
   Storage.set('frate_session', session);
   return session;
@@ -57,23 +57,79 @@ async function sbSignOut() {
   Storage.del('frate_session');
 }
 
-// ── RESTAURAR SESIÓN AL CARGAR ────────────────────────────────
+// ── RESTAURAR SESIÓN ──────────────────────────────────────────
 async function sbRestoreSession() {
   const { data } = await sb.auth.getSession();
   if (!data.session) return null;
-
   const user = data.session.user;
   const { data: profile } = await sb.from('clientes')
     .select('*').eq('id', user.id).single();
-
+  const nombres   = profile?.nombres   || '';
+  const apellidos = profile?.apellidos || '';
   const session = {
-    id:       user.id,
-    email:    user.email,
-    nombre:   profile?.nombre    || user.email.split('@')[0],
-    telefono: profile?.telefono  || '',
-    rut:      profile?.rut       || '',
-    univ:     profile?.universidad || ''
+    id:          user.id,
+    email:       user.email,
+    nombre:      (nombres + ' ' + apellidos).trim() || user.email.split('@')[0],
+    nombres,
+    apellidos,
+    telefono:    profile?.telefono    || '',
+    rut:         profile?.rut         || '',
+    universidad: profile?.universidad || '',
+    carrera:     profile?.carrera     || ''
   };
   Storage.set('frate_session', session);
   return session;
+}
+
+// ── EVENTOS ───────────────────────────────────────────────────
+async function sbGetEventos() {
+  const { data, error } = await sb.from('eventos')
+    .select('*, tipos_ticket(*)')
+    .eq('activo', true)
+    .order('fecha', { ascending: true });
+  if (error) throw error;
+  return data;
+}
+
+// ── CREAR PEDIDO ──────────────────────────────────────────────
+async function sbCrearPedido({ clienteId, nombreCliente, emailCliente, items, total }) {
+  const { data: pedido, error: e1 } = await sb.from('pedidos')
+    .insert({ cliente_id: clienteId||null, nombre_cliente: nombreCliente,
+              email_cliente: emailCliente, estado: 'pendiente', total })
+    .select().single();
+  if (e1) throw e1;
+
+  const rows = items.map(i => ({
+    pedido_id:        pedido.id,
+    evento_id:        i.eventoId,
+    tipo_ticket_id:   i.tipoTicketId,
+    nombre_evento:    i.nombreEvento,
+    nombre_ticket:    i.nombreTicket,
+    cantidad:         i.cantidad,
+    precio_unitario:  i.precio,
+    nombre_asistente: i.nombreAsistente || '',
+    rut_asistente:    i.rutAsistente    || ''
+  }));
+  const { error: e2 } = await sb.from('items_pedido').insert(rows);
+  if (e2) throw e2;
+  return pedido;
+}
+
+// ── MIS PEDIDOS ───────────────────────────────────────────────
+async function sbMisPedidos(clienteId) {
+  const { data, error } = await sb.from('pedidos')
+    .select('*, items_pedido(*)')
+    .eq('cliente_id', clienteId)
+    .order('created_at', { ascending: false });
+  if (error) throw error;
+  return data;
+}
+
+// ── CREAR RESERVA ─────────────────────────────────────────────
+async function sbCrearReserva({ clienteId, nombre, email, telefono, fecha, tipo, personas, mensaje }) {
+  const { data, error } = await sb.from('reservas')
+    .insert({ cliente_id: clienteId||null, nombre, email, telefono, fecha, tipo, personas, mensaje })
+    .select().single();
+  if (error) throw error;
+  return data;
 }
