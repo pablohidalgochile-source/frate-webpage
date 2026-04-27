@@ -51,8 +51,8 @@
       <button class="age-back-btn" onclick="ageShowStep('age-s2')">← Volver</button>
       <div class="age-gate-title" style="font-size:2rem;margin-bottom:20px;">Iniciar sesión</div>
       <form class="age-gate-form" id="age-login-form" style="gap:14px;" onsubmit="event.preventDefault();ageDoLogin()">
-        <label>Email</label>
-        <input type="email" id="agl-email" placeholder="tu@email.com" required />
+        <label>Email o nombre de usuario</label>
+        <input type="text" id="agl-email" placeholder="tu@email.com o @username" autocomplete="username" required />
         <label>Contraseña</label>
         <input type="password" id="agl-pass" placeholder="••••••••" required />
         <div class="age-gate-error" id="agl-error"></div>
@@ -75,7 +75,10 @@
             <input type="text" id="agr-apellidos" placeholder="Tus apellidos" required />
           </div>
         </div>
-        <label>Email</label>
+        <label>¿Cómo quieres que te llamemos? <span style="color:#555;font-size:0.65rem;">nombre de usuario único</span></label>
+        <input type="text" id="agr-username" placeholder="ej: pablofrate · sin espacios" autocomplete="off"
+          oninput="this.value=this.value.toLowerCase().replace(/[^a-z0-9._-]/g,'')" required />
+        <label>Email <span style="color:#555;font-size:0.65rem;">— será el enlace de tu cuenta</span></label>
         <input type="email" id="agr-email" placeholder="tu@email.com" required />
         <div class="age-gate-form-row">
           <div>
@@ -89,7 +92,7 @@
           </div>
         </div>
         <label>Institución de Estudios</label>
-        <select id="agr-inst" onchange="ageCarreras(this)" required>
+        <select id="agr-inst" onchange="ageCarreras(this)">
           <option value="">Selecciona tu institución</option>
         </select>
         <div id="agr-carrera-wrap" style="display:none;">
@@ -139,8 +142,8 @@
     <div class="modal-form-panel active" id="panel-login">
       <form class="modal-form" id="login-form">
         <div class="form-group">
-          <label>Email</label>
-          <input type="email" id="login-email" placeholder="tu@email.com" required />
+          <label>Email o nombre de usuario</label>
+          <input type="text" id="login-email" placeholder="tu@email.com o @username" autocomplete="username" required />
         </div>
         <div class="form-group">
           <label>Contraseña</label>
@@ -164,9 +167,14 @@
             <input type="text" id="reg-apellidos" placeholder="Tus apellidos" required />
           </div>
         </div>
+        <div class="form-group">
+          <label>¿Cómo quieres que te llamemos? <span style="color:#777;font-size:0.7rem;">nombre de usuario único</span></label>
+          <input type="text" id="reg-username" placeholder="ej: pablofrate · sin espacios" autocomplete="off"
+            oninput="this.value=this.value.toLowerCase().replace(/[^a-z0-9._-]/g,'')" required />
+        </div>
         <div class="form-row">
           <div class="form-group">
-            <label>Email</label>
+            <label>Email <span style="color:#777;font-size:0.7rem;">— enlace de tu cuenta</span></label>
             <input type="email" id="reg-email" placeholder="tu@email.com" required />
           </div>
           <div class="form-group">
@@ -1246,41 +1254,40 @@ document.addEventListener('DOMContentLoaded', function() {
 });
 
 async function ageDoRegister() {
-  var nombres    = ((document.getElementById('agr-nombres')   || {}).value || '').trim();
-  var apellidos  = ((document.getElementById('agr-apellidos') || {}).value || '').trim();
-  var nombre     = (nombres + ' ' + apellidos).trim();
-  var email      = ((document.getElementById('agr-email')     || {}).value || '').trim();
-  var pass       = (document.getElementById('agr-pass')       || {}).value || '';
-  var telefono   = ((document.getElementById('agr-tel')       || {}).value || '').trim();
-  var rut        = ((document.getElementById('agr-rut')       || {}).value || '').trim();
-  var universidad= ((document.getElementById('agr-inst')      || {}).value || '');
-  var carrera    = ((document.getElementById('agr-carrera')   || {}).value || '');
+  var nombres    = ((document.getElementById('agr-nombres')   ||{}).value||'').trim();
+  var apellidos  = ((document.getElementById('agr-apellidos') ||{}).value||'').trim();
+  var username   = ((document.getElementById('agr-username')  ||{}).value||'').trim().toLowerCase();
+  var email      = ((document.getElementById('agr-email')     ||{}).value||'').trim();
+  var pass       =  (document.getElementById('agr-pass')      ||{}).value||'';
+  var telefono   = ((document.getElementById('agr-tel')       ||{}).value||'').trim();
+  var rut        = ((document.getElementById('agr-rut')       ||{}).value||'').trim();
+  var universidad= ((document.getElementById('agr-inst')      ||{}).value||'');
+  var carrera    = ((document.getElementById('agr-carrera')   ||{}).value||'');
   var errEl = document.getElementById('agr-error');
   var btn   = document.getElementById('agr-submit');
-  if (errEl) { errEl.textContent = ''; errEl.style.display = 'none'; }
-  if (!nombres || !email || !pass) {
-    if (errEl) { errEl.textContent = 'Nombres, email y contraseña son obligatorios.'; errEl.style.display = 'block'; }
-    return;
+  if (errEl) { errEl.textContent=''; errEl.style.display='none'; }
+  if (!nombres||!username||!email||!pass) {
+    if(errEl){errEl.textContent='Nombres, username, email y contraseña son obligatorios.';errEl.style.display='block';} return;
   }
   if (pass.length < 6) {
-    if (errEl) { errEl.textContent = 'La contraseña debe tener al menos 6 caracteres.'; errEl.style.display = 'block'; }
-    return;
+    if(errEl){errEl.textContent='La contraseña debe tener al menos 6 caracteres.';errEl.style.display='block';} return;
   }
-  if (btn) { btn.disabled = true; btn.textContent = 'Creando cuenta...'; }
+  if (btn) { btn.disabled=true; btn.textContent='Creando cuenta...'; }
   try {
     if (typeof sbSignUp === 'function') {
-      await sbSignUp({ nombre:nombre, email:email, password:pass, telefono:telefono, rut:rut, universidad:universidad, carrera:carrera });
+      await sbSignUp({nombres,apellidos,username,email,password:pass,telefono,rut,universidad,carrera});
       try { await sbSignIn(email, pass); } catch(_) {}
     }
+    var displayName = username || nombres;
     var msg = document.getElementById('age-success-msg');
-    if (msg) msg.textContent = '¡Cuenta creada, ' + nombres + '! Bienvenid@ a Frate 🎉';
+    if (msg) msg.textContent = '¡Cuenta creada, @' + displayName + '! Bienvenid@ a Frate 🎉';
     ageShowStep('age-s5');
   } catch(err) {
-    var txt = (err && err.message) ? err.message : 'Error al crear la cuenta.';
-    if (txt.toLowerCase().includes('already')) txt = 'Este email ya tiene cuenta. Usa "Ya tengo cuenta".';
-    if (errEl) { errEl.textContent = txt; errEl.style.display = 'block'; }
+    var txt = (err&&err.message)||'Error al crear la cuenta.';
+    if (txt.toLowerCase().includes('already registered')) txt = 'Este email ya tiene cuenta. Usa "Ya tengo cuenta".';
+    if(errEl){errEl.textContent=txt;errEl.style.display='block';}
   } finally {
-    if (btn) { btn.disabled = false; btn.textContent = 'CREAR CUENTA'; }
+    if (btn) { btn.disabled=false; btn.textContent='CREAR CUENTA'; }
   }
 }
 
@@ -1301,6 +1308,7 @@ function modalCarreras(sel) {
 async function modalDoRegister() {
   var nombres   = ((document.getElementById('reg-nombres')   ||{}).value||'').trim();
   var apellidos = ((document.getElementById('reg-apellidos') ||{}).value||'').trim();
+  var username  = ((document.getElementById('reg-username')  ||{}).value||'').trim().toLowerCase();
   var email     = ((document.getElementById('reg-email')     ||{}).value||'').trim();
   var pass      =  (document.getElementById('reg-pass')      ||{}).value||'';
   var pass2     =  (document.getElementById('reg-pass2')     ||{}).value||'';
@@ -1311,8 +1319,8 @@ async function modalDoRegister() {
   var errEl = document.getElementById('reg-error');
   var btn   = document.querySelector('#register-form .btn-rojo');
   if (errEl) { errEl.textContent=''; errEl.style.display='none'; }
-  if (!nombres||!email||!pass) {
-    if(errEl){errEl.textContent='Nombres, email y contraseña son obligatorios.';errEl.style.display='block';} return;
+  if (!nombres||!username||!email||!pass) {
+    if(errEl){errEl.textContent='Nombres, username, email y contraseña son obligatorios.';errEl.style.display='block';} return;
   }
   if (pass !== pass2) {
     if(errEl){errEl.textContent='Las contraseñas no coinciden.';errEl.style.display='block';} return;
@@ -1323,16 +1331,17 @@ async function modalDoRegister() {
   if (btn) { btn.disabled=true; btn.textContent='Creando cuenta...'; }
   try {
     if (typeof sbSignUp === 'function') {
-      await sbSignUp({ nombres:nombres, apellidos:apellidos, email:email, password:pass,
-                       telefono:telefono, rut:rut, universidad:inst, carrera:carrera });
+      await sbSignUp({ nombres, apellidos, username, email, password:pass,
+                       telefono, rut, universidad:inst, carrera });
       await sbSignIn(email, pass);
     }
+    var displayName = username || nombres;
     if (typeof closeAuthModal === 'function') closeAuthModal();
     if (typeof updateNavUser  === 'function') updateNavUser();
-    if (typeof showToast      === 'function') showToast('¡Bienvenid@, '+nombres+'! 🔥');
+    if (typeof showToast      === 'function') showToast('¡Bienvenid@, @'+displayName+'! 🔥');
   } catch(err) {
     var txt = (err&&err.message)||'Error al crear la cuenta.';
-    if (txt.toLowerCase().includes('already')) txt='Este email ya tiene cuenta. Usa "Iniciar sesión".';
+    if (txt.toLowerCase().includes('already registered')) txt='Este email ya tiene cuenta. Usa "Iniciar sesión".';
     if(errEl){errEl.textContent=txt;errEl.style.display='block';}
   } finally {
     if (btn) { btn.disabled=false; btn.textContent='CREAR CUENTA'; }

@@ -8,7 +8,12 @@ const SUPABASE_ANON = 'sb_publishable_-_7GeDU_h84zf2v--lWQaQ_15ZFxOWt';
 const sb = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON);
 
 // ── REGISTRO ─────────────────────────────────────────────────
-async function sbSignUp({ nombres, apellidos, nombre, email, password, telefono, rut, universidad, carrera }) {
+async function sbSignUp({ nombres, apellidos, nombre, username, email, password, telefono, rut, universidad, carrera }) {
+  // Verificar que el username no esté tomado
+  if (username) {
+    const { data: existing } = await sb.from('clientes').select('id').eq('username', username.toLowerCase()).maybeSingle();
+    if (existing) throw new Error('Ese nombre de usuario ya está en uso. Elige otro.');
+  }
   const { data, error } = await sb.auth.signUp({ email, password });
   if (error) throw error;
   if (data.user) {
@@ -16,6 +21,7 @@ async function sbSignUp({ nombres, apellidos, nombre, email, password, telefono,
     const a = apellidos || (nombre || '').split(' ').slice(1).join(' ') || '';
     await sb.from('clientes').upsert({
       id:          data.user.id,
+      username:    (username || '').toLowerCase(),
       nombres:     n,
       apellidos:   a,
       email:       email       || '',
@@ -28,8 +34,16 @@ async function sbSignUp({ nombres, apellidos, nombre, email, password, telefono,
   return data;
 }
 
-// ── LOGIN ─────────────────────────────────────────────────────
-async function sbSignIn(email, password) {
+// ── LOGIN (email O username) ───────────────────────────────────
+async function sbSignIn(emailOrUser, password) {
+  let email = emailOrUser.trim();
+  // Si no tiene @ → es username, buscar el email
+  if (!email.includes('@')) {
+    const { data: profile, error: lookupErr } = await sb.from('clientes')
+      .select('email').eq('username', email.toLowerCase()).maybeSingle();
+    if (lookupErr || !profile) throw new Error('Nombre de usuario no encontrado.');
+    email = profile.email;
+  }
   const { data, error } = await sb.auth.signInWithPassword({ email, password });
   if (error) throw error;
   const { data: profile } = await sb.from('clientes')
@@ -39,7 +53,8 @@ async function sbSignIn(email, password) {
   const session = {
     id:          data.user.id,
     email:       data.user.email,
-    nombre:      (nombres + ' ' + apellidos).trim() || email.split('@')[0],
+    username:    profile?.username    || '',
+    nombre:      profile?.username    || (nombres + ' ' + apellidos).trim() || email.split('@')[0],
     nombres,
     apellidos,
     telefono:    profile?.telefono    || '',
