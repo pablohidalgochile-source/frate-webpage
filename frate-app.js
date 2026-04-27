@@ -82,19 +82,20 @@ function initAgeGate() {
   }
 
   // ── PASO 1: Verificar edad ────────────────────────────────
-  document.getElementById('age-gate-form')?.addEventListener('submit', e => {
-    e.preventDefault();
+  function checkAge() {
     showErr('age-error', '');
     const val = input?.value;
     if (!val) { showErr('age-error', 'Ingresa tu fecha de nacimiento.'); return; }
-    const birth = new Date(val + 'T12:00:00'); // mediodía evita desfase UTC
+    const birth = new Date(val + 'T12:00:00');
     const today = new Date();
     let age = today.getFullYear() - birth.getFullYear();
     const m = today.getMonth() - birth.getMonth();
     if (m < 0 || (m === 0 && today.getDate() < birth.getDate())) age--;
     if (age < 18) { showErr('age-error', 'Debes ser mayor de 18 años para ingresar.'); return; }
     showStep('age-s2');
-  });
+  }
+  document.getElementById('age-gate-form')?.addEventListener('submit', e => { e.preventDefault(); checkAge(); });
+  document.getElementById('age-verify-btn')?.addEventListener('click', checkAge);
 
   // ── PASO 2: Botones elección ──────────────────────────────
   document.getElementById('age-btn-register')?.addEventListener('click', () => showStep('age-s4'));
