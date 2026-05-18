@@ -128,7 +128,7 @@
 .ep-buy-btn.secondary:hover { background: var(--dorado); color: var(--negro); }
 
 /* ── TICKET SECTION (dentro del popup de evento) ── */
-#ep-ticket-section { display: none; }
+#ep-ticket-section { display: block; }
 .ep-ticket-section-title {
   font-size: 0.65rem; letter-spacing: 3px; text-transform: uppercase;
   color: var(--rojo); margin-bottom: 16px;

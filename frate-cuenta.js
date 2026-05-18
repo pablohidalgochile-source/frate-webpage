@@ -20,6 +20,27 @@ function applyRUTFormat(input) {
   });
 }
 
+// ── RUT VALIDATOR ─────────────────────────────────────────────
+// Valida dígito verificador del RUT chileno.
+// Acepta formatos: "12.345.678-9", "12345678-9", "12345678K", etc.
+// Devuelve true si el RUT es válido o está vacío (campo opcional).
+function validarRut(rut) {
+  if (!rut || rut.trim() === '') return true; // vacío = opcional, no bloquear
+  const clean = rut.replace(/\./g, '').replace(/-/g, '').toUpperCase().trim();
+  if (clean.length < 2) return false;
+  const cuerpo = clean.slice(0, -1);
+  const dv     = clean.slice(-1);
+  if (!/^\d+$/.test(cuerpo)) return false;
+  let suma = 0, multiplo = 2;
+  for (let i = cuerpo.length - 1; i >= 0; i--) {
+    suma += parseInt(cuerpo[i]) * multiplo;
+    multiplo = multiplo < 7 ? multiplo + 1 : 2;
+  }
+  const dvCalc = 11 - (suma % 11);
+  const dvEsperado = dvCalc === 11 ? '0' : dvCalc === 10 ? 'K' : String(dvCalc);
+  return dv === dvEsperado;
+}
+
 function applyPhoneFormat(input) {
   if (!input.value || input.value === '') input.value = '+569 ';
   input.addEventListener('focus', function() {
@@ -230,56 +251,8 @@ function initCuenta() {
 }
 
 // ── TIENDITA ─────────────────────────────────────────────────
-function initTiendita() {
-  if (typeof FRATE_TIENDITA === 'undefined') return;
-  const grid = document.getElementById('tiendita-grid');
-  if (!grid) return;
-
-  const emojis = { 'Ropa':'👕', 'Accesorios':'🧢', 'Coleccionables':'🎨' };
-  grid.innerHTML = FRATE_TIENDITA.map(p => `
-    <div class="tiendita-card" onclick="openTiendaPopup('${p.id}')">
-      <div class="tiendita-img" style="background:${p.imagen_color}">
-        <span style="position:relative;z-index:1;font-size:3rem;">${emojis[p.categoria] || '🛍️'}</span>
-      </div>
-      <div class="tiendita-info">
-        <div class="tiendita-categoria">${p.categoria}</div>
-        <div class="tiendita-nombre">${p.nombre}</div>
-        <div class="tiendita-desc">${p.descripcion}</div>
-        <div class="tiendita-precio-row">
-          <div class="tiendita-precio">${formatCLP(p.precio)}</div>
-          <button class="tiendita-add-btn" onclick="event.stopPropagation();openTiendaPopup('${p.id}')">VER</button>
-        </div>
-      </div>
-    </div>
-  `).join('');
-}
-
-function openTiendaPopup(prodId) {
-  const prod = FRATE_TIENDITA.find(p => p.id === prodId);
-  if (!prod) return;
-  const popup = document.getElementById('tienda-popup');
-  if (!popup) return;
-
-  document.getElementById('tp-nombre').textContent = prod.nombre;
-  document.getElementById('tp-categoria').textContent = prod.categoria;
-  document.getElementById('tp-desc').textContent = prod.descripcion;
-  document.getElementById('tp-precio').textContent = formatCLP(prod.precio);
-
-  // Tallas
-  const tallasEl = document.getElementById('tp-tallas');
-  tallasEl.innerHTML = prod.tallas.map(t => `<div class="ts-option" data-talla="${t}" onclick="selectTiendaOpt(this,'talla')">${t}</div>`).join('');
-  if (prod.tallas.length === 1) tallasEl.firstChild?.classList.add('selected');
-
-  // Colores
-  const coloresEl = document.getElementById('tp-colores');
-  coloresEl.innerHTML = prod.colores.map(c => `<div class="ts-option" data-color="${c}" onclick="selectTiendaOpt(this,'color')">${c}</div>`).join('');
-  if (prod.colores.length === 1) coloresEl.firstChild?.classList.add('selected');
-
-  document.getElementById('tp-qty').textContent = '1';
-  popup.dataset.prodid = prodId;
-  popup.classList.add('open');
-  document.body.style.overflow = 'hidden';
-}
+// initTiendita() y openTiendaPopup() están definidas en index.html
+// (versiones async que cargan desde Supabase y usan window._tiendaData).
 
 function closeTiendaPopup() {
   document.getElementById('tienda-popup')?.classList.remove('open');
@@ -291,78 +264,11 @@ function selectTiendaOpt(el, type) {
   parent?.querySelectorAll('.ts-option').forEach(o => o.classList.remove('selected'));
   el.classList.add('selected');
 }
-
-function addTiendaToCart() {
-  const popup = document.getElementById('tienda-popup');
-  const prodId = popup?.dataset.prodid;
-  const prod = FRATE_TIENDITA?.find(p => p.id === prodId);
-  if (!prod) return;
-
-  const talla = popup.querySelector('.ts-option[data-talla].selected')?.dataset.talla;
-  const color = popup.querySelector('.ts-option[data-color].selected')?.dataset.color;
-  const qty = parseInt(document.getElementById('tp-qty')?.textContent || '1');
-
-  if (prod.tallas.length > 1 && !talla) { showToast('Selecciona una talla'); return; }
-  if (prod.colores.length > 1 && !color) { showToast('Selecciona un color'); return; }
-
-  cart.push({
-    tipo: 'merch',
-    productoId: prodId,
-    nombre: prod.nombre,
-    detalle: [talla, color].filter(Boolean).join(' · '),
-    precio: prod.precio,
-    cantidad: qty,
-    personas: []
-  });
-  saveCart(); updateCartBadge(); renderCartItems();
-  closeTiendaPopup();
-  showToast(`🛍️ ${prod.nombre} agregado al carrito`);
-}
+// addTiendaToCart() está definida en index.html (usa window._tiendaData).
 
 // ── CARTA ─────────────────────────────────────────────────────
-function initCarta() {
-  if (typeof FRATE_CARTA === 'undefined') return;
-  const container = document.getElementById('carta-container');
-  if (!container) return;
-
-  container.innerHTML = FRATE_CARTA.map(cat => `
-    <div class="carta-categoria">
-      <div class="carta-cat-title">${cat.categoria}</div>
-      <div class="carta-items-grid">
-        ${cat.items.map(item => `
-          <div class="carta-item">
-            <div class="carta-item-info">
-              <div class="carta-item-nombre">${item.nombre}</div>
-              <div class="carta-item-desc">${item.descripcion}</div>
-            </div>
-            <div class="carta-item-right">
-              <div class="carta-item-precio">${formatCLP(item.precio)}</div>
-              <button class="carta-add-btn" onclick="addCartaToCart('${item.id}')" title="Agregar">+</button>
-            </div>
-          </div>
-        `).join('')}
-      </div>
-    </div>
-  `).join('');
-}
-
-function addCartaToCart(itemId) {
-  const item = FRATE_CARTA?.flatMap(c => c.items).find(i => i.id === itemId);
-  if (!item) return;
-  const existing = cart.find(c => c.tipo === 'carta' && c.productoId === itemId);
-  if (existing) existing.cantidad++;
-  else cart.push({
-    tipo: 'carta',
-    productoId: itemId,
-    nombre: item.nombre,
-    detalle: 'Pre-compra en barra',
-    precio: item.precio,
-    cantidad: 1,
-    personas: []
-  });
-  saveCart(); updateCartBadge(); renderCartItems();
-  showToast(`🍹 ${item.nombre} agregado al carrito`);
-}
+// initCarta() y addCartaItemDirect() están definidas en index.html
+// (versión async que carga desde Supabase).
 
 // ── TICKET MULTI-TYPE POPUP (improved event popup) ────────────
 function renderTicketTypes(ev) {
@@ -398,25 +304,33 @@ function renderTicketTypes(ev) {
   }
 }
 
-let ticketTypeQtys = {};
+// ticketTypeQtys se almacena en window para que el listener de index.html
+// pueda leerlo al momento de re-renderizar los formularios de personas.
+// NO declarar con let/const para que window.ticketTypeQtys sea la única copia.
 
 function changeTicketTypeQty(ttId, delta) {
-  const ev = FRATE_EVENTOS.find(e => e.tiposTicket?.some(t => t.id === ttId));
-  const tt = ev?.tiposTicket?.find(t => t.id === ttId);
+  if (!window.ticketTypeQtys) window.ticketTypeQtys = {};
+  // Comparar como string para tolerar id numérico vs string (Supabase integer vs onclick string)
+  const sid = String(ttId);
+  const ev = FRATE_EVENTOS.find(e => e.tiposTicket?.some(t => String(t.id) === sid));
+  const tt = ev?.tiposTicket?.find(t => String(t.id) === sid);
   if (!tt) return;
-  ticketTypeQtys[ttId] = ticketTypeQtys[ttId] || 0;
-  ticketTypeQtys[ttId] = Math.min(tt.maxPorCompra, Math.max(0, ticketTypeQtys[ttId] + delta));
-  const el = document.getElementById('qty-' + ttId);
-  if (el) el.textContent = ticketTypeQtys[ttId];
-  // Update total
+  window.ticketTypeQtys[sid] = window.ticketTypeQtys[sid] || 0;
+  window.ticketTypeQtys[sid] = Math.min(tt.maxPorCompra, Math.max(0, window.ticketTypeQtys[sid] + delta));
+  const el = document.getElementById('qty-' + sid);
+  if (el) el.textContent = window.ticketTypeQtys[sid];
+  // Actualizar total + formularios de personas
   updateTicketTotal(ev);
+  // Sincronizar formularios de personas (el listener de index.html usa window.ticketTypeQtys)
+  const totalQty = (ev.tiposTicket || []).reduce((s, t2) => s + (window.ticketTypeQtys[String(t2.id)] || 0), 0);
+  if (typeof renderPersonalizacionFormsV3 === 'function') renderPersonalizacionFormsV3(totalQty);
 }
 
 function updateTicketTotal(ev) {
   let total = 0;
   let qty = 0;
   (ev.tiposTicket || []).forEach(tt => {
-    const q = ticketTypeQtys[tt.id] || 0;
+    const q = (window.ticketTypeQtys || {})[String(tt.id)] || 0;
     total += q * tt.precio;
     qty += q;
   });
@@ -433,20 +347,41 @@ function confirmMultiTickets() {
   const ev = FRATE_EVENTOS.find(e => e.id === evId);
   if (!ev) return;
 
-  const selected = (ev.tiposTicket || []).filter(tt => (ticketTypeQtys[tt.id] || 0) > 0);
+  const qtys = window.ticketTypeQtys || {};
+  const selected = (ev.tiposTicket || []).filter(tt => (qtys[String(tt.id)] || 0) > 0);
   if (!selected.length) { showToast('Selecciona al menos 1 entrada.'); return; }
 
-  const totalQty = selected.reduce((s, tt) => s + ticketTypeQtys[tt.id], 0);
+  const totalQty = selected.reduce((s, tt) => s + qtys[String(tt.id)], 0);
   const personas = [...document.querySelectorAll('.persona-nombre')].map((inp, i) => ({
     nombre: inp.value.trim(),
     rut: document.querySelectorAll('.persona-rut')[i]?.value.trim() || '',
     email: document.querySelectorAll('.persona-email')[i]?.value.trim() || ''
   }));
 
-  if (personas.some(p => !p.nombre)) { showToast('Asigna nombre a cada entrada.'); return; }
+  // Validar que cada entrada tenga nombre
+  if (personas.some(p => !p.nombre)) { showToast('⚠️ Asigna nombre a cada entrada.'); return; }
 
+  // Validar RUTs — si se ingresó un RUT debe ser válido
+  const rutsInvalidos = personas.filter(p => p.rut && !validarRut(p.rut));
+  if (rutsInvalidos.length) {
+    const idx = personas.findIndex(p => p.rut && !validarRut(p.rut));
+    showToast(`⚠️ RUT inválido en la entrada #${idx + 1}. Revisa el dígito verificador.`);
+    // Resaltar el campo con error
+    const rutInputs = [...document.querySelectorAll('.persona-rut')];
+    if (rutInputs[idx]) {
+      rutInputs[idx].style.borderColor = '#ef4444';
+      rutInputs[idx].focus();
+      setTimeout(() => { rutInputs[idx].style.borderColor = '#333'; }, 3000);
+    }
+    return;
+  }
+
+  // Asignar personas en orden: Ticket#1 → primer tipo, Ticket#2... → segundo tipo, etc.
+  let personaIdx = 0;
   selected.forEach(tt => {
-    const qty = ticketTypeQtys[tt.id];
+    const qty = qtys[String(tt.id)];
+    const thisPersonas = personas.slice(personaIdx, personaIdx + qty);
+    personaIdx += qty;
     const existing = cart.findIndex(c => c.eventoId === evId && c.tipo === tt.nombre);
     if (existing >= 0) cart.splice(existing, 1);
     cart.push({
@@ -459,57 +394,95 @@ function confirmMultiTickets() {
       hora: ev.hora,
       ambiente: ev.ambiente,
       ttId: tt.id,
-      personas: personas.slice(0, qty)
+      personas: thisPersonas
     });
   });
 
   saveCart(); updateCartBadge(); renderCartItems();
-  ticketTypeQtys = {};
+  window.ticketTypeQtys = {};
   closeEventPopup();
   showToast(`🎟️ ${totalQty} entrada${totalQty > 1 ? 's' : ''} agregada${totalQty > 1 ? 's' : ''} al carrito`);
 }
 
-// Override renderPersonalizacionForms to include email + scan option
+// Renderiza un formulario de nombre+RUT por cada entrada seleccionada,
+// agrupando por tipo de ticket para que quede claro a cuál pertenece cada persona.
 function renderPersonalizacionFormsV3(qty) {
   const container = document.getElementById('ep-personas-list');
   if (!container) return;
-  const session = Storage.get('frate_session');
 
-  container.innerHTML = Array.from({ length: qty }, (_, i) => {
-    const isOwn = i === 0 && session;
-    return `
-    <div style="background:var(--negro-3);border:1px solid #2a2a2c;border-radius:var(--radius);padding:16px;margin-bottom:10px;">
-      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px;">
-        <div style="font-size:0.65rem;letter-spacing:3px;text-transform:uppercase;color:var(--rojo);">
-          Ticket #${i + 1}${isOwn ? ' — Tú' : ' — Enviar a'}
-        </div>
-        ${!isOwn ? `<span style="font-size:0.65rem;color:var(--gris);letter-spacing:1px;">🎁 Ticket de regalo</span>` : ''}
-      </div>
-      <div class="form-row">
-        <div class="form-group">
-          <label>Nombre completo</label>
-          <input type="text" class="persona-nombre" placeholder="Nombre del asistente"
-                 value="${isOwn ? session.nombre || '' : ''}" required
-                 style="background:var(--negro);border:1px solid #333;color:var(--blanco);padding:10px 12px;font-family:var(--fuente-body);font-size:0.9rem;border-radius:var(--radius);width:100%;outline:none;" />
-        </div>
-        <div class="form-group">
-          <label>RUT</label>
-          <input type="text" class="persona-rut rut-field" placeholder="12.345.678-9"
-                 value="${isOwn ? session.rut || '' : ''}"
-                 style="background:var(--negro);border:1px solid #333;color:var(--blanco);padding:10px 12px;font-family:var(--fuente-body);font-size:0.9rem;border-radius:var(--radius);width:100%;outline:none;" />
-        </div>
-      </div>
-      ${!isOwn ? `
-      <div class="form-group" style="margin-top:10px;">
-        <label>Email (para enviar el ticket)</label>
-        <input type="email" class="persona-email" placeholder="email@ejemplo.com"
-               style="background:var(--negro);border:1px solid #333;color:var(--blanco);padding:10px 12px;font-family:var(--fuente-body);font-size:0.9rem;border-radius:var(--radius);width:100%;outline:none;" />
-      </div>` : `<input type="hidden" class="persona-email" value="${session?.email || ''}" />`}
-    </div>`;
-  }).join('');
+  // Si no hay entradas, limpiar y salir
+  if (!qty || qty === 0) { container.innerHTML = ''; return; }
 
-  // Apply RUT format
+  const session      = Storage.get('frate_session');
+  const nombreCompleto = session
+    ? ((session.nombres || '') + ' ' + (session.apellidos || '')).trim() || session.nombre || ''
+    : '';
+
+  // Obtener tipos de ticket del evento actual para saber el nombre de cada tipo
+  const popup = document.getElementById('event-popup');
+  const evId  = parseInt(popup?.dataset.evid);
+  const ev    = FRATE_EVENTOS?.find(e => e.id === evId);
+  const qtys  = window.ticketTypeQtys || {};
+
+  let html = '';
+  let globalIdx = 0; // índice global de ticket (para "Ticket #N" y para saber quién es el dueño)
+
+  if (ev && ev.tiposTicket) {
+    // Recorrer cada tipo de ticket en el mismo orden que se renderizaron las cards
+    ev.tiposTicket.forEach(tt => {
+      const count = qtys[String(tt.id)] || 0;
+      for (let i = 0; i < count; i++) {
+        const isOwn = globalIdx === 0 && !!session;
+        html += buildPersonaForm(globalIdx, tt.nombre, isOwn, session, nombreCompleto);
+        globalIdx++;
+      }
+    });
+  } else {
+    // Fallback: sin info de tipos (no debería ocurrir)
+    for (let i = 0; i < qty; i++) {
+      const isOwn = i === 0 && !!session;
+      html += buildPersonaForm(i, null, isOwn, session, nombreCompleto);
+    }
+  }
+
+  container.innerHTML = html;
   document.querySelectorAll('.persona-rut.rut-field').forEach(applyRUTFormat);
+}
+
+function buildPersonaForm(idx, tipoNombre, isOwn, session, nombreCompleto) {
+  const etiqueta = tipoNombre
+    ? `Ticket #${idx + 1} — ${tipoNombre}${isOwn ? ' — Tu entrada' : ''}`
+    : `Ticket #${idx + 1}${isOwn ? ' — Tu entrada' : ''}`;
+
+  return `
+  <div style="background:var(--negro-3);border:1px solid #2a2a2c;border-radius:var(--radius);padding:16px;margin-bottom:10px;">
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px;">
+      <div style="font-size:0.62rem;letter-spacing:2px;text-transform:uppercase;color:var(--rojo);font-weight:700;">
+        ${etiqueta}
+      </div>
+      ${!isOwn ? `<span style="font-size:0.62rem;color:var(--gris);letter-spacing:1px;">Datos del asistente</span>` : ''}
+    </div>
+    <div class="form-row">
+      <div class="form-group">
+        <label>Nombre completo</label>
+        <input type="text" class="persona-nombre" placeholder="Nombre y apellido"
+               value="${isOwn ? nombreCompleto : ''}" required
+               style="background:var(--negro);border:1px solid #333;color:var(--blanco);padding:10px 12px;font-family:var(--fuente-body);font-size:0.9rem;border-radius:var(--radius);width:100%;outline:none;" />
+      </div>
+      <div class="form-group">
+        <label>RUT <span style="font-size:0.7rem;color:var(--gris);">(ej: 12.345.678-9)</span></label>
+        <input type="text" class="persona-rut rut-field" placeholder="12.345.678-9"
+               value="${isOwn && session ? session.rut || '' : ''}"
+               style="background:var(--negro);border:1px solid #333;color:var(--blanco);padding:10px 12px;font-family:var(--fuente-body);font-size:0.9rem;border-radius:var(--radius);width:100%;outline:none;" />
+      </div>
+    </div>
+    ${!isOwn ? `
+    <div class="form-group" style="margin-top:10px;">
+      <label>Email del invitado <span style="font-size:0.7rem;color:var(--gris);">(opcional)</span></label>
+      <input type="email" class="persona-email" placeholder="email@ejemplo.com"
+             style="background:var(--negro);border:1px solid #333;color:var(--blanco);padding:10px 12px;font-family:var(--fuente-body);font-size:0.9rem;border-radius:var(--radius);width:100%;outline:none;" />
+    </div>` : `<input type="hidden" class="persona-email" value="${session?.email || ''}" />`}
+  </div>`;
 }
 
 // ── GENERATE UNIQUE QR CODE ────────────────────────────────────
@@ -535,34 +508,39 @@ function isTicketBurned(ticketUniqueId) {
 // ── INIT ─────────────────────────────────────────────────────
 function initCuentaModule() {
   initCuenta();
-  initTiendita();
-  initCarta();
 
-  // Tienda popup
+  // Cargar tiendita y carta desde Supabase (funciones definidas en index.html)
+  if (typeof initTiendita === 'function') initTiendita();
+  if (typeof initCarta    === 'function') initCarta();
+
+  // Tienda popup: cerrar al hacer click fuera o en el ×
   document.getElementById('tienda-popup')?.addEventListener('click', e => {
     if (e.target === document.getElementById('tienda-popup')) closeTiendaPopup();
   });
   document.getElementById('tp-close')?.addEventListener('click', closeTiendaPopup);
-  document.getElementById('tp-add-cart-btn')?.addEventListener('click', addTiendaToCart);
+  // tp-add-cart-btn usa addTiendaToCart() definida en index.html (ya tiene el onclick)
 
-  // Qty controls in tienda popup
+  // Qty controls en popup de tiendita
   document.getElementById('tp-qty-up')?.addEventListener('click', () => {
     const el = document.getElementById('tp-qty');
-    el.textContent = Math.min(10, parseInt(el.textContent) + 1);
+    if (el) el.textContent = Math.min(10, parseInt(el.textContent) + 1);
   });
   document.getElementById('tp-qty-down')?.addEventListener('click', () => {
     const el = document.getElementById('tp-qty');
-    el.textContent = Math.max(1, parseInt(el.textContent) - 1);
+    if (el) el.textContent = Math.max(1, parseInt(el.textContent) - 1);
   });
 
-  // Override confirm tickets button
-  document.getElementById('ep-confirm-tickets')?.removeEventListener('click', confirmMultiTickets);
-  document.getElementById('ep-confirm-tickets')?.addEventListener('click', confirmMultiTickets);
+  // Botón "Agregar al carrito" del popup de eventos
+  // (index.html también lo wires en su DOMContentLoaded, esto es respaldo)
+  const epConfBtn = document.getElementById('ep-confirm-tickets');
+  if (epConfBtn && !epConfBtn._bound) {
+    epConfBtn.addEventListener('click', confirmMultiTickets);
+    epConfBtn._bound = true;
+  }
 
   // Nav user button → abre Mi Cuenta si logueado, login si no
   const navUserBtn = document.getElementById('nav-user-btn');
   if (navUserBtn) {
-    navUserBtn._cuentaHandler = true;
     navUserBtn.onclick = null; // limpia cualquier handler previo
     navUserBtn.addEventListener('click', () => {
       const session = Storage.get('frate_session');

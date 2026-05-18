@@ -336,13 +336,12 @@
 /* ── TICKET MODAL (post-compra) ── */
 .ticket-overlay {
   position: fixed; inset: 0;
-  background: rgba(0,0,0,0.95);
+  background: var(--negro);
   z-index: 4000;
-  display: flex; align-items: center; justify-content: center;
-  padding: 24px;
+  display: block;
+  overflow-y: auto;
   opacity: 0; pointer-events: none;
   transition: opacity var(--transicion);
-  overflow-y: auto;
 }
 .ticket-overlay.open { opacity: 1; pointer-events: all; }
 .ticket-card {

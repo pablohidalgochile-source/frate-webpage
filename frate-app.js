@@ -182,58 +182,34 @@ function initAuthModal() {
   $('#auth-modal-close').addEventListener('click', () => closeAuthModal());
   authModal.addEventListener('click', e => { if (e.target === authModal) closeAuthModal(); });
 
-  // Login form
-  $('#login-form')?.addEventListener('submit', e => {
+  // ── LOGIN con Supabase ───────────────────────────────────────
+  $('#login-form')?.addEventListener('submit', async e => {
     e.preventDefault();
-    const email = $('#login-email').value;
-    const pass = $('#login-pass').value;
-    const users = Storage.get('frate_users') || [];
-    const pwHash = pass.split('').reduce((h,c)=>((h<<5)-h+c.charCodeAt(0))|0, 0).toString(36);
-    const user = users.find(u => u.email === email && (u.pwHash === pwHash || u.password === pass));
-    if (!user) { showToast('Email o contraseña incorrectos.'); return; }
-    // Migrate old plain-text password to hash
-    if (user.password) { user.pwHash = user.password.split('').reduce((h,c)=>((h<<5)-h+c.charCodeAt(0))|0,0).toString(36); delete user.password; const us=Storage.get('frate_users')||[]; const i=us.findIndex(u=>u.email===email); if(i>=0){us[i]=user;Storage.set('frate_users',us);} }
-    const safeUser = Object.assign({}, user); delete safeUser.pwHash; delete safeUser.password;
-    Storage.set('frate_session', safeUser);
-    closeAuthModal();
-    updateNavUser();
-    showToast(`¡Bienvenido de vuelta, ${user.nombre}! 🔥`);
+    const emailOrUser = ($('#login-email')?.value || '').trim();
+    const pass        = ($('#login-pass')?.value  || '');
+    const btn         = $('#login-form .btn-rojo');
+    if (!emailOrUser || !pass) { showToast('Ingresa tu email/usuario y contraseña.'); return; }
+    if (btn) { btn.disabled = true; btn.textContent = 'Ingresando...'; }
+    try {
+      const session = await sbSignIn(emailOrUser, pass);
+      closeAuthModal();
+      updateNavUser();
+      const nombre = session.username ? '@' + session.username
+        : ((session.nombres || '') + ' ' + (session.apellidos || '')).trim() || session.nombre || '';
+      showToast(`¡Bienvenido de vuelta, ${nombre}! 🔥`);
+    } catch (err) {
+      let txt = err?.message || 'Error al iniciar sesión.';
+      if (txt.toLowerCase().includes('invalid') || txt.toLowerCase().includes('credentials'))
+        txt = 'Email o contraseña incorrectos.';
+      showToast('⚠️ ' + txt);
+    } finally {
+      if (btn) { btn.disabled = false; btn.textContent = 'ENTRAR'; }
+    }
   });
 
-  // Register form
-  $('#register-form')?.addEventListener('submit', e => {
-    e.preventDefault();
-    const nombre = $('#reg-nombre').value.trim();
-    const email = $('#reg-email').value.trim();
-    const pass = $('#reg-pass').value;
-    const pass2 = $('#reg-pass2').value;
-    const rut = $('#reg-rut').value.trim();
-    const telefono = $('#reg-tel').value.trim();
-    const univ = $('#reg-univ').value;
-    const carrera = $('#reg-carrera').value.trim();
-
-    if (pass !== pass2) { showToast('Las contraseñas no coinciden.'); return; }
-    if (pass.length < 6) { showToast('La contraseña debe tener al menos 6 caracteres.'); return; }
-
-    const users = Storage.get('frate_users') || [];
-    if (users.find(u => u.email === email)) { showToast('Este email ya está registrado.'); return; }
-
-    // Store only a simple hash — never raw password
-    const pwHash = pass.split('').reduce((h,c)=>((h<<5)-h+c.charCodeAt(0))|0, 0).toString(36);
-    const newUser = {
-      id: Date.now(),
-      nombre, email, pwHash, rut, telefono, univ, carrera,
-      createdAt: new Date().toISOString(),
-      tickets: [], reservas: []
-    };
-    users.push(newUser);
-    Storage.set('frate_users', users);
-    const safeSession = Object.assign({}, newUser); delete safeSession.pwHash;
-    Storage.set('frate_session', safeSession);
-    closeAuthModal();
-    updateNavUser();
-    showToast(`¡Bienvenido a Frate, ${nombre}! 🎉`);
-  });
+  // ── REGISTRO — manejado por modalDoRegister() en index.html (Supabase).
+  // NO agregar listener aquí para evitar doble ejecución.
+  // El form tiene onsubmit="event.preventDefault();modalDoRegister()" en el HTML.
 
   // Nav user button: frate-cuenta.js gestiona esto vía onclick
   // Solo asignamos aquí si frate-cuenta.js no está disponible
@@ -319,14 +295,21 @@ function initEventos() {
   const grid = $('#eventos-grid');
   if (!grid) return;
 
-  function formatPeso(n) { return '$' + n.toLocaleString('es-CL'); }
+  function formatPeso(n) { return n ? '$' + n.toLocaleString('es-CL') : ''; }
+  function getPrecioMin(ev) {
+    if (ev.precio_anticipada) return ev.precio_anticipada;
+    const tt = (ev.tiposTicket||[]).filter(t => t.estado==='Activo' && t.soloWeb!==false);
+    return tt.length ? Math.min(...tt.map(t => t.precio)) : 0;
+  }
 
   function renderEventos(filter = 'Todos') {
     const filtered = filter === 'Todos' ? FRATE_EVENTOS : FRATE_EVENTOS.filter(e => e.tipo === filter);
     grid.innerHTML = filtered.map(ev => {
       const [diaNom, diaNum, ...mes] = ev.fecha.split(' ');
+      const precioMin = getPrecioMin(ev);
       return `
-      <div class="evento-card reveal" data-tipo="${ev.tipo}">
+      <div class="evento-card" data-tipo="${ev.tipo}" data-evid="${ev.id}"
+           style="cursor:pointer;opacity:1;transform:none;" onclick="openEventPopup(${ev.id})">
         <div class="evento-fecha-block">
           <div class="evento-dia">${diaNum}</div>
           <div class="evento-mes">${diaNom}</div>
@@ -341,13 +324,12 @@ function initEventos() {
           </div>
         </div>
         <div class="evento-precios">
-          <div class="evento-precio-anticipada">Anticipada</div>
-          <div class="evento-precio-valor">${formatPeso(ev.precio_anticipada)} <small>/ General ${formatPeso(ev.precio_general)}</small></div>
-          <a href="${FRATE_CONFIG.passline}" target="_blank" class="btn-ticket">TICKETS</a>
+          <div class="evento-precio-anticipada">Tickets desde</div>
+          <div class="evento-precio-valor">${formatPeso(precioMin)}</div>
+          <button class="btn-ticket" onclick="event.stopPropagation();openEventPopup(${ev.id})">VER INFO →</button>
         </div>
       </div>`;
     }).join('');
-    initReveal();
   }
 
   renderEventos();
@@ -363,26 +345,40 @@ function initEventos() {
 
 // ── AMBIENTES ─────────────────────────────────────────────────
 function initAmbientes() {
-  if (typeof FRATE_AMBIENTES === 'undefined') return;
   const grid = $('#ambientes-grid');
   if (!grid) return;
+  // Render inmediato con datos locales, luego reemplaza con Supabase
+  if (typeof FRATE_AMBIENTES !== 'undefined') renderAmbientesGrid(FRATE_AMBIENTES);
+  if (typeof sbGetAmbientes === 'function') {
+    sbGetAmbientes().then(data => {
+      if (data && data.length) renderAmbientesGrid(data);
+    }).catch(() => {});
+  }
+}
 
-  grid.innerHTML = FRATE_AMBIENTES.map((a, i) => `
-    <div class="ambiente-card reveal reveal-delay-${i+1}">
-      <div class="ambiente-placeholder" style="background: ${a.id === 'fuego' ? '#0e0608' : a.id === 'aire' ? '#060a0e' : '#06080a'}; min-height:420px;">
-        <span style="font-size:0.7rem;color:#2a2a2c;z-index:1;position:relative">
-          foto ${a.nombre.toLowerCase()}
-        </span>
+function renderAmbientesGrid(ambientes) {
+  const grid = $('#ambientes-grid');
+  if (!grid) return;
+  const bgMap = { fuego:'#0e0608', aire:'#060a0e', tierra:'#06080a' };
+  grid.innerHTML = ambientes.map((a, i) => {
+    const slug = a.slug || a.id?.toString() || 'fuego';
+    const bg = bgMap[slug] || '#0e0608';
+    const musica = Array.isArray(a.musica) ? a.musica.join(' · ') : (a.musica || '');
+    return `
+    <div class="ambiente-card" style="opacity:1;transform:none;">
+      <div class="ambiente-placeholder" style="background:${a.imagen_url ? 'transparent' : bg};min-height:420px;position:relative;overflow:hidden;">
+        ${a.imagen_url
+          ? `<img src="${a.imagen_url}" style="width:100%;height:100%;object-fit:cover;position:absolute;inset:0;" loading="lazy" />`
+          : `<span style="font-size:0.7rem;color:#2a2a2c;z-index:1;position:relative">foto ${a.nombre.toLowerCase()}</span>`}
       </div>
       <div class="ambiente-overlay">
-        <div class="ambiente-musica">${a.musica}</div>
+        <div class="ambiente-musica">${musica}</div>
         <div class="ambiente-nombre">${a.nombre}</div>
-        <div class="ambiente-desc">${a.descripcion}</div>
-        <div class="ambiente-capacidad">${a.capacidad}</div>
+        <div class="ambiente-desc">${a.descripcion || ''}</div>
+        <div class="ambiente-capacidad">${a.capacidad || ''}</div>
       </div>
-    </div>
-  `).join('');
-  initReveal();
+    </div>`;
+  }).join('');
 }
 
 // ── GALERÍA ───────────────────────────────────────────────────
@@ -416,23 +412,39 @@ function initGaleria() {
 
 // ── WEBEUM ────────────────────────────────────────────────────
 function initWebeum() {
-  if (typeof FRATE_WEBEUM === 'undefined') return;
   const grid = $('#webeum-grid');
   if (!grid) return;
+  // Solo carga desde Supabase — no fallback hardcodeado
+  if (typeof sbGetWebeum === 'function') {
+    sbGetWebeum().then(data => {
+      if (data && data.length) renderWebe(data);
+      else grid.innerHTML = ''; // vacío si no hay episodios en admin
+    }).catch(() => {
+      // Si Supabase falla, mostrar datos locales como fallback
+      if (typeof FRATE_WEBEUM !== 'undefined') renderWebe(FRATE_WEBEUM);
+    });
+  } else if (typeof FRATE_WEBEUM !== 'undefined') {
+    renderWebe(FRATE_WEBEUM);
+  }
+}
 
-  grid.innerHTML = FRATE_WEBEUM.map((ep, i) => `
-    <a href="${ep.url}" target="_blank" class="webeum-card reveal reveal-delay-${i+1}" style="text-decoration:none">
-      <div class="webeum-thumb">
-        <div class="webeum-play">▶</div>
+function renderWebe(eps) {
+  const grid = $('#webeum-grid');
+  if (!grid) return;
+  grid.innerHTML = eps.map((ep) => {
+    const thumb = ep.thumbnail_url || '';
+    return `
+    <a href="${ep.url}" target="_blank" class="webeum-card" style="text-decoration:none;opacity:1;transform:none;">
+      <div class="webeum-thumb" style="${thumb ? `background-image:url(${thumb});background-size:cover;background-position:center;` : ''}">
+        ${!thumb ? '<div class="webeum-play">▶</div>' : '<div class="webeum-play" style="opacity:0.8">▶</div>'}
       </div>
       <div class="webeum-info">
         <div class="webeum-ep">Webeum Humanum Est</div>
         <div class="webeum-titulo">${ep.titulo}</div>
-        <div class="webeum-meta"><span>${ep.fecha}</span><span>${ep.duracion}</span></div>
+        <div class="webeum-meta"><span>${ep.fecha || ''}</span><span>${ep.duracion || ''}</span></div>
       </div>
-    </a>
-  `).join('');
-  initReveal();
+    </a>`;
+  }).join('');
 }
 
 // ── STATS ─────────────────────────────────────────────────────

@@ -22,7 +22,7 @@ const FRATE_CONFIG = {
 // Estado: Activo | Agotado | Cortesía | Cerrado | Solo venta WEB | Venta solo RRPP | Oculto | Venta Efectivo | Venta Abonados
 // Solo se muestran en la web los que tienen soloWeb:true y estado "Activo" o "Solo venta WEB"
 
-const FRATE_EVENTOS = [
+var FRATE_EVENTOS = [
   {
     id: 1,
     nombre: "TRAP JUEVES",

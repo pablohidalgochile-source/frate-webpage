@@ -1,0 +1,81 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Restablecer contraseña — Frate</title>
+<link rel="icon" href="assets/favicon.png">
+<link rel="stylesheet" href="frate.css">
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<style>
+  body { background:#0A0A0B; color:#fff; min-height:100vh; display:flex; align-items:center; justify-content:center; padding:24px; }
+  .reset-box {
+    background:#141415; border:1px solid #2a2a2c; border-radius:4px;
+    padding:36px; max-width:420px; width:100%;
+  }
+  .reset-title { font-family:'Barlow Condensed',sans-serif; font-weight:900; font-size:1.8rem; letter-spacing:3px; color:#E8363D; margin:0 0 8px; text-transform:uppercase; }
+  .reset-sub   { font-size:0.85rem; color:#a1a1aa; margin:0 0 24px; }
+  .reset-form  { display:flex; flex-direction:column; gap:14px; }
+  .reset-form input {
+    background:#0A0A0B; border:1px solid #333; color:#fff;
+    padding:12px 14px; font-size:0.95rem; border-radius:2px; outline:none;
+  }
+  .reset-form input:focus { border-color:#E8363D; }
+  .reset-form button {
+    background:#E8363D; color:#fff; border:none; padding:14px;
+    font-family:'Barlow Condensed',sans-serif; font-weight:900;
+    font-size:1rem; letter-spacing:3px; text-transform:uppercase;
+    border-radius:2px; cursor:pointer; margin-top:8px;
+  }
+  .reset-form button:disabled { opacity:.5; cursor:not-allowed; }
+  .err { color:#ef4444; font-size:0.8rem; margin-top:8px; display:none; }
+  .ok  { color:#22c55e; font-size:0.85rem; margin-top:16px; text-align:center; }
+  .back { display:block; text-align:center; margin-top:20px; color:#71717a; font-size:0.75rem; letter-spacing:2px; text-transform:uppercase; text-decoration:none; }
+</style>
+</head>
+<body>
+<div class="reset-box">
+  <h1 class="reset-title">Nueva contraseña</h1>
+  <p class="reset-sub">Ingresa tu nueva contraseña. Debe tener al menos 6 caracteres.</p>
+  <form class="reset-form" id="reset-form" onsubmit="event.preventDefault();doReset()">
+    <input type="password" id="np-pass"  placeholder="Nueva contraseña" minlength="6" required autocomplete="new-password" />
+    <input type="password" id="np-pass2" placeholder="Repite la contraseña" minlength="6" required autocomplete="new-password" />
+    <button type="submit" id="np-btn">GUARDAR CONTRASEÑA</button>
+    <div class="err" id="np-err"></div>
+  </form>
+  <div class="ok" id="np-ok" style="display:none;">✅ Contraseña actualizada. Redirigiendo…</div>
+  <a class="back" href="/">← Volver a frate.cl</a>
+</div>
+
+<script>
+const SUPABASE_URL  = 'https://ydwlpraoaaijlfssevoh.supabase.co';
+const SUPABASE_ANON = 'sb_publishable_-_7GeDU_h84zf2v--lWQaQ_15ZFxOWt';
+const sb = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON);
+
+async function doReset() {
+  const p1   = document.getElementById('np-pass').value;
+  const p2   = document.getElementById('np-pass2').value;
+  const err  = document.getElementById('np-err');
+  const ok   = document.getElementById('np-ok');
+  const btn  = document.getElementById('np-btn');
+  err.style.display = 'none';
+
+  if (p1 !== p2)      { err.textContent = 'Las contraseñas no coinciden.'; err.style.display='block'; return; }
+  if (p1.length < 6)  { err.textContent = 'Mínimo 6 caracteres.'; err.style.display='block'; return; }
+
+  btn.disabled = true; btn.textContent = 'Guardando...';
+  try {
+    const { error } = await sb.auth.updateUser({ password: p1 });
+    if (error) throw error;
+    ok.style.display = 'block';
+    document.getElementById('reset-form').style.display = 'none';
+    setTimeout(() => location.href = '/', 2000);
+  } catch (e) {
+    err.textContent = e.message || 'Error al actualizar.';
+    err.style.display = 'block';
+    btn.disabled = false; btn.textContent = 'GUARDAR CONTRASEÑA';
+  }
+}
+</script>
+</body>
+</html>

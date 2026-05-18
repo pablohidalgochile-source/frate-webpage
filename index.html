@@ -150,6 +150,9 @@
           <input type="password" id="login-pass" placeholder="••••••••" required />
         </div>
         <button type="submit" class="btn-rojo">ENTRAR</button>
+        <div style="text-align:center;margin-top:8px;">
+          <a href="#" onclick="event.preventDefault();forgotPassword()" style="font-size:0.75rem;color:#71717a;text-decoration:none;letter-spacing:1px;">¿Olvidaste tu contraseña?</a>
+        </div>
         <div class="form-divider">o</div>
         <button type="button" class="btn-dorado" onclick="document.querySelector('[data-tab=register]').click()">CREAR CUENTA NUEVA</button>
       </form>
@@ -375,54 +378,8 @@
 <!-- ══════════════════════════════════════════════
      TICKET DIGITAL
 ════════════════════════════════════════════════ -->
+<!-- ticket-overlay: contenido generado dinámicamente por showTicket() en frate-cart.js -->
 <div class="ticket-overlay" id="ticket-overlay">
-  <div class="ticket-card">
-    <div class="ticket-top">
-      <img src="assets/logo-insignia.png" alt="Frate" class="ticket-logo-img" />
-      <div class="ticket-success-badge">✓ Compra confirmada</div>
-      <div class="ticket-evento-name" id="ticket-evento-name">NOMBRE EVENTO</div>
-      <div class="ticket-evento-date" id="ticket-evento-date">Fecha</div>
-      <div class="ticket-qr">
-        <canvas id="ticket-qr-canvas" width="140" height="140"></canvas>
-      </div>
-      <div class="ticket-code" id="ticket-order-id">FCC-XXXXXX</div>
-    </div>
-    <div class="ticket-bottom">
-      <div class="ticket-info-grid">
-        <div class="ticket-info-item">
-          <div class="ticket-info-label">Comprador</div>
-          <div class="ticket-info-value" id="ticket-buyer-name">—</div>
-        </div>
-        <div class="ticket-info-item">
-          <div class="ticket-info-label">Email</div>
-          <div class="ticket-info-value" id="ticket-buyer-email" style="font-size:0.8rem">—</div>
-        </div>
-        <div class="ticket-info-item">
-          <div class="ticket-info-label">Entradas</div>
-          <div class="ticket-info-value" id="ticket-qty">—</div>
-        </div>
-        <div class="ticket-info-item">
-          <div class="ticket-info-label">Ambiente</div>
-          <div class="ticket-info-value" id="ticket-ambiente">—</div>
-        </div>
-        <div class="ticket-info-item">
-          <div class="ticket-info-label">Total pagado</div>
-          <div class="ticket-info-value" id="ticket-total" style="color:var(--dorado)">—</div>
-        </div>
-        <div class="ticket-info-item">
-          <div class="ticket-info-label">Venue</div>
-          <div class="ticket-info-value">Santiago Centro</div>
-        </div>
-      </div>
-      <div class="ticket-actions">
-        <button class="ticket-action-btn" onclick="downloadTicket()">📧 Enviar al email</button>
-        <button class="ticket-action-btn primary" id="ticket-close-btn">LISTO 🔥</button>
-      </div>
-      <p style="font-size:0.65rem;color:#333;text-align:center;margin-top:16px;line-height:1.6">
-        Presenta este QR en la entrada · Solo válido para +18 · No conducir bajo los efectos del alcohol
-      </p>
-    </div>
-  </div>
 </div>
 
 <!-- ══════════════════════════════════════════════
@@ -597,7 +554,7 @@
           Documentamos cada noche. Guardamos cada momento.
         </p>
       </div>
-      <a href="https://youtube.com/@fratecc" target="_blank" class="btn-dorado reveal" style="display:inline-block;max-width:200px;flex-shrink:0">VER EN YT</a>
+      <a href="https://www.youtube.com/@fraternidadcampuscentral" target="_blank" class="btn-dorado reveal" style="display:inline-block;max-width:200px;flex-shrink:0">VER EN YT</a>
     </div>
     <div class="webeum-grid" id="webeum-grid"></div>
   </div>
@@ -801,15 +758,19 @@
 <div class="frate-popup" id="event-popup">
   <div class="popup-box" style="max-width:620px">
     <button class="popup-close-btn" id="ep-close">✕</button>
-    <div class="ep-hero">
-      <div class="ep-hero-bg"></div>
+
+    <!-- Hero: imagen/video del evento -->
+    <div class="ep-hero" id="ep-hero">
+      <div class="ep-hero-bg" id="ep-hero-bg"></div>
       <div class="ep-hero-light"></div>
       <div class="ep-hero-content">
         <div class="ep-evento-tag">Próximo evento · frate.cl</div>
         <div class="ep-evento-nombre" id="ep-nombre">NOMBRE EVENTO</div>
       </div>
     </div>
+
     <div class="ep-body">
+      <!-- Info del evento -->
       <div class="ep-meta-row">
         <div class="ep-meta-item">
           <span class="ep-meta-label">Fecha y hora</span>
@@ -825,40 +786,28 @@
         </div>
       </div>
 
-      <div class="ep-precios">
-        <div class="ep-precio-card anticipada">
-          <div class="ep-precio-tipo">Anticipada</div>
-          <div class="ep-precio-valor" id="ep-anticipada">—</div>
-        </div>
-        <div class="ep-precio-card">
-          <div class="ep-precio-tipo">General</div>
-          <div class="ep-precio-valor" id="ep-general">—</div>
-        </div>
+      <!-- "Tickets desde" -->
+      <div style="display:flex;justify-content:space-between;align-items:center;padding:12px 0;border-bottom:1px solid #1a1a1c;margin-bottom:12px;">
+        <span style="font-size:0.65rem;letter-spacing:2px;text-transform:uppercase;color:var(--gris);">Tickets desde</span>
+        <span id="ep-precio-desde" style="font-family:var(--fuente-display);font-weight:900;font-size:1.5rem;color:var(--dorado);">—</span>
       </div>
 
-      <div class="ep-social-row">
-        <a href="#" id="ep-ig-link" target="_blank" class="ep-social-btn">
-          📸 Instagram
-        </a>
-        <a href="https://www.youtube.com/@fraternidadcampuscentral" target="_blank" class="ep-social-btn">
-          ▶ WEBEUM
-        </a>
+      <!-- Links sociales / externos -->
+      <div class="ep-social-row" id="ep-social-row" style="margin-bottom:18px;">
+        <a href="#" id="ep-ig-link" target="_blank" class="ep-social-btn">📸 Instagram</a>
+        <a href="https://www.youtube.com/@fraternidadcampuscentral" target="_blank" class="ep-social-btn">▶ WEBEUM</a>
+        <a href="#" id="ep-ext-link" target="_blank" class="ep-social-btn" style="display:none;background:rgba(232,54,61,0.12);border-color:var(--rojo);color:var(--rojo);">🎟️ Comprar aquí</a>
       </div>
 
-      <div id="ep-buy-btns" style="display:flex;gap:10px;flex-wrap:wrap;">
-        <button class="ep-buy-btn" id="ep-open-tickets">🎟️ COMPRAR ENTRADAS</button>
-        <button class="ep-buy-btn secondary" onclick="openReservaPopup('vip');closeEventPopup()">👑 MESA VIP</button>
-      </div>
-
-      <!-- Ticket multi-type selector -->
+      <!-- Tickets (siempre visibles, sin paso intermedio) -->
       <div id="ep-ticket-section">
-        <button class="ep-back-btn" onclick="showTicketSelector(false)">← Volver</button>
-        <div class="ep-ticket-section-title">Selecciona tus entradas</div>
+        <div class="ep-ticket-section-title" style="margin-bottom:12px;">Selecciona tus entradas</div>
         <div id="ep-ticket-types" style="display:flex;flex-direction:column;gap:8px;margin-bottom:16px;"></div>
-        <div style="font-size:0.75rem;color:var(--dorado);text-align:center;margin-bottom:12px;" id="ep-ticket-total"></div>
-        <div class="ep-personas-title">Asigna cada entrada (nombre + RUT requeridos)</div>
+        <div style="font-size:0.8rem;color:var(--dorado);text-align:center;margin-bottom:14px;font-weight:600;" id="ep-ticket-total"></div>
+        <div class="ep-personas-title" style="margin-bottom:10px;">Asigna nombre + RUT a cada entrada</div>
         <div id="ep-personas-list"></div>
         <button class="ep-confirm-btn" id="ep-confirm-tickets">🎟️ AGREGAR AL CARRITO</button>
+        <button class="ep-buy-btn secondary" style="width:100%;margin-top:10px;" onclick="openReservaPopup('vip');closeEventPopup()">👑 MESA VIP / RESERVAS</button>
       </div>
     </div>
   </div>
@@ -1347,6 +1296,47 @@ async function cuentaGuardarPerfil() {
   }
 }
 
+// ── Re-mostrar QRs de un pedido pasado (desde Mi Cuenta) ──────
+async function rePrintPedido(pedidoId) {
+  try {
+    var session = Storage.get('frate_session');
+    if (!session) return;
+    var { data: pedido, error } = await sb.from('pedidos')
+      .select('*, items_pedido(*)').eq('id', pedidoId).single();
+    if (error || !pedido) throw error || new Error('Pedido no encontrado');
+
+    // Reconstruir orderData con el mismo formato que usa showTicket()
+    var items = (pedido.items_pedido || []).map(function(ip) {
+      return {
+        tipo:       ip.producto_tipo === 'ticket' ? (ip.nombre_ticket || 'Ticket') : ip.producto_tipo,
+        nombre:     ip.nombre_evento || ip.nombre_ticket || 'Item',
+        precio:     ip.precio_unitario,
+        cantidad:   ip.cantidad,
+        eventoId:   ip.evento_id,
+        ttId:       ip.tipo_ticket_id,
+        productoId: ip.producto_id,
+        detalle:    ip.detalle,
+        personas:   ip.personas || []
+      };
+    });
+    var orderId = 'FCC-' + String(pedido.id).padStart(6, '0');
+    var orderData = {
+      id:        orderId,
+      pedidoId:  pedido.id,
+      items:     items,
+      comprador: { nombre: pedido.nombre_cliente, email: pedido.email_cliente },
+      total:     pedido.total,
+      fee:       pedido.fee_servicio || 0,
+      fecha:     pedido.created_at
+    };
+    closeCuenta();
+    if (typeof showTicket === 'function') showTicket(orderData);
+  } catch (err) {
+    console.error('[FRATE] rePrintPedido:', err);
+    if (typeof showToast === 'function') showToast('⚠️ No se pudo cargar el pedido.');
+  }
+}
+
 // ── MI CUENTA: cargar historial desde Supabase ────────────────
 async function cuentaCargarHistorial() {
   var session = Storage.get('frate_session');
@@ -1366,23 +1356,31 @@ async function cuentaCargarHistorial() {
       var items = p.items_pedido||[];
       var totalItems = items.reduce(function(s,i){return s+(i.cantidad||0);},0);
       var firstItem = items[0];
+      // Título del pedido: usa nombre_evento si es ticket, sino nombre_ticket (carta/merch)
+      var tituloPedido = firstItem
+        ? (firstItem.nombre_evento || firstItem.nombre_ticket || ('Pedido #'+p.id))
+        : 'Pedido #'+p.id;
       var fecha = new Date(p.created_at).toLocaleDateString('es-CL',{day:'2-digit',month:'short',year:'numeric'});
       var estadoColor = p.estado==='pagado'?'#22c55e':p.estado==='pendiente'?'#f59e0b':'var(--gris)';
+      // Estimar nº de QRs total (sumando cantidades de todos los items)
+      var nQR = items.reduce(function(s,i){return s+(i.cantidad||0);},0);
       return '<div style="background:var(--negro-3);border:1px solid #1a1a1c;border-radius:4px;padding:16px;margin-bottom:12px;">'
         +'<div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:10px;">'
-        +'<div><div style="font-family:var(--fuente-display);font-weight:700;font-size:0.95rem;color:var(--blanco);">'+(firstItem?firstItem.nombre_evento:'Pedido #'+p.id)+'</div>'
-        +'<div style="font-size:0.7rem;color:var(--gris);margin-top:2px;">'+fecha+' · Pedido #'+p.id+'</div></div>'
+        +'<div><div style="font-family:var(--fuente-display);font-weight:700;font-size:0.95rem;color:var(--blanco);">'+tituloPedido+'</div>'
+        +'<div style="font-size:0.7rem;color:var(--gris);margin-top:2px;">'+fecha+' · FCC-'+String(p.id).padStart(6,'0')+'</div></div>'
         +'<span style="font-size:0.6rem;letter-spacing:2px;text-transform:uppercase;padding:3px 8px;border-radius:20px;background:rgba(0,0,0,0.3);border:1px solid '+estadoColor+';color:'+estadoColor+';">'+p.estado+'</span>'
         +'</div>'
         +(items.length ? '<div style="margin-bottom:10px;">'+items.map(function(i){
+          var label = i.nombre_ticket || i.nombre_evento || 'Item';
+          var icono = i.producto_tipo==='carta' ? '🍹' : i.producto_tipo==='merch' ? '🛍️' : '🎟️';
           return '<div style="display:flex;justify-content:space-between;font-size:0.8rem;padding:4px 0;border-top:1px solid #1a1a1c;">'
-            +'<span style="color:var(--gris);">'+i.nombre_ticket+' x'+i.cantidad+'</span>'
-            +'<span style="color:var(--blanco);">'+fmt(i.precio_unitario*i.cantidad)+'</span>'
+            +'<span style="color:var(--gris);">'+icono+' '+label+' x'+i.cantidad+'</span>'
+            +'<span style="color:var(--blanco);">'+fmt((i.precio_unitario||0)*(i.cantidad||0))+'</span>'
             +'</div>';
         }).join('')+'</div>' : '')
         +'<div style="display:flex;justify-content:space-between;align-items:center;">'
-        +'<span style="font-size:0.7rem;color:var(--gris);">'+totalItems+' entrada'+(totalItems!==1?'s':'')+'</span>'
-        +'<span style="font-family:var(--fuente-display);font-weight:900;font-size:1.1rem;color:var(--dorado);">'+fmt(p.total)+'</span>'
+        +'<button onclick="rePrintPedido('+p.id+')" style="background:transparent;border:1px solid var(--rojo);color:var(--rojo);padding:6px 12px;font-size:0.65rem;letter-spacing:2px;text-transform:uppercase;border-radius:2px;cursor:pointer;font-weight:700;">🖨️ Ver QRs ('+nQR+')</button>'
+        +'<span style="font-family:var(--fuente-display);font-weight:900;font-size:1.1rem;color:var(--dorado);">'+fmt(p.total_pagado||p.total)+'</span>'
         +'</div>'
         +'</div>';
     }).join('');
@@ -1420,12 +1418,30 @@ async function ageDoRegister() {
     var msg = document.getElementById('age-success-msg');
     if (msg) msg.textContent = '¡Cuenta creada, @' + displayName + '! Bienvenid@ a Frate 🎉';
     ageShowStep('age-s5');
+    // Email de bienvenida (no bloquea si falla)
+    if (typeof sbSendWelcomeEmail === 'function') {
+      sbSendWelcomeEmail({ nombre: nombres, apellidos, username, email });
+    }
   } catch(err) {
     var txt = (err&&err.message)||'Error al crear la cuenta.';
     if (txt.toLowerCase().includes('already registered')) txt = 'Este email ya tiene cuenta. Usa "Ya tengo cuenta".';
     if(errEl){errEl.textContent=txt;errEl.style.display='block';}
   } finally {
     if (btn) { btn.disabled=false; btn.textContent='CREAR CUENTA'; }
+  }
+}
+
+// ── RECUPERAR CONTRASEÑA ──────────────────────────────────────
+async function forgotPassword() {
+  const current = document.getElementById('login-email')?.value?.trim() || '';
+  const email = prompt('Te enviaremos un email para restablecer tu contraseña.\n\nIngresa tu email o nombre de usuario:', current);
+  if (!email) return;
+  try {
+    const res = await sbResetPassword(email);
+    if (typeof showToast === 'function') showToast('📧 Email enviado a ' + res.email + '. Revisa tu bandeja.');
+  } catch (err) {
+    if (typeof showToast === 'function') showToast('⚠️ ' + (err.message || 'Error'));
+    else alert(err.message);
   }
 }
 
@@ -1477,6 +1493,10 @@ async function modalDoRegister() {
     if (typeof closeAuthModal === 'function') closeAuthModal();
     if (typeof updateNavUser  === 'function') updateNavUser();
     if (typeof showToast      === 'function') showToast('¡Bienvenid@, @'+displayName+'! 🔥');
+    // Email de bienvenida (no bloquea si falla)
+    if (typeof sbSendWelcomeEmail === 'function') {
+      sbSendWelcomeEmail({ nombre: nombres, apellidos, username, email });
+    }
   } catch(err) {
     var txt = (err&&err.message)||'Error al crear la cuenta.';
     if (txt.toLowerCase().includes('already registered')) txt='Este email ya tiene cuenta. Usa "Iniciar sesión".';
@@ -1563,79 +1583,85 @@ function initStats() {
   initReveal();
 }
 
-// ── Override initTiendita con datos hardcoded ──
-function initTiendita() {
+// ── initTiendita — carga desde Supabase ──────────────────────
+async function initTiendita() {
   const grid = document.getElementById('tiendita-grid');
   if (!grid) return;
   const emojis = { 'Ropa':'👕', 'Accesorios':'🧢', 'Coleccionables':'🎨' };
-  const data = [
-    { id:"t1", nombre:"Polera FRATE Classic", descripcion:"100% algodón. Logo bordado. Tallas S-XXL.", precio:18900, stock:50, categoria:"Ropa", imagen_color:"#1a0a0b", tallas:["S","M","L","XL","XXL"], colores:["Negro","Blanco","Rojo"] },
-    { id:"t2", nombre:"Gorra Snapback FRATE", descripcion:"Bordado insignia. Talla única regulable.", precio:14900, stock:30, categoria:"Accesorios", imagen_color:"#0a0a0b", tallas:["Única"], colores:["Negro","Dorado"] },
-    { id:"t3", nombre:"Hoodie FRATE Premium", descripcion:"Forro polar. Logo grande al pecho.", precio:29900, stock:20, categoria:"Ropa", imagen_color:"#0a0a0b", tallas:["S","M","L","XL"], colores:["Negro"] },
-    { id:"t4", nombre:"Tote Bag FRATE", descripcion:"Tela resistente 100% algodón.", precio:8900, stock:40, categoria:"Accesorios", imagen_color:"#0f0a00", tallas:["Única"], colores:["Natural","Negro"] },
-    { id:"t5", nombre:"Sticker Pack x5", descripcion:"5 stickers premium vinyl. Diseños exclusivos.", precio:3900, stock:100, categoria:"Coleccionables", imagen_color:"#0a0a12", tallas:["Única"], colores:["Multicolor"] },
-    { id:"t6", nombre:"Vaso Térmico FRATE", descripcion:"Acero inoxidable 500ml. Logo grabado.", precio:16900, stock:25, categoria:"Accesorios", imagen_color:"#0a120a", tallas:["Única"], colores:["Negro","Plateado"] }
-  ];
-  grid.innerHTML = data.map(p => `
-    <div class="tiendita-card" onclick="openTiendaPopup('${p.id}')">
-      <div class="tiendita-img" style="background:${p.imagen_color}">
-        <span style="position:relative;z-index:1;font-size:3rem;">${emojis[p.categoria]||'🛍️'}</span>
-      </div>
-      <div class="tiendita-info">
-        <div class="tiendita-categoria">${p.categoria}</div>
-        <div class="tiendita-nombre">${p.nombre}</div>
-        <div class="tiendita-desc">${p.descripcion}</div>
-        <div class="tiendita-precio-row">
-          <div class="tiendita-precio">$${p.precio.toLocaleString('es-CL')}</div>
-          <button class="tiendita-add-btn" onclick="event.stopPropagation();openTiendaPopup('${p.id}')">VER</button>
+  try {
+    const data = await sbGetTiendita();
+    if (!data || !data.length) {
+      grid.innerHTML = '<div style="color:var(--gris);font-size:0.85rem;letter-spacing:2px;padding:24px 0;">Sin productos disponibles</div>';
+      window._tiendaData = [];
+      return;
+    }
+    // normalise id to string for popup lookup
+    const norm = data.map(p => ({
+      ...p,
+      id: String(p.id),
+      imagen_color: p.imagen_color || '#111',
+      tallas:  Array.isArray(p.tallas)  ? p.tallas  : (p.tallas  || '').split(',').map(s=>s.trim()).filter(Boolean),
+      colores: Array.isArray(p.colores) ? p.colores : (p.colores || '').split(',').map(s=>s.trim()).filter(Boolean)
+    }));
+    window._tiendaData = norm;
+    grid.innerHTML = norm.map(p => `
+      <div class="tiendita-card" onclick="openTiendaPopup('${p.id}')">
+        <div class="tiendita-img" style="background:${p.imagen_url ? 'transparent' : p.imagen_color};${p.imagen_url ? `background-image:url(${p.imagen_url});background-size:cover;background-position:center;` : ''}">
+          ${!p.imagen_url ? `<span style="position:relative;z-index:1;font-size:3rem;">${emojis[p.categoria]||'🛍️'}</span>` : ''}
         </div>
-      </div>
-    </div>`).join('');
-  // Store data for popup
-  window._tiendaData = data;
+        <div class="tiendita-info">
+          <div class="tiendita-categoria">${p.categoria}</div>
+          <div class="tiendita-nombre">${p.nombre}</div>
+          <div class="tiendita-desc">${p.descripcion || ''}</div>
+          <div class="tiendita-precio-row">
+            <div class="tiendita-precio">$${p.precio.toLocaleString('es-CL')}</div>
+            <button class="tiendita-add-btn" onclick="event.stopPropagation();openTiendaPopup('${p.id}')">VER</button>
+          </div>
+        </div>
+      </div>`).join('');
+  } catch(err) {
+    console.warn('[FRATE] Tiendita no disponible:', err);
+    grid.innerHTML = '<div style="color:var(--gris);font-size:0.85rem;letter-spacing:2px;padding:24px 0;">Sin productos disponibles</div>';
+  }
 }
 
-// ── Override initCarta con datos hardcoded ──
-function initCarta() {
+// ── initCarta — carga desde Supabase ────────────────────────
+async function initCarta() {
   const container = document.getElementById('carta-container');
   if (!container) return;
-  const data = [
-    { categoria:"Cócteles Firma", items:[
-      { id:"c1", nombre:"Frate Sour", descripcion:"Pisco premium, limón, clara de huevo, hielo.", precio:6500 },
-      { id:"c2", nombre:"Campus Mule", descripcion:"Vodka, jengibre, limón, menta fresca.", precio:6000 },
-      { id:"c3", nombre:"Fuego Picante", descripcion:"Tequila, chile, limón, sal, jugo de tomate.", precio:7000 }
-    ]},
-    { categoria:"Cervezas", items:[
-      { id:"c4", nombre:"Schop Litro", descripcion:"Cerveza artesanal de barril. 1 litro.", precio:5500 },
-      { id:"c5", nombre:"Schop Medio", descripcion:"Cerveza artesanal de barril. 500cc.", precio:3500 },
-      { id:"c6", nombre:"Botella Importada", descripcion:"Selección importada 330cc.", precio:4500 }
-    ]},
-    { categoria:"Shots & Chupitos", items:[
-      { id:"c7", nombre:"Shot Clásico", descripcion:"Vodka, tequila o ron.", precio:2500 },
-      { id:"c8", nombre:"Chupito Frate", descripcion:"Combinación secreta de la casa.", precio:3000 }
-    ]},
-    { categoria:"Sin Alcohol", items:[
-      { id:"c9", nombre:"Jugo Natural", descripcion:"Naranja, maracuyá o piña. 300cc.", precio:2000 },
-      { id:"c10", nombre:"Agua Mineral", descripcion:"Con o sin gas. 500cc.", precio:1500 }
-    ]}
-  ];
-  container.innerHTML = data.map(cat => `
-    <div class="carta-categoria">
-      <div class="carta-cat-title">${cat.categoria}</div>
-      <div class="carta-items-grid">
-        ${cat.items.map(item => `
-          <div class="carta-item">
-            <div class="carta-item-info">
-              <div class="carta-item-nombre">${item.nombre}</div>
-              <div class="carta-item-desc">${item.descripcion}</div>
-            </div>
-            <div class="carta-item-right">
-              <div class="carta-item-precio">$${item.precio.toLocaleString('es-CL')}</div>
-              <button class="carta-add-btn" onclick="addCartaItemDirect('${item.id}','${item.nombre}',${item.precio})" title="Agregar">+</button>
-            </div>
-          </div>`).join('')}
-      </div>
-    </div>`).join('');
+  try {
+    const data = await sbGetCarta();
+    if (!data || !data.length) {
+      container.innerHTML = '<div style="color:var(--gris);font-size:0.85rem;letter-spacing:2px;padding:24px 0;">Carta no disponible</div>';
+      return;
+    }
+    // Agrupar por categoría
+    const cats = {};
+    data.forEach(item => {
+      if (!cats[item.categoria]) cats[item.categoria] = [];
+      cats[item.categoria].push(item);
+    });
+    container.innerHTML = Object.entries(cats).map(([cat, items]) => `
+      <div class="carta-categoria">
+        <div class="carta-cat-title">${cat}</div>
+        <div class="carta-items-grid">
+          ${items.map(item => `
+            <div class="carta-item">
+              <div class="carta-item-info">
+                <div class="carta-item-nombre">${item.nombre}</div>
+                <div class="carta-item-desc">${item.descripcion || ''}</div>
+              </div>
+              <div class="carta-item-right">
+                <div class="carta-item-precio">$${item.precio.toLocaleString('es-CL')}</div>
+                <button class="carta-add-btn" onclick="addCartaItemDirect('${item.id}','${item.nombre}',${item.precio})" title="Agregar">+</button>
+              </div>
+            </div>`).join('')}
+        </div>
+      </div>`).join('');
+  } catch(err) {
+    console.warn('[FRATE] Carta no disponible:', err);
+    container.innerHTML = '<div style="color:var(--gris);font-size:0.85rem;letter-spacing:2px;padding:24px 0;">Carta no disponible</div>';
+  }
 }
 
 function addCartaItemDirect(id, nombre, precio) {
@@ -1678,14 +1704,34 @@ function renderEventos(filter) {
   filter = filter || 'Todos';
   const grid = document.getElementById('eventos-grid');
   if (!grid || typeof FRATE_EVENTOS === 'undefined') return;
-  function formatP(n) { return '$' + n.toLocaleString('es-CL'); }
+  function formatP(n) { return n ? '$' + n.toLocaleString('es-CL') : ''; }
+  function getPrecioMin(ev) {
+    if (ev.precio_anticipada) return ev.precio_anticipada;
+    const tt = (ev.tiposTicket||[]).filter(t => t.estado==='Activo' && t.soloWeb!==false);
+    return tt.length ? Math.min(...tt.map(t => t.precio)) : 0;
+  }
   const filtered = filter === 'Todos' ? FRATE_EVENTOS : FRATE_EVENTOS.filter(e => e.tipo === filter);
+  if (!filtered.length) {
+    grid.innerHTML = '<div style="color:var(--gris);font-size:0.85rem;letter-spacing:2px;text-transform:uppercase;padding:32px 0;">Sin eventos próximos</div>';
+    return;
+  }
+  // Detecta si TODOS los tipos de ticket de un evento están agotados
+  function eventoAgotado(ev) {
+    const visibles = (ev.tiposTicket || []).filter(t =>
+      t.soloWeb !== false && t.estado !== 'Oculto' && t.estado !== 'Cerrado');
+    if (!visibles.length) return false;
+    return visibles.every(t => t.disponible === 0 || t.estado === 'Agotado');
+  }
+
   grid.innerHTML = filtered.map(ev => {
     const parts = ev.fecha.split(' ');
     const diaNom = parts[0], diaNum = parts[1], mes = parts.slice(2).join(' ');
+    const precioMin = getPrecioMin(ev);
+    const agotado = eventoAgotado(ev);
     return `
-    <div class="evento-card reveal" data-tipo="${ev.tipo}" data-evid="${ev.id}"
-         style="cursor:pointer;" onclick="openEventPopup(${ev.id})">
+    <div class="evento-card ${agotado ? 'evento-agotado' : ''}" data-tipo="${ev.tipo}" data-evid="${ev.id}"
+         style="cursor:pointer;opacity:1;transform:none;${agotado ? 'opacity:.7;' : ''}" onclick="openEventPopup(${ev.id})">
+      ${agotado ? `<div style="position:absolute;top:12px;right:12px;background:#52525b;color:#fff;font-size:0.55rem;letter-spacing:2px;padding:4px 10px;border-radius:2px;text-transform:uppercase;font-weight:900;z-index:2;">Agotado</div>` : ''}
       <div class="evento-fecha-block">
         <div class="evento-dia">${diaNum}</div>
         <div class="evento-mes">${diaNom}</div>
@@ -1700,13 +1746,12 @@ function renderEventos(filter) {
         </div>
       </div>
       <div class="evento-precios">
-        <div class="evento-precio-anticipada">Anticipada</div>
-        <div class="evento-precio-valor">${formatP(ev.precio_anticipada)}</div>
-        <button class="btn-ticket" onclick="event.stopPropagation();openEventPopup(${ev.id})">VER INFO →</button>
+        <div class="evento-precio-anticipada">${agotado ? 'Estado' : 'Tickets desde'}</div>
+        <div class="evento-precio-valor" style="${agotado ? 'color:#52525b;font-size:1.2rem;' : ''}">${agotado ? 'AGOTADO' : formatP(precioMin)}</div>
+        <button class="btn-ticket" onclick="event.stopPropagation();openEventPopup(${ev.id})">${agotado ? 'VER DETALLE' : 'VER INFO →'}</button>
       </div>
     </div>`;
   }).join('');
-  initReveal();
 }
 
 function openTicketsPopup() {
@@ -1777,75 +1822,145 @@ function syncFloatingCount() {
   fc.textContent = count > 0 ? count + (count === 1 ? ' ticket' : ' tickets') : '';
 }
 
+// ── Carga eventos desde Supabase y reemplaza FRATE_EVENTOS ────────────────
+async function loadEventosDesdeSupabase() {
+  try {
+    const DIAS  = ['Domingo','Lunes','Martes','Miércoles','Jueves','Viernes','Sábado'];
+    const MESES = ['Enero','Febrero','Marzo','Abril','Mayo','Junio','Julio','Agosto',
+                   'Septiembre','Octubre','Noviembre','Diciembre'];
+    const raw = await sbGetEventos();
+    console.log('[FRATE] Supabase eventos recibidos:', raw?.length, raw);
+    if (!raw || !raw.length) { renderEventos('Todos'); return; }
+    const mapped = raw.map(ev => {
+      const [y, m, d] = ev.fecha.split('-').map(Number);
+      const dateObj  = new Date(y, m - 1, d);
+      const diaNom   = DIAS[dateObj.getDay()];
+      const mesNom   = MESES[m - 1];
+      const fechaStr = `${diaNom} ${d} ${mesNom}`;
+      const dow  = dateObj.getDay(); // 0=Dom … 6=Sáb
+      const tipo = dow === 5 ? 'Viernes' : dow === 6 ? 'Sábado' : 'Especiales';
+      const tiposTicket = (ev.tipos_ticket || []).map(tt => ({
+        id:           tt.id,
+        nombre:       tt.nombre,
+        descripcion:  tt.descripcion || '',
+        precio:       tt.precio,
+        disponible:   tt.disponible,
+        estado:       tt.estado || 'Activo',
+        soloWeb:      tt.solo_web !== false,
+        maxPorCompra: tt.max_por_compra || 6
+      }));
+      return {
+        id:                ev.id,
+        nombre:            ev.nombre,
+        fecha:             fechaStr,
+        hora:              ev.hora || '23:00',
+        ambiente:          ev.ambiente || 'Fuego',
+        tipo,
+        descripcion:       ev.descripcion || '',
+        djs:               Array.isArray(ev.djs) ? ev.djs : [],
+        imagen_url:        ev.imagen_url || '',
+        precio_anticipada: ev.precio_anticipada || 0,
+        precio_general:    ev.precio_general || 0,
+        tiposTicket
+      };
+    });
+    // Mutar el array existente en lugar de reasignarlo (const no se puede reasignar)
+    FRATE_EVENTOS.splice(0, FRATE_EVENTOS.length, ...mapped);
+    // Re-render respetando el filtro activo
+    const activeFilter = document.querySelector('.filter-btn.active')?.dataset.filter || 'Todos';
+    renderEventos(activeFilter);
+  } catch (err) {
+    console.warn('[FRATE] No se pudo cargar eventos desde Supabase, usando datos locales.', err);
+    renderEventos('Todos');
+  }
+}
+
 document.addEventListener('DOMContentLoaded', () => {
-  // Fix stale ambiente names from cached frate-data.js
+  // Render inmediato con datos locales (frate-data.js) mientras carga Supabase
   fixEventoAmbientes();
   initCart();
   renderEventos('Todos');
   updateCartBadge();
   syncFloatingCount();
   prefillFormsFromSession();
+  // Carga datos en vivo desde Supabase y reemplaza la lista
+  loadEventosDesdeSupabase();
 
-  // Replace all stale confirm-ticket listeners (old frate-popups.js handler
-  // references ep-ticket-tipo/ep-ticket-qty which no longer exist) with the
-  // correct multi-type confirmMultiTickets from frate-cuenta.js.
-  const _epConfBtn = document.getElementById('ep-confirm-tickets');
-  if (_epConfBtn) {
-    const _newBtn = _epConfBtn.cloneNode(true);
-    _epConfBtn.parentNode.replaceChild(_newBtn, _epConfBtn);
-    _newBtn.addEventListener('click', confirmMultiTickets);
-  }
+  // Event popup: cerrar con × y con click en backdrop
+  document.getElementById('ep-close')?.addEventListener('click', closeEventPopup);
+  document.getElementById('event-popup')?.addEventListener('click', e => {
+    if (e.target === document.getElementById('event-popup')) closeEventPopup();
+  });
+
+  // ep-confirm-tickets: el listener lo agrega initCuentaModule en frate-cuenta.js
 });
 
-// Override openEventPopup to render multi-type tickets
-const _origOpenEventPopup = typeof openEventPopup === 'function' ? openEventPopup : null;
+// openEventPopup — muestra info + tickets directamente (sin paso intermedio)
 function openEventPopup(evId) {
   const ev = FRATE_EVENTOS.find(e => e.id === evId);
   if (!ev) return;
   const popup = document.getElementById('event-popup');
   if (!popup) return;
+
+  // Info básica
   document.getElementById('ep-nombre').textContent = ev.nombre;
-  document.getElementById('ep-fecha').textContent = ev.fecha + ' · ' + ev.hora + ' hrs';
-  document.getElementById('ep-djs').textContent = ev.djs.join(' · ');
-  document.getElementById('ep-ambiente').textContent = ev.ambiente;
-  const tt = ev.tiposTicket?.filter(t => t.soloWeb && t.estado === 'Activo');
-  const minP = tt?.length ? Math.min(...tt.map(t => t.precio)) : 0;
-  document.getElementById('ep-anticipada').textContent = minP ? '$' + minP.toLocaleString('es-CL') + '+' : '—';
-  document.getElementById('ep-general').textContent = ev.tiposTicket?.length + ' tipos';
+  document.getElementById('ep-fecha').textContent  = ev.fecha + ' · ' + (ev.hora || '23:00') + ' hrs';
+  document.getElementById('ep-djs').textContent    = (ev.djs || []).join(' · ');
+  document.getElementById('ep-ambiente').textContent = ev.ambiente || '';
+
+  // Imagen de fondo del evento
+  const heroBg = document.getElementById('ep-hero-bg');
+  if (heroBg) {
+    heroBg.style.backgroundImage   = ev.imagen_url ? `url(${ev.imagen_url})` : '';
+    heroBg.style.backgroundSize    = 'cover';
+    heroBg.style.backgroundPosition = 'center';
+  }
+
+  // "Tickets desde" — menor precio de los tickets activos disponibles
+  const ttActivos = (ev.tiposTicket || []).filter(t =>
+    t.soloWeb !== false && t.estado !== 'Agotado' && t.estado !== 'Oculto' &&
+    t.estado !== 'Cerrado' && t.estado !== 'Venta solo RRPP' && (t.disponible ?? 1) > 0
+  );
+  const minP = ttActivos.length ? Math.min(...ttActivos.map(t => t.precio)) : 0;
+  const desdeEl = document.getElementById('ep-precio-desde');
+  if (desdeEl) desdeEl.textContent = minP ? '$' + minP.toLocaleString('es-CL') + '+' : '—';
+
+  // Links
   const igLink = document.getElementById('ep-ig-link');
-  if (igLink) igLink.href = FRATE_CONFIG.instagram;
+  if (igLink) igLink.href = ev.link_ig || FRATE_CONFIG.instagram;
+  const extLink = document.getElementById('ep-ext-link');
+  if (extLink) {
+    if (ev.link_externo) { extLink.href = ev.link_externo; extLink.style.display = ''; }
+    else extLink.style.display = 'none';
+  }
+
   popup.dataset.evid = evId;
-  showTicketSelector(false);
   window.ticketTypeQtys = {};
+
+  // Renderizar tickets directamente
+  if (typeof renderTicketTypes === 'function') renderTicketTypes(ev);
+  if (typeof renderPersonalizacionFormsV3 === 'function') renderPersonalizacionFormsV3(0);
+
   popup.classList.add('open');
   document.body.style.overflow = 'hidden';
 }
 
-// Override showTicketSelector to render multi-type list
-const _origShowTicketSelector = typeof showTicketSelector === 'function' ? showTicketSelector : null;
+// showTicketSelector — ya no necesita alternar vistas, sólo re-renderiza si es necesario
 function showTicketSelector(show) {
-  const sel = document.getElementById('ep-ticket-section');
-  const btns = document.getElementById('ep-buy-btns');
-  if (sel) sel.style.display = show ? 'block' : 'none';
-  if (btns) btns.style.display = show ? 'none' : 'flex';
-  if (show) {
-    const evId = parseInt(document.getElementById('event-popup').dataset.evid);
-    const ev = FRATE_EVENTOS.find(e => e.id === evId);
-    if (ev) {
-      renderTicketTypes(ev);
-      renderPersonalizacionFormsV3(1);
-    }
-  }
+  if (!show) return; // no-op: tickets siempre visibles
+  const evId = parseInt(document.getElementById('event-popup')?.dataset.evid);
+  const ev = FRATE_EVENTOS.find(e => e.id === evId);
+  if (ev) { renderTicketTypes(ev); renderPersonalizacionFormsV3(0); }
 }
 
-// Watch qty changes → update personas list
+// Watch qty changes → actualizar formularios de personas
 document.addEventListener('click', e => {
   if (e.target.closest('.ticket-qty-inline .qty-btn')) {
-    const evId = parseInt(document.getElementById('event-popup').dataset.evid);
+    const evId = parseInt(document.getElementById('event-popup')?.dataset.evid);
     const ev = FRATE_EVENTOS.find(e2 => e2.id === evId);
     if (!ev) return;
     const totalQty = (ev.tiposTicket || []).reduce((s,tt) => s + (window.ticketTypeQtys?.[tt.id] || 0), 0);
-    if (totalQty > 0) renderPersonalizacionFormsV3(totalQty);
+    renderPersonalizacionFormsV3(totalQty);
   }
 });
 </script>

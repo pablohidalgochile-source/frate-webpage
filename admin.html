@@ -276,8 +276,11 @@
 
     <!-- AMBIENTES -->
     <div class="panel" id="p-ambientes">
-      <h2 style="font-family:var(--disp);font-weight:900;font-size:1.6rem;margin-bottom:18px;">AMBIENTES</h2>
-      <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:12px;" id="amb-cards"></div>
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:18px;">
+        <h2 style="font-family:var(--disp);font-weight:900;font-size:1.6rem;">AMBIENTES</h2>
+        <button class="btn btn-p" onclick="openModal('modal-ambiente')">+ Ambiente</button>
+      </div>
+      <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(280px,1fr));gap:12px;" id="amb-cards"></div>
     </div>
 
     <!-- MEDIA -->
@@ -437,7 +440,14 @@
     <div class="fg"><label>DJs / Lineup (separados por coma)</label><input type="text" id="ev-djs" placeholder="DJ KRE, BASTIAN" /></div>
     <div class="form-2">
       <div class="fg"><label>Descripción</label><textarea id="ev-desc" placeholder="La noche de trap más esperada..."></textarea></div>
-      <div class="fg"><label>URL imagen (opcional)</label><input type="url" id="ev-img" placeholder="https://..." /></div>
+      <div class="fg"><label>URL imagen del evento</label><input type="url" id="ev-img" placeholder="https://..." /></div>
+    </div>
+    <div style="font-size:0.65rem;letter-spacing:2px;text-transform:uppercase;color:var(--rojo);margin:12px 0 6px;">Links & Tickets</div>
+    <div class="fg"><label>🎟️ Link de tickets externo (Passline, Fintoc, etc.)</label><input type="url" id="ev-link-ext" placeholder="https://passline.com/..." /></div>
+    <div class="form-3">
+      <div class="fg"><label>📸 Instagram (post del evento)</label><input type="url" id="ev-link-ig" placeholder="https://instagram.com/p/..." /></div>
+      <div class="fg"><label>🎵 TikTok</label><input type="url" id="ev-link-tiktok" placeholder="https://tiktok.com/..." /></div>
+      <div class="fg"><label>📘 Facebook</label><input type="url" id="ev-link-fb" placeholder="https://facebook.com/..." /></div>
     </div>
     <div class="toggle-row"><span style="font-size:0.82rem;">Evento activo (visible en frate.cl)</span><label class="sw"><input type="checkbox" id="ev-activo" checked><span class="sl"></span></label></div>
   </div>
@@ -501,6 +511,33 @@
     <div class="form-2"><div class="fg"><label>Precio (CLP)</label><input type="number" id="ca-precio" /></div><div class="fg"><label>Disponible</label><select id="ca-disp"><option value="true">Sí</option><option value="false">No</option></select></div></div>
   </div>
   <div class="mfoot"><button class="btn btn-g" onclick="closeModal('modal-carta')">Cancelar</button><button class="btn btn-p" onclick="saveCarta()">Guardar</button></div>
+</div></div>
+
+<!-- Ambiente -->
+<div class="mo" id="modal-ambiente"><div class="mb">
+  <div class="mh"><span class="mht" id="mamt-title">Ambiente</span><button class="mc" onclick="closeModal('modal-ambiente')">✕</button></div>
+  <div class="mbody">
+    <input type="hidden" id="amt-id" value="" />
+    <div class="form-3">
+      <div class="fg"><label>Nombre</label><input type="text" id="amt-nombre" placeholder="FUEGO" /></div>
+      <div class="fg"><label>Slug (id único)</label><input type="text" id="amt-slug" placeholder="fuego" /></div>
+      <div class="fg"><label>Emoji</label><input type="text" id="amt-emoji" placeholder="🔥" /></div>
+    </div>
+    <div class="fg"><label>Descripción</label><textarea id="amt-desc" placeholder="La pista principal..."></textarea></div>
+    <div class="form-2">
+      <div class="fg"><label>Música (géneros, coma)</label><input type="text" id="amt-musica" placeholder="Reggaeton, Urban, Trap" /></div>
+      <div class="fg"><label>Capacidad</label><input type="text" id="amt-cap" placeholder="350 personas" /></div>
+    </div>
+    <div class="form-2">
+      <div class="fg"><label>Color acento (hex)</label><input type="text" id="amt-color" placeholder="#E8363D" /></div>
+      <div class="fg"><label>Orden</label><input type="number" id="amt-orden" placeholder="1" /></div>
+    </div>
+    <div class="fg"><label>URL imagen del ambiente</label><input type="url" id="amt-img" placeholder="https://..." /></div>
+    <div style="font-size:0.72rem;color:var(--muted);margin-top:6px;">O sube una imagen directamente:</div>
+    <input type="file" id="amt-file" accept="image/*" style="display:none" onchange="uploadAmbienteImg(this)" />
+    <button class="btn btn-s btn-sm" style="margin-top:6px;" onclick="document.getElementById('amt-file').click()">📸 Subir imagen</button>
+  </div>
+  <div class="mfoot"><button class="btn btn-g" onclick="closeModal('modal-ambiente')">Cancelar</button><button class="btn btn-p" onclick="saveAmbiente()">Guardar</button></div>
 </div></div>
 
 <!-- Regalo usuario -->
@@ -705,7 +742,7 @@ async function renderEventos() {
 function resetEventoForm() {
   document.getElementById('ev-id').value = '';
   document.getElementById('me-title').textContent = 'Nuevo evento';
-  ['ev-nombre','ev-fecha','ev-hora','ev-djs','ev-desc','ev-img'].forEach(id => { const el=document.getElementById(id); if(el) el.value=''; });
+  ['ev-nombre','ev-fecha','ev-hora','ev-djs','ev-desc','ev-img','ev-link-ext','ev-link-ig','ev-link-tiktok','ev-link-fb'].forEach(id => { const el=document.getElementById(id); if(el) el.value=''; });
   document.getElementById('ev-ambiente').value = 'Fuego';
   document.getElementById('ev-activo').checked = true;
 }
@@ -722,6 +759,10 @@ async function editEvento(evId) {
   document.getElementById('ev-ambiente').value = ev.ambiente || 'Fuego';
   document.getElementById('ev-desc').value = ev.descripcion || '';
   document.getElementById('ev-img').value = ev.imagen_url || '';
+  document.getElementById('ev-link-ext').value = ev.link_externo || '';
+  document.getElementById('ev-link-ig').value = ev.link_ig || '';
+  document.getElementById('ev-link-tiktok').value = ev.link_tiktok || '';
+  document.getElementById('ev-link-fb').value = ev.link_fb || '';
   document.getElementById('ev-activo').checked = ev.activo !== false;
   openModal('modal-evento');
 }
@@ -732,13 +773,17 @@ async function saveEvento() {
   if (!nombre) { showToast('Ingresa un nombre', true); return; }
   const data = {
     nombre,
-    fecha:       document.getElementById('ev-fecha').value || null,
-    hora:        document.getElementById('ev-hora').value || '23:00',
-    djs:         document.getElementById('ev-djs').value.split(',').map(s=>s.trim()).filter(Boolean),
-    ambiente:    document.getElementById('ev-ambiente').value,
-    descripcion: document.getElementById('ev-desc').value,
-    imagen_url:  document.getElementById('ev-img').value || null,
-    activo:      document.getElementById('ev-activo').checked
+    fecha:         document.getElementById('ev-fecha').value || null,
+    hora:          document.getElementById('ev-hora').value || '23:00',
+    djs:           document.getElementById('ev-djs').value.split(',').map(s=>s.trim()).filter(Boolean),
+    ambiente:      document.getElementById('ev-ambiente').value,
+    descripcion:   document.getElementById('ev-desc').value,
+    imagen_url:    document.getElementById('ev-img').value || null,
+    link_externo:  document.getElementById('ev-link-ext').value.trim() || null,
+    link_ig:       document.getElementById('ev-link-ig').value.trim() || null,
+    link_tiktok:   document.getElementById('ev-link-tiktok').value.trim() || null,
+    link_fb:       document.getElementById('ev-link-fb').value.trim() || null,
+    activo:        document.getElementById('ev-activo').checked
   };
   try {
     if (evId) {
@@ -936,14 +981,90 @@ async function marcarPagado(id, estadoActual) {
   renderOrdenes(); showToast('Estado → ' + nuevoEstado);
 }
 
+// ── VALIDAR QR ─────────────────────────────────────────────────
+// Formato nuevo: FCC-<pedidoId>-<key>-<unit>
+// Si solo viene FCC-<pedidoId>: muestra el pedido completo
 async function validateQR() {
-  const code = document.getElementById('qr-input').value.trim().toUpperCase();
+  const code   = document.getElementById('qr-input').value.trim().toUpperCase();
   const result = document.getElementById('qr-result');
-  if (!code) { result.innerHTML=`<div style="padding:14px;background:rgba(232,54,61,.1);border:1px solid rgba(232,54,61,.3);border-radius:4px;color:var(--rojo)">Ingresa un código</div>`; return; }
-  // QR validation: lookup in pedidos
-  const { data: order } = await sb.from('pedidos').select('*,items_pedido(*)').eq('id', code.replace('FCC-','')).maybeSingle();
-  if (!order) { result.innerHTML=`<div style="padding:14px;background:rgba(232,54,61,.1);border:1px solid rgba(232,54,61,.3);border-radius:4px;color:var(--rojo)">❌ Ticket no encontrado</div>`; return; }
-  result.innerHTML=`<div style="padding:14px;background:rgba(34,197,94,.1);border:1px solid rgba(34,197,94,.3);border-radius:4px;"><div style="color:var(--verde);font-weight:600;margin-bottom:6px">✅ Válido — Ingreso autorizado</div><div style="font-size:0.78rem;color:var(--muted);line-height:1.8">Comprador: <strong style="color:var(--text)">${order.nombre_cliente}</strong><br/>Total: <strong style="color:var(--text)">${clp(order.total)}</strong><br/>Estado: <strong style="color:var(--text)">${order.estado}</strong></div></div>`;
+  if (!code) {
+    result.innerHTML = `<div style="padding:14px;background:rgba(232,54,61,.1);border:1px solid rgba(232,54,61,.3);border-radius:4px;color:var(--rojo)">Ingresa un código</div>`;
+    return;
+  }
+
+  // Parsear formato FCC-pedidoId-key-unit
+  const raw = code.replace(/^FCC-/, '');
+  const parts = raw.split('-');
+  const pedidoId = parseInt(parts[0]) || parseInt(raw); // tolera FCC-000123 también
+  if (!pedidoId) {
+    result.innerHTML = `<div style="padding:14px;background:rgba(232,54,61,.1);border:1px solid rgba(232,54,61,.3);border-radius:4px;color:var(--rojo)">❌ Código inválido</div>`;
+    return;
+  }
+
+  // Buscar pedido
+  const { data: order } = await sb.from('pedidos').select('*, items_pedido(*)').eq('id', pedidoId).maybeSingle();
+  if (!order) {
+    result.innerHTML = `<div style="padding:14px;background:rgba(232,54,61,.1);border:1px solid rgba(232,54,61,.3);border-radius:4px;color:var(--rojo)">❌ Pedido no encontrado</div>`;
+    return;
+  }
+
+  // Si pedido no está pagado, advertir
+  if (order.estado !== 'pagado') {
+    result.innerHTML = `<div style="padding:14px;background:rgba(245,158,11,.1);border:1px solid rgba(245,158,11,.3);border-radius:4px;color:#f59e0b;font-weight:600">⚠️ Pedido en estado: ${order.estado} — NO autorizado</div>`;
+    return;
+  }
+
+  // Si tiene key+unit, buscar el item específico
+  let itemMatch = null;
+  let personaMatch = null;
+  if (parts.length >= 3) {
+    const key  = parts[1];
+    const unit = parseInt(parts[2]);
+    itemMatch = (order.items_pedido || []).find(ip => {
+      if (ip.tipo_ticket_id && String(ip.tipo_ticket_id) === key) return true;
+      if (ip.producto_id && String(ip.producto_id) === key) return true;
+      if (ip.producto_tipo === key) return true;
+      return false;
+    });
+    if (itemMatch?.personas && Array.isArray(itemMatch.personas)) {
+      personaMatch = itemMatch.personas[unit] || null;
+    }
+  }
+
+  // Verificar si ya fue usado
+  const { data: usado } = await sb.from('qr_usados').select('*').eq('qr_id', code).maybeSingle();
+  const yaUsado = !!usado;
+
+  const icono = itemMatch?.producto_tipo === 'carta' ? '🍹' : itemMatch?.producto_tipo === 'merch' ? '🛍️' : '🎟️';
+  const itemNombre = itemMatch?.nombre_evento || itemMatch?.nombre_ticket || (itemMatch ? 'Item' : 'Pedido completo');
+
+  result.innerHTML = `
+    <div style="padding:14px;background:${yaUsado ? 'rgba(245,158,11,.1)' : 'rgba(34,197,94,.1)'};border:1px solid ${yaUsado ? 'rgba(245,158,11,.4)' : 'rgba(34,197,94,.4)'};border-radius:4px;">
+      <div style="color:${yaUsado ? '#f59e0b' : 'var(--verde)'};font-weight:700;margin-bottom:10px;font-size:1rem;">
+        ${yaUsado ? '⚠️ Ya escaneado — uso duplicado' : '✅ Válido — Autorizar ingreso'}
+      </div>
+      <div style="font-size:0.8rem;color:var(--text);line-height:1.8;">
+        <div>${icono} <strong>${itemNombre}</strong></div>
+        ${personaMatch?.nombre ? `<div>👤 ${personaMatch.nombre}${personaMatch.rut ? ' · RUT: '+personaMatch.rut : ''}</div>` : ''}
+        <div>Comprador: <strong>${order.nombre_cliente}</strong></div>
+        <div style="font-size:0.7rem;color:var(--muted);">${order.email_cliente}</div>
+        <div>Pedido: <strong style="color:var(--dorado)">FCC-${String(order.id).padStart(6,'0')}</strong></div>
+        ${yaUsado ? `<div style="margin-top:8px;color:#f59e0b;">Escaneado: ${new Date(usado.created_at).toLocaleString('es-CL')}</div>` : ''}
+      </div>
+      ${!yaUsado ? `<button class="btn btn-ok btn-sm" style="margin-top:10px;width:100%;" onclick="marcarQRUsado('${code}', ${pedidoId})">CONFIRMAR INGRESO</button>` : ''}
+    </div>`;
+}
+
+async function marcarQRUsado(qrId, pedidoId) {
+  try {
+    const { error } = await sb.from('qr_usados').insert({ qr_id: qrId, pedido_id: pedidoId });
+    if (error) throw error;
+    showToast('✅ Ingreso registrado');
+    document.getElementById('qr-input').value = '';
+    document.getElementById('qr-result').innerHTML = '<div style="padding:14px;color:var(--verde);text-align:center;">✅ Listo — siguiente</div>';
+  } catch (err) {
+    showToast('⚠️ Error: ' + err.message);
+  }
 }
 
 // ── USUARIOS ─────────────────────────────────────────────────
@@ -1054,9 +1175,82 @@ async function renderPuntos() {
 }
 
 // ── AMBIENTES ────────────────────────────────────────────────
-function renderAmbientes() {
-  const data=[{nombre:'FUEGO',musica:'Reggaeton · Urban · Trap',cap:'350 personas',color:'#E8363D',icon:'🔥',desc:'La pista principal. El corazón del carrete.'},{nombre:'AIRE',musica:'Nacional Hits · Afrobeats',cap:'200 personas',color:'#D4A832',icon:'🌬️',desc:'El espacio donde suena lo nuestro.'},{nombre:'TIERRA',musica:'Guaracha · Dembow',cap:'150 personas',color:'#8B1A1E',icon:'🌿',desc:'La terraza de la casita. Bajo las estrellas.'}];
-  document.getElementById('amb-cards').innerHTML=data.map(a=>`<div class="card"><div style="padding:14px 18px;border-bottom:1px solid var(--border);border-top:3px solid ${a.color};display:flex;align-items:center;gap:10px;"><span style="font-size:1.4rem">${a.icon}</span><div><div style="font-family:var(--disp);font-weight:900;font-size:1.2rem">${a.nombre}</div><div style="font-size:0.68rem;color:var(--muted)">${a.cap}</div></div></div><div class="cb"><div style="font-size:0.75rem;color:var(--muted);margin-bottom:6px">${a.desc}</div><div style="font-size:0.68rem;color:${a.color};letter-spacing:1px;text-transform:uppercase">${a.musica}</div></div></div>`).join('');
+async function renderAmbientes() {
+  const cards = document.getElementById('amb-cards');
+  try {
+    const { data, error } = await sb.from('ambientes').select('*').order('orden').order('id');
+    if (error || !data?.length) { cards.innerHTML='<div style="color:var(--muted);padding:20px">Sin ambientes. Crea el primero →</div>'; return; }
+    cards.innerHTML = data.map(a => {
+      const musica = Array.isArray(a.musica) ? a.musica.join(' · ') : (a.musica||'');
+      return `<div class="card" style="border-top:3px solid ${a.color_acento||'#E8363D'}">
+        <div class="ch">
+          <span style="font-size:1.4rem">${a.emoji||'🔥'}</span>
+          <div><div style="font-family:var(--disp);font-weight:900;font-size:1.2rem">${a.nombre}</div><div style="font-size:0.68rem;color:var(--muted)">${a.capacidad||''}</div></div>
+          <div style="margin-left:auto;display:flex;gap:4px">
+            <button class="btn btn-g btn-sm" onclick="editAmbiente(${a.id})">Editar</button>
+            <button class="btn btn-del btn-sm" onclick="deleteAmbiente(${a.id})">×</button>
+          </div>
+        </div>
+        <div class="cb">
+          ${a.imagen_url ? `<img src="${a.imagen_url}" style="width:100%;height:120px;object-fit:cover;border-radius:var(--r);margin-bottom:8px;" />` : ''}
+          <div style="font-size:0.75rem;color:var(--muted);margin-bottom:6px">${a.descripcion||''}</div>
+          <div style="font-size:0.68rem;color:${a.color_acento||'#E8363D'};letter-spacing:1px;text-transform:uppercase">${musica}</div>
+        </div>
+      </div>`;
+    }).join('');
+  } catch(e) { cards.innerHTML=`<div style="color:var(--muted)">Error: ${e.message}</div>`; }
+}
+async function editAmbiente(id) {
+  const { data } = await sb.from('ambientes').select('*').eq('id', id).single();
+  if (!data) return;
+  document.getElementById('amt-id').value = id;
+  document.getElementById('amt-nombre').value = data.nombre || '';
+  document.getElementById('amt-slug').value = data.slug || '';
+  document.getElementById('amt-emoji').value = data.emoji || '';
+  document.getElementById('amt-desc').value = data.descripcion || '';
+  document.getElementById('amt-musica').value = Array.isArray(data.musica) ? data.musica.join(', ') : (data.musica||'');
+  document.getElementById('amt-cap').value = data.capacidad || '';
+  document.getElementById('amt-color').value = data.color_acento || '#E8363D';
+  document.getElementById('amt-orden').value = data.orden || 0;
+  document.getElementById('amt-img').value = data.imagen_url || '';
+  document.getElementById('mamt-title').textContent = 'Editar: ' + data.nombre;
+  openModal('modal-ambiente');
+}
+async function saveAmbiente() {
+  const id = document.getElementById('amt-id').value;
+  const row = {
+    nombre:      document.getElementById('amt-nombre').value.trim().toUpperCase(),
+    slug:        document.getElementById('amt-slug').value.trim().toLowerCase(),
+    emoji:       document.getElementById('amt-emoji').value.trim(),
+    descripcion: document.getElementById('amt-desc').value.trim(),
+    musica:      document.getElementById('amt-musica').value.split(',').map(s=>s.trim()).filter(Boolean),
+    capacidad:   document.getElementById('amt-cap').value.trim(),
+    color_acento:document.getElementById('amt-color').value.trim(),
+    orden:       parseInt(document.getElementById('amt-orden').value)||0,
+    imagen_url:  document.getElementById('amt-img').value.trim()||null
+  };
+  if (!row.nombre||!row.slug) { showToast('Nombre y slug son obligatorios',true); return; }
+  if (id) { await sb.from('ambientes').update(row).eq('id',id); }
+  else { await sb.from('ambientes').insert(row); }
+  closeModal('modal-ambiente');
+  document.getElementById('amt-id').value='';
+  document.getElementById('mamt-title').textContent='Ambiente';
+  renderAmbientes(); showToast('✅ Ambiente guardado');
+}
+async function deleteAmbiente(id) {
+  if (!confirm('¿Eliminar este ambiente?')) return;
+  await sb.from('ambientes').delete().eq('id',id);
+  renderAmbientes(); showToast('Ambiente eliminado');
+}
+async function uploadAmbienteImg(input) {
+  const file = input.files[0]; if (!file) return;
+  showToast('Subiendo imagen...');
+  const fname = `ambientes/${Date.now()}-${file.name.replace(/\s/g,'_')}`;
+  const { error } = await sb.storage.from('frate-media').upload(fname, file, { upsert:true });
+  if (error) { showToast('Error: '+error.message, true); return; }
+  const { data: { publicUrl } } = sb.storage.from('frate-media').getPublicUrl(fname);
+  document.getElementById('amt-img').value = publicUrl;
+  showToast('✅ Imagen subida');
 }
 
 // ── MEDIA / FOTOS ────────────────────────────────────────────
@@ -1109,50 +1303,156 @@ async function saveMedia() {
   showToast('✅ URL de media guardada'); closeModal('modal-media');
 }
 
-// ── WEBEUM ───────────────────────────────────────────────────
-function getWebeum()  { return LS.get('admin_webeum') || []; }
-function renderWebeum() {
-  const eps=getWebeum(); const tbody=document.getElementById('tb-webeum');
-  tbody.innerHTML=eps.length
-    ? eps.map((ep,i)=>`<tr><td class="tb" style="color:var(--rojo)">EP.${eps.length-i}</td><td class="tb">${ep.titulo}</td><td class="tm">${ep.fecha}</td><td class="tm">${ep.duracion}</td><td><a href="${ep.url}" target="_blank" style="color:var(--azul);font-size:0.72rem;text-decoration:none">${ep.url?.substring(0,35)}...</a></td><td><div style="display:flex;gap:4px"><a href="${ep.url}" target="_blank" class="btn btn-g btn-sm">▶</a><button class="btn btn-del btn-sm" onclick="deleteWebeum(${i})">×</button></div></td></tr>`).join('')
-    : `<tr><td colspan="6" style="text-align:center;color:var(--muted);padding:20px">Sin episodios</td></tr>`;
+// ── WEBEUM → Supabase ────────────────────────────────────────
+async function renderWebeum() {
+  const tbody = document.getElementById('tb-webeum');
+  try {
+    const { data, error } = await sb.from('webeum').select('*').order('orden',{ascending:false}).order('created_at',{ascending:false});
+    if (error) throw error;
+    tbody.innerHTML = data?.length
+      ? data.map((ep,i)=>`<tr>
+          <td class="tb" style="color:var(--rojo)">EP.${data.length-i}</td>
+          <td class="tb">${ep.titulo}</td>
+          <td class="tm">${ep.fecha||''}</td>
+          <td class="tm">${ep.duracion||''}</td>
+          <td><a href="${ep.url}" target="_blank" style="color:var(--azul);font-size:0.72rem;text-decoration:none">${(ep.url||'').substring(0,40)}...</a></td>
+          <td><div style="display:flex;gap:4px">
+            <a href="${ep.url}" target="_blank" class="btn btn-g btn-sm">▶</a>
+            <button class="btn btn-del btn-sm" onclick="deleteWebeum(${ep.id})">×</button>
+          </div></td>
+        </tr>`).join('')
+      : `<tr><td colspan="6" style="text-align:center;color:var(--muted);padding:20px">Sin episodios</td></tr>`;
+  } catch(e) { tbody.innerHTML=`<tr><td colspan="6" style="color:var(--muted)">${e.message}</td></tr>`; }
 }
-function saveWebeum() {
-  const eps=getWebeum(); const f=document.getElementById('we-fecha').value;
-  eps.unshift({id:Date.now(),titulo:document.getElementById('we-titulo').value,url:document.getElementById('we-url').value,fecha:f?new Date(f).toLocaleDateString('es-CL',{day:'numeric',month:'short',year:'numeric'}):'',duracion:document.getElementById('we-dur').value});
-  LS.set('admin_webeum',eps); closeModal('modal-webeum'); renderWebeum(); showToast('✅ Episodio agregado');
+async function saveWebeum() {
+  const f = document.getElementById('we-fecha').value;
+  const row = {
+    titulo:   document.getElementById('we-titulo').value.trim(),
+    url:      document.getElementById('we-url').value.trim(),
+    fecha:    f ? new Date(f).toLocaleDateString('es-CL',{day:'numeric',month:'short',year:'numeric'}) : '',
+    duracion: document.getElementById('we-dur').value.trim()
+  };
+  if (!row.titulo||!row.url) { showToast('Título y URL son obligatorios',true); return; }
+  const { error } = await sb.from('webeum').insert(row);
+  if (error) { showToast('Error: '+error.message, true); return; }
+  closeModal('modal-webeum'); renderWebeum(); showToast('✅ Episodio agregado');
 }
-function deleteWebeum(i) { const eps=getWebeum(); eps.splice(i,1); LS.set('admin_webeum',eps); renderWebeum(); }
+async function deleteWebeum(id) {
+  if (!confirm('¿Eliminar este episodio?')) return;
+  await sb.from('webeum').delete().eq('id',id);
+  renderWebeum(); showToast('Episodio eliminado');
+}
 
-// ── TIENDITA ─────────────────────────────────────────────────
-function getTiendita(){ return LS.get('admin_tiendita') || []; }
-function renderTiendita() {
-  const items=getTiendita(); const tbody=document.getElementById('tb-tiendita');
-  tbody.innerHTML=items.length
-    ? items.map((p,i)=>`<tr><td class="tb">${p.nombre}</td><td class="tm">${p.categoria}</td><td style="color:var(--dorado)">${clp(p.precio)}</td><td>${p.stock||'—'}</td><td><span class="badge ${p.disponible?'b-g':'b-gr'}">${p.disponible?'Disponible':'Sin stock'}</span></td><td><button class="btn btn-del btn-sm" onclick="deleteTiendita(${i})">×</button></td></tr>`).join('')
-    : `<tr><td colspan="6" style="text-align:center;color:var(--muted);padding:20px">Sin productos</td></tr>`;
+// ── TIENDITA → Supabase ──────────────────────────────────────
+async function renderTiendita() {
+  const tbody = document.getElementById('tb-tiendita');
+  try {
+    const { data, error } = await sb.from('tiendita').select('*').order('orden').order('id');
+    if (error) throw error;
+    tbody.innerHTML = data?.length
+      ? data.map(p=>`<tr>
+          <td class="tb">${p.nombre}</td>
+          <td class="tm">${p.categoria}</td>
+          <td style="color:var(--dorado)">${clp(p.precio)}</td>
+          <td>${p.stock||0}</td>
+          <td><span class="badge ${p.disponible?'b-g':'b-gr'}">${p.disponible?'Disponible':'Sin stock'}</span></td>
+          <td><div style="display:flex;gap:4px">
+            <button class="btn btn-g btn-sm" onclick="editTiendita(${p.id})">Editar</button>
+            <button class="btn btn-del btn-sm" onclick="deleteTiendita(${p.id})">×</button>
+          </div></td>
+        </tr>`).join('')
+      : `<tr><td colspan="6" style="text-align:center;color:var(--muted);padding:20px">Sin productos</td></tr>`;
+  } catch(e) { tbody.innerHTML=`<tr><td colspan="6" style="color:var(--muted)">${e.message}</td></tr>`; }
 }
-function saveTiendita() {
-  const items=getTiendita();
-  items.push({id:'t'+Date.now(),nombre:document.getElementById('ti-nombre').value,categoria:document.getElementById('ti-cat').value,descripcion:document.getElementById('ti-desc').value,precio:parseInt(document.getElementById('ti-precio').value)||0,stock:parseInt(document.getElementById('ti-stock').value)||0,disponible:true,imagen_color:'#111',tallas:document.getElementById('ti-tallas').value.split(',').map(s=>s.trim()),colores:document.getElementById('ti-colores').value.split(',').map(s=>s.trim())});
-  LS.set('admin_tiendita',items); closeModal('modal-tiendita'); renderTiendita(); showToast('✅ Producto guardado');
+async function editTiendita(id) {
+  const { data } = await sb.from('tiendita').select('*').eq('id',id).single();
+  if (!data) return;
+  document.getElementById('ti-nombre').value = data.nombre||'';
+  document.getElementById('ti-cat').value = data.categoria||'Ropa';
+  document.getElementById('ti-desc').value = data.descripcion||'';
+  document.getElementById('ti-precio').value = data.precio||0;
+  document.getElementById('ti-stock').value = data.stock||0;
+  document.getElementById('ti-img').value = data.imagen_url||'';
+  document.getElementById('ti-tallas').value = Array.isArray(data.tallas)?data.tallas.join(','):(data.tallas||'');
+  document.getElementById('ti-colores').value = Array.isArray(data.colores)?data.colores.join(','):(data.colores||'');
+  document.getElementById('modal-tiendita').dataset.editId = id;
+  openModal('modal-tiendita');
 }
-function deleteTiendita(i){const l=getTiendita();l.splice(i,1);LS.set('admin_tiendita',l);renderTiendita();}
+async function saveTiendita() {
+  const editId = document.getElementById('modal-tiendita').dataset.editId;
+  const row = {
+    nombre:      document.getElementById('ti-nombre').value.trim(),
+    categoria:   document.getElementById('ti-cat').value,
+    descripcion: document.getElementById('ti-desc').value.trim(),
+    precio:      parseInt(document.getElementById('ti-precio').value)||0,
+    stock:       parseInt(document.getElementById('ti-stock').value)||0,
+    disponible:  true,
+    imagen_url:  document.getElementById('ti-img').value.trim()||null,
+    tallas:      document.getElementById('ti-tallas').value.split(',').map(s=>s.trim()).filter(Boolean),
+    colores:     document.getElementById('ti-colores').value.split(',').map(s=>s.trim()).filter(Boolean)
+  };
+  if (!row.nombre) { showToast('Nombre es obligatorio',true); return; }
+  if (editId) { await sb.from('tiendita').update(row).eq('id',editId); delete document.getElementById('modal-tiendita').dataset.editId; }
+  else { await sb.from('tiendita').insert(row); }
+  closeModal('modal-tiendita'); renderTiendita(); showToast('✅ Producto guardado');
+}
+async function deleteTiendita(id) {
+  if (!confirm('¿Eliminar este producto?')) return;
+  await sb.from('tiendita').delete().eq('id',id);
+  renderTiendita(); showToast('Producto eliminado');
+}
 
-// ── CARTA ────────────────────────────────────────────────────
-function getCarta(){ return LS.get('admin_carta') || []; }
-function renderCarta() {
-  const items=getCarta(); const tbody=document.getElementById('tb-carta');
-  tbody.innerHTML=items.length
-    ? items.map((c,i)=>`<tr><td class="tb">${c.nombre}</td><td class="tm">${c.categoria}</td><td class="tm">${c.descripcion}</td><td style="color:var(--dorado)">${clp(c.precio)}</td><td><span class="badge ${c.disponible?'b-g':'b-gr'}">${c.disponible?'Disponible':'No'}</span></td><td><button class="btn btn-del btn-sm" onclick="deleteCarta(${i})">×</button></td></tr>`).join('')
-    : `<tr><td colspan="6" style="text-align:center;color:var(--muted);padding:20px">Sin ítems</td></tr>`;
+// ── CARTA → Supabase ─────────────────────────────────────────
+async function renderCarta() {
+  const tbody = document.getElementById('tb-carta');
+  try {
+    const { data, error } = await sb.from('carta').select('*').order('categoria').order('orden').order('id');
+    if (error) throw error;
+    tbody.innerHTML = data?.length
+      ? data.map(c=>`<tr>
+          <td class="tb">${c.nombre}</td>
+          <td class="tm">${c.categoria}</td>
+          <td class="tm" style="max-width:180px;overflow:hidden;text-overflow:ellipsis">${c.descripcion||''}</td>
+          <td style="color:var(--dorado)">${clp(c.precio)}</td>
+          <td><span class="badge ${c.disponible?'b-g':'b-gr'}">${c.disponible?'Disponible':'No'}</span></td>
+          <td><div style="display:flex;gap:4px">
+            <button class="btn btn-g btn-sm" onclick="editCarta(${c.id})">Editar</button>
+            <button class="btn btn-del btn-sm" onclick="deleteCarta(${c.id})">×</button>
+          </div></td>
+        </tr>`).join('')
+      : `<tr><td colspan="6" style="text-align:center;color:var(--muted);padding:20px">Sin ítems</td></tr>`;
+  } catch(e) { tbody.innerHTML=`<tr><td colspan="6" style="color:var(--muted)">${e.message}</td></tr>`; }
 }
-function saveCarta() {
-  const items=getCarta();
-  items.push({id:'c'+Date.now(),nombre:document.getElementById('ca-nombre').value,categoria:document.getElementById('ca-cat').value,descripcion:document.getElementById('ca-desc').value,precio:parseInt(document.getElementById('ca-precio').value)||0,disponible:document.getElementById('ca-disp').value==='true'});
-  LS.set('admin_carta',items); closeModal('modal-carta'); renderCarta(); showToast('✅ Ítem guardado');
+async function editCarta(id) {
+  const { data } = await sb.from('carta').select('*').eq('id',id).single();
+  if (!data) return;
+  document.getElementById('ca-nombre').value = data.nombre||'';
+  document.getElementById('ca-cat').value = data.categoria||'';
+  document.getElementById('ca-desc').value = data.descripcion||'';
+  document.getElementById('ca-precio').value = data.precio||0;
+  document.getElementById('ca-disp').value = String(data.disponible!==false);
+  document.getElementById('modal-carta').dataset.editId = id;
+  openModal('modal-carta');
 }
-function deleteCarta(i){const l=getCarta();l.splice(i,1);LS.set('admin_carta',l);renderCarta();}
+async function saveCarta() {
+  const editId = document.getElementById('modal-carta').dataset.editId;
+  const row = {
+    nombre:      document.getElementById('ca-nombre').value.trim(),
+    categoria:   document.getElementById('ca-cat').value,
+    descripcion: document.getElementById('ca-desc').value.trim(),
+    precio:      parseInt(document.getElementById('ca-precio').value)||0,
+    disponible:  document.getElementById('ca-disp').value === 'true'
+  };
+  if (!row.nombre) { showToast('Nombre es obligatorio',true); return; }
+  if (editId) { await sb.from('carta').update(row).eq('id',editId); delete document.getElementById('modal-carta').dataset.editId; }
+  else { await sb.from('carta').insert(row); }
+  closeModal('modal-carta'); renderCarta(); showToast('✅ Ítem guardado');
+}
+async function deleteCarta(id) {
+  if (!confirm('¿Eliminar este ítem?')) return;
+  await sb.from('carta').delete().eq('id',id);
+  renderCarta(); showToast('Ítem eliminado');
+}
 
 // ── REGALO ───────────────────────────────────────────────────
 function enviarRegalo() { showToast('✅ Función de regalo — próximamente con email'); closeModal('modal-regalo'); }
