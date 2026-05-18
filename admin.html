@@ -258,7 +258,17 @@
         <button class="tab" onclick="switchTab(this,'ot-validar')">Validar QR</button>
       </div>
       <div id="ot-ordenes">
-        <div class="card"><div class="tw"><table><thead><tr><th>ID</th><th>Comprador</th><th>Evento</th><th>Entradas</th><th>Total</th><th>Estado</th><th>Fecha</th><th>Acciones</th></tr></thead><tbody id="tb-ordenes"></tbody></table></div></div>
+        <!-- Filtros + búsqueda -->
+        <div style="display:flex;gap:8px;align-items:center;margin-bottom:12px;flex-wrap:wrap;">
+          <div style="display:flex;gap:4px;">
+            <button class="btn btn-sm ord-filter-btn active" data-estado="todos"     onclick="filtrarOrdenes('todos')">Todas</button>
+            <button class="btn btn-sm ord-filter-btn"        data-estado="pagado"    onclick="filtrarOrdenes('pagado')" style="background:rgba(34,197,94,.15);color:#22c55e;">Pagadas</button>
+            <button class="btn btn-sm ord-filter-btn"        data-estado="pendiente" onclick="filtrarOrdenes('pendiente')" style="background:rgba(245,158,11,.15);color:#f59e0b;">Pendientes</button>
+            <button class="btn btn-sm ord-filter-btn"        data-estado="cancelado" onclick="filtrarOrdenes('cancelado')" style="background:rgba(232,54,61,.15);color:#E8363D;">Canceladas</button>
+          </div>
+          <input type="text" placeholder="🔍 Buscar por ID, nombre o email..." oninput="buscarOrdenes(this.value)" style="flex:1;min-width:200px;background:var(--bg3);border:1px solid var(--border);color:var(--text);padding:8px 12px;border-radius:var(--r);font-size:0.85rem;outline:none;" />
+        </div>
+        <div class="card"><div class="tw"><table><thead><tr><th>ID</th><th>Comprador</th><th>Concepto</th><th>Items</th><th>Total</th><th>Estado</th><th>Fecha</th><th>Acciones</th></tr></thead><tbody id="tb-ordenes"></tbody></table></div></div>
       </div>
       <div id="ot-validar" style="display:none">
         <div class="card cb" style="max-width:420px;margin:0 auto;text-align:center;">
@@ -266,7 +276,7 @@
           <h3 style="margin-bottom:8px;font-weight:600;">Validar entrada</h3>
           <p style="color:var(--muted);font-size:0.8rem;margin-bottom:16px;">Ingresa el código del QR o del ticket</p>
           <div style="display:flex;gap:8px;margin-bottom:12px;">
-            <input type="text" id="qr-input" placeholder="FCC-XXXXXX" style="flex:1;background:var(--bg3);border:1px solid var(--border);color:var(--text);padding:8px 12px;border-radius:var(--r);font-size:0.9rem;text-transform:uppercase;outline:none;" />
+            <input type="text" id="qr-input" placeholder="FCC-XXXXXX o COR-XXXXXX" onkeypress="if(event.key==='Enter') validateQR()" autofocus style="flex:1;background:var(--bg3);border:1px solid var(--border);color:var(--text);padding:8px 12px;border-radius:var(--r);font-size:0.9rem;text-transform:uppercase;outline:none;" />
             <button class="btn btn-p" onclick="validateQR()">Validar</button>
           </div>
           <div id="qr-result"></div>
@@ -683,12 +693,16 @@ async function renderDash() {
       sb.from('clientes').select('*', { count:'exact', head:true }),
       sb.from('reservas').select('*', { count:'exact', head:true }).eq('estado','pendiente'),
       sb.from('eventos').select('id,nombre,fecha,activo').eq('activo',true).order('fecha').limit(4),
-      sb.from('pedidos').select('id,nombre_cliente,email_cliente,total,estado,created_at,items_pedido(nombre_evento)').order('created_at',{ascending:false}).limit(6)
+      sb.from('pedidos').select('id,nombre_cliente,email_cliente,total,total_pagado,estado,created_at,items_pedido(nombre_evento,nombre_ticket,cantidad,producto_tipo)').order('created_at',{ascending:false}).limit(10)
     ]);
-    const todayOrders = recentOrders?.filter(o => o.created_at?.startsWith(today)) || [];
-    const totalHoy = todayOrders.reduce((s,o)=>s+(o.total||0), 0);
+    // Tickets vendidos y recaudación de HOY (solo pagados)
+    const todayPaidOrders = recentOrders?.filter(o => o.estado === 'pagado' && o.created_at?.startsWith(today)) || [];
+    const totalHoy = todayPaidOrders.reduce((s,o)=>s+(o.total_pagado || o.total || 0), 0);
+    const ticketsHoy = todayPaidOrders.reduce((s,o)=>{
+      return s + (o.items_pedido?.reduce((ss,ip)=>ss+(ip.cantidad||0),0) || 0);
+    }, 0);
 
-    document.getElementById('k-tickets').textContent = todayOrders.length;
+    document.getElementById('k-tickets').textContent = ticketsHoy;
     document.getElementById('k-ingresos').textContent = clp(totalHoy);
     document.getElementById('k-usuarios').textContent = totalUsers || 0;
     document.getElementById('k-reservas').textContent = pendRes || 0;
@@ -716,26 +730,86 @@ async function renderEventos() {
   const tbody = document.getElementById('tb-eventos');
   tbody.innerHTML = `<tr><td colspan="7" style="text-align:center;color:var(--muted);padding:20px">Cargando...</td></tr>`;
   try {
-    const { data: evs, error } = await sb.from('eventos').select('*, tipos_ticket(*)').order('fecha', { ascending: true });
+    const [{ data: evs, error }, { data: itemsPagados }] = await Promise.all([
+      sb.from('eventos').select('*, tipos_ticket(*)').order('fecha', { ascending: true }),
+      sb.from('items_pedido').select('evento_id,cantidad,precio_unitario,pedidos!inner(estado)').not('evento_id','is',null)
+    ]);
     if (error) throw error;
+
+    // Calcular asistentes + ingresos por evento (solo pagados)
+    const vendidosPorEvento = {};
+    const ingresosPorEvento = {};
+    (itemsPagados || []).forEach(ip => {
+      if (ip.pedidos?.estado !== 'pagado') return;
+      const eid = ip.evento_id;
+      vendidosPorEvento[eid] = (vendidosPorEvento[eid]||0) + (ip.cantidad||0);
+      ingresosPorEvento[eid] = (ingresosPorEvento[eid]||0) + ((ip.cantidad||0)*(ip.precio_unitario||0));
+    });
+
     document.getElementById('nb-eventos').textContent = evs?.length || 0;
     tbody.innerHTML = evs?.length
-      ? evs.map(ev=>`
-        <tr>
+      ? evs.map(ev=>{
+          const vendidos = vendidosPorEvento[ev.id] || 0;
+          const ingresos = ingresosPorEvento[ev.id] || 0;
+          return `<tr>
           <td class="tb">${ev.nombre}</td>
           <td class="tm">${ev.fecha} · ${ev.hora||''}h</td>
           <td><span class="badge b-${ev.ambiente==='Fuego'?'r':ev.ambiente==='Aire'?'o':'b'}">${ev.ambiente||'—'}</span></td>
-          <td class="tm" style="font-size:0.72rem;">${Array.isArray(ev.djs)?ev.djs.join(', '):(ev.djs||'—')}</td>
-          <td><span class="badge b-b">${ev.tipos_ticket?.length||0} tipos</span></td>
+          <td><strong style="color:var(--verde)">${vendidos}</strong><div style="font-size:0.6rem;color:var(--muted)">asistentes</div></td>
+          <td style="color:var(--dorado);font-weight:700">${clp(ingresos)}</td>
           <td><span class="badge ${ev.activo?'b-g':'b-gr'}">${ev.activo?'Activo':'Inactivo'}</span></td>
           <td><div style="display:flex;gap:4px;">
             <button class="btn btn-g btn-sm" onclick="editEvento(${ev.id})">Editar</button>
-            <button class="btn btn-s btn-sm" onclick="go('tickets-tipos');setTimeout(()=>{document.getElementById('tt-evento-sel').value=${ev.id};renderTiposTicket()},200)">Tickets</button>
+            <button class="btn btn-s btn-sm" onclick="go('tickets-tipos');setTimeout(()=>{document.getElementById('tt-evento-sel').value=${ev.id};renderTiposTicket()},200)" title="Gestionar tickets">🎟️</button>
+            <button class="btn btn-gold btn-sm" onclick="exportarAsistentes(${ev.id})" title="Lista para puerta">📋</button>
             <button class="btn btn-del btn-sm" onclick="deleteEvento(${ev.id})">×</button>
           </div></td>
-        </tr>`).join('')
+        </tr>`;
+        }).join('')
       : `<tr><td colspan="7" style="text-align:center;color:var(--muted);padding:24px">Sin eventos — crea el primero</td></tr>`;
   } catch(e) { tbody.innerHTML=`<tr><td colspan="7" style="color:var(--rojo);padding:16px">Error: ${e.message}</td></tr>`; }
+}
+
+// ── EXPORTAR LISTA DE ASISTENTES DE UN EVENTO (para puerta) ──
+async function exportarAsistentes(eventoId) {
+  try {
+    const [{ data: ev }, { data: items }] = await Promise.all([
+      sb.from('eventos').select('nombre,fecha').eq('id', eventoId).single(),
+      sb.from('items_pedido').select('nombre_ticket,personas,qr_ids,pedidos!inner(estado,nombre_cliente,email_cliente)')
+        .eq('evento_id', eventoId)
+    ]);
+    if (!items?.length) { showToast('Sin asistentes aún', true); return; }
+
+    const rows = [['Ticket', 'Nombre asistente', 'RUT', 'Email comprador', 'QR ID', 'Estado pedido']];
+    items.forEach(ip => {
+      if (ip.pedidos?.estado !== 'pagado') return;
+      const personas = Array.isArray(ip.personas) ? ip.personas : [];
+      const qrs = Array.isArray(ip.qr_ids) ? ip.qr_ids : [];
+      const max = Math.max(personas.length, qrs.length);
+      for (let i = 0; i < max; i++) {
+        const p = personas[i] || {};
+        rows.push([
+          ip.nombre_ticket || 'Ticket',
+          p.nombre || ip.pedidos.nombre_cliente || '—',
+          p.rut || '—',
+          ip.pedidos.email_cliente || '—',
+          qrs[i] || '—',
+          'pagado'
+        ]);
+      }
+    });
+
+    // Generar CSV
+    const csv = rows.map(r => r.map(c => `"${String(c).replace(/"/g,'""')}"`).join(',')).join('\n');
+    const blob = new Blob(['﻿' + csv], { type: 'text/csv;charset=utf-8;' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = `asistentes-${(ev?.nombre||'evento').toLowerCase().replace(/\s+/g,'-')}-${ev?.fecha||''}.csv`;
+    document.body.appendChild(a); a.click(); a.remove();
+    URL.revokeObjectURL(url);
+    showToast(`✅ ${rows.length-1} asistentes exportados`);
+  } catch(e) { showToast('Error: '+e.message, true); }
 }
 
 // ── EVENTOS CRUD ─────────────────────────────────────────────
@@ -831,22 +905,48 @@ async function renderTiposTicket() {
   if (!evId) return;
   const list = document.getElementById('tt-list');
   list.innerHTML = '<div style="padding:20px;text-align:center;color:var(--muted);">Cargando...</div>';
-  const { data: tickets } = await sb.from('tipos_ticket').select('*').eq('evento_id', evId).order('id');
+
+  // Traer tickets + items_pedido vendidos del evento
+  const [{ data: tickets }, { data: itemsVendidos }] = await Promise.all([
+    sb.from('tipos_ticket').select('*').eq('evento_id', evId).order('id'),
+    sb.from('items_pedido').select('tipo_ticket_id,cantidad,precio_unitario,pedidos!inner(estado)').eq('evento_id', evId)
+  ]);
   if (!tickets?.length) { list.innerHTML='<div style="padding:24px;text-align:center;color:var(--muted);">Sin tipos de ticket — agrega el primero</div>'; return; }
+
+  // Calcular vendidos por tipo (solo pedidos pagados)
+  const vendidosPorTipo = {};
+  const ingresosPorTipo = {};
+  (itemsVendidos || []).forEach(ip => {
+    if (ip.pedidos?.estado !== 'pagado') return;
+    const tid = ip.tipo_ticket_id;
+    if (!tid) return;
+    vendidosPorTipo[tid] = (vendidosPorTipo[tid] || 0) + (ip.cantidad || 0);
+    ingresosPorTipo[tid] = (ingresosPorTipo[tid] || 0) + ((ip.cantidad||0) * (ip.precio_unitario||0));
+  });
+
   const estadoColor = { 'Activo':'b-g', 'Agotado':'b-r', 'Cerrado':'b-gr', 'Oculto':'b-gr', 'Solo venta WEB':'b-b', 'Venta solo RRPP':'b-gr' };
-  list.innerHTML = tickets.map(tt=>`
+  list.innerHTML = tickets.map(tt=>{
+    const vendidos = vendidosPorTipo[tt.id] || 0;
+    const ingresos = ingresosPorTipo[tt.id] || 0;
+    const stockInicial = (tt.disponible || 0) + vendidos; // capacidad original
+    const pctVendido = stockInicial ? Math.round((vendidos/stockInicial)*100) : 0;
+    return `
     <div class="tt-row">
       <div><div class="tt-nombre">${tt.nombre}</div><span class="badge ${estadoColor[tt.estado]||'b-gr'} tt-estado-badge">${tt.estado}</span>${tt.solo_web?'<span class="badge b-b tt-estado-badge" style="margin-left:4px;">WEB</span>':''}</div>
-      <div>${tt.disponible}</div>
-      <div>—</div><div>—</div><div>—</div><div>—</div>
+      <div><strong>${tt.disponible}</strong><div style="font-size:0.6rem;color:var(--muted)">de ${stockInicial}</div></div>
+      <div style="color:var(--verde)"><strong>${vendidos}</strong><div style="font-size:0.6rem;color:var(--muted)">${pctVendido}%</div></div>
+      <div>—</div>
+      <div>—</div>
+      <div>${tt.max_por_compra||6}</div>
       <div style="color:var(--dorado)">${clp(tt.precio)}</div>
-      <div style="color:var(--verde)">${clp(tt.precio*(tt.disponible||0))}</div>
+      <div style="color:var(--verde);font-weight:700">${clp(ingresos)}</div>
       <div style="display:flex;gap:4px;">
         <button class="btn btn-del btn-sm" onclick="toggleTTEstado(${tt.id},'${tt.estado}')">${tt.estado==='Activo'?'CERRAR':'ABRIR'}</button>
         <button class="btn btn-g btn-sm" onclick="editTT(${tt.id})">EDITAR</button>
         <button class="btn btn-del btn-sm" onclick="deleteTT(${tt.id})">×</button>
       </div>
-    </div>`).join('');
+    </div>`;
+  }).join('');
 }
 
 let editingTTId = null;
@@ -915,70 +1015,298 @@ async function deleteTT(ttId) {
   renderTiposTicket(); showToast('Eliminado');
 }
 
-// ── CORTESÍAS (localStorage) ─────────────────────────────────
-function getCortesias() { return LS.get('admin_cortesias') || []; }
-function renderCortesias() {
-  const list = getCortesias();
-  document.getElementById('c-count').textContent = list.filter(c=>c.estado==='activa').length;
-  document.getElementById('c-used').textContent  = list.filter(c=>c.estado==='usada').length;
+// ── CORTESÍAS — Supabase (crea un pedido de cortesía con QR válido) ──
+async function renderCortesias() {
   const tbody = document.getElementById('tb-cortesias');
-  tbody.innerHTML = list.length
-    ? list.map((c,i)=>`<tr><td class="tb">${c.nombre}</td><td class="tm">${c.email}</td><td>${c.evento||'—'}</td><td class="tm">${c.motivo}</td><td>${c.cantidad}</td><td style="font-family:monospace;color:var(--dorado)">${c.codigo}</td><td><span class="badge ${c.estado==='activa'?'b-g':c.estado==='usada'?'b-gr':'b-r'}">${c.estado}</span></td><td><button class="btn btn-del btn-sm" onclick="deleteCortesia(${i})">×</button></td></tr>`).join('')
-    : `<tr><td colspan="8" style="text-align:center;color:var(--muted);padding:20px">Sin cortesías</td></tr>`;
+  tbody.innerHTML = `<tr><td colspan="8" style="text-align:center;color:var(--muted);padding:20px">Cargando...</td></tr>`;
+  try {
+    // Cortesías = pedidos con metodo_pago='cortesia'
+    const { data: pedidos } = await sb.from('pedidos')
+      .select('*, items_pedido(*)').eq('metodo_pago', 'cortesia')
+      .order('created_at', { ascending: false });
+    const activas = pedidos?.filter(p=>p.estado==='pagado').length || 0;
+    document.getElementById('c-count').textContent = activas;
+    // Usadas = cortesías cuyos QRs ya fueron escaneados
+    const { count: usadasCount } = await sb.from('qr_usados').select('*',{count:'exact',head:true});
+    document.getElementById('c-used').textContent = usadasCount || 0;
+
+    tbody.innerHTML = pedidos?.length
+      ? pedidos.map(p=>{
+          const item = p.items_pedido?.[0];
+          const codigo = 'COR-' + String(p.id).padStart(6,'0');
+          return `<tr>
+            <td class="tb">${p.nombre_cliente||'—'}</td>
+            <td class="tm">${p.email_cliente||'—'}</td>
+            <td>${item?.nombre_evento||'—'}</td>
+            <td class="tm">${p.referencia_pago||'—'}</td>
+            <td>${item?.cantidad||1}</td>
+            <td style="font-family:monospace;color:var(--dorado)">${codigo}</td>
+            <td><span class="badge ${p.estado==='pagado'?'b-g':'b-gr'}">${p.estado}</span></td>
+            <td><div style="display:flex;gap:4px;">
+              <button class="btn btn-gold btn-sm" onclick="reenviarComprobante(${p.id})" title="Enviar QR por email">📧</button>
+              <button class="btn btn-del btn-sm" onclick="cancelarOrden(${p.id})">×</button>
+            </div></td>
+          </tr>`;
+        }).join('')
+      : `<tr><td colspan="8" style="text-align:center;color:var(--muted);padding:20px">Sin cortesías</td></tr>`;
+  } catch(e) { tbody.innerHTML=`<tr><td colspan="8" style="color:var(--rojo);padding:16px">Error: ${e.message}</td></tr>`; }
 }
+
 async function saveCortesia() {
-  const { data: evs } = await sb.from('eventos').select('id,nombre').order('fecha');
-  const evId = parseInt(document.getElementById('co-evento').value);
-  const ev = evs?.find(e=>e.id===evId);
-  const codigo = 'COR-'+Math.random().toString(36).toUpperCase().slice(2,8);
-  const list = getCortesias();
-  list.push({ nombre:document.getElementById('co-nombre').value, email:document.getElementById('co-email').value, rut:document.getElementById('co-rut').value, tel:document.getElementById('co-tel').value, evento:ev?.nombre||'—', eventoId:evId, cantidad:parseInt(document.getElementById('co-cant').value)||1, motivo:document.getElementById('co-motivo').value, codigo, estado:'activa', createdAt:new Date().toISOString() });
-  LS.set('admin_cortesias', list); closeModal('modal-cortesia'); renderCortesias(); showToast('✅ Cortesía generada: '+codigo);
+  try {
+    const nombre = document.getElementById('co-nombre').value.trim();
+    const email  = document.getElementById('co-email').value.trim();
+    const rut    = document.getElementById('co-rut').value.trim();
+    const tel    = document.getElementById('co-tel').value.trim();
+    const evId   = parseInt(document.getElementById('co-evento').value);
+    const cant   = parseInt(document.getElementById('co-cant').value) || 1;
+    const motivo = document.getElementById('co-motivo').value.trim();
+
+    if (!nombre || !email || !evId) { showToast('Nombre, email y evento son obligatorios', true); return; }
+
+    // Buscar el primer tipo de ticket del evento (cualquiera sirve para cortesía)
+    const { data: tts } = await sb.from('tipos_ticket').select('*').eq('evento_id', evId).limit(1);
+    const tt = tts?.[0];
+    const { data: ev } = await sb.from('eventos').select('nombre,fecha,hora').eq('id', evId).single();
+
+    // Crear pedido como cortesía (total=0, metodo_pago='cortesia', estado='pagado' directamente)
+    const { data: pedido, error } = await sb.from('pedidos').insert({
+      nombre_cliente:  nombre,
+      email_cliente:   email,
+      estado:          'pagado',  // cortesías van directo a pagado (genera QR válido)
+      total:           0,
+      fee_servicio:    0,
+      total_pagado:    0,
+      metodo_pago:     'cortesia',
+      referencia_pago: motivo || 'cortesia',
+      fecha_pago:      new Date().toISOString()
+    }).select().single();
+    if (error) throw error;
+
+    // Generar QR ids
+    const personas = Array.from({length: cant}, () => ({ nombre, rut, email }));
+    const qrIds = Array.from({length: cant}, (_, u) => `FCC-${pedido.id}-${tt?.id || 'cor'}-${u}`);
+
+    const { error: e2 } = await sb.from('items_pedido').insert({
+      pedido_id:        pedido.id,
+      producto_tipo:    'ticket',
+      evento_id:        evId,
+      tipo_ticket_id:   tt?.id || null,
+      nombre_evento:    ev?.nombre || '—',
+      nombre_ticket:    'Cortesía',
+      cantidad:         cant,
+      precio_unitario:  0,
+      personas:         personas,
+      qr_ids:           qrIds,
+      nombre_asistente: nombre,
+      rut_asistente:    rut
+    });
+    if (e2) { await sb.from('pedidos').delete().eq('id', pedido.id); throw e2; }
+
+    closeModal('modal-cortesia');
+    renderCortesias();
+    showToast(`✅ Cortesía generada: COR-${String(pedido.id).padStart(6,'0')}`);
+
+    // Enviar email con QR automáticamente
+    setTimeout(() => reenviarComprobante(pedido.id), 500);
+  } catch(e) { showToast('Error: '+e.message, true); }
 }
-function deleteCortesia(i) { const l=getCortesias(); l.splice(i,1); LS.set('admin_cortesias',l); renderCortesias(); }
 
 // ── ÓRDENES ──────────────────────────────────────────────────
+// Filtros activos
+let ordenesFiltroEstado = 'todos';
+let ordenesBusqueda = '';
+
 async function renderOrdenes() {
   const tbody = document.getElementById('tb-ordenes');
   tbody.innerHTML = `<tr><td colspan="8" style="text-align:center;color:var(--muted);padding:20px">Cargando...</td></tr>`;
   try {
-    const { data: orders, error } = await sb.from('pedidos')
-      .select('*, items_pedido(nombre_evento,nombre_ticket,cantidad,precio_unitario)')
-      .order('created_at', { ascending: false }).limit(100);
+    let q = sb.from('pedidos')
+      .select('*, items_pedido(nombre_evento,nombre_ticket,cantidad,precio_unitario,producto_tipo)')
+      .order('created_at', { ascending: false }).limit(200);
+    if (ordenesFiltroEstado !== 'todos') q = q.eq('estado', ordenesFiltroEstado);
+
+    const { data: ordersRaw, error } = await q;
     if (error) throw error;
+
+    // Filtrar por búsqueda (id, nombre, email)
+    const orders = (ordersRaw || []).filter(o => {
+      if (!ordenesBusqueda) return true;
+      const s = ordenesBusqueda.toLowerCase();
+      return String(o.id).includes(s)
+          || (o.nombre_cliente||'').toLowerCase().includes(s)
+          || (o.email_cliente||'').toLowerCase().includes(s);
+    });
+
     document.getElementById('nb-ordenes').textContent = orders?.length || 0;
+
     tbody.innerHTML = orders?.length
       ? orders.map(o => {
-          const totalItems = o.items_pedido?.reduce((s,i)=>s+(i.cantidad||0), 0) || 0;
-          const firstItem  = o.items_pedido?.[0];
-          const fecha = o.created_at ? new Date(o.created_at).toLocaleDateString('es-CL') : '—';
-          const estadoColor = o.estado==='pagado'?'b-g':o.estado==='pendiente'?'b-o':'b-gr';
+          const items = o.items_pedido || [];
+          const totalItems = items.reduce((s,i)=>s+(i.cantidad||0), 0);
+          // Etiqueta del concepto: primer item con icono
+          const first = items[0];
+          let concepto = '—';
+          if (first) {
+            const icono = first.producto_tipo === 'carta' ? '🍹' : first.producto_tipo === 'merch' ? '🛍️' : '🎟️';
+            concepto = icono + ' ' + (first.nombre_evento || first.nombre_ticket || 'Item');
+            if (items.length > 1) concepto += ` <span style="color:var(--muted);font-size:0.7rem">+${items.length-1} más</span>`;
+          }
+          const fecha = o.created_at ? new Date(o.created_at).toLocaleString('es-CL',{day:'2-digit',month:'2-digit',hour:'2-digit',minute:'2-digit'}) : '—';
+          const estadoColor = o.estado==='pagado'?'b-g':o.estado==='pendiente'?'b-o':o.estado==='cancelado'?'b-r':'b-gr';
+          const totalShow = clp(o.total_pagado || o.total);
+          const codigo = 'FCC-' + String(o.id).padStart(6,'0');
           return `<tr>
-            <td class="tb" style="font-family:monospace;font-size:0.7rem;color:var(--dorado)">#${o.id}</td>
+            <td class="tb" style="font-family:monospace;font-size:0.7rem;color:var(--dorado)">${codigo}</td>
             <td><div class="tb">${o.nombre_cliente||'—'}</div><div class="tm" style="font-size:0.7rem">${o.email_cliente||''}</div></td>
-            <td>${firstItem?.nombre_evento||'—'}</td>
+            <td>${concepto}</td>
             <td>${totalItems}</td>
-            <td class="tb" style="color:var(--dorado)">${clp(o.total)}</td>
+            <td class="tb" style="color:var(--dorado)">${totalShow}</td>
             <td><span class="badge ${estadoColor}">${o.estado}</span></td>
             <td class="tm">${fecha}</td>
-            <td><button class="btn btn-ok btn-sm" onclick="verOrden(${o.id})">Ver</button>
-                <button class="btn btn-g btn-sm" onclick="marcarPagado(${o.id},'${o.estado}')">💳</button></td>
+            <td><div style="display:flex;gap:4px">
+              <button class="btn btn-ok btn-sm" onclick="verOrden(${o.id})" title="Ver detalle">👁️</button>
+              <button class="btn btn-g btn-sm" onclick="marcarPagado(${o.id},'${o.estado}')" title="Toggle pagado">💳</button>
+              <button class="btn btn-gold btn-sm" onclick="reenviarComprobante(${o.id})" title="Reenviar email">📧</button>
+              ${o.estado !== 'cancelado' ? `<button class="btn btn-del btn-sm" onclick="cancelarOrden(${o.id})" title="Cancelar">×</button>` : ''}
+            </div></td>
           </tr>`;
         }).join('')
-      : `<tr><td colspan="8" style="text-align:center;color:var(--muted);padding:24px">Sin órdenes aún</td></tr>`;
+      : `<tr><td colspan="8" style="text-align:center;color:var(--muted);padding:24px">Sin órdenes</td></tr>`;
   } catch(e) { tbody.innerHTML=`<tr><td colspan="8" style="color:var(--rojo);padding:16px">Error: ${e.message}</td></tr>`; }
 }
 
+function filtrarOrdenes(estado) {
+  ordenesFiltroEstado = estado;
+  document.querySelectorAll('.ord-filter-btn').forEach(b => b.classList.toggle('active', b.dataset.estado === estado));
+  renderOrdenes();
+}
+function buscarOrdenes(q) {
+  ordenesBusqueda = q.trim();
+  renderOrdenes();
+}
+
 async function verOrden(id) {
-  const { data } = await sb.from('pedidos').select('*, items_pedido(*)').eq('id',id).single();
-  if (!data) return;
-  alert(`Orden #${data.id}\nComprador: ${data.nombre_cliente} (${data.email_cliente})\nTotal: ${clp(data.total)}\nEstado: ${data.estado}\n\nItems:\n${data.items_pedido?.map(i=>`  · ${i.nombre_ticket} x${i.cantidad} — ${clp(i.precio_unitario*i.cantidad)}`).join('\n')}`);
+  const { data: o, error } = await sb.from('pedidos').select('*, items_pedido(*)').eq('id',id).single();
+  if (error || !o) { showToast('Orden no encontrada', true); return; }
+
+  const fecha   = o.created_at ? new Date(o.created_at).toLocaleString('es-CL') : '—';
+  const codigo  = 'FCC-' + String(o.id).padStart(6,'0');
+  const totalPagado = o.total_pagado || (o.total + (o.fee_servicio||0));
+  // QRs escaneados de este pedido
+  const { data: usados } = await sb.from('qr_usados').select('qr_id,created_at').eq('pedido_id', id);
+  const usadosSet = new Set((usados||[]).map(u=>u.qr_id));
+
+  const itemsHtml = (o.items_pedido || []).map(ip => {
+    const icono = ip.producto_tipo === 'carta' ? '🍹' : ip.producto_tipo === 'merch' ? '🛍️' : '🎟️';
+    const nombre = ip.nombre_evento || ip.nombre_ticket || 'Item';
+    const qrIds  = Array.isArray(ip.qr_ids) ? ip.qr_ids : [];
+    const personas = Array.isArray(ip.personas) ? ip.personas : [];
+    const qrRows = qrIds.length ? qrIds.map((qid, idx) => {
+      const usado = usadosSet.has(qid);
+      const p = personas[idx];
+      return `<div style="display:flex;justify-content:space-between;align-items:center;padding:6px 10px;background:var(--bg3);border-radius:4px;margin-top:4px;font-size:0.75rem;">
+        <span style="font-family:monospace;color:${usado?'var(--muted)':'var(--dorado)'};">${qid}${p?.nombre?' · '+p.nombre:''}</span>
+        <span class="badge ${usado?'b-gr':'b-g'}" style="font-size:0.6rem;">${usado?'USADO':'VÁLIDO'}</span>
+      </div>`;
+    }).join('') : '';
+    return `<div style="background:var(--bg2);border:1px solid var(--border);border-radius:6px;padding:12px;margin-bottom:8px;">
+      <div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:6px;">
+        <div><strong>${icono} ${nombre}</strong>${ip.detalle?` <span style="color:var(--muted);font-size:0.75rem;">· ${ip.detalle}</span>`:''}</div>
+        <div style="color:var(--dorado);font-weight:700;">${clp(ip.precio_unitario * ip.cantidad)}</div>
+      </div>
+      <div style="font-size:0.72rem;color:var(--muted);">Cantidad: ${ip.cantidad} · Precio unit: ${clp(ip.precio_unitario)}</div>
+      ${qrRows}
+    </div>`;
+  }).join('');
+
+  const body = `
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-bottom:16px;">
+      <div><div style="font-size:0.62rem;letter-spacing:2px;color:var(--muted);text-transform:uppercase;">Pedido</div><div style="font-family:monospace;color:var(--dorado);font-size:1.1rem;font-weight:700;">${codigo}</div></div>
+      <div><div style="font-size:0.62rem;letter-spacing:2px;color:var(--muted);text-transform:uppercase;">Estado</div><span class="badge ${o.estado==='pagado'?'b-g':o.estado==='pendiente'?'b-o':'b-gr'}">${o.estado}</span></div>
+      <div><div style="font-size:0.62rem;letter-spacing:2px;color:var(--muted);text-transform:uppercase;">Comprador</div><div>${o.nombre_cliente}</div><div style="font-size:0.7rem;color:var(--muted);">${o.email_cliente}</div></div>
+      <div><div style="font-size:0.62rem;letter-spacing:2px;color:var(--muted);text-transform:uppercase;">Fecha</div><div style="font-size:0.85rem;">${fecha}</div></div>
+      <div><div style="font-size:0.62rem;letter-spacing:2px;color:var(--muted);text-transform:uppercase;">Método pago</div><div>${o.metodo_pago||'—'}</div></div>
+      <div><div style="font-size:0.62rem;letter-spacing:2px;color:var(--muted);text-transform:uppercase;">Referencia</div><div style="font-family:monospace;font-size:0.78rem;">${o.referencia_pago||'—'}</div></div>
+    </div>
+    <div style="border-top:1px solid var(--border);padding-top:14px;margin-bottom:14px;">
+      <div style="font-size:0.62rem;letter-spacing:2px;color:var(--muted);text-transform:uppercase;margin-bottom:8px;">Productos (${(o.items_pedido||[]).length})</div>
+      ${itemsHtml}
+    </div>
+    <div style="display:flex;justify-content:space-between;align-items:center;padding-top:12px;border-top:1px solid var(--border);">
+      <div>
+        <div style="font-size:0.72rem;color:var(--muted);">Subtotal: ${clp(o.total)} · Fee 4%: ${clp(o.fee_servicio||0)}</div>
+        <div style="font-size:1.2rem;font-weight:900;color:var(--dorado);">TOTAL: ${clp(totalPagado)}</div>
+      </div>
+      <div style="display:flex;gap:6px;">
+        <button class="btn btn-gold btn-sm" onclick="reenviarComprobante(${o.id});closeModal('modal-orden-detalle')">📧 Reenviar email</button>
+        <button class="btn btn-g btn-sm" onclick="marcarPagado(${o.id},'${o.estado}');closeModal('modal-orden-detalle')">💳 Toggle pagado</button>
+      </div>
+    </div>`;
+
+  // Inyectar modal si no existe
+  let modal = document.getElementById('modal-orden-detalle');
+  if (!modal) {
+    modal = document.createElement('div');
+    modal.id = 'modal-orden-detalle';
+    modal.className = 'modal-backdrop';
+    modal.innerHTML = `<div class="modal" style="max-width:700px;max-height:90vh;overflow-y:auto;">
+      <div class="modal-header"><div class="modal-title">Detalle de orden</div>
+        <button class="modal-close" onclick="closeModal('modal-orden-detalle')">×</button></div>
+      <div class="modal-body" id="orden-detalle-body"></div>
+    </div>`;
+    document.body.appendChild(modal);
+  }
+  document.getElementById('orden-detalle-body').innerHTML = body;
+  openModal('modal-orden-detalle');
 }
 
 async function marcarPagado(id, estadoActual) {
   const nuevoEstado = estadoActual === 'pagado' ? 'pendiente' : 'pagado';
-  await sb.from('pedidos').update({ estado: nuevoEstado }).eq('id', id);
-  renderOrdenes(); showToast('Estado → ' + nuevoEstado);
+  const update = { estado: nuevoEstado };
+  if (nuevoEstado === 'pagado') update.fecha_pago = new Date().toISOString();
+  const { error } = await sb.from('pedidos').update(update).eq('id', id);
+  if (error) { showToast('Error: '+error.message, true); return; }
+  renderOrdenes();
+  showToast('Estado → ' + nuevoEstado + (nuevoEstado==='pagado'?' (stock descontado)':''));
+}
+
+async function cancelarOrden(id) {
+  if (!confirm('¿Cancelar esta orden? Si estaba pagada, NO devuelve el stock automáticamente (hazlo manual).')) return;
+  const { error } = await sb.from('pedidos').update({ estado: 'cancelado' }).eq('id', id);
+  if (error) { showToast('Error: '+error.message, true); return; }
+  renderOrdenes(); showToast('✅ Orden cancelada');
+}
+
+async function reenviarComprobante(id) {
+  try {
+    const { data: o, error } = await sb.from('pedidos').select('*, items_pedido(*)').eq('id', id).single();
+    if (error || !o) throw error || new Error('No encontrado');
+    // Reconstruir orderData en el formato que espera send-receipt
+    const items = (o.items_pedido || []).map(ip => ({
+      tipo:       ip.producto_tipo === 'ticket' ? (ip.nombre_ticket || 'Ticket') : ip.producto_tipo,
+      nombre:     ip.nombre_evento || ip.nombre_ticket || 'Item',
+      precio:     ip.precio_unitario,
+      cantidad:   ip.cantidad,
+      eventoId:   ip.evento_id,
+      ttId:       ip.tipo_ticket_id,
+      productoId: ip.producto_id,
+      detalle:    ip.detalle,
+      personas:   ip.personas || []
+    }));
+    const orderData = {
+      id:        'FCC-' + String(o.id).padStart(6,'0'),
+      items,
+      comprador: { nombre: o.nombre_cliente, email: o.email_cliente },
+      total:     o.total,
+      fecha:     o.created_at
+    };
+    const { data: res, error: err2 } = await sb.functions.invoke('send-receipt', { body: { order: orderData } });
+    if (err2) throw err2;
+    showToast('📧 Comprobante reenviado a ' + o.email_cliente);
+  } catch (err) {
+    showToast('⚠️ ' + (err.message || 'Error al reenviar'), true);
+  }
 }
 
 // ── VALIDAR QR ─────────────────────────────────────────────────
@@ -992,8 +1320,8 @@ async function validateQR() {
     return;
   }
 
-  // Parsear formato FCC-pedidoId-key-unit
-  const raw = code.replace(/^FCC-/, '');
+  // Parsear formato FCC-pedidoId-key-unit  o  COR-pedidoId (cortesías)
+  const raw = code.replace(/^(FCC|COR)-/, '');
   const parts = raw.split('-');
   const pedidoId = parseInt(parts[0]) || parseInt(raw); // tolera FCC-000123 también
   if (!pedidoId) {
@@ -1057,11 +1385,19 @@ async function validateQR() {
 
 async function marcarQRUsado(qrId, pedidoId) {
   try {
-    const { error } = await sb.from('qr_usados').insert({ qr_id: qrId, pedido_id: pedidoId });
+    // Obtener el id del admin actual para el audit trail
+    const { data: { user } } = await sb.auth.getUser();
+    const { error } = await sb.from('qr_usados').insert({
+      qr_id:         qrId,
+      pedido_id:     pedidoId,
+      escaneado_por: user?.id || null
+    });
     if (error) throw error;
     showToast('✅ Ingreso registrado');
-    document.getElementById('qr-input').value = '';
-    document.getElementById('qr-result').innerHTML = '<div style="padding:14px;color:var(--verde);text-align:center;">✅ Listo — siguiente</div>';
+    const input = document.getElementById('qr-input');
+    if (input) { input.value = ''; input.focus(); }
+    document.getElementById('qr-result').innerHTML = '<div style="padding:14px;color:var(--verde);text-align:center;font-weight:700;">✅ Listo — siguiente</div>';
+    setTimeout(() => { const r = document.getElementById('qr-result'); if (r) r.innerHTML = ''; }, 2500);
   } catch (err) {
     showToast('⚠️ Error: ' + err.message);
   }
