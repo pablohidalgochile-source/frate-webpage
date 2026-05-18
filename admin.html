@@ -4,6 +4,8 @@
   <meta charset="UTF-8" /><meta name="viewport" content="width=device-width,initial-scale=1.0" />
   <title>Frate Admin — Panel de Control</title>
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script src="https://unpkg.com/html5-qrcode@2.3.8/html5-qrcode.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Barlow+Condensed:wght@700;900&display=swap" rel="stylesheet" />
   <style>
     :root{--bg:#0d0d0f;--bg2:#111113;--bg3:#18181b;--border:#27272a;--border2:#3f3f46;--text:#fafafa;--muted:#71717a;--muted2:#52525b;--rojo:#E8363D;--dorado:#D4A832;--verde:#22c55e;--azul:#3b82f6;--r:4px;--font:'Inter',sans-serif;--disp:'Barlow Condensed',sans-serif;}
@@ -239,7 +241,10 @@
     <div class="panel" id="p-cortesias">
       <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:18px;">
         <h2 style="font-family:var(--disp);font-weight:900;font-size:1.6rem;">CORTESÍAS</h2>
-        <button class="btn btn-p" onclick="openModal('modal-cortesia')">+ Nueva cortesía</button>
+        <div style="display:flex;gap:8px;">
+          <button class="btn btn-gold" onclick="openImportador()">📥 IMPORTAR MASIVO</button>
+          <button class="btn btn-p" onclick="openModal('modal-cortesia')">+ Nueva cortesía</button>
+        </div>
       </div>
       <div style="display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-bottom:18px;">
         <div class="card"><div class="ch"><span class="ct">Cortesías activas</span></div><div class="cb" style="font-size:2rem;font-family:var(--disp);font-weight:900;color:var(--dorado);" id="c-count">0</div></div>
@@ -271,15 +276,45 @@
         <div class="card"><div class="tw"><table><thead><tr><th>ID</th><th>Comprador</th><th>Concepto</th><th>Items</th><th>Total</th><th>Estado</th><th>Fecha</th><th>Acciones</th></tr></thead><tbody id="tb-ordenes"></tbody></table></div></div>
       </div>
       <div id="ot-validar" style="display:none">
-        <div class="card cb" style="max-width:420px;margin:0 auto;text-align:center;">
-          <div style="font-size:2.5rem;margin-bottom:12px;">📷</div>
-          <h3 style="margin-bottom:8px;font-weight:600;">Validar entrada</h3>
-          <p style="color:var(--muted);font-size:0.8rem;margin-bottom:16px;">Ingresa el código del QR o del ticket</p>
-          <div style="display:flex;gap:8px;margin-bottom:12px;">
-            <input type="text" id="qr-input" placeholder="FCC-XXXXXX o COR-XXXXXX" onkeypress="if(event.key==='Enter') validateQR()" autofocus style="flex:1;background:var(--bg3);border:1px solid var(--border);color:var(--text);padding:8px 12px;border-radius:var(--r);font-size:0.9rem;text-transform:uppercase;outline:none;" />
-            <button class="btn btn-p" onclick="validateQR()">Validar</button>
+        <div class="card cb" style="max-width:520px;margin:0 auto;">
+          <!-- Tabs entre modo cámara y manual -->
+          <div style="display:flex;gap:6px;margin-bottom:16px;background:var(--bg3);padding:4px;border-radius:6px;">
+            <button id="qrmode-camera" class="btn btn-sm" onclick="qrModeSwitch('camera')" style="flex:1;background:var(--rojo);color:#fff;font-weight:700;">📷 ESCANEAR CÁMARA</button>
+            <button id="qrmode-manual" class="btn btn-sm" onclick="qrModeSwitch('manual')" style="flex:1;background:transparent;color:var(--muted);">⌨️ MANUAL</button>
           </div>
-          <div id="qr-result"></div>
+
+          <!-- MODO CÁMARA -->
+          <div id="qr-camera-pane" style="text-align:center;">
+            <div id="qr-reader" style="width:100%;max-width:480px;margin:0 auto;border-radius:8px;overflow:hidden;background:#000;"></div>
+            <div style="display:flex;gap:8px;justify-content:center;margin-top:14px;flex-wrap:wrap;">
+              <button id="qr-start-btn" class="btn btn-ok" onclick="startQRScanner()">▶️ Iniciar escáner</button>
+              <button id="qr-stop-btn" class="btn btn-del" onclick="stopQRScanner()" style="display:none;">⏸ Detener</button>
+              <button id="qr-flip-btn" class="btn btn-g btn-sm" onclick="flipQRCamera()" style="display:none;">🔄 Cambiar cámara</button>
+            </div>
+            <div style="font-size:0.72rem;color:var(--muted);margin-top:10px;line-height:1.5;">
+              Apunta la cámara al QR del ticket o cortesía.<br/>El sistema lo detecta y te pide aprobar el ingreso.
+            </div>
+          </div>
+
+          <!-- MODO MANUAL -->
+          <div id="qr-manual-pane" style="display:none;text-align:center;">
+            <div style="font-size:2.5rem;margin-bottom:12px;">⌨️</div>
+            <p style="color:var(--muted);font-size:0.8rem;margin-bottom:16px;">Ingresa el código del QR o del ticket</p>
+            <div style="display:flex;gap:8px;margin-bottom:12px;">
+              <input type="text" id="qr-input" placeholder="FCC-XXXXXX o COR-XXXXXX" onkeypress="if(event.key==='Enter') validateQR()" style="flex:1;background:var(--bg3);border:1px solid var(--border);color:var(--text);padding:8px 12px;border-radius:var(--r);font-size:0.9rem;text-transform:uppercase;outline:none;" />
+              <button class="btn btn-p" onclick="validateQR()">Validar</button>
+            </div>
+          </div>
+
+          <!-- Resultado (compartido entre cámara y manual) -->
+          <div id="qr-result" style="margin-top:16px;"></div>
+
+          <!-- Contador de escaneos en sesión -->
+          <div id="qr-counter" style="margin-top:12px;padding:10px;background:var(--bg2);border-radius:6px;text-align:center;font-size:0.72rem;color:var(--muted);">
+            Sesión: <strong style="color:var(--verde);" id="qr-cnt-ok">0</strong> autorizados ·
+            <strong style="color:#f59e0b;" id="qr-cnt-dup">0</strong> duplicados ·
+            <strong style="color:var(--rojo);" id="qr-cnt-err">0</strong> rechazados
+          </div>
         </div>
       </div>
     </div>
@@ -487,6 +522,99 @@
     <div class="fg"><label>Motivo</label><select id="co-motivo"><option>Staff</option><option>Artista / DJ</option><option>RRPP</option><option>Concurso RRSS</option><option>Prensa</option><option>Cumpleaños especial</option><option>VIP / Sponsor</option><option>Otro</option></select></div>
   </div>
   <div class="mfoot"><button class="btn btn-g" onclick="closeModal('modal-cortesia')">Cancelar</button><button class="btn btn-p" onclick="saveCortesia()">Generar cortesía</button></div>
+</div></div>
+
+<!-- IMPORTADOR MASIVO (CSV/XLSX) ─────────────────────────────── -->
+<div class="mo" id="modal-import"><div class="mb" style="max-width:900px;max-height:92vh;overflow-y:auto;">
+  <div class="mh"><span class="mht">📥 Importación masiva de entradas</span><button class="mc" onclick="closeModal('modal-import')">✕</button></div>
+  <div class="mbody">
+
+    <!-- PASO 1: Subir archivo -->
+    <div id="imp-step-upload" class="imp-step">
+      <h3 style="font-family:var(--disp);font-size:1.2rem;margin-bottom:12px;">1. Sube tu archivo (XLSX o CSV)</h3>
+      <div id="imp-dropzone" style="border:2px dashed var(--border);border-radius:8px;padding:40px;text-align:center;cursor:pointer;background:var(--bg2);transition:all .2s;" onclick="document.getElementById('imp-file').click()">
+        <div style="font-size:3rem;margin-bottom:12px;">📂</div>
+        <div style="font-weight:700;margin-bottom:6px;">Click o arrastra el archivo aquí</div>
+        <div style="color:var(--muted);font-size:0.78rem;">.xlsx, .xls o .csv — incluso directo del Google Forms (Descargar respuestas)</div>
+        <input type="file" id="imp-file" accept=".xlsx,.xls,.csv" style="display:none;" onchange="impHandleFile(this.files[0])" />
+      </div>
+      <div style="margin-top:14px;font-size:0.75rem;color:var(--muted);line-height:1.6;">
+        <strong>Patrones soportados:</strong><br/>
+        <strong>A.</strong> Lista simple — 1 fila = 1 persona (Cortesía Mujeres, U. de Chile Frat&amp;Friends)<br/>
+        <strong>B.</strong> Titular + invitados — 1 fila = grupo de N personas (Cumpleaños, Ganadores Insta)
+      </div>
+    </div>
+
+    <!-- PASO 2: Preview + mapeo de columnas -->
+    <div id="imp-step-map" class="imp-step" style="display:none;">
+      <h3 style="font-family:var(--disp);font-size:1.2rem;margin-bottom:12px;">2. Verifica las columnas detectadas</h3>
+      <div id="imp-pattern-info" style="padding:10px 14px;border-radius:6px;background:rgba(34,197,94,.08);border:1px solid rgba(34,197,94,.3);margin-bottom:14px;font-size:0.85rem;"></div>
+      <div id="imp-mapping"></div>
+      <div style="margin-top:16px;">
+        <h4 style="font-size:0.75rem;letter-spacing:2px;color:var(--muted);text-transform:uppercase;margin-bottom:8px;">Preview (primeras 5 filas)</h4>
+        <div style="overflow-x:auto;border:1px solid var(--border);border-radius:6px;max-height:240px;overflow-y:auto;">
+          <table id="imp-preview-table" style="font-size:0.72rem;width:100%;border-collapse:collapse;"></table>
+        </div>
+      </div>
+    </div>
+
+    <!-- PASO 3: Configuración del lote -->
+    <div id="imp-step-config" class="imp-step" style="display:none;">
+      <h3 style="font-family:var(--disp);font-size:1.2rem;margin-bottom:12px;">3. Configura el lote</h3>
+      <div class="form-2">
+        <div class="fg"><label>Evento destino</label><select id="imp-evento"></select></div>
+        <div class="fg"><label>Tipo de admisión</label>
+          <select id="imp-tipo-admision">
+            <option value="cortesia">Cortesía (gratis)</option>
+            <option value="convenio">Convenio universidad</option>
+            <option value="transferencia">Pre-pagado por transferencia</option>
+            <option value="concurso">Ganador concurso/sorteo</option>
+          </select>
+        </div>
+      </div>
+      <div class="form-2">
+        <div class="fg"><label>Tipo de ticket a usar</label><select id="imp-tt"><option>—</option></select></div>
+        <div class="fg"><label>Motivo / etiqueta interna</label><input type="text" id="imp-motivo" placeholder="Ej: Cortesía Universidad de Chile" /></div>
+      </div>
+      <div style="margin:14px 0;padding:12px;background:var(--bg2);border-radius:6px;font-size:0.85rem;">
+        <label style="display:flex;align-items:center;gap:10px;cursor:pointer;">
+          <input type="checkbox" id="imp-send-email" checked /> Enviar email con QR a cada persona automáticamente
+        </label>
+        <label style="display:flex;align-items:center;gap:10px;cursor:pointer;margin-top:8px;">
+          <input type="checkbox" id="imp-titular-cc" checked /> En grupos (Patrón B): enviar copia con TODOS los QRs al titular como backup
+        </label>
+      </div>
+    </div>
+
+    <!-- PASO 4: Validación -->
+    <div id="imp-step-validate" class="imp-step" style="display:none;">
+      <h3 style="font-family:var(--disp);font-size:1.2rem;margin-bottom:12px;">4. Resumen pre-importación</h3>
+      <div id="imp-summary" style="display:grid;grid-template-columns:repeat(auto-fit,minmax(140px,1fr));gap:10px;margin-bottom:14px;"></div>
+      <div id="imp-errors-list" style="max-height:280px;overflow-y:auto;background:var(--bg2);border:1px solid var(--border);border-radius:6px;padding:10px;font-size:0.78rem;"></div>
+    </div>
+
+    <!-- PASO 5: Progreso -->
+    <div id="imp-step-progress" class="imp-step" style="display:none;text-align:center;">
+      <h3 style="font-family:var(--disp);font-size:1.2rem;margin-bottom:20px;">5. Procesando…</h3>
+      <div style="background:var(--bg2);border-radius:20px;height:24px;overflow:hidden;margin-bottom:12px;">
+        <div id="imp-progress-bar" style="background:linear-gradient(90deg,var(--rojo),var(--dorado));height:100%;width:0%;transition:width .3s;border-radius:20px;"></div>
+      </div>
+      <div id="imp-progress-text" style="color:var(--muted);font-size:0.85rem;">0 / 0</div>
+    </div>
+
+    <!-- PASO 6: Resultado -->
+    <div id="imp-step-done" class="imp-step" style="display:none;text-align:center;">
+      <div style="font-size:4rem;margin-bottom:12px;">🎉</div>
+      <h3 style="font-family:var(--disp);font-size:1.4rem;margin-bottom:8px;">¡Importación completada!</h3>
+      <div id="imp-done-summary" style="margin-bottom:20px;"></div>
+      <button class="btn btn-g" onclick="impDownloadLog()">📋 Descargar log CSV</button>
+    </div>
+  </div>
+
+  <div class="mfoot" id="imp-footer">
+    <button class="btn btn-g" onclick="closeModal('modal-import')">Cancelar</button>
+    <button class="btn btn-p" id="imp-btn-next" onclick="impNext()" disabled>Siguiente →</button>
+  </div>
 </div></div>
 
 <!-- WEBEUM -->
@@ -1333,12 +1461,16 @@ async function validateQR() {
   const { data: order } = await sb.from('pedidos').select('*, items_pedido(*)').eq('id', pedidoId).maybeSingle();
   if (!order) {
     result.innerHTML = `<div style="padding:14px;background:rgba(232,54,61,.1);border:1px solid rgba(232,54,61,.3);border-radius:4px;color:var(--rojo)">❌ Pedido no encontrado</div>`;
+    qrIncCounter('err'); qrBeep(false);
+    setTimeout(() => { if (qrScannerActive) qrScannerPaused = false; }, 1800);
     return;
   }
 
   // Si pedido no está pagado, advertir
   if (order.estado !== 'pagado') {
     result.innerHTML = `<div style="padding:14px;background:rgba(245,158,11,.1);border:1px solid rgba(245,158,11,.3);border-radius:4px;color:#f59e0b;font-weight:600">⚠️ Pedido en estado: ${order.estado} — NO autorizado</div>`;
+    qrIncCounter('err'); qrBeep(false);
+    setTimeout(() => { if (qrScannerActive) qrScannerPaused = false; }, 2000);
     return;
   }
 
@@ -1362,6 +1494,10 @@ async function validateQR() {
   // Verificar si ya fue usado
   const { data: usado } = await sb.from('qr_usados').select('*').eq('qr_id', code).maybeSingle();
   const yaUsado = !!usado;
+  if (yaUsado) {
+    qrIncCounter('dup'); qrBeep(false);
+    setTimeout(() => { if (qrScannerActive) qrScannerPaused = false; }, 3000);
+  }
 
   const icono = itemMatch?.producto_tipo === 'carta' ? '🍹' : itemMatch?.producto_tipo === 'merch' ? '🛍️' : '🎟️';
   const itemNombre = itemMatch?.nombre_evento || itemMatch?.nombre_ticket || (itemMatch ? 'Item' : 'Pedido completo');
@@ -1393,14 +1529,152 @@ async function marcarQRUsado(qrId, pedidoId) {
       escaneado_por: user?.id || null
     });
     if (error) throw error;
+    qrIncCounter('ok');
+    qrBeep(true);
     showToast('✅ Ingreso registrado');
     const input = document.getElementById('qr-input');
     if (input) { input.value = ''; input.focus(); }
-    document.getElementById('qr-result').innerHTML = '<div style="padding:14px;color:var(--verde);text-align:center;font-weight:700;">✅ Listo — siguiente</div>';
-    setTimeout(() => { const r = document.getElementById('qr-result'); if (r) r.innerHTML = ''; }, 2500);
+    document.getElementById('qr-result').innerHTML = '<div style="padding:14px;color:var(--verde);text-align:center;font-weight:700;font-size:1.1rem;">✅ AUTORIZADO — siguiente persona</div>';
+    setTimeout(() => {
+      const r = document.getElementById('qr-result');
+      if (r) r.innerHTML = '';
+      // Si el scanner está activo, reactivarlo
+      if (qrScannerActive) qrScannerPaused = false;
+    }, 2000);
   } catch (err) {
     showToast('⚠️ Error: ' + err.message);
+    qrIncCounter('err');
   }
+}
+
+// ═══════════════════════════════════════════════════════════════
+// LECTOR QR CON CÁMARA
+// ═══════════════════════════════════════════════════════════════
+let qrScanner = null;
+let qrScannerActive = false;
+let qrScannerPaused = false;     // se pausa mientras admin aprueba
+let qrCameras = [];
+let qrCurrentCam = 0;
+let qrLastCode = null;           // evita detectar el mismo QR repetidamente
+let qrLastDetectedAt = 0;
+
+const QR_CFG = { fps: 10, qrbox: { width: 250, height: 250 }, aspectRatio: 1.0 };
+
+function qrModeSwitch(mode) {
+  const cam = document.getElementById('qr-camera-pane');
+  const man = document.getElementById('qr-manual-pane');
+  const btnCam = document.getElementById('qrmode-camera');
+  const btnMan = document.getElementById('qrmode-manual');
+  if (mode === 'camera') {
+    cam.style.display = 'block';
+    man.style.display = 'none';
+    btnCam.style.background = 'var(--rojo)'; btnCam.style.color = '#fff';
+    btnMan.style.background = 'transparent'; btnMan.style.color = 'var(--muted)';
+  } else {
+    cam.style.display = 'none';
+    man.style.display = 'block';
+    btnMan.style.background = 'var(--rojo)'; btnMan.style.color = '#fff';
+    btnCam.style.background = 'transparent'; btnCam.style.color = 'var(--muted)';
+    stopQRScanner();
+    setTimeout(() => document.getElementById('qr-input')?.focus(), 100);
+  }
+}
+
+async function startQRScanner() {
+  if (qrScannerActive) return;
+  if (typeof Html5Qrcode === 'undefined') {
+    showToast('⚠️ Librería de QR no cargada. Refresca la página.', true);
+    return;
+  }
+  try {
+    qrCameras = await Html5Qrcode.getCameras();
+    if (!qrCameras?.length) { showToast('⚠️ No se detectaron cámaras', true); return; }
+
+    // Preferir cámara trasera (back/environment) en mobile
+    const backIdx = qrCameras.findIndex(c => /back|trasera|environment|rear/i.test(c.label));
+    qrCurrentCam = backIdx >= 0 ? backIdx : 0;
+
+    qrScanner = new Html5Qrcode("qr-reader");
+    await qrScanner.start(
+      qrCameras[qrCurrentCam].id,
+      QR_CFG,
+      onQRDetected,   // callback en éxito
+      () => {}        // callback en error (ignorar — son frames sin QR)
+    );
+    qrScannerActive = true;
+    qrScannerPaused = false;
+    document.getElementById('qr-start-btn').style.display = 'none';
+    document.getElementById('qr-stop-btn').style.display = 'inline-flex';
+    if (qrCameras.length > 1) document.getElementById('qr-flip-btn').style.display = 'inline-flex';
+  } catch (err) {
+    showToast('⚠️ ' + (err.message || 'Error al iniciar cámara. Permite el acceso.'), true);
+    console.error('[QR Scanner]', err);
+  }
+}
+
+async function stopQRScanner() {
+  if (!qrScanner || !qrScannerActive) return;
+  try {
+    await qrScanner.stop();
+    qrScanner.clear();
+  } catch (e) {}
+  qrScanner = null;
+  qrScannerActive = false;
+  qrScannerPaused = false;
+  qrLastCode = null;
+  document.getElementById('qr-start-btn').style.display = 'inline-flex';
+  document.getElementById('qr-stop-btn').style.display = 'none';
+  document.getElementById('qr-flip-btn').style.display = 'none';
+}
+
+async function flipQRCamera() {
+  if (qrCameras.length < 2) return;
+  qrCurrentCam = (qrCurrentCam + 1) % qrCameras.length;
+  await stopQRScanner();
+  setTimeout(startQRScanner, 300);
+}
+
+// Callback cuando se detecta un QR
+async function onQRDetected(decoded, result) {
+  if (qrScannerPaused) return;
+  const now = Date.now();
+  // Evita re-detectar el mismo QR en menos de 3 seg
+  if (decoded === qrLastCode && (now - qrLastDetectedAt) < 3000) return;
+  qrLastCode = decoded;
+  qrLastDetectedAt = now;
+
+  // Pausar el scanner mientras admin revisa
+  qrScannerPaused = true;
+  qrBeep(false); // beep neutro de detección
+
+  // Llenar el input + invocar validación normal
+  const input = document.getElementById('qr-input');
+  if (input) input.value = decoded;
+  await validateQR();
+  // El admin debe tocar "CONFIRMAR INGRESO" para autorizar.
+  // marcarQRUsado() reactivará el scanner cuando termine.
+}
+
+// ── Contador de sesión ───────────────────────────────────────
+function qrIncCounter(kind) {
+  const ids = { ok: 'qr-cnt-ok', dup: 'qr-cnt-dup', err: 'qr-cnt-err' };
+  const el = document.getElementById(ids[kind]);
+  if (el) el.textContent = (parseInt(el.textContent) || 0) + 1;
+}
+
+// ── Beep + vibración para feedback ───────────────────────────
+function qrBeep(ok) {
+  try {
+    const ctx = new (window.AudioContext || window.webkitAudioContext)();
+    const osc = ctx.createOscillator();
+    const gain = ctx.createGain();
+    osc.connect(gain); gain.connect(ctx.destination);
+    osc.frequency.value = ok ? 880 : 440;
+    gain.gain.value = 0.15;
+    osc.start();
+    setTimeout(() => { osc.stop(); ctx.close(); }, ok ? 150 : 80);
+  } catch(e) {}
+  if (navigator.vibrate) navigator.vibrate(ok ? [80, 30, 80] : 50);
 }
 
 // ── USUARIOS ─────────────────────────────────────────────────
@@ -1845,6 +2119,493 @@ async function initAdmin() {
 
 // Auto check session on load
 checkSession();
+
+// ═══════════════════════════════════════════════════════════════
+// IMPORTADOR MASIVO CSV/XLSX (cortesías, convenios, ganadores, etc.)
+// ═══════════════════════════════════════════════════════════════
+const IMP = {
+  step:      'upload',
+  rawRows:   [],     // todas las filas del archivo (incluyendo header)
+  headers:   [],     // headers detectados
+  pattern:   null,   // 'simple' | 'groups'
+  mapping:   {},     // { nombre: 'col_idx', email: 'col_idx', rut: 'col_idx', ... }
+  guestBlocks: [],   // para Patrón B: [{nombre: idx, email: idx, rut: idx}, ...]
+  people:    [],     // entradas individuales expandidas y validadas
+  errors:    [],     // [{row, col, msg, raw}]
+  log:       [],     // resultado de cada envío
+  config:    {}
+};
+
+function openImportador() {
+  IMP.step='upload'; IMP.rawRows=[]; IMP.headers=[]; IMP.pattern=null;
+  IMP.mapping={}; IMP.guestBlocks=[]; IMP.people=[]; IMP.errors=[]; IMP.log=[]; IMP.config={};
+  impShowStep('upload');
+  const btn = document.getElementById('imp-btn-next');
+  if (btn) btn.disabled = true;
+  // Limpiar dropzone visual
+  const dz = document.getElementById('imp-dropzone');
+  if (dz) {
+    dz.ondragover = e => { e.preventDefault(); dz.style.background='var(--bg3)'; };
+    dz.ondragleave = e => { dz.style.background='var(--bg2)'; };
+    dz.ondrop = e => { e.preventDefault(); dz.style.background='var(--bg2)';
+      const f = e.dataTransfer?.files?.[0]; if (f) impHandleFile(f); };
+  }
+  openModal('modal-import');
+  // Cargar eventos en selector
+  populateImpEventos();
+}
+
+function impShowStep(step) {
+  IMP.step = step;
+  ['upload','map','config','validate','progress','done'].forEach(s => {
+    const el = document.getElementById('imp-step-'+s);
+    if (el) el.style.display = s===step ? 'block' : 'none';
+  });
+  // Texto del botón siguiente
+  const btn = document.getElementById('imp-btn-next');
+  if (!btn) return;
+  btn.disabled = false;
+  if (step === 'upload')   { btn.disabled = true; btn.textContent = 'Siguiente →'; }
+  if (step === 'map')      btn.textContent = 'Confirmar mapeo →';
+  if (step === 'config')   btn.textContent = 'Validar →';
+  if (step === 'validate') btn.textContent = '🚀 Procesar e importar';
+  if (step === 'progress') { btn.disabled = true; btn.textContent = 'Procesando...'; }
+  if (step === 'done')     { btn.textContent = 'Cerrar'; btn.onclick = () => { closeModal('modal-import'); renderCortesias(); }; }
+}
+
+function impNext() {
+  if (IMP.step === 'map')      return impDoConfig();
+  if (IMP.step === 'config')   return impDoValidate();
+  if (IMP.step === 'validate') return impDoProcess();
+}
+
+// ── PASO 1: Leer archivo ─────────────────────────────────────
+async function impHandleFile(file) {
+  if (!file) return;
+  try {
+    const buf = await file.arrayBuffer();
+    const wb  = XLSX.read(buf, { type: 'array' });
+    const ws  = wb.Sheets[wb.SheetNames[0]];
+    const rows = XLSX.utils.sheet_to_json(ws, { header: 1, defval: '', raw: false });
+    if (!rows.length) { showToast('Archivo vacío', true); return; }
+    // Detectar header row (primera fila con datos, ignorar timestamps vacíos)
+    IMP.headers = rows[0].map(h => String(h || '').trim());
+    IMP.rawRows = rows.slice(1).filter(r => r.some(c => String(c).trim()));
+    if (!IMP.rawRows.length) { showToast('Sin filas de datos', true); return; }
+
+    impAutoDetect();
+    impRenderMappingStep();
+    impShowStep('map');
+    impEnableNext();
+  } catch(e) {
+    console.error(e);
+    showToast('Error leyendo archivo: '+e.message, true);
+  }
+}
+
+// ── Detección automática de patrón + mapeo ─────────────────────
+function impAutoDetect() {
+  const h = IMP.headers.map(s => s.toUpperCase());
+
+  // Detectar bloques de invitados (Patrón B)
+  // Buscar columnas tipo "NOMBRE INVITAD@ 1", "CORREO INVITAD@ 1", "RUT INVITAD@ 1"
+  const guestRegex = /INVITAD[@OA]\s*(\d+)/i;
+  const guestNums = new Set();
+  h.forEach(col => { const m = col.match(guestRegex); if (m) guestNums.add(parseInt(m[1])); });
+
+  if (guestNums.size >= 1) {
+    // Patrón B: hay invitados
+    IMP.pattern = 'groups';
+
+    // Titular = la columna con "TITULAR" o "CUMPLEAÑER" o "GANADOR" o sin número
+    const findTitular = (kw, fallback) => {
+      let idx = h.findIndex(c => c.includes(kw) && !c.match(guestRegex));
+      return idx >= 0 ? idx : fallback;
+    };
+    IMP.mapping = {
+      nombre: findTitular('NOMBRE', h.findIndex(c => /NOMBRE.*CUMPLE|NOMBRE.*GANADOR|NOMBRE.*TITULAR/i.test(c))),
+      email:  findTitular('CORREO', findTitular('EMAIL', -1)),
+      rut:    findTitular('RUT', -1)
+    };
+    // Si no encontró titular, usar primera columna nombre/correo/rut sin guest tag
+    if (IMP.mapping.nombre < 0) IMP.mapping.nombre = h.findIndex(c => /NOMBRE/i.test(c) && !c.match(guestRegex));
+    if (IMP.mapping.email  < 0) IMP.mapping.email  = h.findIndex(c => /CORREO|EMAIL|MAIL/i.test(c) && !c.match(guestRegex));
+    if (IMP.mapping.rut    < 0) IMP.mapping.rut    = h.findIndex(c => /RUT/i.test(c) && !c.match(guestRegex));
+
+    // Bloques de invitados ordenados por número
+    const sortedNums = [...guestNums].sort((a,b) => a-b);
+    IMP.guestBlocks = sortedNums.map(n => {
+      // Tolerar variaciones tipo "NOMBRE INVITAD@ 1 1" (un typo en el form)
+      const reN = new RegExp(`NOMBRE\\s+INVITAD[@OA]\\s*${n}(?!\\d)`, 'i');
+      const reE = new RegExp(`(CORREO|EMAIL|MAIL).*INVITAD[@OA]\\s*${n}(?!\\d)`, 'i');
+      const reR = new RegExp(`RUT.*INVITAD[@OA]\\s*${n}(?!\\d)`, 'i');
+      return {
+        nombre: h.findIndex(c => reN.test(c)),
+        email:  h.findIndex(c => reE.test(c)),
+        rut:    h.findIndex(c => reR.test(c))
+      };
+    }).filter(b => b.nombre >= 0);
+  } else {
+    // Patrón A: lista simple
+    IMP.pattern = 'simple';
+    IMP.mapping = {
+      nombre: h.findIndex(c => /NOMBRE/i.test(c)),
+      email:  h.findIndex(c => /CORREO|EMAIL|MAIL/i.test(c)),
+      rut:    h.findIndex(c => /RUT/i.test(c)),
+      telefono: h.findIndex(c => /TEL[ÉE]FONO|CELULAR|PHONE/i.test(c)),
+      universidad: h.findIndex(c => /UNIVERSIDAD|FACULTAD/i.test(c))
+    };
+  }
+}
+
+// ── Render PASO 2 ─────────────────────────────────────────────
+function impRenderMappingStep() {
+  const info = document.getElementById('imp-pattern-info');
+  const totalPeople = IMP.pattern === 'groups'
+    ? IMP.rawRows.length * (1 + IMP.guestBlocks.length)  // peor caso
+    : IMP.rawRows.length;
+  if (IMP.pattern === 'groups') {
+    info.innerHTML = `<strong>📋 Patrón B detectado:</strong> Titular + ${IMP.guestBlocks.length} invitados por fila.<br/>
+      <span style="color:var(--muted);">${IMP.rawRows.length} grupos · hasta ${totalPeople} personas en total</span>`;
+  } else {
+    info.innerHTML = `<strong>📋 Patrón A detectado:</strong> Lista simple, 1 persona por fila.<br/>
+      <span style="color:var(--muted);">${IMP.rawRows.length} personas detectadas</span>`;
+  }
+
+  // Render selectores de mapeo (titular)
+  const mapDiv = document.getElementById('imp-mapping');
+  const opts = IMP.headers.map((h,i) => `<option value="${i}">[${i}] ${h.slice(0,60)}</option>`).join('');
+  const optsNone = `<option value="-1">— No usar —</option>` + opts;
+  const sel = (id, val) => `<select id="imp-map-${id}" style="background:var(--bg3);border:1px solid var(--border);color:var(--text);padding:6px 10px;border-radius:4px;width:100%;font-size:0.78rem;">${optsNone.replace(`value="${val}"`, `value="${val}" selected`)}</select>`;
+
+  let html = `<div class="form-2">
+    <div class="fg"><label>Nombre completo *</label>${sel('nombre', IMP.mapping.nombre)}</div>
+    <div class="fg"><label>Email *</label>${sel('email', IMP.mapping.email)}</div>
+  </div>
+  <div class="form-2">
+    <div class="fg"><label>RUT</label>${sel('rut', IMP.mapping.rut)}</div>
+    <div class="fg"><label>Teléfono (opcional)</label>${sel('telefono', IMP.mapping.telefono ?? -1)}</div>
+  </div>`;
+
+  if (IMP.pattern === 'groups') {
+    html += `<div style="margin-top:14px;padding:10px;background:var(--bg2);border-radius:6px;font-size:0.8rem;">
+      <strong>✓ ${IMP.guestBlocks.length} bloques de invitados detectados automáticamente.</strong>
+      <div style="color:var(--muted);margin-top:4px;">Cada uno con su nombre, email y RUT propios. Total máximo: ${1 + IMP.guestBlocks.length} personas por grupo.</div>
+    </div>`;
+  }
+
+  mapDiv.innerHTML = html;
+
+  // Preview
+  const t = document.getElementById('imp-preview-table');
+  const headerRow = `<tr style="background:var(--bg3);">${IMP.headers.map(h => `<th style="padding:6px 8px;text-align:left;color:var(--muted);font-weight:600;border-bottom:1px solid var(--border);font-size:0.7rem;">${h.slice(0,30)}</th>`).join('')}</tr>`;
+  const rows = IMP.rawRows.slice(0,5).map(r =>
+    `<tr>${IMP.headers.map((_,i) => `<td style="padding:6px 8px;border-bottom:1px solid var(--border);color:var(--text);">${String(r[i]||'').slice(0,40)}</td>`).join('')}</tr>`
+  ).join('');
+  t.innerHTML = headerRow + rows;
+}
+
+async function populateImpEventos() {
+  const sel = document.getElementById('imp-evento');
+  if (!sel) return;
+  const { data: evs } = await sb.from('eventos').select('id,nombre,fecha').eq('activo', true).order('fecha');
+  sel.innerHTML = evs?.map(ev => `<option value="${ev.id}">${ev.nombre} · ${ev.fecha||''}</option>`).join('') || '<option>Sin eventos activos</option>';
+  // Cuando cambia evento, cargar tipos de ticket
+  sel.onchange = async () => {
+    const evId = parseInt(sel.value);
+    const { data: tts } = await sb.from('tipos_ticket').select('id,nombre').eq('evento_id', evId).order('id');
+    const ttSel = document.getElementById('imp-tt');
+    ttSel.innerHTML = tts?.length
+      ? tts.map(t => `<option value="${t.id}">${t.nombre}</option>`).join('')
+      : '<option value="">— Sin tipos (se creará uno genérico) —</option>';
+  };
+  sel.dispatchEvent(new Event('change'));
+}
+
+// ── PASO 3: Aplicar mapeo + ir a config ─────────────────────
+function impDoConfig() {
+  // Leer mapeo del usuario
+  ['nombre','email','rut','telefono'].forEach(k => {
+    const el = document.getElementById('imp-map-'+k);
+    if (el) IMP.mapping[k] = parseInt(el.value);
+  });
+  if (IMP.mapping.nombre < 0 || IMP.mapping.email < 0) {
+    showToast('Nombre y Email son obligatorios', true); return;
+  }
+  impShowStep('config');
+}
+
+// ── PASO 4: Validar todas las filas ─────────────────────────
+function impDoValidate() {
+  IMP.config = {
+    eventoId:    parseInt(document.getElementById('imp-evento').value),
+    ttId:        parseInt(document.getElementById('imp-tt').value) || null,
+    tipoAdmision: document.getElementById('imp-tipo-admision').value,
+    motivo:      document.getElementById('imp-motivo').value.trim(),
+    sendEmail:   document.getElementById('imp-send-email').checked,
+    titularCC:   document.getElementById('imp-titular-cc').checked
+  };
+  if (!IMP.config.eventoId) { showToast('Selecciona un evento', true); return; }
+
+  // Expandir filas en personas individuales
+  IMP.people = [];
+  IMP.errors = [];
+
+  IMP.rawRows.forEach((row, rowIdx) => {
+    const rowNum = rowIdx + 2; // +2 porque excel: header=1, primera data=2
+    if (IMP.pattern === 'simple') {
+      const p = impExtractPerson(row, IMP.mapping, rowNum);
+      if (p) IMP.people.push({ ...p, groupId: null, isTitular: true });
+    } else {
+      // Patrón B: titular + invitados de la misma fila
+      const groupId = 'g'+rowIdx;
+      const titular = impExtractPerson(row, IMP.mapping, rowNum);
+      if (titular) IMP.people.push({ ...titular, groupId, isTitular: true });
+      IMP.guestBlocks.forEach((blk, gi) => {
+        const g = impExtractPerson(row, blk, rowNum, ` (invitado ${gi+1})`);
+        if (g) IMP.people.push({ ...g, groupId, isTitular: false, titularEmail: titular?.email });
+      });
+    }
+  });
+
+  impRenderSummary();
+  impShowStep('validate');
+}
+
+function impExtractPerson(row, mapping, rowNum, suffix='') {
+  const nombre = String(row[mapping.nombre] ?? '').trim();
+  const email  = String(row[mapping.email]  ?? '').trim().toLowerCase();
+  const rut    = String(row[mapping.rut]    ?? '').trim();
+  const tel    = mapping.telefono >= 0 ? String(row[mapping.telefono] ?? '').trim() : '';
+
+  // Si nombre Y email están vacíos, la fila está vacía (común en patrón B con menos invitados de los máximos)
+  if (!nombre && !email) return null;
+
+  const errs = [];
+  if (!nombre) errs.push('Sin nombre');
+  if (!email)  errs.push('Sin email');
+  else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) errs.push('Email inválido: ' + email);
+  if (rut && !impValidarRut(rut)) errs.push('RUT inválido: ' + rut);
+
+  if (errs.length) {
+    IMP.errors.push({ row: rowNum + suffix, nombre, email, msg: errs.join(' · ') });
+    return null;
+  }
+  return { nombre, email, rut, tel, rowNum: rowNum + suffix };
+}
+
+function impValidarRut(rut) {
+  const c = rut.replace(/\./g,'').replace(/-/g,'').toUpperCase().trim();
+  if (c.length < 2) return false;
+  const cuerpo = c.slice(0,-1), dv = c.slice(-1);
+  if (!/^\d+$/.test(cuerpo)) return false;
+  let s=0, m=2;
+  for (let i=cuerpo.length-1;i>=0;i--) { s+=parseInt(cuerpo[i])*m; m=m<7?m+1:2; }
+  const dvc = 11 - (s%11);
+  const exp = dvc===11?'0':dvc===10?'K':String(dvc);
+  return dv === exp;
+}
+
+function impRenderSummary() {
+  const s = document.getElementById('imp-summary');
+  // Detectar duplicados de email en el mismo archivo
+  const emails = IMP.people.map(p => p.email);
+  const dupSet = new Set();
+  const seen = new Set();
+  emails.forEach(e => { if (seen.has(e)) dupSet.add(e); seen.add(e); });
+
+  s.innerHTML = `
+    <div style="padding:12px;background:rgba(34,197,94,.1);border:1px solid rgba(34,197,94,.3);border-radius:6px;text-align:center;">
+      <div style="font-size:1.6rem;font-weight:900;color:var(--verde);">${IMP.people.length}</div>
+      <div style="font-size:0.7rem;color:var(--muted);letter-spacing:1px;text-transform:uppercase;">A importar</div>
+    </div>
+    <div style="padding:12px;background:rgba(245,158,11,.1);border:1px solid rgba(245,158,11,.3);border-radius:6px;text-align:center;">
+      <div style="font-size:1.6rem;font-weight:900;color:#f59e0b;">${dupSet.size}</div>
+      <div style="font-size:0.7rem;color:var(--muted);letter-spacing:1px;text-transform:uppercase;">Emails duplicados</div>
+    </div>
+    <div style="padding:12px;background:rgba(232,54,61,.08);border:1px solid rgba(232,54,61,.3);border-radius:6px;text-align:center;">
+      <div style="font-size:1.6rem;font-weight:900;color:var(--rojo);">${IMP.errors.length}</div>
+      <div style="font-size:0.7rem;color:var(--muted);letter-spacing:1px;text-transform:uppercase;">Filas rechazadas</div>
+    </div>
+    <div style="padding:12px;background:var(--bg2);border-radius:6px;text-align:center;">
+      <div style="font-size:1.6rem;font-weight:900;color:var(--dorado);">${IMP.pattern === 'groups' ? new Set(IMP.people.map(p=>p.groupId)).size : '—'}</div>
+      <div style="font-size:0.7rem;color:var(--muted);letter-spacing:1px;text-transform:uppercase;">Grupos</div>
+    </div>
+  `;
+
+  const ed = document.getElementById('imp-errors-list');
+  if (IMP.errors.length === 0 && dupSet.size === 0) {
+    ed.innerHTML = '<div style="text-align:center;color:var(--verde);padding:20px;">✅ Todos los datos pasaron la validación.</div>';
+  } else {
+    const errsHtml = IMP.errors.map(e =>
+      `<div style="padding:6px 0;border-bottom:1px solid var(--border);">
+        <strong>Fila ${e.row}:</strong> ${e.nombre || '(sin nombre)'} <span style="color:var(--muted);">${e.email||''}</span><br/>
+        <span style="color:var(--rojo);font-size:0.72rem;">→ ${e.msg}</span>
+      </div>`
+    ).join('');
+    const dupsHtml = [...dupSet].map(e => `<div style="padding:4px 0;color:#f59e0b;">↗ Email duplicado en el archivo: <strong>${e}</strong></div>`).join('');
+    ed.innerHTML = errsHtml + (dupsHtml ? '<div style="margin-top:8px;border-top:1px solid var(--border);padding-top:8px;">'+dupsHtml+'</div>' : '');
+  }
+}
+
+// ── PASO 5: PROCESAR — crear pedidos en lote ────────────────
+async function impDoProcess() {
+  if (IMP.people.length === 0) { showToast('No hay personas válidas para importar', true); return; }
+  if (!confirm(`¿Confirmar importación de ${IMP.people.length} personas? Se crearán pedidos en Supabase${IMP.config.sendEmail?' y se enviarán emails con QR':''}.`)) return;
+
+  impShowStep('progress');
+  const bar  = document.getElementById('imp-progress-bar');
+  const text = document.getElementById('imp-progress-text');
+  IMP.log = [];
+
+  const evento = await sb.from('eventos').select('nombre').eq('id', IMP.config.eventoId).single();
+  const evNombre = evento.data?.nombre || '—';
+  let ttId = IMP.config.ttId;
+  // Si no hay tt, usar el primero del evento
+  if (!ttId) {
+    const { data: tts } = await sb.from('tipos_ticket').select('id,nombre,precio').eq('evento_id', IMP.config.eventoId).limit(1);
+    ttId = tts?.[0]?.id || null;
+  }
+  const { data: ttData } = ttId ? await sb.from('tipos_ticket').select('nombre,precio').eq('id', ttId).single() : { data: null };
+  const ttNombre = ttData?.nombre || (IMP.config.tipoAdmision === 'cortesia' ? 'Cortesía' : 'Convenio');
+
+  // Agrupar personas por groupId (para Patrón B: 1 pedido por grupo)
+  // Para Patrón A: 1 pedido por persona
+  const groups = {};
+  IMP.people.forEach(p => {
+    const key = p.groupId || 'p_'+p.email;
+    if (!groups[key]) groups[key] = [];
+    groups[key].push(p);
+  });
+  const groupKeys = Object.keys(groups);
+  const total = groupKeys.length;
+  let done = 0;
+
+  for (const key of groupKeys) {
+    const personas = groups[key];
+    const titular  = personas.find(p => p.isTitular) || personas[0];
+    try {
+      // 1) Crear pedido
+      const { data: pedido, error: e1 } = await sb.from('pedidos').insert({
+        nombre_cliente:  titular.nombre,
+        email_cliente:   titular.email,
+        estado:          'pagado',
+        total:           0,
+        fee_servicio:    0,
+        total_pagado:    0,
+        metodo_pago:     IMP.config.tipoAdmision,
+        referencia_pago: IMP.config.motivo || IMP.config.tipoAdmision,
+        fecha_pago:      new Date().toISOString()
+      }).select().single();
+      if (e1) throw e1;
+
+      const qrIds = personas.map((_, u) => `FCC-${pedido.id}-${ttId || 'cor'}-${u}`);
+      const personasArr = personas.map(p => ({ nombre: p.nombre, rut: p.rut, email: p.email }));
+
+      // 2) Crear item_pedido
+      const { error: e2 } = await sb.from('items_pedido').insert({
+        pedido_id:        pedido.id,
+        producto_tipo:    'ticket',
+        evento_id:        IMP.config.eventoId,
+        tipo_ticket_id:   ttId,
+        nombre_evento:    evNombre,
+        nombre_ticket:    ttNombre,
+        cantidad:         personas.length,
+        precio_unitario:  0,
+        personas:         personasArr,
+        qr_ids:           qrIds,
+        nombre_asistente: titular.nombre,
+        rut_asistente:    titular.rut || ''
+      });
+      if (e2) throw e2;
+
+      // 3) Enviar emails (no bloquea si falla)
+      if (IMP.config.sendEmail) {
+        // 3a) Email individual a cada persona con SU QR
+        for (let i = 0; i < personas.length; i++) {
+          const p = personas[i];
+          const personalOrder = {
+            id:    'FCC-' + String(pedido.id).padStart(6,'0') + '-' + (i+1),
+            items: [{
+              tipo:     ttNombre,
+              nombre:   evNombre,
+              precio:   0,
+              cantidad: 1,
+              eventoId: IMP.config.eventoId,
+              ttId:     ttId,
+              personas: [personasArr[i]]
+            }],
+            comprador: { nombre: p.nombre, email: p.email },
+            total: 0,
+            fecha: new Date().toISOString()
+          };
+          // Inyectar qr_id específico
+          personalOrder.items[0]._qrOverride = qrIds[i];
+          await sb.functions.invoke('send-receipt', { body: { order: personalOrder } }).catch(e => console.warn(e));
+        }
+        // 3b) Si Patrón B y opción CC al titular: email con TODOS los QRs
+        if (IMP.config.titularCC && IMP.pattern === 'groups' && personas.length > 1) {
+          const fullOrder = {
+            id:    'FCC-' + String(pedido.id).padStart(6,'0'),
+            items: [{
+              tipo:     ttNombre,
+              nombre:   evNombre,
+              precio:   0,
+              cantidad: personas.length,
+              eventoId: IMP.config.eventoId,
+              ttId:     ttId,
+              personas: personasArr
+            }],
+            comprador: { nombre: titular.nombre, email: titular.email },
+            total: 0,
+            fecha: new Date().toISOString()
+          };
+          await sb.functions.invoke('send-receipt', { body: { order: fullOrder } }).catch(e => console.warn(e));
+        }
+      }
+
+      personas.forEach(p => IMP.log.push({ row: p.rowNum, nombre: p.nombre, email: p.email, pedido: pedido.id, status: 'OK', error: '' }));
+    } catch (err) {
+      console.error('[Import]', err);
+      personas.forEach(p => IMP.log.push({ row: p.rowNum, nombre: p.nombre, email: p.email, pedido: '', status: 'ERROR', error: err.message }));
+    }
+    done++;
+    const pct = Math.round((done/total)*100);
+    if (bar)  bar.style.width = pct+'%';
+    if (text) text.textContent = `${done} / ${total} grupos · ${IMP.log.filter(l=>l.status==='OK').length} personas OK · ${IMP.log.filter(l=>l.status==='ERROR').length} fallidos`;
+  }
+
+  impShowStep('done');
+  const ok  = IMP.log.filter(l => l.status==='OK').length;
+  const err = IMP.log.filter(l => l.status==='ERROR').length;
+  document.getElementById('imp-done-summary').innerHTML = `
+    <div style="font-size:1rem;color:var(--text);margin-bottom:8px;">
+      <strong style="color:var(--verde);">${ok}</strong> personas importadas correctamente
+      ${err ? `<br/><strong style="color:var(--rojo);">${err}</strong> fallaron — ver log` : ''}
+    </div>
+    <div style="font-size:0.75rem;color:var(--muted);">
+      ${IMP.config.sendEmail ? '📧 Emails enviados a cada persona' : '⚠️ No se enviaron emails (opción desactivada)'}
+    </div>`;
+}
+
+function impDownloadLog() {
+  const rows = [['Fila', 'Nombre', 'Email', 'Pedido', 'Estado', 'Error']];
+  IMP.log.forEach(l => rows.push([l.row, l.nombre, l.email, l.pedido, l.status, l.error]));
+  IMP.errors.forEach(e => rows.push([e.row, e.nombre, e.email, '', 'RECHAZADA', e.msg]));
+  const csv = rows.map(r => r.map(c => `"${String(c).replace(/"/g,'""')}"`).join(',')).join('\n');
+  const blob = new Blob(['﻿' + csv], { type: 'text/csv;charset=utf-8;' });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url; a.download = `import-log-${Date.now()}.csv`;
+  document.body.appendChild(a); a.click(); a.remove();
+  URL.revokeObjectURL(url);
+}
+
+// Habilitar siguiente cuando se sube archivo OK
+function impEnableNext() {
+  const btn = document.getElementById('imp-btn-next');
+  if (btn) btn.disabled = false;
+}
 </script>
 </body>
 </html>

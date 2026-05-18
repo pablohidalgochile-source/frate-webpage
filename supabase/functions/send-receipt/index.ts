@@ -9,6 +9,10 @@ const RESEND_API = 'https://api.resend.com/emails';
 const FROM       = 'Frate Tickets <tickets@frate.cl>';
 const SITE_URL   = 'https://frate.cl';
 
+// Email del admin que recibe copia (BCC) de cada venta/cortesía.
+// Configurable via env. Si está vacío, no se envía BCC.
+const ADMIN_BCC  = Deno.env.get('ADMIN_BCC_EMAIL') || '';
+
 // QR como imagen real via api.qrserver.com (gratuito, sin límite)
 const qrUrl = (data: string) =>
   `https://api.qrserver.com/v1/create-qr-code/?size=160x160&format=png&data=${encodeURIComponent(data)}&bgcolor=ffffff&color=0a0a0b&margin=8`;
@@ -37,18 +41,21 @@ Deno.serve(async (req: Request) => {
 
     const html = buildReceiptHtml(order, entries);
 
+    const payload: any = {
+      from:    FROM,
+      to:      [order.comprador.email],
+      subject: `🎟️ Tus entradas — ${order.id}`,
+      html,
+    };
+    if (ADMIN_BCC) payload.bcc = [ADMIN_BCC];
+
     const res = await fetch(RESEND_API, {
       method: 'POST',
       headers: {
         Authorization: `Bearer ${resendKey}`,
         'Content-Type': 'application/json',
       },
-      body: JSON.stringify({
-        from:    FROM,
-        to:      [order.comprador.email],
-        subject: `🎟️ Tus entradas — ${order.id}`,
-        html,
-      }),
+      body: JSON.stringify(payload),
     });
 
     const data = await res.json();
@@ -96,12 +103,15 @@ interface Entry {
 }
 
 // ── Expande la orden en entradas individuales ─────────────────
+// Soporta opcionalmente item._qrOverride: si está definido, usa ESE qrId en
+// vez del computado. Útil para el importador masivo cuando envía 1 email
+// individual por invitado con SOLO su QR personal (no los del grupo entero).
 function buildEntries(order: Order): Entry[] {
   const entries: Entry[] = [];
-  for (const item of order.items) {
+  for (const item of order.items as any[]) {
     if (item.tipo === 'carta' || item.tipo === 'merch') {
       for (let u = 0; u < item.cantidad; u++) {
-        const uid = `${order.id}-${item.productoId || item.tipo}-${u}`;
+        const uid = item._qrOverride || `${order.id}-${item.productoId || item.tipo}-${u}`;
         entries.push({
           qrId:   uid,
           icon:   item.tipo === 'carta' ? '🍹' : '🛍️',
@@ -116,7 +126,8 @@ function buildEntries(order: Order): Entry[] {
       // Ticket de evento — 1 QR por persona
       for (let p = 0; p < item.cantidad; p++) {
         const persona = item.personas?.[p] ?? null;
-        const uid = `${order.id}-${item.ttId || item.tipo}-${p}`;
+        // Si _qrOverride está, usar ese exacto (caso importador: 1 persona = 1 email)
+        const uid = item._qrOverride || `${order.id}-${item.ttId || item.tipo}-${p}`;
         entries.push({
           qrId:    uid,
           icon:    '🎟️',
