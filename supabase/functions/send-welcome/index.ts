@@ -10,20 +10,22 @@ const FROM       = 'Frate <hola@frate.cl>';  // dominio verificado en Resend
 const SITE_URL   = 'https://frate.cl';
 
 Deno.serve(async (req: Request) => {
-  // Solo POST
-  if (req.method !== 'POST') {
-    return new Response('Method not allowed', { status: 405 });
-  }
-
   // CORS — llamado desde frate.cl
   const headers = {
     'Access-Control-Allow-Origin':  '*',
+    'Access-Control-Allow-Methods': 'POST, OPTIONS',
     'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
     'Content-Type': 'application/json',
   };
 
+  // Preflight CORS DEBE responderse antes que cualquier otra cosa
   if (req.method === 'OPTIONS') {
     return new Response('ok', { headers });
+  }
+
+  // Solo POST
+  if (req.method !== 'POST') {
+    return new Response('Method not allowed', { status: 405, headers });
   }
 
   try {

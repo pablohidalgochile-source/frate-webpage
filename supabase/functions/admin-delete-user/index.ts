@@ -12,12 +12,13 @@ const SERVICE_ROLE  = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!;
 Deno.serve(async (req: Request) => {
   const corsHeaders = {
     'Access-Control-Allow-Origin':  '*',
+    'Access-Control-Allow-Methods': 'POST, OPTIONS',
     'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
     'Content-Type': 'application/json',
   };
 
   if (req.method === 'OPTIONS') return new Response('ok', { headers: corsHeaders });
-  if (req.method !== 'POST')    return new Response('Method not allowed', { status: 405 });
+  if (req.method !== 'POST')    return new Response('Method not allowed', { status: 405, headers: corsHeaders });
 
   try {
     // 1) Verificar que el caller es admin

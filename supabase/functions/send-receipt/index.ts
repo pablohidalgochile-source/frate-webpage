@@ -20,12 +20,13 @@ const qrUrl = (data: string) =>
 Deno.serve(async (req: Request) => {
   const corsHeaders = {
     'Access-Control-Allow-Origin':  '*',
+    'Access-Control-Allow-Methods': 'POST, OPTIONS',
     'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
     'Content-Type': 'application/json',
   };
 
   if (req.method === 'OPTIONS') return new Response('ok', { headers: corsHeaders });
-  if (req.method !== 'POST')    return new Response('Method not allowed', { status: 405 });
+  if (req.method !== 'POST')    return new Response('Method not allowed', { status: 405, headers: corsHeaders });
 
   try {
     const { order } = await req.json() as { order: Order };
