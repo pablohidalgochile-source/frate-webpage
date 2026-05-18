@@ -407,11 +407,46 @@
       <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:18px;">
         <h2 style="font-family:var(--disp);font-weight:900;font-size:1.6rem;">USUARIOS</h2>
         <div style="display:flex;gap:6px;">
-          <button class="btn btn-g btn-sm" onclick="exportCSV()">↓ CSV</button>
-          <button class="btn btn-gold btn-sm" onclick="openModal('modal-regalo')">🎁 Enviar regalo</button>
+          <button class="btn btn-gold btn-sm" onclick="openUserImport()">📥 Importar</button>
+          <button class="btn btn-g btn-sm" onclick="exportCSV()">↓ Exportar CSV</button>
         </div>
       </div>
-      <div class="card"><div class="tw"><table><thead><tr><th>Username</th><th>Nombre</th><th>Email</th><th>RUT</th><th>Teléfono</th><th>Universidad</th><th>Rol</th><th>Registro</th><th>Acciones</th></tr></thead><tbody id="tb-usuarios"></tbody></table></div></div>
+
+      <!-- KPIs de usuarios -->
+      <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(160px,1fr));gap:12px;margin-bottom:16px;">
+        <div class="card cb" style="text-align:center;"><div style="font-size:0.62rem;letter-spacing:2px;color:var(--muted);text-transform:uppercase;">Total usuarios</div><div style="font-size:1.8rem;font-weight:900;color:var(--text);" id="u-kpi-total">—</div></div>
+        <div class="card cb" style="text-align:center;"><div style="font-size:0.62rem;letter-spacing:2px;color:var(--muted);text-transform:uppercase;">Admins</div><div style="font-size:1.8rem;font-weight:900;color:var(--rojo);" id="u-kpi-admins">—</div></div>
+        <div class="card cb" style="text-align:center;"><div style="font-size:0.62rem;letter-spacing:2px;color:var(--muted);text-transform:uppercase;">Compradores</div><div style="font-size:1.8rem;font-weight:900;color:var(--verde);" id="u-kpi-compradores">—</div></div>
+        <div class="card cb" style="text-align:center;"><div style="font-size:0.62rem;letter-spacing:2px;color:var(--muted);text-transform:uppercase;">Nuevos hoy</div><div style="font-size:1.8rem;font-weight:900;color:var(--dorado);" id="u-kpi-hoy">—</div></div>
+      </div>
+
+      <!-- Filtros + búsqueda -->
+      <div style="display:flex;gap:8px;margin-bottom:12px;flex-wrap:wrap;align-items:center;">
+        <div style="display:flex;gap:4px;">
+          <button class="btn btn-sm u-filter-btn active" data-filter="todos" onclick="filtrarUsuarios('todos')">Todos</button>
+          <button class="btn btn-sm u-filter-btn" data-filter="admin"   onclick="filtrarUsuarios('admin')"   style="background:rgba(232,54,61,.15);color:var(--rojo);">Admins</button>
+          <button class="btn btn-sm u-filter-btn" data-filter="comprador" onclick="filtrarUsuarios('comprador')" style="background:rgba(34,197,94,.15);color:var(--verde);">Con compras</button>
+          <button class="btn btn-sm u-filter-btn" data-filter="sin-compra" onclick="filtrarUsuarios('sin-compra')" style="background:var(--bg2);color:var(--muted);">Sin compras</button>
+        </div>
+        <input type="text" placeholder="🔍 Buscar por nombre, email, username, RUT, universidad..." oninput="buscarUsuarios(this.value)" style="flex:1;min-width:240px;background:var(--bg3);border:1px solid var(--border);color:var(--text);padding:8px 12px;border-radius:var(--r);font-size:0.85rem;outline:none;" />
+        <select onchange="ordenarUsuarios(this.value)" style="background:var(--bg3);border:1px solid var(--border);color:var(--text);padding:8px 12px;border-radius:var(--r);font-size:0.78rem;outline:none;">
+          <option value="recent">📅 Recientes primero</option>
+          <option value="oldest">📅 Antiguos primero</option>
+          <option value="alpha">🔤 A → Z</option>
+          <option value="spent">💰 Mayor gasto</option>
+          <option value="compras">🎟️ Más compras</option>
+        </select>
+      </div>
+
+      <div class="card"><div class="tw"><table><thead><tr><th style="width:30px;"><input type="checkbox" id="u-select-all" onchange="toggleSelectAllUsers(this.checked)" /></th><th>Username</th><th>Nombre</th><th>Email</th><th>Universidad</th><th>Compras</th><th>Gasto total</th><th>Rol</th><th>Registro</th><th>Acciones</th></tr></thead><tbody id="tb-usuarios"></tbody></table></div></div>
+
+      <!-- Acciones masivas (aparece cuando hay selección) -->
+      <div id="u-bulk-bar" style="display:none;margin-top:12px;padding:12px;background:var(--bg2);border:1px solid var(--border);border-radius:6px;display:none;align-items:center;gap:12px;flex-wrap:wrap;">
+        <span style="font-size:0.8rem;"><strong id="u-bulk-count">0</strong> seleccionados</span>
+        <button class="btn btn-gold btn-sm" onclick="bulkExportUsuarios()">📥 Exportar selección</button>
+        <button class="btn btn-del btn-sm" onclick="bulkDeleteUsuarios()">🗑️ Eliminar selección</button>
+        <button class="btn btn-g btn-sm" onclick="bulkClearSelection()">Limpiar</button>
+      </div>
     </div>
 
     <!-- RESERVAS -->
@@ -687,6 +722,32 @@
   </div>
   <div class="mfoot"><button class="btn btn-g" onclick="closeModal('modal-regalo')">Cancelar</button><button class="btn btn-p" onclick="enviarRegalo()">Enviar</button></div>
 </div></div>
+
+<!-- DETALLE DE USUARIO — vista completa con tabs ───────────── -->
+<div class="mo" id="modal-user"><div class="mb" style="max-width:760px;max-height:92vh;overflow-y:auto;">
+  <div class="mh">
+    <span class="mht" id="uModal-title">Usuario</span>
+    <button class="mc" onclick="closeModal('modal-user')">✕</button>
+  </div>
+  <!-- Tabs -->
+  <div style="display:flex;gap:4px;padding:0 18px;border-bottom:1px solid var(--border);background:var(--bg2);">
+    <button class="uModal-tab active" data-tab="info"     onclick="renderUserDetailTab('info')"
+      style="background:transparent;border:none;color:var(--text);padding:12px 16px;font-size:0.78rem;letter-spacing:1px;text-transform:uppercase;cursor:pointer;border-bottom:2px solid transparent;font-weight:600;">📋 Info</button>
+    <button class="uModal-tab" data-tab="compras"  onclick="renderUserDetailTab('compras')"
+      style="background:transparent;border:none;color:var(--muted);padding:12px 16px;font-size:0.78rem;letter-spacing:1px;text-transform:uppercase;cursor:pointer;border-bottom:2px solid transparent;font-weight:600;">🎟️ Compras</button>
+    <button class="uModal-tab" data-tab="reservas" onclick="renderUserDetailTab('reservas')"
+      style="background:transparent;border:none;color:var(--muted);padding:12px 16px;font-size:0.78rem;letter-spacing:1px;text-transform:uppercase;cursor:pointer;border-bottom:2px solid transparent;font-weight:600;">📋 Reservas</button>
+    <button class="uModal-tab" data-tab="acciones" onclick="renderUserDetailTab('acciones')"
+      style="background:transparent;border:none;color:var(--muted);padding:12px 16px;font-size:0.78rem;letter-spacing:1px;text-transform:uppercase;cursor:pointer;border-bottom:2px solid transparent;font-weight:600;">⚙️ Acciones</button>
+  </div>
+  <div class="mbody" id="uModal-body" style="max-height:60vh;overflow-y:auto;"></div>
+  <div class="mfoot"><button class="btn btn-g" onclick="closeModal('modal-user')">Cerrar</button></div>
+</div></div>
+
+<style>
+  .uModal-tab.active { color: var(--rojo) !important; border-bottom-color: var(--rojo) !important; }
+  .uModal-tab:hover  { color: var(--text) !important; }
+</style>
 
 <!-- Media -->
 <div class="mo" id="modal-media"><div class="mb">
@@ -1680,33 +1741,118 @@ function qrBeep(ok) {
 // ── USUARIOS ─────────────────────────────────────────────────
 async function renderUsuarios() {
   const tbody = document.getElementById('tb-usuarios');
-  tbody.innerHTML = `<tr><td colspan="9" style="text-align:center;color:var(--muted);padding:20px">Cargando...</td></tr>`;
+  tbody.innerHTML = `<tr><td colspan="10" style="text-align:center;color:var(--muted);padding:20px">Cargando...</td></tr>`;
   try {
-    const { data: users, error } = await sb.from('clientes').select('*').order('created_at', { ascending: false });
+    // Traer usuarios + pedidos en paralelo
+    const [{ data: users, error }, { data: pedidos }] = await Promise.all([
+      sb.from('clientes').select('*').order('created_at', { ascending: false }),
+      sb.from('pedidos').select('cliente_id,total_pagado,total,estado').eq('estado', 'pagado')
+    ]);
     if (error) throw error;
+
+    // Calcular agregados por cliente
+    const stats = {};
+    (pedidos || []).forEach(p => {
+      if (!p.cliente_id) return;
+      if (!stats[p.cliente_id]) stats[p.cliente_id] = { compras: 0, total: 0 };
+      stats[p.cliente_id].compras += 1;
+      stats[p.cliente_id].total += (p.total_pagado || p.total || 0);
+    });
+
+    // Guardar en cache global para filtros/búsqueda
+    window._allUsers = (users || []).map(u => ({
+      ...u,
+      _stats: stats[u.id] || { compras: 0, total: 0 }
+    }));
+
+    // KPIs
+    const today = new Date().toISOString().split('T')[0];
+    document.getElementById('u-kpi-total').textContent = window._allUsers.length;
+    document.getElementById('u-kpi-admins').textContent = window._allUsers.filter(u=>u.rol==='admin').length;
+    document.getElementById('u-kpi-compradores').textContent = window._allUsers.filter(u=>u._stats.compras>0).length;
+    document.getElementById('u-kpi-hoy').textContent = window._allUsers.filter(u=>u.created_at?.startsWith(today)).length;
+
     document.getElementById('nb-usuarios').textContent = users?.length || 0;
+
     // Populate regalo select
     const rg = document.getElementById('rg-usuario');
     if (rg) rg.innerHTML = users?.map(u=>`<option value="${u.id}">${u.username?'@'+u.username:((u.nombres||'') + ' ' + (u.apellidos||'')).trim()} — ${u.email}</option>`).join('') || '';
-    tbody.innerHTML = users?.length
-      ? users.map(u=>{
-          const nombre = u.username ? '@'+u.username : ((u.nombres||'') + ' ' + (u.apellidos||'')).trim() || '—';
-          const nombreCompleto = ((u.nombres||'') + ' ' + (u.apellidos||'')).trim() || '—';
-          const fecha = u.created_at ? new Date(u.created_at).toLocaleDateString('es-CL') : '—';
-          return `<tr>
-            <td class="tb" style="color:var(--rojo)">${u.username?'@'+u.username:'—'}</td>
-            <td class="tb">${nombreCompleto}</td>
-            <td class="tm">${u.email||'—'}</td>
-            <td class="tm" style="font-family:monospace;font-size:0.7rem">${u.rut||'—'}</td>
-            <td><a href="https://wa.me/${(u.telefono||'').replace(/\D/g,'')}" target="_blank" style="color:var(--verde);text-decoration:none">${u.telefono||'—'}</a></td>
-            <td class="tm">${u.universidad||'—'}</td>
-            <td><span class="badge ${u.rol==='admin'?'b-r':'b-gr'}">${u.rol||'usuario'}</span></td>
-            <td class="tm">${fecha}</td>
-            <td><button class="btn btn-g btn-sm" onclick="toggleAdmin('${u.id}','${u.rol||'usuario'}')">${u.rol==='admin'?'Quitar admin':'Hacer admin'}</button></td>
-          </tr>`;
-        }).join('')
-      : `<tr><td colspan="9" style="text-align:center;color:var(--muted);padding:24px">Sin usuarios registrados</td></tr>`;
-  } catch(e) { tbody.innerHTML=`<tr><td colspan="9" style="color:var(--rojo);padding:16px">Error: ${e.message}</td></tr>`; }
+
+    renderUsuariosTable();
+  } catch(e) { tbody.innerHTML=`<tr><td colspan="10" style="color:var(--rojo);padding:16px">Error: ${e.message}</td></tr>`; }
+}
+
+// Filtros y ordenamiento de usuarios (en memoria sobre window._allUsers)
+let _usuariosFiltro = 'todos';
+let _usuariosBusqueda = '';
+let _usuariosOrden = 'recent';
+
+function filtrarUsuarios(f) {
+  _usuariosFiltro = f;
+  document.querySelectorAll('.u-filter-btn').forEach(b => b.classList.toggle('active', b.dataset.filter === f));
+  renderUsuariosTable();
+}
+function buscarUsuarios(q) { _usuariosBusqueda = q.toLowerCase().trim(); renderUsuariosTable(); }
+function ordenarUsuarios(o) { _usuariosOrden = o; renderUsuariosTable(); }
+
+function renderUsuariosTable() {
+  const tbody = document.getElementById('tb-usuarios');
+  if (!tbody || !window._allUsers) return;
+
+  let list = window._allUsers.slice();
+
+  // Filtros
+  if (_usuariosFiltro === 'admin') list = list.filter(u => u.rol === 'admin');
+  if (_usuariosFiltro === 'comprador') list = list.filter(u => u._stats.compras > 0);
+  if (_usuariosFiltro === 'sin-compra') list = list.filter(u => u._stats.compras === 0);
+
+  // Búsqueda
+  if (_usuariosBusqueda) {
+    const s = _usuariosBusqueda;
+    list = list.filter(u => {
+      return (u.username || '').toLowerCase().includes(s)
+          || (u.nombres   || '').toLowerCase().includes(s)
+          || (u.apellidos || '').toLowerCase().includes(s)
+          || (u.email     || '').toLowerCase().includes(s)
+          || (u.rut       || '').toLowerCase().includes(s)
+          || (u.universidad || '').toLowerCase().includes(s);
+    });
+  }
+
+  // Ordenamiento
+  if (_usuariosOrden === 'recent') list.sort((a,b) => (b.created_at||'').localeCompare(a.created_at||''));
+  if (_usuariosOrden === 'oldest') list.sort((a,b) => (a.created_at||'').localeCompare(b.created_at||''));
+  if (_usuariosOrden === 'alpha')  list.sort((a,b) => (a.nombres||'').localeCompare(b.nombres||''));
+  if (_usuariosOrden === 'spent')  list.sort((a,b) => b._stats.total - a._stats.total);
+  if (_usuariosOrden === 'compras') list.sort((a,b) => b._stats.compras - a._stats.compras);
+
+  if (!list.length) {
+    tbody.innerHTML = `<tr><td colspan="10" style="text-align:center;color:var(--muted);padding:24px">Ningún usuario cumple los filtros</td></tr>`;
+    return;
+  }
+
+  tbody.innerHTML = list.map(u => {
+    const nombreCompleto = ((u.nombres||'') + ' ' + (u.apellidos||'')).trim() || '—';
+    const fecha = u.created_at ? new Date(u.created_at).toLocaleDateString('es-CL') : '—';
+    const userVIP = u._stats.total > 100000;
+    return `<tr style="cursor:pointer;" onclick="abrirUsuario('${u.id}')">
+      <td onclick="event.stopPropagation()"><input type="checkbox" class="u-cb" data-uid="${u.id}" onchange="updateBulkBar()" /></td>
+      <td class="tb" style="color:var(--rojo)">${u.username?'@'+u.username:'—'}${userVIP?' ⭐':''}</td>
+      <td class="tb">${nombreCompleto}</td>
+      <td class="tm">${u.email||'—'}</td>
+      <td class="tm" style="font-size:0.72rem;">${(u.universidad||'—').slice(0,30)}</td>
+      <td><strong style="color:var(--verde)">${u._stats.compras}</strong></td>
+      <td style="color:var(--dorado);font-weight:700;">${clp(u._stats.total)}</td>
+      <td><span class="badge ${u.rol==='admin'?'b-r':'b-gr'}">${u.rol||'usuario'}</span></td>
+      <td class="tm">${fecha}</td>
+      <td onclick="event.stopPropagation()">
+        <div style="display:flex;gap:4px;">
+          <button class="btn btn-ok btn-sm" onclick="abrirUsuario('${u.id}')" title="Ver detalle">👁️</button>
+          <button class="btn btn-g btn-sm" onclick="toggleAdmin('${u.id}','${u.rol||'usuario'}')" title="${u.rol==='admin'?'Quitar admin':'Hacer admin'}">${u.rol==='admin'?'🔓':'🔒'}</button>
+        </div>
+      </td>
+    </tr>`;
+  }).join('');
 }
 
 async function toggleAdmin(userId, currentRol) {
@@ -1716,6 +1862,304 @@ async function toggleAdmin(userId, currentRol) {
   if (error) { showToast('Error: '+error.message, true); return; }
   showToast(`✅ Rol actualizado → ${nuevoRol}`);
   renderUsuarios();
+}
+
+// ══════════════════════════════════════════════════════════════
+// MODAL DE DETALLE DE USUARIO — vista completa con tabs
+// ══════════════════════════════════════════════════════════════
+let _currentUser = null;
+
+async function abrirUsuario(userId) {
+  try {
+    const [{ data: user }, { data: pedidos }, { data: reservas }] = await Promise.all([
+      sb.from('clientes').select('*').eq('id', userId).single(),
+      sb.from('pedidos').select('*, items_pedido(*)').eq('cliente_id', userId).order('created_at', { ascending: false }),
+      sb.from('reservas').select('*').eq('cliente_id', userId).order('created_at', { ascending: false })
+    ]);
+    if (!user) { showToast('Usuario no encontrado', true); return; }
+    _currentUser = { ...user, pedidos: pedidos || [], reservas: reservas || [] };
+
+    // Render modal contenido
+    document.getElementById('uModal-title').textContent = user.username ? '@'+user.username : ((user.nombres||'')+' '+(user.apellidos||'')).trim() || user.email;
+    renderUserDetailTab('info');
+    openModal('modal-user');
+  } catch (e) {
+    showToast('Error: '+e.message, true);
+  }
+}
+
+function renderUserDetailTab(tab) {
+  document.querySelectorAll('.uModal-tab').forEach(t => t.classList.toggle('active', t.dataset.tab === tab));
+  const body = document.getElementById('uModal-body');
+  const u = _currentUser;
+  if (!u) return;
+  if (tab === 'info')     body.innerHTML = renderUserInfoTab(u);
+  if (tab === 'compras')  body.innerHTML = renderUserComprasTab(u);
+  if (tab === 'reservas') body.innerHTML = renderUserReservasTab(u);
+  if (tab === 'acciones') body.innerHTML = renderUserAccionesTab(u);
+}
+
+function renderUserInfoTab(u) {
+  const stats = u.pedidos.filter(p => p.estado === 'pagado').reduce((s,p) => {
+    s.total += (p.total_pagado || p.total || 0);
+    s.entradas += (p.items_pedido||[]).reduce((ss,i)=>ss+(i.cantidad||0),0);
+    return s;
+  }, { total: 0, entradas: 0 });
+
+  return `
+  <!-- Avatar + KPIs -->
+  <div style="display:grid;grid-template-columns:120px 1fr;gap:20px;margin-bottom:24px;align-items:center;">
+    <div style="width:120px;height:120px;border-radius:50%;background:linear-gradient(135deg,var(--rojo),var(--dorado));display:flex;align-items:center;justify-content:center;font-family:var(--disp);font-size:2.6rem;font-weight:900;color:#fff;">
+      ${((u.nombres||'')[0]||u.email[0]||'?').toUpperCase()}${((u.apellidos||'')[0]||'').toUpperCase()}
+    </div>
+    <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:10px;">
+      <div style="padding:10px;background:var(--bg2);border-radius:6px;text-align:center;">
+        <div style="font-size:0.62rem;letter-spacing:2px;color:var(--muted);text-transform:uppercase;">Compras</div>
+        <div style="font-size:1.5rem;font-weight:900;color:var(--verde);">${u.pedidos.filter(p=>p.estado==='pagado').length}</div>
+      </div>
+      <div style="padding:10px;background:var(--bg2);border-radius:6px;text-align:center;">
+        <div style="font-size:0.62rem;letter-spacing:2px;color:var(--muted);text-transform:uppercase;">Entradas</div>
+        <div style="font-size:1.5rem;font-weight:900;color:var(--text);">${stats.entradas}</div>
+      </div>
+      <div style="padding:10px;background:var(--bg2);border-radius:6px;text-align:center;">
+        <div style="font-size:0.62rem;letter-spacing:2px;color:var(--muted);text-transform:uppercase;">Gasto total</div>
+        <div style="font-size:1.5rem;font-weight:900;color:var(--dorado);">${clp(stats.total)}</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Form de edición -->
+  <div style="border-top:1px solid var(--border);padding-top:18px;">
+    <div style="font-size:0.62rem;letter-spacing:3px;color:var(--rojo);text-transform:uppercase;margin-bottom:14px;font-weight:700;">Datos del usuario</div>
+    <div class="form-2">
+      <div class="fg"><label>Username</label><input type="text" id="ue-username" value="${u.username||''}" /></div>
+      <div class="fg"><label>Email <span style="color:var(--muted);font-size:0.7rem;">(no editable desde aquí)</span></label><input type="email" value="${u.email||''}" disabled style="opacity:.6;" /></div>
+    </div>
+    <div class="form-2">
+      <div class="fg"><label>Nombres</label><input type="text" id="ue-nombres" value="${u.nombres||''}" /></div>
+      <div class="fg"><label>Apellidos</label><input type="text" id="ue-apellidos" value="${u.apellidos||''}" /></div>
+    </div>
+    <div class="form-2">
+      <div class="fg"><label>RUT</label><input type="text" id="ue-rut" value="${u.rut||''}" /></div>
+      <div class="fg"><label>Teléfono</label><input type="text" id="ue-tel" value="${u.telefono||''}" /></div>
+    </div>
+    <div class="form-2">
+      <div class="fg"><label>Universidad</label><input type="text" id="ue-univ" value="${u.universidad||''}" /></div>
+      <div class="fg"><label>Carrera</label><input type="text" id="ue-carrera" value="${u.carrera||''}" /></div>
+    </div>
+    <div class="fg"><label>Rol</label><select id="ue-rol"><option value="usuario" ${u.rol!=='admin'?'selected':''}>Usuario</option><option value="admin" ${u.rol==='admin'?'selected':''}>Admin</option></select></div>
+    <div style="margin-top:14px;text-align:right;">
+      <button class="btn btn-p" onclick="saveUserEdit()">💾 Guardar cambios</button>
+    </div>
+  </div>
+
+  <!-- Meta -->
+  <div style="margin-top:18px;padding-top:14px;border-top:1px solid var(--border);font-size:0.72rem;color:var(--muted);">
+    <strong>ID interno:</strong> <span style="font-family:monospace;">${u.id}</span><br/>
+    <strong>Registrado:</strong> ${u.created_at ? new Date(u.created_at).toLocaleString('es-CL') : '—'}
+  </div>`;
+}
+
+function renderUserComprasTab(u) {
+  if (!u.pedidos.length) return '<div style="text-align:center;padding:32px;color:var(--muted);">Este usuario no ha hecho compras.</div>';
+  return u.pedidos.map(p => {
+    const items = p.items_pedido || [];
+    const fecha = new Date(p.created_at).toLocaleString('es-CL');
+    const total = p.total_pagado || p.total || 0;
+    const estadoColor = p.estado==='pagado'?'b-g':p.estado==='pendiente'?'b-o':'b-gr';
+    return `<div style="background:var(--bg2);border:1px solid var(--border);border-radius:6px;padding:14px;margin-bottom:10px;">
+      <div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:8px;">
+        <div>
+          <div style="font-family:monospace;color:var(--dorado);font-weight:700;">FCC-${String(p.id).padStart(6,'0')}</div>
+          <div style="font-size:0.72rem;color:var(--muted);">${fecha} · ${p.metodo_pago||'—'}</div>
+        </div>
+        <div style="text-align:right;">
+          <span class="badge ${estadoColor}">${p.estado}</span>
+          <div style="color:var(--dorado);font-weight:900;font-size:1.1rem;margin-top:4px;">${clp(total)}</div>
+        </div>
+      </div>
+      <div style="margin-top:6px;font-size:0.78rem;">
+        ${items.map(ip => {
+          const icono = ip.producto_tipo==='carta'?'🍹':ip.producto_tipo==='merch'?'🛍️':'🎟️';
+          return `<div style="padding:4px 0;border-top:1px solid var(--border);display:flex;justify-content:space-between;">
+            <span>${icono} ${ip.nombre_evento || ip.nombre_ticket || 'Item'} ×${ip.cantidad}</span>
+            <span style="color:var(--muted);">${clp((ip.precio_unitario||0)*(ip.cantidad||0))}</span>
+          </div>`;
+        }).join('')}
+      </div>
+      <div style="margin-top:8px;display:flex;gap:6px;justify-content:flex-end;">
+        <button class="btn btn-gold btn-sm" onclick="reenviarComprobante(${p.id})">📧 Reenviar email</button>
+        <button class="btn btn-g btn-sm" onclick="closeModal('modal-user');setTimeout(()=>{go('ordenes');setTimeout(()=>verOrden(${p.id}),300)},200)">Ver detalle</button>
+      </div>
+    </div>`;
+  }).join('');
+}
+
+function renderUserReservasTab(u) {
+  if (!u.reservas.length) return '<div style="text-align:center;padding:32px;color:var(--muted);">Este usuario no ha hecho reservas.</div>';
+  return u.reservas.map(r => `
+    <div style="background:var(--bg2);border:1px solid var(--border);border-radius:6px;padding:14px;margin-bottom:10px;">
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:6px;">
+        <span class="badge b-o">${r.tipo||'—'}</span>
+        <span class="badge ${r.estado==='confirmada'?'b-g':r.estado==='pendiente'?'b-o':'b-r'}">${r.estado}</span>
+      </div>
+      <div style="font-weight:700;margin-bottom:4px;">${r.nombre}</div>
+      <div style="font-size:0.78rem;color:var(--muted);">${r.fecha||'—'} · ${r.personas||'—'} personas · ${r.telefono||'—'}</div>
+      ${r.mensaje ? `<div style="margin-top:6px;font-size:0.78rem;font-style:italic;">"${r.mensaje}"</div>` : ''}
+    </div>
+  `).join('');
+}
+
+function renderUserAccionesTab(u) {
+  return `
+  <div style="display:flex;flex-direction:column;gap:12px;">
+    <div style="padding:14px;background:var(--bg2);border-radius:6px;border-left:3px solid var(--dorado);">
+      <div style="font-weight:700;margin-bottom:4px;">📧 Reenviar email de bienvenida</div>
+      <div style="font-size:0.78rem;color:var(--muted);margin-bottom:8px;">Útil si el usuario no recibió el email original o quiere repasar los beneficios.</div>
+      <button class="btn btn-gold btn-sm" onclick="reenviarWelcome('${u.id}')">Enviar ahora</button>
+    </div>
+
+    <div style="padding:14px;background:var(--bg2);border-radius:6px;border-left:3px solid var(--verde);">
+      <div style="font-weight:700;margin-bottom:4px;">🔑 Enviar link de recuperación de contraseña</div>
+      <div style="font-size:0.78rem;color:var(--muted);margin-bottom:8px;">Envía un email con link para que el usuario pueda cambiar su contraseña.</div>
+      <button class="btn btn-g btn-sm" onclick="sendResetLink('${u.email}')">Enviar reset link</button>
+    </div>
+
+    <div style="padding:14px;background:var(--bg2);border-radius:6px;border-left:3px solid var(--rojo);">
+      <div style="font-weight:700;margin-bottom:4px;color:var(--rojo);">🗑️ Eliminar usuario</div>
+      <div style="font-size:0.78rem;color:var(--muted);margin-bottom:8px;">⚠️ Esta acción es <strong>irreversible</strong>. Elimina el perfil y la cuenta de autenticación. Los pedidos y reservas quedan en la base de datos pero sin asociación al usuario.</div>
+      <button class="btn btn-del btn-sm" onclick="eliminarUsuario('${u.id}','${u.email}')">Eliminar permanentemente</button>
+    </div>
+  </div>`;
+}
+
+async function saveUserEdit() {
+  if (!_currentUser) return;
+  const data = {
+    username:    document.getElementById('ue-username').value.trim().toLowerCase() || null,
+    nombres:     document.getElementById('ue-nombres').value.trim(),
+    apellidos:   document.getElementById('ue-apellidos').value.trim(),
+    rut:         document.getElementById('ue-rut').value.trim(),
+    telefono:    document.getElementById('ue-tel').value.trim(),
+    universidad: document.getElementById('ue-univ').value.trim(),
+    carrera:     document.getElementById('ue-carrera').value.trim(),
+    rol:         document.getElementById('ue-rol').value
+  };
+  const { error } = await sb.from('clientes').update(data).eq('id', _currentUser.id);
+  if (error) { showToast('Error: '+error.message, true); return; }
+  showToast('✅ Usuario actualizado');
+  await renderUsuarios();
+  await abrirUsuario(_currentUser.id);
+}
+
+async function reenviarWelcome(uid) {
+  const u = window._allUsers?.find(x => x.id === uid);
+  if (!u) return;
+  try {
+    const { error } = await sb.functions.invoke('send-welcome', {
+      body: { nombre: u.nombres, apellidos: u.apellidos, username: u.username, email: u.email }
+    });
+    if (error) throw error;
+    showToast('📧 Email de bienvenida reenviado a ' + u.email);
+  } catch (e) {
+    showToast('Error: '+e.message, true);
+  }
+}
+
+async function sendResetLink(email) {
+  try {
+    const { error } = await sb.auth.resetPasswordForEmail(email, {
+      redirectTo: 'https://frate.cl/reset.html'
+    });
+    if (error) throw error;
+    showToast('📧 Link de recuperación enviado a ' + email);
+  } catch (e) {
+    showToast('Error: '+e.message, true);
+  }
+}
+
+async function eliminarUsuario(uid, email) {
+  if (!confirm(`⚠️ Vas a ELIMINAR PERMANENTEMENTE al usuario:\n\n${email}\n\nEsta acción NO se puede deshacer. ¿Continuar?`)) return;
+  if (!confirm('Última confirmación. ¿Eliminar definitivamente?')) return;
+  try {
+    // 1) Llamar edge function admin-delete-user (usa service_role)
+    const { error: e1 } = await sb.functions.invoke('admin-delete-user', { body: { userId: uid } });
+    if (e1) throw e1;
+    showToast('✅ Usuario eliminado');
+    closeModal('modal-user');
+    renderUsuarios();
+  } catch (e) {
+    // Fallback: si la edge function no existe aún, borrar solo el perfil (clientes)
+    const { error: e2 } = await sb.from('clientes').delete().eq('id', uid);
+    if (e2) { showToast('Error: '+e2.message, true); return; }
+    showToast('⚠️ Perfil eliminado (auth queda. Crear edge function admin-delete-user para eliminación completa).');
+    closeModal('modal-user');
+    renderUsuarios();
+  }
+}
+
+// ── ACCIONES MASIVAS ──────────────────────────────────────────
+function toggleSelectAllUsers(checked) {
+  document.querySelectorAll('.u-cb').forEach(cb => cb.checked = checked);
+  updateBulkBar();
+}
+function updateBulkBar() {
+  const selected = document.querySelectorAll('.u-cb:checked');
+  const bar = document.getElementById('u-bulk-bar');
+  if (selected.length) {
+    bar.style.display = 'flex';
+    document.getElementById('u-bulk-count').textContent = selected.length;
+  } else {
+    bar.style.display = 'none';
+  }
+}
+function bulkClearSelection() {
+  document.querySelectorAll('.u-cb').forEach(cb => cb.checked = false);
+  document.getElementById('u-select-all').checked = false;
+  updateBulkBar();
+}
+function bulkExportUsuarios() {
+  const ids = [...document.querySelectorAll('.u-cb:checked')].map(cb => cb.dataset.uid);
+  if (!ids.length) return;
+  const users = window._allUsers.filter(u => ids.includes(u.id));
+  const rows = [['Username','Nombres','Apellidos','Email','RUT','Telefono','Universidad','Carrera','Rol','Compras','Gasto total','Registro']];
+  users.forEach(u => rows.push([
+    u.username||'', u.nombres||'', u.apellidos||'', u.email||'', u.rut||'', u.telefono||'',
+    u.universidad||'', u.carrera||'', u.rol||'usuario', u._stats.compras, u._stats.total, u.created_at?.split('T')[0]||''
+  ]));
+  const csv = rows.map(r => r.map(c => `"${String(c).replace(/"/g,'""')}"`).join(',')).join('\n');
+  const blob = new Blob(['﻿'+csv], { type: 'text/csv;charset=utf-8;' });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url; a.download = `usuarios-seleccion-${Date.now()}.csv`;
+  document.body.appendChild(a); a.click(); a.remove();
+  URL.revokeObjectURL(url);
+  showToast(`✅ ${users.length} usuarios exportados`);
+}
+async function bulkDeleteUsuarios() {
+  const ids = [...document.querySelectorAll('.u-cb:checked')].map(cb => cb.dataset.uid);
+  if (!ids.length) return;
+  if (!confirm(`⚠️ Eliminar ${ids.length} usuarios? Esta acción es IRREVERSIBLE.`)) return;
+  if (!confirm('Última confirmación.')) return;
+  let ok = 0, fail = 0;
+  for (const uid of ids) {
+    try {
+      const { error } = await sb.functions.invoke('admin-delete-user', { body: { userId: uid } });
+      if (error) throw error;
+      ok++;
+    } catch {
+      const { error: e2 } = await sb.from('clientes').delete().eq('id', uid);
+      if (e2) fail++; else ok++;
+    }
+  }
+  showToast(`✅ ${ok} eliminados${fail?` · ⚠️ ${fail} fallaron`:''}`);
+  renderUsuarios();
+}
+
+function openUserImport() {
+  showToast('Importación de usuarios — usar mismo flujo de Cortesías (Patrón A). Crea usuarios sin auth, solo registro en tabla clientes.', false);
+  // Reutilizamos el importador pero target=clientes
+  // TODO: implementar variante para clientes en una iteración futura
 }
 
 // ── RESERVAS ─────────────────────────────────────────────────
