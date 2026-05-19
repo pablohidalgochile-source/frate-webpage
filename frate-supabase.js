@@ -37,12 +37,19 @@ async function sbSignUp({ nombres, apellidos, nombre, username, email, password,
 // ── LOGIN (email O username) ───────────────────────────────────
 async function sbSignIn(emailOrUser, password) {
   let email = emailOrUser.trim();
-  // Si no tiene @ → es username, buscar el email
+  // Si no tiene @ → es username, resolver el email via RPC (SECURITY DEFINER
+  // que bypasea RLS, porque el usuario aún no está autenticado para SELECT).
   if (!email.includes('@')) {
-    const { data: profile, error: lookupErr } = await sb.from('clientes')
-      .select('email').eq('username', email.toLowerCase()).maybeSingle();
-    if (lookupErr || !profile) throw new Error('Nombre de usuario no encontrado.');
-    email = profile.email;
+    const { data: foundEmail, error: lookupErr } = await sb.rpc('get_email_by_username', { p_username: email });
+    // Fallback: por si la RPC aún no está deployada, intenta SELECT directo
+    if (lookupErr || !foundEmail) {
+      const { data: profile } = await sb.from('clientes')
+        .select('email').eq('username', email.toLowerCase()).maybeSingle();
+      if (!profile?.email) throw new Error('Nombre de usuario no encontrado.');
+      email = profile.email;
+    } else {
+      email = foundEmail;
+    }
   }
   const { data, error } = await sb.auth.signInWithPassword({ email, password });
   if (error) throw error;
@@ -78,12 +85,18 @@ async function sbSignOut() {
 async function sbResetPassword(emailOrUser) {
   let email = (emailOrUser || '').trim();
   if (!email) throw new Error('Ingresa tu email o nombre de usuario.');
-  // Si es username, buscar el email
+  // Si es username, resolver via RPC (bypassea RLS sin autenticar)
   if (!email.includes('@')) {
-    const { data: profile } = await sb.from('clientes')
-      .select('email').eq('username', email.toLowerCase()).maybeSingle();
-    if (!profile?.email) throw new Error('No encontramos esa cuenta.');
-    email = profile.email;
+    const { data: foundEmail } = await sb.rpc('get_email_by_username', { p_username: email });
+    if (foundEmail) {
+      email = foundEmail;
+    } else {
+      // Fallback al SELECT directo (si RPC no está deployada todavía)
+      const { data: profile } = await sb.from('clientes')
+        .select('email').eq('username', email.toLowerCase()).maybeSingle();
+      if (!profile?.email) throw new Error('No encontramos esa cuenta.');
+      email = profile.email;
+    }
   }
   const { error } = await sb.auth.resetPasswordForEmail(email, {
     redirectTo: window.location.origin + '/reset.html'
