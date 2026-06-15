@@ -15,6 +15,45 @@
 <body>
 
 <!-- ══════════════════════════════════════════════
+     ACCESS GATE — modo privado / pruebas
+     Para desactivar: eliminar este bloque completo
+     Código actual: FRATE2026
+════════════════════════════════════════════════ -->
+<div id="access-gate" style="display:none;position:fixed;inset:0;z-index:99999;background:#0A0A0B;flex-direction:column;align-items:center;justify-content:center;padding:24px;">
+  <div style="text-align:center;max-width:360px;width:100%;">
+    <div style="font-size:32px;font-weight:900;color:#fff;letter-spacing:8px;font-family:'Arial Black',sans-serif;margin-bottom:4px;">FRATE</div>
+    <div style="font-size:10px;color:#71717a;letter-spacing:4px;text-transform:uppercase;margin-bottom:48px;">Fraternidad Campus Central</div>
+    <div style="background:#E8363D;width:40px;height:3px;margin:0 auto 32px;"></div>
+    <p style="color:#a1a1aa;font-size:0.85rem;letter-spacing:1px;margin-bottom:32px;line-height:1.6;">Sitio en modo privado.<br>Ingresa el código de acceso.</p>
+    <input id="gate-input" type="text" placeholder="CÓDIGO DE ACCESO" autocomplete="off" style="width:100%;box-sizing:border-box;background:#141415;border:1px solid #2a2a2c;color:#fff;padding:16px;text-align:center;font-family:'Barlow Condensed',sans-serif;font-size:1.1rem;letter-spacing:4px;text-transform:uppercase;outline:none;border-radius:2px;margin-bottom:12px;" onkeydown="if(event.key==='Enter')checkGate()" />
+    <div id="gate-error" style="color:#E8363D;font-size:0.75rem;letter-spacing:1px;margin-bottom:12px;min-height:16px;"></div>
+    <button onclick="checkGate()" style="width:100%;background:#E8363D;color:#fff;border:none;padding:16px;font-family:'Barlow Condensed',sans-serif;font-weight:900;font-size:1rem;letter-spacing:4px;text-transform:uppercase;cursor:pointer;border-radius:2px;">ENTRAR</button>
+  </div>
+</div>
+<script>
+  (function(){
+    var GATE_CODE = 'FRATE2026';
+    var gate = document.getElementById('access-gate');
+    if (localStorage.getItem('frate_gate') !== GATE_CODE) {
+      gate.style.display = 'flex';
+      document.body.style.overflow = 'hidden';
+    }
+    window.checkGate = function() {
+      var val = (document.getElementById('gate-input').value || '').trim().toUpperCase();
+      if (val === GATE_CODE) {
+        localStorage.setItem('frate_gate', GATE_CODE);
+        gate.style.display = 'none';
+        document.body.style.overflow = '';
+      } else {
+        document.getElementById('gate-error').textContent = 'Código incorrecto.';
+        document.getElementById('gate-input').value = '';
+        document.getElementById('gate-input').focus();
+      }
+    };
+  })();
+</script>
+
+<!-- ══════════════════════════════════════════════
      AGE GATE — flujo multi-paso
 ════════════════════════════════════════════════ -->
 <div id="age-gate">
