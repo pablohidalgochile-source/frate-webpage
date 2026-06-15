@@ -977,7 +977,31 @@
       <button id="save-perfil-btn" class="btn-rojo" style="width:100%;margin-top:20px;border:none;cursor:pointer;padding:14px;font-family:'Barlow Condensed',sans-serif;font-weight:900;font-size:1rem;letter-spacing:2px;text-transform:uppercase;border-radius:2px;">
         GUARDAR CAMBIOS
       </button>
-      <button onclick="cuentaCerrarSesion()" style="width:100%;margin-top:10px;background:none;border:1px solid #2a2a2c;color:var(--gris);padding:12px;font-family:var(--fuente-body);cursor:pointer;border-radius:2px;font-size:0.8rem;">
+
+      <!-- Cambiar contraseña -->
+      <div style="margin-top:28px;border-top:1px solid #1e1e20;padding-top:24px;">
+        <div class="cuenta-section-title" style="margin-bottom:16px;">CAMBIAR CONTRASEÑA</div>
+        <div class="form-group" style="margin-bottom:12px;">
+          <label style="font-size:0.65rem;letter-spacing:2px;color:var(--gris);text-transform:uppercase;">Nueva contraseña</label>
+          <div style="position:relative;">
+            <input type="password" id="new-pass1" placeholder="Mín. 6 caracteres" style="padding-right:44px;width:100%;box-sizing:border-box;" />
+            <button type="button" onclick="togglePass('new-pass1',this)" tabindex="-1" style="position:absolute;right:0;top:0;height:100%;width:44px;background:none;border:none;cursor:pointer;color:#71717a;font-size:18px;display:flex;align-items:center;justify-content:center;">👁</button>
+          </div>
+        </div>
+        <div class="form-group" style="margin-bottom:12px;">
+          <label style="font-size:0.65rem;letter-spacing:2px;color:var(--gris);text-transform:uppercase;">Confirmar contraseña</label>
+          <div style="position:relative;">
+            <input type="password" id="new-pass2" placeholder="Repite" style="padding-right:44px;width:100%;box-sizing:border-box;" />
+            <button type="button" onclick="togglePass('new-pass2',this)" tabindex="-1" style="position:absolute;right:0;top:0;height:100%;width:44px;background:none;border:none;cursor:pointer;color:#71717a;font-size:18px;display:flex;align-items:center;justify-content:center;">👁</button>
+          </div>
+        </div>
+        <div class="age-gate-error" id="pass-change-error" style="margin-bottom:8px;display:none;"></div>
+        <button onclick="cuentaCambiarPass()" style="width:100%;background:none;border:1px solid #E8363D;color:#E8363D;padding:12px;font-family:'Barlow Condensed',sans-serif;font-weight:700;font-size:0.85rem;letter-spacing:2px;text-transform:uppercase;cursor:pointer;border-radius:2px;">
+          CAMBIAR CONTRASEÑA
+        </button>
+      </div>
+
+      <button onclick="cuentaCerrarSesion()" style="width:100%;margin-top:16px;background:none;border:1px solid #2a2a2c;color:var(--gris);padding:12px;font-family:var(--fuente-body);cursor:pointer;border-radius:2px;font-size:0.8rem;">
         Cerrar sesión
       </button>
     </div>
@@ -1253,6 +1277,30 @@ function cuentaCarreras(sel) {
 }
 
 // ── MI CUENTA: cerrar sesión (también en Supabase) ─────────────
+async function cuentaCambiarPass() {
+  var p1 = (document.getElementById('new-pass1')?.value || '').trim();
+  var p2 = (document.getElementById('new-pass2')?.value || '').trim();
+  var errEl = document.getElementById('pass-change-error');
+  var btn = event.currentTarget;
+  function showErr(msg) { if(errEl){errEl.textContent=msg;errEl.style.display='block';} }
+  errEl && (errEl.style.display='none');
+  if (!p1) return showErr('Ingresa tu nueva contraseña.');
+  if (p1.length < 6) return showErr('Mínimo 6 caracteres.');
+  if (p1 !== p2) return showErr('Las contraseñas no coinciden.');
+  btn.disabled = true; btn.textContent = 'Guardando...';
+  try {
+    await sbUpdatePassword(p1);
+    document.getElementById('new-pass1').value = '';
+    document.getElementById('new-pass2').value = '';
+    if(errEl){errEl.style.color='#4ade80';errEl.textContent='✓ Contraseña actualizada';errEl.style.display='block';}
+    setTimeout(()=>{ if(errEl)errEl.style.display='none'; errEl&&(errEl.style.color=''); }, 3000);
+  } catch(e) {
+    showErr(e.message || 'Error al cambiar la contraseña.');
+  } finally {
+    btn.disabled = false; btn.textContent = 'CAMBIAR CONTRASEÑA';
+  }
+}
+
 async function cuentaCerrarSesion() {
   try { if (typeof sbSignOut === 'function') await sbSignOut(); } catch(_) {}
   Storage.del('frate_session');
