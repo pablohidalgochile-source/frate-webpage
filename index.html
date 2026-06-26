@@ -1928,6 +1928,19 @@ function syncFloatingCount() {
 }
 
 // ── Carga eventos desde Supabase y reemplaza FRATE_EVENTOS ────────────────
+// ── CONFIG SECCIONES: oculta/muestra secciones según config_sitio ──
+async function aplicarConfigSecciones() {
+  try {
+    const config = await sbGetConfigSitio();
+    config.forEach(c => {
+      const el = document.getElementById(c.clave);
+      if (el) el.style.display = c.visible ? '' : 'none';
+    });
+  } catch (err) {
+    console.warn('[FRATE] No se pudo cargar config_sitio:', err?.message || err);
+  }
+}
+
 async function loadEventosDesdeSupabase() {
   try {
     const DIAS  = ['Domingo','Lunes','Martes','Miércoles','Jueves','Viernes','Sábado'];
@@ -1990,6 +2003,7 @@ document.addEventListener('DOMContentLoaded', () => {
   prefillFormsFromSession();
   // Carga datos en vivo desde Supabase y reemplaza la lista
   loadEventosDesdeSupabase();
+  aplicarConfigSecciones();
 
   // Event popup: cerrar con × y con click en backdrop
   document.getElementById('ep-close')?.addEventListener('click', closeEventPopup);

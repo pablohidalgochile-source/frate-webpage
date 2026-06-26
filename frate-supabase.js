@@ -308,6 +308,20 @@ async function sbGetAmbientes() {
   return data;
 }
 
+// ── CONFIG DEL SITIO (secciones visibles) ──────────────────────
+async function sbGetConfigSitio() {
+  const { data, error } = await sb.from('config_sitio').select('*');
+  if (error) throw error;
+  return data;
+}
+
+async function sbSetSeccionVisible(clave, visible) {
+  const { error } = await sb.from('config_sitio')
+    .update({ visible }).eq('clave', clave);
+  if (error) throw error;
+  return true;
+}
+
 // ── MAILING — Edge Functions ───────────────────────────────────
 
 // Envía email de bienvenida al registrar un nuevo usuario.

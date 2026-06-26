@@ -176,6 +176,7 @@
     <div class="sb-sect">Herramientas</div>
     <button class="ni" onclick="go('ia')"><span class="ni-icon">🤖</span>IA & Marketing</button>
     <button class="ni" onclick="go('exportar')"><span class="ni-icon">⚙️</span>Exportar</button>
+    <button class="ni" onclick="go('config')"><span class="ni-icon">🧩</span>Configuración</button>
   </nav>
   <div class="sb-foot">
     frate.cl/admin<br/>
@@ -506,6 +507,15 @@
       </div>
     </div>
 
+    <!-- CONFIGURACIÓN DEL SITIO -->
+    <div class="panel" id="p-config">
+      <h2 style="font-family:var(--disp);font-weight:900;font-size:1.6rem;margin-bottom:6px;">CONFIGURACIÓN DEL SITIO</h2>
+      <p style="color:var(--muted);font-size:0.8rem;margin-bottom:18px;">Activa o desactiva secciones de frate.cl sin hacer deploy. Útil mientras terminas de cargar contenido.</p>
+      <div class="card"><div class="cb" id="config-secciones-list" style="display:grid;gap:0;">
+        <div style="text-align:center;padding:24px;color:var(--muted);">Cargando...</div>
+      </div></div>
+    </div>
+
   </div><!-- /content -->
 </div><!-- /main -->
 
@@ -770,6 +780,17 @@ const SUPABASE_URL  = 'https://ydwlpraoaaijlfssevoh.supabase.co';
 const SUPABASE_ANON = 'sb_publishable_-_7GeDU_h84zf2v--lWQaQ_15ZFxOWt';
 const sb = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON);
 
+async function sbGetConfigSitio() {
+  const { data, error } = await sb.from('config_sitio').select('*');
+  if (error) throw error;
+  return data;
+}
+async function sbSetSeccionVisible(clave, visible) {
+  const { error } = await sb.from('config_sitio').update({ visible }).eq('clave', clave);
+  if (error) throw error;
+  return true;
+}
+
 // ── UTILS ────────────────────────────────────────────────────
 const LS = { get: k => { try { return JSON.parse(localStorage.getItem(k)); } catch { return null; } }, set: (k,v) => localStorage.setItem(k,JSON.stringify(v)) };
 function clp(n) { return '$' + (n||0).toLocaleString('es-CL'); }
@@ -832,7 +853,7 @@ async function checkSession() {
 }
 
 // ── NAV ──────────────────────────────────────────────────────
-const panelTitles = { dashboard:'Resumen', eventos:'Eventos', 'tickets-tipos':'Tipos de Ticket', cortesias:'Cortesías', ordenes:'Órdenes & Validación', ambientes:'Ambientes', media:'Galería & Media', webeum:'WEBEUM', tiendita:'La Tiendita', carta:'Carta', usuarios:'Usuarios', reservas:'Reservas', puntos:'Puntos & Premios', ia:'IA & Marketing', exportar:'Exportar' };
+const panelTitles = { dashboard:'Resumen', eventos:'Eventos', 'tickets-tipos':'Tipos de Ticket', cortesias:'Cortesías', ordenes:'Órdenes & Validación', ambientes:'Ambientes', media:'Galería & Media', webeum:'WEBEUM', tiendita:'La Tiendita', carta:'Carta', usuarios:'Usuarios', reservas:'Reservas', puntos:'Puntos & Premios', ia:'IA & Marketing', exportar:'Exportar', config:'Configuración del sitio' };
 
 function go(name) {
   document.querySelectorAll('.panel').forEach(p => p.classList.remove('active'));
@@ -864,6 +885,7 @@ function render(name) {
   else if(name==='reservas') renderReservas();
   else if(name==='puntos') renderPuntos();
   else if(name==='media') renderMedia();
+  else if(name==='config') renderConfigSecciones();
 }
 
 async function syncAll() {
@@ -2512,6 +2534,31 @@ async function deleteCarta(id) {
 function enviarRegalo() { showToast('✅ Función de regalo — próximamente con email'); closeModal('modal-regalo'); }
 
 // ── EXPORT ───────────────────────────────────────────────────
+// ── CONFIGURACIÓN DEL SITIO (secciones visibles) ────────────────
+async function renderConfigSecciones() {
+  const wrap = document.getElementById('config-secciones-list');
+  try {
+    const config = await sbGetConfigSitio();
+    if (!config.length) { wrap.innerHTML = '<div style="color:var(--muted);padding:12px;">No hay secciones configuradas. Corre frate-config-secciones.sql en Supabase.</div>'; return; }
+    wrap.innerHTML = config.map(c => `
+      <div class="toggle-row" style="padding:12px 0;border-bottom:1px solid var(--bd);">
+        <span style="font-size:0.85rem;">${c.label || c.clave}</span>
+        <label class="sw"><input type="checkbox" ${c.visible ? 'checked' : ''} onchange="toggleSeccion('${c.clave}', this.checked)"><span class="sl"></span></label>
+      </div>`).join('');
+  } catch (err) {
+    wrap.innerHTML = `<div style="color:var(--rojo);padding:12px;">Error: ${err?.message || err}</div>`;
+  }
+}
+
+async function toggleSeccion(clave, visible) {
+  try {
+    await sbSetSeccionVisible(clave, visible);
+  } catch (err) {
+    alert('Error al guardar: ' + (err?.message || err));
+    renderConfigSecciones();
+  }
+}
+
 async function exportCSV() {
   const { data: users } = await sb.from('clientes').select('*').order('created_at', { ascending: false });
   if (!users?.length) { showToast('Sin usuarios para exportar', true); return; }
