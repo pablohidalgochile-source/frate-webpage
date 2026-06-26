@@ -280,7 +280,11 @@ async function confirmPurchase() {
 
   } catch (err) {
     console.error('[FRATE] Error en confirmPurchase:', err);
-    showToast('⚠️ ' + (err?.message || 'Error al procesar la compra. Intenta de nuevo.'));
+    let msg = err?.message || 'Error al procesar la compra. Intenta de nuevo.';
+    if (msg.includes('SIN_STOCK')) {
+      msg = msg.replace(/.*SIN_STOCK:\s*/, '') + ' — alguien lo compró justo antes que tú. Elige otra opción.';
+    }
+    showToast('⚠️ ' + msg);
   } finally {
     if (btn) { btn.textContent = 'CONFIRMAR COMPRA'; btn.disabled = false; }
   }
