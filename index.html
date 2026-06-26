@@ -1935,6 +1935,12 @@ async function aplicarConfigSecciones() {
     config.forEach(c => {
       const el = document.getElementById(c.clave);
       if (el) el.style.display = c.visible ? '' : 'none';
+      // Oculta también los links de navegación (desktop, mobile, footer) que apuntan a esta sección
+      document.querySelectorAll(`a[href="#${c.clave}"]`).forEach(a => {
+        const li = a.closest('li');
+        const target = li || a;
+        target.style.display = c.visible ? '' : 'none';
+      });
     });
   } catch (err) {
     console.warn('[FRATE] No se pudo cargar config_sitio:', err?.message || err);
