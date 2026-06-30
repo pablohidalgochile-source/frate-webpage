@@ -310,12 +310,18 @@ async function confirmPurchase() {
 
     if (error) throw new Error(error.message || 'No se pudo iniciar el pago.');
     if (data?.error) throw new Error(data.error);
-    if (!data?.initPoint) throw new Error('MercadoPago no devolvió un link de pago.');
 
     // Vacía el carrito local (el pedido ya quedó guardado en el servidor)
     cart = [];
     saveCart();
     updateCartBadge();
+
+    // Pedido gratis (entrada cubierta por membresía) → no pasa por MercadoPago
+    if (data?.freeOrder) {
+      window.location.href = '/pago-exitoso.html?external_reference=' + data.pedidoId;
+      return;
+    }
+    if (!data?.initPoint) throw new Error('MercadoPago no devolvió un link de pago.');
 
     // Redirige a la página segura de MercadoPago
     window.location.href = data.initPoint;

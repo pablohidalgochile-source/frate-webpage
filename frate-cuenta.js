@@ -207,28 +207,56 @@ function renderHistorialPuntos(session) {
   `).join('');
 }
 
-function renderMembresias(session) {
+async function renderMembresias(session) {
   const container = document.getElementById('membresias-list');
-  if (!container || typeof FRATE_MEMBRESIAS === 'undefined') return;
-  container.innerHTML = FRATE_MEMBRESIAS.map(m => `
-    <div class="membresia-card ${session.membresia === m.id ? 'activa' : ''}" onclick="suscribirMembresia('${m.id}')">
-      <div class="membresia-nombre">${m.nombre}</div>
-      <div class="membresia-precio">${formatCLP(m.precio)} <small>/mes</small></div>
-      <ul class="membresia-beneficios">
-        ${m.beneficios.map(b => `<li>${b}</li>`).join('')}
-      </ul>
-      ${session.membresia === m.id ? '' : `<button class="btn-rojo" style="margin-top:16px;width:100%;border:none;cursor:pointer;padding:12px;font-family:'Barlow Condensed',sans-serif;font-weight:900;font-size:1rem;letter-spacing:2px;text-transform:uppercase;border-radius:2px;">SUSCRIBIRME</button>`}
-    </div>
-  `).join('');
+  if (!container) return;
+  container.innerHTML = '<div style="color:var(--gris);padding:16px;">Cargando...</div>';
+  try {
+    const [{ data: cli }, { data: mems }] = await Promise.all([
+      sb.from('clientes').select('membresia_nombre, membresia_hasta').eq('id', session.id).maybeSingle(),
+      sb.from('membresias').select('*').eq('activo', true).order('orden').order('precio')
+    ]);
+    let html = '';
+    const activa = cli?.membresia_hasta && new Date(cli.membresia_hasta) > new Date();
+    if (activa) {
+      const hasta = new Date(cli.membresia_hasta).toLocaleDateString('es-CL', { day:'2-digit', month:'long', year:'numeric' });
+      html += `<div style="background:linear-gradient(90deg,rgba(212,168,50,0.15),var(--negro-3));border:1px solid rgba(212,168,50,0.4);border-radius:8px;padding:18px;margin-bottom:16px;">
+        <div style="color:var(--dorado);font-weight:900;font-family:var(--fuente-display);font-size:1.2rem;">👑 ${cli.membresia_nombre}</div>
+        <div style="color:var(--gris);font-size:0.85rem;margin-top:4px;">Activa hasta el ${hasta}</div>
+      </div>`;
+    }
+    if (!mems || !mems.length) {
+      container.innerHTML = html + '<div style="color:var(--gris);padding:16px;">No hay membresías disponibles por ahora.</div>';
+      return;
+    }
+    html += mems.map(m => {
+      const benes = (m.beneficios || '').split('\n').filter(Boolean);
+      return `<div class="membresia-card">
+        <div class="membresia-nombre">${m.nombre}</div>
+        <div class="membresia-precio">${formatCLP(m.precio)} <small>pago único</small></div>
+        <ul class="membresia-beneficios">${benes.map(b => `<li>${b}</li>`).join('')}</ul>
+        <button onclick="comprarMembresia(${m.id},this)" class="btn-rojo" style="margin-top:16px;width:100%;border:none;cursor:pointer;padding:12px;font-family:'Barlow Condensed',sans-serif;font-weight:900;font-size:1rem;letter-spacing:2px;text-transform:uppercase;border-radius:2px;">${activa ? 'RENOVAR / CAMBIAR' : 'OBTENER'}</button>
+      </div>`;
+    }).join('');
+    container.innerHTML = html;
+  } catch(e) { container.innerHTML = '<div style="color:var(--gris);padding:16px;">No se pudo cargar.</div>'; }
 }
 
-function suscribirMembresia(id) {
+async function comprarMembresia(id, btn) {
   const session = Storage.get('frate_session');
-  if (!session) return;
-  session.membresia = id;
-  Storage.set('frate_session', session);
-  renderMembresias(session);
-  showToast('🌟 Membresía activada — ¡bienvenido a la familia!');
+  if (!session?.id) { showToast('Inicia sesión para obtener tu membresía'); return; }
+  if (btn) { btn.disabled = true; btn.textContent = 'Generando pago...'; }
+  try {
+    const nombre = ((session.nombres||'') + ' ' + (session.apellidos||'')).trim() || session.nombre || session.username || 'Cliente';
+    const { data, error } = await sb.functions.invoke('comprar-membresia', { body: { membresiaId: id, comprador: { nombre, email: session.email, clienteId: session.id } } });
+    if (error) throw new Error(error.message || 'Error');
+    if (data?.error) throw new Error(data.error);
+    if (!data?.initPoint) throw new Error('No se pudo iniciar el pago.');
+    window.location.href = data.initPoint;
+  } catch(e) {
+    showToast('⚠️ ' + (e.message || e));
+    if (btn) { btn.disabled = false; btn.textContent = 'OBTENER'; }
+  }
 }
 
 function savePerfil() {

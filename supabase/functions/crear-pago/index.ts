@@ -115,6 +115,20 @@ Deno.serve(async (req: Request) => {
       return new Response(JSON.stringify({ error: errores.join(' · ') }), { status: 409, headers: cors });
     }
 
+    // Beneficio de MEMBRESÍA activa (aplica sobre el valor de las entradas)
+    let membDesc = 0;
+    if (comprador.clienteId) {
+      const { data: cli } = await sb.from('clientes').select('membresia_id, membresia_hasta').eq('id', comprador.clienteId).maybeSingle();
+      if (cli?.membresia_id && cli?.membresia_hasta && new Date(cli.membresia_hasta) > new Date()) {
+        const { data: mem } = await sb.from('membresias').select('beneficio_tipo, beneficio_valor').eq('id', cli.membresia_id).maybeSingle();
+        if (mem) {
+          const ticketSubtotal = itemsValidados.filter(i => i.ttId).reduce((s, i) => s + i._precio * i.cantidad, 0);
+          if (mem.beneficio_tipo === 'entrada_gratis') membDesc = ticketSubtotal;
+          else if (mem.beneficio_tipo === 'descuento')  membDesc = Math.round(ticketSubtotal * (mem.beneficio_valor || 0) / 100);
+        }
+      }
+    }
+
     // Validar código (descuento / RRPP) en el SERVIDOR
     let codigoRow: any = null;
     let descuento = 0;
@@ -131,7 +145,8 @@ Deno.serve(async (req: Request) => {
       }
     }
 
-    const base = total - descuento;  // subtotal con descuento por código
+    descuento = Math.min(total, descuento + membDesc);  // código + beneficio de membresía
+    const base = total - descuento;
 
     // Crédito del usuario ($1.000 por votar, etc.) — se aplica después del código
     let creditoUsado = 0;
@@ -193,6 +208,38 @@ Deno.serve(async (req: Request) => {
     });
     const { error: e2 } = await sb.from('items_pedido').insert(rows);
     if (e2) { await sb.from('pedidos').delete().eq('id', pedido.id); throw e2; }
+
+    // ── PEDIDO GRATIS ($0 por membresía entrada_gratis) ──────────
+    // MercadoPago no puede cobrar $0. Marcamos pagado directo, lo que
+    // dispara el trigger de stock, y enviamos el comprobante con QRs.
+    if (totalPagado <= 0) {
+      await sb.from('pedidos').update({
+        estado: 'pagado', referencia_pago: 'GRATIS-MEMBRESIA', fecha_pago: new Date().toISOString(),
+      }).eq('id', pedido.id).eq('estado', 'pendiente');
+      // Enviar comprobante con QRs (reusa send-receipt)
+      try {
+        const { data: full } = await sb.from('pedidos').select('*, items_pedido(*)').eq('id', pedido.id).single();
+        const order = {
+          id: 'FCC-' + String(pedido.id).padStart(6, '0'),
+          pedidoId: pedido.id,
+          items: (full?.items_pedido || []).map((ip: any) => ({
+            tipo: ip.producto_tipo === 'ticket' ? (ip.nombre_ticket || 'TICKET') : ip.producto_tipo,
+            nombre: ip.nombre_evento || ip.nombre_ticket || 'Producto',
+            precio: ip.precio_unitario, cantidad: ip.cantidad,
+            ttId: ip.tipo_ticket_id || undefined, productoId: ip.producto_id || undefined,
+            personas: Array.isArray(ip.personas) ? ip.personas : [], qr_ids: Array.isArray(ip.qr_ids) ? ip.qr_ids : [],
+          })),
+          comprador: { nombre: comprador.nombre, email: comprador.email },
+          total: 0, fecha: new Date().toISOString(),
+        };
+        await fetch(`${Deno.env.get('SUPABASE_URL')}/functions/v1/send-receipt`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')}` },
+          body: JSON.stringify({ order }),
+        });
+      } catch (e) { console.error('[crear-pago] receipt gratis:', e); }
+      return new Response(JSON.stringify({ ok: true, pedidoId: pedido.id, freeOrder: true }), { headers: cors });
+    }
 
     // ── 4) Crear preferencia en MercadoPago ──────────────────────
     const pref = {

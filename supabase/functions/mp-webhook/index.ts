@@ -108,6 +108,22 @@ Deno.serve(async (req: Request) => {
       } catch (e) { console.error('[mp-webhook] puntos:', e); }
     }
 
+    // ── MEMBRESÍA: si el pedido es la compra de un pase, activarla ──
+    if (pedido.membresia_id) {
+      try {
+        const { data: mem } = await sb.from('membresias').select('*').eq('id', pedido.membresia_id).maybeSingle();
+        if (mem && pedido.cliente_id) {
+          const hasta = new Date(Date.now() + (mem.duracion_dias || 60) * 24 * 60 * 60 * 1000).toISOString();
+          await sb.from('clientes').update({
+            membresia_id:     mem.id,
+            membresia_nombre: mem.nombre,
+            membresia_hasta:  hasta,
+          }).eq('id', pedido.cliente_id);
+        }
+      } catch (e) { console.error('[mp-webhook] membresia:', e); }
+      return ok(); // membresía no lleva QRs; terminamos aquí
+    }
+
     // ── Construir orden y enviar comprobantes ────────────────────
     const order = buildOrder(pedido);
     const buyerEmail = (pedido.email_cliente || '').toLowerCase();

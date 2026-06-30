@@ -177,6 +177,7 @@
     <button class="ni" onclick="go('usuarios')"><span class="ni-icon">👥</span>Usuarios<span class="ni-badge" id="nb-usuarios">0</span></button>
     <button class="ni" onclick="go('reservas')"><span class="ni-icon">📋</span>Reservas<span class="ni-badge" id="nb-reservas">0</span></button>
     <button class="ni" onclick="go('puntos')"><span class="ni-icon">⭐</span>Puntos & Premios</button>
+    <button class="ni" onclick="go('membresias')"><span class="ni-icon">👑</span>Membresías</button>
     <div class="sb-sect">Herramientas</div>
     <button class="ni" onclick="go('ia')"><span class="ni-icon">🤖</span>IA & Marketing</button>
     <button class="ni" onclick="go('exportar')"><span class="ni-icon">⚙️</span>Exportar</button>
@@ -534,6 +535,19 @@
       </table></div>
     </div>
 
+    <!-- MEMBRESÍAS -->
+    <div class="panel" id="p-membresias">
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:6px;">
+        <h2 style="font-family:var(--disp);font-weight:900;font-size:1.6rem;">MEMBRESÍAS</h2>
+        <button class="btn btn-p btn-sm" onclick="abrirMembresia()">+ Nueva membresía</button>
+      </div>
+      <p style="color:var(--muted);font-size:0.8rem;margin-bottom:18px;">Pases de pago único. Ej: "$30.000 → 2 meses de entrada gratis". La pestaña Membresía se muestra/oculta en Configuración.</p>
+      <div class="tw"><table>
+        <thead><tr><th>Nombre</th><th>Precio</th><th>Duración</th><th>Beneficio</th><th>Miembros</th><th>Estado</th><th></th></tr></thead>
+        <tbody id="tb-membresias"><tr><td colspan="7" style="text-align:center;color:var(--muted);padding:20px">Cargando...</td></tr></tbody>
+      </table></div>
+    </div>
+
     <div class="panel" id="p-config">
       <h2 style="font-family:var(--disp);font-weight:900;font-size:1.6rem;margin-bottom:6px;">CONFIGURACIÓN DEL SITIO</h2>
       <p style="color:var(--muted);font-size:0.8rem;margin-bottom:18px;">Activa o desactiva secciones de frate.cl sin hacer deploy. Útil mientras terminas de cargar contenido.</p>
@@ -646,6 +660,30 @@
     <div class="toggle-row"><span style="font-size:0.82rem;">Activo</span><label class="sw"><input type="checkbox" id="cod-activo" checked><span class="sl"></span></label></div>
   </div>
   <div class="mfoot"><button class="btn btn-g" onclick="closeModal('modal-codigo')">Cancelar</button><button class="btn btn-p" onclick="saveCodigo()">Guardar código</button></div>
+</div></div>
+
+<!-- Modal Membresía -->
+<div class="mo" id="modal-membresia"><div class="mb">
+  <div class="mh"><span class="mht" id="mem-title">Nueva membresía</span><button class="mc" onclick="closeModal('modal-membresia')">✕</button></div>
+  <div class="mbody">
+    <input type="hidden" id="mem-id" value="" />
+    <div class="fg"><label>Nombre</label><input type="text" id="mem-nombre" placeholder="FRATE PASS 2 MESES" /></div>
+    <div class="fg"><label>Descripción corta</label><input type="text" id="mem-desc" placeholder="Entrada gratis por 2 meses" /></div>
+    <div class="form-2">
+      <div class="fg"><label>Precio (pago único)</label><input type="number" id="mem-precio" min="0" placeholder="30000" /></div>
+      <div class="fg"><label>Duración (días)</label><input type="number" id="mem-dias" min="1" placeholder="60" /></div>
+    </div>
+    <div class="form-2">
+      <div class="fg"><label>Beneficio</label><select id="mem-benef-tipo" onchange="memBenefChange()">
+        <option value="entrada_gratis">Entrada gratis</option>
+        <option value="descuento">Descuento % en entradas</option>
+      </select></div>
+      <div class="fg" id="mem-benef-valor-wrap" style="display:none"><label>% de descuento</label><input type="number" id="mem-benef-valor" min="0" max="100" placeholder="20" /></div>
+    </div>
+    <div class="fg"><label>Beneficios (uno por línea)</label><textarea id="mem-benes" placeholder="Entrada gratis a todos los eventos&#10;2 meses completos&#10;Un solo pago"></textarea></div>
+    <div class="toggle-row"><span style="font-size:0.82rem;">Activa</span><label class="sw"><input type="checkbox" id="mem-activo" checked><span class="sl"></span></label></div>
+  </div>
+  <div class="mfoot"><button class="btn btn-g" onclick="closeModal('modal-membresia')">Cancelar</button><button class="btn btn-p" onclick="saveMembresia()">Guardar membresía</button></div>
 </div></div>
 
 <!-- Modal Premio -->
@@ -973,7 +1011,7 @@ async function checkSession() {
 }
 
 // ── NAV ──────────────────────────────────────────────────────
-const panelTitles = { dashboard:'Resumen', eventos:'Eventos', 'tickets-tipos':'Tipos de Ticket', cortesias:'Cortesías', codigos:'Códigos & RRPP', ordenes:'Órdenes & Validación', ambientes:'Ambientes', media:'Galería & Media', webeum:'WEBEUM', tiendita:'La Tiendita', carta:'Carta', usuarios:'Usuarios', reservas:'Reservas', puntos:'Puntos & Premios', ia:'IA & Marketing', exportar:'Exportar', config:'Configuración del sitio' };
+const panelTitles = { dashboard:'Resumen', eventos:'Eventos', 'tickets-tipos':'Tipos de Ticket', cortesias:'Cortesías', codigos:'Códigos & RRPP', membresias:'Membresías', ordenes:'Órdenes & Validación', ambientes:'Ambientes', media:'Galería & Media', webeum:'WEBEUM', tiendita:'La Tiendita', carta:'Carta', usuarios:'Usuarios', reservas:'Reservas', puntos:'Puntos & Premios', ia:'IA & Marketing', exportar:'Exportar', config:'Configuración del sitio' };
 
 function go(name) {
   document.querySelectorAll('.panel').forEach(p => p.classList.remove('active'));
@@ -997,6 +1035,7 @@ function render(name) {
   else if(name==='tickets-tipos') renderTiposTicketPanel();
   else if(name==='cortesias') renderCortesias();
   else if(name==='codigos') renderCodigos();
+  else if(name==='membresias') renderMembresiasAdmin();
   else if(name==='ordenes') renderOrdenes();
   else if(name==='ambientes') renderAmbientes();
   else if(name==='webeum') renderWebeum();
@@ -2482,6 +2521,59 @@ async function savePremio() {
 }
 async function togglePremio(id, activo) { await sb.from('premios').update({ activo: !activo }).eq('id', id); renderPremios(); }
 async function deletePremio(id) { if (!confirm('¿Eliminar este premio?')) return; await sb.from('premios').delete().eq('id', id); renderPremios(); }
+
+// ── MEMBRESÍAS (admin) ───────────────────────────────────────
+async function renderMembresiasAdmin() {
+  const tb = document.getElementById('tb-membresias');
+  try {
+    const [{ data: mems }, { data: clientes }] = await Promise.all([
+      sb.from('membresias').select('*').order('orden').order('precio'),
+      sb.from('clientes').select('membresia_id, membresia_hasta')
+    ]);
+    const now = Date.now(); const count = {};
+    (clientes || []).forEach(c => { if (c.membresia_id && c.membresia_hasta && new Date(c.membresia_hasta).getTime() > now) count[c.membresia_id] = (count[c.membresia_id] || 0) + 1; });
+    if (!mems || !mems.length) { tb.innerHTML = `<tr><td colspan="7" style="text-align:center;color:var(--muted);padding:20px">Sin membresías. Crea la primera.</td></tr>`; return; }
+    tb.innerHTML = mems.map(m => `<tr>
+      <td><div class="tb">${m.nombre}</div><div class="tm" style="font-size:0.72rem">${m.descripcion||''}</div></td>
+      <td class="tb" style="color:var(--dorado)">${clp(m.precio)}</td>
+      <td>${m.duracion_dias} días</td>
+      <td>${m.beneficio_tipo==='entrada_gratis'?'<span class="badge b-g">Entrada gratis</span>':`<span class="badge b-b">${m.beneficio_valor}% desc.</span>`}</td>
+      <td>${count[m.id]||0}</td>
+      <td><span class="badge ${m.activo?'b-g':'b-gr'}">${m.activo?'Activa':'Inactiva'}</span></td>
+      <td><div style="display:flex;gap:4px">
+        <button class="btn btn-ok btn-sm" onclick="abrirMembresia(${m.id})">✏️</button>
+        <button class="btn btn-g btn-sm" onclick="toggleMembresia(${m.id},${m.activo})">${m.activo?'⏸':'▶'}</button>
+        <button class="btn btn-del btn-sm" onclick="deleteMembresia(${m.id})">×</button>
+      </div></td></tr>`).join('');
+  } catch(e) { tb.innerHTML = `<tr><td colspan="7" style="color:var(--rojo);padding:12px">Error: ${e.message}</td></tr>`; }
+}
+function memBenefChange() { document.getElementById('mem-benef-valor-wrap').style.display = document.getElementById('mem-benef-tipo').value === 'descuento' ? 'block' : 'none'; }
+async function abrirMembresia(id) {
+  const set = (k,v)=>{ const el=document.getElementById(k); if(el){ if(el.type==='checkbox') el.checked=v; else el.value=v; } };
+  set('mem-id','');set('mem-nombre','');set('mem-desc','');set('mem-precio','');set('mem-dias','60');set('mem-benef-tipo','entrada_gratis');set('mem-benef-valor','');set('mem-benes','');set('mem-activo',true);
+  document.getElementById('mem-title').textContent='Nueva membresía';
+  if (id) { const { data: m } = await sb.from('membresias').select('*').eq('id',id).single();
+    if (m) { set('mem-id',m.id);set('mem-nombre',m.nombre);set('mem-desc',m.descripcion||'');set('mem-precio',m.precio);set('mem-dias',m.duracion_dias);set('mem-benef-tipo',m.beneficio_tipo);set('mem-benef-valor',m.beneficio_valor||'');set('mem-benes',m.beneficios||'');set('mem-activo',!!m.activo); document.getElementById('mem-title').textContent='Editar membresía'; } }
+  memBenefChange(); openModal('modal-membresia');
+}
+async function saveMembresia() {
+  const id = document.getElementById('mem-id').value;
+  const nombre = document.getElementById('mem-nombre').value.trim();
+  const precio = parseInt(document.getElementById('mem-precio').value);
+  if (!nombre || isNaN(precio)) { showToast('Nombre y precio son obligatorios', true); return; }
+  const row = {
+    nombre, descripcion: document.getElementById('mem-desc').value.trim() || null, precio,
+    duracion_dias: parseInt(document.getElementById('mem-dias').value) || 60,
+    beneficio_tipo: document.getElementById('mem-benef-tipo').value,
+    beneficio_valor: parseInt(document.getElementById('mem-benef-valor').value) || 0,
+    beneficios: document.getElementById('mem-benes').value.trim() || null,
+    activo: document.getElementById('mem-activo').checked
+  };
+  try { let error; if (id) ({ error } = await sb.from('membresias').update(row).eq('id', id)); else ({ error } = await sb.from('membresias').insert(row)); if (error) throw error; closeModal('modal-membresia'); renderMembresiasAdmin(); showToast('✅ Membresía guardada'); }
+  catch(e) { showToast('Error: ' + (e.message || e), true); }
+}
+async function toggleMembresia(id, activo) { await sb.from('membresias').update({ activo: !activo }).eq('id', id); renderMembresiasAdmin(); }
+async function deleteMembresia(id) { if (!confirm('¿Eliminar esta membresía?')) return; await sb.from('membresias').delete().eq('id', id); renderMembresiasAdmin(); }
 
 // ── AMBIENTES ────────────────────────────────────────────────
 async function renderAmbientes() {
