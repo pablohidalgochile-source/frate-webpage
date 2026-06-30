@@ -1164,9 +1164,11 @@
       <div class="puntos-card">
         <div class="puntos-valor" id="puntos-valor">0</div>
         <div class="puntos-label">Frate Points</div>
-        <div class="puntos-equiv">100 pts = $1.000 de descuento en tu próxima compra</div>
+        <div class="puntos-equiv" id="puntos-equiv">Gana puntos en cada compra y canjéalos por premios</div>
       </div>
-      <div class="cuenta-section-title">Historial de puntos</div>
+      <div class="cuenta-section-title">Canjea tus puntos</div>
+      <div id="puntos-catalogo"><div style="color:var(--gris);padding:12px;">Cargando...</div></div>
+      <div class="cuenta-section-title" style="margin-top:24px;">Historial</div>
       <div class="puntos-history" id="puntos-history-list"></div>
     </div>
 
@@ -2042,6 +2044,64 @@ function syncFloatingCount() {
 }
 
 // ── Carga eventos desde Supabase y reemplaza FRATE_EVENTOS ────────────────
+// ── PUNTOS: saldo + catálogo + canje (en la cuenta) ───────────
+async function renderPuntosCuenta() {
+  const session = Storage.get('frate_session');
+  if (!session?.id) return;
+  try {
+    const [{ data: cli }, { data: premios }, { data: movs }] = await Promise.all([
+      sb.from('clientes').select('puntos').eq('id', session.id).maybeSingle(),
+      sb.from('premios').select('*').eq('activo', true).order('orden').order('costo_puntos'),
+      sb.from('movimientos').select('*').eq('cliente_id', session.id).eq('tipo', 'puntos').order('created_at', { ascending: false }).limit(15)
+    ]);
+    const puntos = cli?.puntos || 0;
+    const elV = document.getElementById('puntos-valor'); if (elV) elV.textContent = puntos.toLocaleString('es-CL');
+    // catálogo
+    const cat = document.getElementById('puntos-catalogo');
+    if (cat) {
+      cat.innerHTML = (premios || []).map(p => {
+        const alcanza = puntos >= p.costo_puntos;
+        const sinStock = p.stock != null && p.stock <= 0;
+        return `<div style="display:flex;align-items:center;gap:12px;background:var(--negro-3);border:1px solid #1a1a1c;border-radius:8px;padding:12px 14px;margin-bottom:8px;">
+          <div style="flex:1;min-width:0;">
+            <div style="color:#fff;font-weight:600;font-size:0.92rem;">${p.nombre}</div>
+            <div style="color:var(--gris);font-size:0.78rem;">${p.descripcion||''}</div>
+          </div>
+          <div style="text-align:right;flex-shrink:0;">
+            <div style="color:var(--dorado);font-weight:900;font-family:var(--fuente-display);">${p.costo_puntos} pts</div>
+            <button ${(!alcanza||sinStock)?'disabled':''} onclick="canjearPremio(${p.id})"
+              style="margin-top:4px;border:none;border-radius:20px;padding:6px 14px;font-size:0.7rem;font-weight:700;text-transform:uppercase;letter-spacing:1px;cursor:${(!alcanza||sinStock)?'not-allowed':'pointer'};background:${(!alcanza||sinStock)?'#2a2a2c':'var(--rojo)'};color:${(!alcanza||sinStock)?'#71717a':'#fff'};">
+              ${sinStock?'Agotado':alcanza?'Canjear':'Te faltan '+(p.costo_puntos-puntos)}</button>
+          </div>
+        </div>`;
+      }).join('') || '<div style="color:var(--gris);padding:12px;">Aún no hay premios disponibles.</div>';
+    }
+    // historial
+    const hist = document.getElementById('puntos-history-list');
+    if (hist) {
+      hist.innerHTML = (movs || []).length ? movs.map(m => `
+        <div style="display:flex;justify-content:space-between;padding:8px 0;border-bottom:1px solid #1a1a1c;font-size:0.82rem;">
+          <span style="color:var(--gris);">${m.concepto||''}</span>
+          <span style="color:${m.monto>=0?'#4ade80':'#f87171'};font-weight:700;">${m.monto>=0?'+':''}${m.monto} pts</span>
+        </div>`).join('') : '<div style="color:var(--gris);padding:8px;font-size:0.82rem;">Sin movimientos todavía.</div>';
+    }
+  } catch(e) { console.warn('[FRATE] puntos:', e?.message || e); }
+}
+
+async function canjearPremio(premioId) {
+  const session = Storage.get('frate_session');
+  if (!session?.id) return;
+  if (!confirm('¿Canjear este premio con tus puntos?')) return;
+  try {
+    const { data, error } = await sb.rpc('canjear_premio', { p_cliente_id: session.id, p_premio_id: premioId });
+    if (error) throw error;
+    if (!data?.ok) { showToast('⚠️ ' + (data?.error || 'No se pudo canjear')); return; }
+    if (data.tipo === 'credito') showToast(`🎉 ¡Canjeado! Sumaste $${(data.valor||0).toLocaleString('es-CL')} de crédito`);
+    else showToast(`🎉 ¡Canjeado! "${data.premio}" — muéstralo en la puerta`);
+    renderPuntosCuenta();
+  } catch(e) { showToast('⚠️ ' + (e.message || e)); }
+}
+
 // ── PROMOS: muestra el crédito del usuario ────────────────────
 async function renderPromos() {
   const cont = document.getElementById('promos-content');

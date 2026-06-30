@@ -99,6 +99,9 @@ function showCuentaTab(tab) {
   if (tab === 'promos' && typeof renderPromos === 'function') {
     renderPromos();
   }
+  if (tab === 'puntos' && typeof renderPuntosCuenta === 'function') {
+    renderPuntosCuenta();
+  }
 }
 
 function renderCuenta(session) {
@@ -113,12 +116,16 @@ function renderCuenta(session) {
   if (nameEl)  nameEl.textContent  = session.username ? '@' + session.username : (nombre + ' ' + apellido).trim() || '—';
   if (emailEl) emailEl.textContent = session.email || '—';
 
-  // Puntos
-  const puntos = calcularPuntos(session);
+  // Puntos (reales desde la BD)
   const puntosEl = document.getElementById('cuenta-puntos');
-  if (puntosEl) puntosEl.textContent = puntos + ' pts';
   const puntosValorEl = document.getElementById('puntos-valor');
-  if (puntosValorEl) puntosValorEl.textContent = puntos;
+  if (session.id && typeof sb !== 'undefined') {
+    sb.from('clientes').select('puntos').eq('id', session.id).maybeSingle().then(({ data }) => {
+      const pts = (data?.puntos || 0);
+      if (puntosEl) puntosEl.textContent = pts.toLocaleString('es-CL') + ' pts';
+      if (puntosValorEl) puntosValorEl.textContent = pts.toLocaleString('es-CL');
+    });
+  } else if (puntosEl) { puntosEl.textContent = '0 pts'; }
 
   // Campos de perfil
   const set = (id, val) => { const el = document.getElementById(id); if (el && val) el.value = val; };

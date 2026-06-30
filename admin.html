@@ -451,11 +451,28 @@
 
     <!-- PUNTOS & PREMIOS -->
     <div class="panel" id="p-puntos">
-      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:18px;">
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:6px;">
         <h2 style="font-family:var(--disp);font-weight:900;font-size:1.6rem;">PUNTOS & PREMIOS</h2>
       </div>
+      <p style="color:var(--muted);font-size:0.8rem;margin-bottom:16px;">La gente gana puntos al pagar y los canjea por premios. La pestaña Puntos se muestra/oculta en Configuración.</p>
+
+      <div class="card" style="margin-bottom:14px;">
+        <div class="ch"><span class="ct">⚙️ Cómo se ganan los puntos</span></div>
+        <div class="cb" style="display:flex;align-items:center;gap:12px;flex-wrap:wrap;">
+          <span style="color:var(--muted);font-size:0.85rem;">1 punto por cada</span>
+          <input type="number" id="puntos-rate" min="1" onchange="savePuntosRate(this.value)" style="width:120px;background:var(--bg3);border:1px solid var(--border);color:var(--text);padding:8px 10px;border-radius:6px;" />
+          <span style="color:var(--muted);font-size:0.85rem;">pesos gastados.</span>
+          <span id="puntos-rate-msg" style="color:#4ade80;font-size:0.8rem;"></span>
+        </div>
+      </div>
+
+      <div class="card" style="margin-bottom:14px;">
+        <div class="ch"><span class="ct">🎁 Catálogo de premios</span><button class="btn btn-p btn-sm" onclick="abrirPremio()">+ Nuevo premio</button></div>
+        <div class="tw"><table><thead><tr><th>Premio</th><th>Costo</th><th>Tipo</th><th>Stock</th><th>Estado</th><th></th></tr></thead><tbody id="tb-premios"><tr><td colspan="6" style="text-align:center;color:var(--muted);padding:16px">Cargando...</td></tr></tbody></table></div>
+      </div>
+
       <div class="card">
-        <div class="ch"><span class="ct">Ranking de usuarios por órdenes</span></div>
+        <div class="ch"><span class="ct">🏆 Top clientes por gasto</span></div>
         <div class="tw"><table><thead><tr><th>#</th><th>Usuario</th><th>Email</th><th>Órdenes</th><th>Total gastado</th><th>Acciones</th></tr></thead><tbody id="tb-puntos-ranking"></tbody></table></div>
       </div>
     </div>
@@ -626,6 +643,29 @@
     <div class="toggle-row"><span style="font-size:0.82rem;">Activo</span><label class="sw"><input type="checkbox" id="cod-activo" checked><span class="sl"></span></label></div>
   </div>
   <div class="mfoot"><button class="btn btn-g" onclick="closeModal('modal-codigo')">Cancelar</button><button class="btn btn-p" onclick="saveCodigo()">Guardar código</button></div>
+</div></div>
+
+<!-- Modal Premio -->
+<div class="mo" id="modal-premio"><div class="mb">
+  <div class="mh"><span class="mht" id="prem-title">Nuevo premio</span><button class="mc" onclick="closeModal('modal-premio')">✕</button></div>
+  <div class="mbody">
+    <input type="hidden" id="prem-id" value="" />
+    <div class="fg"><label>Nombre del premio</label><input type="text" id="prem-nombre" placeholder="Ej: Trago gratis" /></div>
+    <div class="fg"><label>Descripción</label><input type="text" id="prem-desc" placeholder="Un trago de la carta" /></div>
+    <div class="form-2">
+      <div class="fg"><label>Costo en puntos</label><input type="number" id="prem-costo" min="1" placeholder="200" /></div>
+      <div class="fg"><label>Tipo</label><select id="prem-tipo" onchange="premTipoChange()">
+        <option value="beneficio">Beneficio (se muestra en la puerta)</option>
+        <option value="credito">Crédito en $ (se aplica solo)</option>
+      </select></div>
+    </div>
+    <div class="form-2">
+      <div class="fg" id="prem-valor-wrap" style="display:none"><label>Valor del crédito ($)</label><input type="number" id="prem-valor" min="0" placeholder="1000" /></div>
+      <div class="fg"><label>Stock (vacío = ilimitado)</label><input type="number" id="prem-stock" min="0" placeholder="Ilimitado" /></div>
+    </div>
+    <div class="toggle-row"><span style="font-size:0.82rem;">Activo</span><label class="sw"><input type="checkbox" id="prem-activo" checked><span class="sl"></span></label></div>
+  </div>
+  <div class="mfoot"><button class="btn btn-g" onclick="closeModal('modal-premio')">Cancelar</button><button class="btn btn-p" onclick="savePremio()">Guardar premio</button></div>
 </div></div>
 
 <!-- IMPORTADOR MASIVO (CSV/XLSX) ─────────────────────────────── -->
@@ -2319,6 +2359,12 @@ async function updateReserva(id, estado) {
 
 // ── PUNTOS ───────────────────────────────────────────────────
 async function renderPuntos() {
+  // tasa de puntos
+  try {
+    const { data: cfg } = await sb.from('config_valores').select('valor').eq('clave','puntos_pesos_por_punto').maybeSingle();
+    const inp = document.getElementById('puntos-rate'); if (inp) inp.value = cfg?.valor || '100';
+  } catch(e) {}
+  renderPremios();
   const tbody = document.getElementById('tb-puntos-ranking');
   tbody.innerHTML = `<tr><td colspan="6" style="text-align:center;color:var(--muted);padding:20px">Cargando...</td></tr>`;
   try {
@@ -2344,6 +2390,77 @@ async function renderPuntos() {
       : `<tr><td colspan="6" style="text-align:center;color:var(--muted);padding:20px">Sin datos de compras</td></tr>`;
   } catch(e) { console.error(e); }
 }
+
+async function savePuntosRate(v) {
+  const valor = String(Math.max(1, parseInt(v) || 100));
+  const { error } = await sb.from('config_valores').update({ valor }).eq('clave','puntos_pesos_por_punto');
+  const msg = document.getElementById('puntos-rate-msg');
+  if (error) { showToast('Error: '+error.message, true); }
+  else if (msg) { msg.textContent = '✓ Guardado'; setTimeout(()=>msg.textContent='', 2000); }
+}
+
+async function renderPremios() {
+  const tb = document.getElementById('tb-premios');
+  try {
+    const { data } = await sb.from('premios').select('*').order('orden').order('costo_puntos');
+    if (!data || !data.length) { tb.innerHTML = `<tr><td colspan="6" style="text-align:center;color:var(--muted);padding:16px">Sin premios. Crea el primero.</td></tr>`; return; }
+    tb.innerHTML = data.map(p => `<tr>
+      <td><div class="tb">${p.nombre}</div><div class="tm" style="font-size:0.72rem">${p.descripcion||''}</div></td>
+      <td class="tb" style="color:var(--dorado)">${p.costo_puntos} pts</td>
+      <td>${p.tipo==='credito'?`<span class="badge b-g">Crédito ${clp(p.valor)}</span>`:'<span class="badge b-b">Beneficio</span>'}</td>
+      <td>${p.stock==null?'∞':p.stock}</td>
+      <td><span class="badge ${p.activo?'b-g':'b-gr'}">${p.activo?'Activo':'Inactivo'}</span></td>
+      <td><div style="display:flex;gap:4px">
+        <button class="btn btn-ok btn-sm" onclick="abrirPremio(${p.id})">✏️</button>
+        <button class="btn btn-g btn-sm" onclick="togglePremio(${p.id},${p.activo})">${p.activo?'⏸':'▶'}</button>
+        <button class="btn btn-del btn-sm" onclick="deletePremio(${p.id})">×</button>
+      </div></td></tr>`).join('');
+  } catch(e) { tb.innerHTML = `<tr><td colspan="6" style="color:var(--rojo);padding:12px">Error: ${e.message}</td></tr>`; }
+}
+
+async function abrirPremio(id) {
+  const set = (k,v)=>{ const el=document.getElementById(k); if(el){ if(el.type==='checkbox') el.checked=v; else el.value=v; } };
+  set('prem-id',''); set('prem-nombre',''); set('prem-desc',''); set('prem-costo',''); set('prem-tipo','beneficio'); set('prem-valor',''); set('prem-stock',''); set('prem-activo',true);
+  document.getElementById('prem-title').textContent = 'Nuevo premio';
+  if (id) {
+    const { data: p } = await sb.from('premios').select('*').eq('id',id).single();
+    if (p) {
+      set('prem-id',p.id); set('prem-nombre',p.nombre); set('prem-desc',p.descripcion||''); set('prem-costo',p.costo_puntos);
+      set('prem-tipo',p.tipo); set('prem-valor',p.valor||''); set('prem-stock',p.stock==null?'':p.stock); set('prem-activo',!!p.activo);
+      document.getElementById('prem-title').textContent = 'Editar premio';
+    }
+  }
+  premTipoChange();
+  openModal('modal-premio');
+}
+function premTipoChange() {
+  document.getElementById('prem-valor-wrap').style.display = document.getElementById('prem-tipo').value==='credito' ? 'block' : 'none';
+}
+async function savePremio() {
+  const id = document.getElementById('prem-id').value;
+  const nombre = document.getElementById('prem-nombre').value.trim();
+  const costo = parseInt(document.getElementById('prem-costo').value);
+  if (!nombre || !costo) { showToast('Nombre y costo en puntos son obligatorios', true); return; }
+  const stockRaw = document.getElementById('prem-stock').value;
+  const row = {
+    nombre,
+    descripcion:  document.getElementById('prem-desc').value.trim() || null,
+    costo_puntos: costo,
+    tipo:         document.getElementById('prem-tipo').value,
+    valor:        parseInt(document.getElementById('prem-valor').value) || 0,
+    stock:        stockRaw === '' ? null : parseInt(stockRaw),
+    activo:       document.getElementById('prem-activo').checked
+  };
+  try {
+    let error;
+    if (id) ({ error } = await sb.from('premios').update(row).eq('id', id));
+    else    ({ error } = await sb.from('premios').insert(row));
+    if (error) throw error;
+    closeModal('modal-premio'); renderPremios(); showToast('✅ Premio guardado');
+  } catch(e) { showToast('Error: '+(e.message||e), true); }
+}
+async function togglePremio(id, activo) { await sb.from('premios').update({ activo: !activo }).eq('id', id); renderPremios(); }
+async function deletePremio(id) { if (!confirm('¿Eliminar este premio?')) return; await sb.from('premios').delete().eq('id', id); renderPremios(); }
 
 // ── AMBIENTES ────────────────────────────────────────────────
 async function renderAmbientes() {

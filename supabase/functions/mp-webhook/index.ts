@@ -94,6 +94,20 @@ Deno.serve(async (req: Request) => {
       catch (e) { console.error('[mp-webhook] incrementar_uso_codigo:', e); }
     }
 
+    // Otorgar PUNTOS al cliente (tasa configurable: pesos por punto)
+    if (pedido.cliente_id) {
+      try {
+        const { data: cfg } = await sb.from('config_valores').select('valor').eq('clave', 'puntos_pesos_por_punto').maybeSingle();
+        const pesosPorPunto = Math.max(1, parseInt(cfg?.valor || '100'));
+        const puntos = Math.floor((pedido.total_pagado || 0) / pesosPorPunto);
+        if (puntos > 0) {
+          const { data: cli } = await sb.from('clientes').select('puntos').eq('id', pedido.cliente_id).maybeSingle();
+          await sb.from('clientes').update({ puntos: (cli?.puntos || 0) + puntos }).eq('id', pedido.cliente_id);
+          await sb.from('movimientos').insert({ cliente_id: pedido.cliente_id, tipo: 'puntos', monto: puntos, concepto: 'Compra FCC-' + String(pedido.id).padStart(6, '0'), pedido_id: pedido.id });
+        }
+      } catch (e) { console.error('[mp-webhook] puntos:', e); }
+    }
+
     // ── Construir orden y enviar comprobantes ────────────────────
     const order = buildOrder(pedido);
     const buyerEmail = (pedido.email_cliente || '').toLowerCase();
