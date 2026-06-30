@@ -206,6 +206,11 @@
         <div class="kpi" style="border-top-color:var(--azul)"><div class="kpi-l">Reservas pendientes</div><div class="kpi-v" id="k-reservas" style="color:var(--azul)">—</div><div class="kpi-s">sin confirmar</div></div>
         <div class="kpi" style="border-top-color:#f59e0b;cursor:pointer" onclick="go('ordenes');setTimeout(()=>filtrarOrdenes('no-pagadas'),120)"><div class="kpi-l">Reservaron sin pagar</div><div class="kpi-v" id="k-nopagadas" style="color:#f59e0b">—</div><div class="kpi-s">pendientes + expiradas</div></div>
       </div>
+      <!-- Alerta: pagos cobrados sin stock (requieren reembolso manual) -->
+      <div id="alert-reembolso" style="display:none;background:rgba(232,54,61,.12);border:1px solid var(--rojo);border-radius:8px;padding:14px 18px;margin-bottom:14px;cursor:pointer;" onclick="go('ordenes');setTimeout(()=>filtrarOrdenes('requiere_reembolso'),120)">
+        <span style="color:var(--rojo);font-weight:700;">⚠️ <span id="alert-reembolso-n">0</span> pago(s) requieren REEMBOLSO</span>
+        <span style="color:var(--muted);font-size:0.8rem;margin-left:8px;">Se cobró pero no había stock. Click para ver y devolver.</span>
+      </div>
       <div style="display:grid;grid-template-columns:1fr 1fr;gap:14px;">
         <div class="card"><div class="ch"><span class="ct">Últimas órdenes</span><button class="btn btn-g btn-sm" onclick="go('ordenes')">Ver todas</button></div><div class="tw"><table><thead><tr><th>ID</th><th>Comprador</th><th>Total</th><th>Estado</th></tr></thead><tbody id="d-orders"></tbody></table></div></div>
         <div class="card"><div class="ch"><span class="ct">Eventos activos</span><button class="btn btn-g btn-sm" onclick="go('eventos')">Gestionar</button></div><div class="tw"><table><thead><tr><th>Evento</th><th>Fecha</th><th>Min. precio</th></tr></thead><tbody id="d-eventos"></tbody></table></div></div>
@@ -272,6 +277,7 @@
             <button class="btn btn-sm ord-filter-btn"        data-estado="pagado"    onclick="filtrarOrdenes('pagado')" style="background:rgba(34,197,94,.15);color:#22c55e;">Pagadas</button>
             <button class="btn btn-sm ord-filter-btn"        data-estado="pendiente" onclick="filtrarOrdenes('pendiente')" style="background:rgba(245,158,11,.15);color:#f59e0b;">Pendientes</button>
             <button class="btn btn-sm ord-filter-btn"        data-estado="expirado"  onclick="filtrarOrdenes('expirado')" style="background:rgba(113,113,122,.15);color:#a1a1aa;">Expiradas</button>
+            <button class="btn btn-sm ord-filter-btn"        data-estado="requiere_reembolso" onclick="filtrarOrdenes('requiere_reembolso')" style="background:rgba(232,54,61,.2);color:#E8363D;font-weight:700;">⚠️ Reembolsar</button>
             <button class="btn btn-sm ord-filter-btn"        data-estado="cancelado" onclick="filtrarOrdenes('cancelado')" style="background:rgba(232,54,61,.15);color:#E8363D;">Canceladas</button>
           </div>
           <input type="text" placeholder="🔍 Buscar por ID, nombre o email..." oninput="buscarOrdenes(this.value)" style="flex:1;min-width:200px;background:var(--bg3);border:1px solid var(--border);color:var(--text);padding:8px 12px;border-radius:var(--r);font-size:0.85rem;outline:none;" />
@@ -902,10 +908,11 @@ async function renderDash() {
   setSyncStatus('Cargando...');
   try {
     const today = new Date().toISOString().split('T')[0];
-    const [{ count: totalUsers }, { count: pendRes }, { count: noPagadas }, { data: evs }, { data: recentOrders }] = await Promise.all([
+    const [{ count: totalUsers }, { count: pendRes }, { count: noPagadas }, { count: reembolsos }, { data: evs }, { data: recentOrders }] = await Promise.all([
       sb.from('clientes').select('*', { count:'exact', head:true }),
       sb.from('reservas').select('*', { count:'exact', head:true }).eq('estado','pendiente'),
       sb.from('pedidos').select('*', { count:'exact', head:true }).in('estado',['pendiente','expirado']),
+      sb.from('pedidos').select('*', { count:'exact', head:true }).eq('estado','requiere_reembolso'),
       sb.from('eventos').select('id,nombre,fecha,activo').eq('activo',true).order('fecha').limit(4),
       sb.from('pedidos').select('id,nombre_cliente,email_cliente,total,total_pagado,estado,created_at,items_pedido(nombre_evento,nombre_ticket,cantidad,producto_tipo)').order('created_at',{ascending:false}).limit(10)
     ]);
@@ -921,6 +928,14 @@ async function renderDash() {
     document.getElementById('k-usuarios').textContent = totalUsers || 0;
     document.getElementById('k-reservas').textContent = pendRes || 0;
     document.getElementById('k-nopagadas').textContent = noPagadas || 0;
+    // Banner de reembolso (solo visible si hay pagos cobrados sin stock)
+    const alertR = document.getElementById('alert-reembolso');
+    if (reembolsos && reembolsos > 0) {
+      document.getElementById('alert-reembolso-n').textContent = reembolsos;
+      alertR.style.display = 'block';
+    } else {
+      alertR.style.display = 'none';
+    }
     document.getElementById('nb-usuarios').textContent = totalUsers || 0;
     document.getElementById('nb-reservas').textContent = pendRes || 0;
     document.getElementById('nb-eventos').textContent = evs?.length || 0;
@@ -1369,7 +1384,7 @@ async function renderOrdenes() {
             if (items.length > 1) concepto += ` <span style="color:var(--muted);font-size:0.7rem">+${items.length-1} más</span>`;
           }
           const fecha = o.created_at ? new Date(o.created_at).toLocaleString('es-CL',{day:'2-digit',month:'2-digit',hour:'2-digit',minute:'2-digit'}) : '—';
-          const estadoColor = o.estado==='pagado'?'b-g':o.estado==='pendiente'?'b-o':o.estado==='cancelado'?'b-r':'b-gr';
+          const estadoColor = o.estado==='pagado'?'b-g':o.estado==='pendiente'?'b-o':(o.estado==='cancelado'||o.estado==='requiere_reembolso')?'b-r':'b-gr';
           const totalShow = clp(o.total_pagado || o.total);
           const codigo = 'FCC-' + String(o.id).padStart(6,'0');
           return `<tr>
