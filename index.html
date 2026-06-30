@@ -1382,6 +1382,22 @@ async function cuentaGuardarPerfil() {
 }
 
 // ── Re-mostrar QRs de un pedido pasado (desde Mi Cuenta) ──────
+// Retoma el pago de un pedido pendiente/expirado → genera nuevo link MercadoPago
+async function pagarPedido(pedidoId, btn) {
+  if (btn) { btn.disabled = true; btn.textContent = 'Generando pago...'; }
+  try {
+    var { data, error } = await sb.functions.invoke('reanudar-pago', { body: { pedidoId: pedidoId } });
+    if (error) throw new Error(error.message || 'No se pudo iniciar el pago.');
+    if (data && data.error) throw new Error(data.error);
+    if (!data || !data.initPoint) throw new Error('MercadoPago no devolvió un link de pago.');
+    window.location.href = data.initPoint;
+  } catch (err) {
+    console.error('[FRATE] pagarPedido:', err);
+    if (typeof showToast === 'function') showToast('⚠️ ' + (err.message || 'Error al iniciar el pago.'));
+    if (btn) { btn.disabled = false; btn.textContent = '💳 Pagar ahora'; }
+  }
+}
+
 async function rePrintPedido(pedidoId) {
   try {
     var session = Storage.get('frate_session');
@@ -1438,13 +1454,10 @@ async function cuentaCargarHistorial() {
     if (typeof sbMisPedidos === 'function' && session.id) {
       pedidos = await sbMisPedidos(session.id);
     }
-    // Solo mostrar: pagados (siempre) y pendientes recientes (<60 min) como "en proceso".
-    // Los pendientes viejos / cancelados / expirados NO se muestran (son compras abandonadas).
-    var ahora = Date.now();
+    // Mostrar: pagados (con QRs) y pendientes/expirados (con botón "Pagar ahora").
+    // Ocultar solo los cancelados por el admin.
     pedidos = (pedidos || []).filter(function(p){
-      if (p.estado === 'pagado') return true;
-      if (p.estado === 'pendiente') return (ahora - new Date(p.created_at).getTime()) / 60000 < 60;
-      return false;
+      return ['pagado', 'pendiente', 'expirado'].includes(p.estado);
     });
     if (!pedidos.length) {
       container.innerHTML = '<div style="text-align:center;padding:32px;color:var(--gris);"><div style="font-size:2rem;margin-bottom:8px;">🎟️</div><div>Aún no has comprado tickets</div><div style="font-size:0.75rem;margin-top:8px;"><a href="#tickets" onclick="closeCuenta()" style="color:var(--rojo);text-decoration:none;">Ver próximos eventos →</a></div></div>';
@@ -1461,14 +1474,16 @@ async function cuentaCargarHistorial() {
         ? (firstItem.nombre_evento || firstItem.nombre_ticket || ('Pedido #'+p.id))
         : 'Pedido #'+p.id;
       var fecha = new Date(p.created_at).toLocaleDateString('es-CL',{day:'2-digit',month:'short',year:'numeric'});
-      var estadoColor = p.estado==='pagado'?'#22c55e':p.estado==='pendiente'?'#f59e0b':'var(--gris)';
+      // 'expirado' se muestra como 'pendiente' al usuario (sigue siendo pagable)
+      var estadoColor = pagado ? '#22c55e' : '#f59e0b';
+      var estadoLabel = pagado ? 'pagado' : 'pendiente';
       // Estimar nº de QRs total (sumando cantidades de todos los items)
       var nQR = items.reduce(function(s,i){return s+(i.cantidad||0);},0);
       return '<div style="background:var(--negro-3);border:1px solid #1a1a1c;border-radius:4px;padding:16px;margin-bottom:12px;">'
         +'<div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:10px;">'
         +'<div><div style="font-family:var(--fuente-display);font-weight:700;font-size:0.95rem;color:var(--blanco);">'+tituloPedido+'</div>'
         +'<div style="font-size:0.7rem;color:var(--gris);margin-top:2px;">'+fecha+' · FCC-'+String(p.id).padStart(6,'0')+'</div></div>'
-        +'<span style="font-size:0.6rem;letter-spacing:2px;text-transform:uppercase;padding:3px 8px;border-radius:20px;background:rgba(0,0,0,0.3);border:1px solid '+estadoColor+';color:'+estadoColor+';">'+p.estado+'</span>'
+        +'<span style="font-size:0.6rem;letter-spacing:2px;text-transform:uppercase;padding:3px 8px;border-radius:20px;background:rgba(0,0,0,0.3);border:1px solid '+estadoColor+';color:'+estadoColor+';">'+estadoLabel+'</span>'
         +'</div>'
         +(items.length ? '<div style="margin-bottom:10px;">'+items.map(function(i){
           var label = i.nombre_ticket || i.nombre_evento || 'Item';
@@ -1481,7 +1496,7 @@ async function cuentaCargarHistorial() {
         +'<div style="display:flex;justify-content:space-between;align-items:center;">'
         +(pagado
           ? '<button onclick="rePrintPedido('+p.id+')" style="background:transparent;border:1px solid var(--rojo);color:var(--rojo);padding:6px 12px;font-size:0.65rem;letter-spacing:2px;text-transform:uppercase;border-radius:2px;cursor:pointer;font-weight:700;">🖨️ Ver QRs ('+nQR+')</button>'
-          : '<span style="font-size:0.65rem;color:#f59e0b;letter-spacing:1px;">⏳ Pago en proceso — tus entradas aparecerán al confirmarse</span>')
+          : '<button onclick="pagarPedido('+p.id+',this)" style="background:#E8363D;border:none;color:#fff;padding:7px 16px;font-size:0.65rem;letter-spacing:2px;text-transform:uppercase;border-radius:2px;cursor:pointer;font-weight:700;">💳 Pagar ahora</button>')
         +'<span style="font-family:var(--fuente-display);font-weight:900;font-size:1.1rem;color:var(--dorado);">'+fmt(p.total_pagado||p.total)+'</span>'
         +'</div>'
         +'</div>';
