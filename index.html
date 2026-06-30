@@ -57,6 +57,9 @@
   // un estado viejo (ej: QRs de un pedido que en realidad quedó pendiente).
   // Forzamos una recarga limpia para evitarlo.
   window.addEventListener('pageshow', function(e){ if (e.persisted) window.location.reload(); });
+
+  // Referidos: si llega ?ref=username, lo guardamos para el registro
+  try { var _r = new URLSearchParams(location.search).get('ref'); if (_r) localStorage.setItem('frate_ref', _r.trim().toLowerCase()); } catch(e) {}
 </script>
 
 <!-- ══════════════════════════════════════════════
@@ -267,9 +270,15 @@
               oninput="rutFormat(this)" onblur="rutCheck(this)" autocomplete="off" />
           </div>
         </div>
-        <div class="form-group">
-          <label>Teléfono</label>
-          <input type="tel" id="reg-tel" value="+569" placeholder="+569 xxxx xxxx" />
+        <div class="form-row">
+          <div class="form-group">
+            <label>Teléfono</label>
+            <input type="tel" id="reg-tel" value="+569" placeholder="+569 xxxx xxxx" />
+          </div>
+          <div class="form-group">
+            <label>Fecha de nacimiento 🎂</label>
+            <input type="date" id="reg-nacimiento" style="color-scheme:dark" />
+          </div>
         </div>
         <div class="form-group">
           <label>Institución de Estudios</label>
@@ -1706,8 +1715,9 @@ async function modalDoRegister() {
   if (btn) { btn.disabled=true; btn.textContent='Creando cuenta...'; }
   try {
     if (typeof sbSignUp === 'function') {
+      var fechaNacimiento = ((document.getElementById('reg-nacimiento')||{}).value||'') || null;
       await sbSignUp({ nombres, apellidos, username, email, password:pass,
-                       telefono, rut, universidad:inst, carrera });
+                       telefono, rut, universidad:inst, carrera, fechaNacimiento });
       await sbSignIn(email, pass);
     }
     var displayName = username || nombres;
@@ -2111,23 +2121,51 @@ async function renderPromos() {
   try {
     const { data } = await sb.from('clientes').select('credito').eq('id', session.id).maybeSingle();
     const credito = data?.credito || 0;
+    let html = '';
     if (credito > 0) {
-      cont.innerHTML = `
-        <div style="background:linear-gradient(90deg,rgba(34,197,94,0.15),var(--negro-3));border:1px solid rgba(34,197,94,0.35);border-radius:8px;padding:20px;">
+      html += `
+        <div style="background:linear-gradient(90deg,rgba(34,197,94,0.15),var(--negro-3));border:1px solid rgba(34,197,94,0.35);border-radius:8px;padding:20px;margin-bottom:14px;">
           <div style="font-size:0.7rem;letter-spacing:2px;text-transform:uppercase;color:#4ade80;margin-bottom:6px;">🎁 Tu crédito disponible</div>
           <div style="font-family:var(--fuente-display);font-weight:900;font-size:2.2rem;color:#4ade80;">$${credito.toLocaleString('es-CL')}</div>
           <div style="font-size:0.82rem;color:var(--gris);margin-top:6px;">Se aplica automáticamente en tu próxima compra. 🎟️</div>
         </div>`;
-    } else {
-      cont.innerHTML = `
-        <div style="background:var(--negro-3);border:1px solid #1a1a1c;border-radius:8px;padding:24px;text-align:center;">
-          <div style="font-size:2rem;margin-bottom:8px;">🎵</div>
-          <div style="color:#fff;font-weight:600;margin-bottom:6px;">Vota en el Ranking del Pueblo</div>
-          <div style="font-size:0.85rem;color:var(--gris);margin-bottom:16px;line-height:1.6;">Gánate <strong style="color:var(--dorado)">$1.000 de crédito</strong> la primera vez que votas tu canción.</div>
+    }
+    // Contagia a tu amig@ (referidos)
+    const ref = (session.username || '').toLowerCase();
+    const link = 'https://frate.cl/?ref=' + ref;
+    const waMsg = encodeURIComponent('¡Vente a FRATE conmigo! 🔥 Regístrate con mi link y ambos ganamos crédito para entradas: ' + link);
+    html += `
+      <div style="background:var(--negro-3);border:1px solid #1a1a1c;border-radius:8px;padding:18px;">
+        <div style="color:#fff;font-weight:700;margin-bottom:4px;">🤝 Contagia a tu amig@</div>
+        <div style="font-size:0.82rem;color:var(--gris);margin-bottom:12px;line-height:1.6;">Cuando tu amig@ compra su primera entrada con tu link, <strong style="color:var(--dorado)">ambos ganan crédito</strong>. Ya invitaste a <strong id="ref-count" style="color:#fff;">…</strong> 🎉</div>
+        <div style="display:flex;gap:8px;flex-wrap:wrap;">
+          <button onclick="navigator.clipboard.writeText('${link}').then(()=>showToast('🔗 Link copiado'))" style="flex:1;min-width:120px;background:var(--negro-2);border:1px solid #2a2a2c;color:#fff;padding:11px;border-radius:6px;cursor:pointer;font-size:0.8rem;">📋 Copiar link</button>
+          <a href="https://wa.me/?text=${waMsg}" target="_blank" style="flex:1;min-width:120px;text-align:center;background:#25D366;color:#000;padding:11px;border-radius:6px;text-decoration:none;font-weight:700;font-size:0.8rem;">Compartir por WhatsApp</a>
+        </div>
+      </div>`;
+    if (credito <= 0) {
+      html += `
+        <div style="background:var(--negro-3);border:1px solid #1a1a1c;border-radius:8px;padding:20px;text-align:center;margin-top:14px;">
+          <div style="color:#fff;font-weight:600;margin-bottom:6px;">🎵 Vota en el Ranking del Pueblo</div>
+          <div style="font-size:0.85rem;color:var(--gris);margin-bottom:14px;">Gánate <strong style="color:var(--dorado)">$1.000</strong> la primera vez que votas tu canción.</div>
           <button onclick="closeCuenta();setTimeout(()=>document.getElementById('ranking')?.scrollIntoView({behavior:'smooth'}),200);" class="btn-rojo" style="border:none;cursor:pointer;padding:12px 24px;font-family:'Barlow Condensed',sans-serif;font-weight:900;letter-spacing:2px;text-transform:uppercase;border-radius:2px;">Ir a votar 🎶</button>
         </div>`;
     }
+    cont.innerHTML = html;
+    if (ref) {
+      const { data: n } = await sb.rpc('contar_referidos', { p_username: ref });
+      const el = document.getElementById('ref-count'); if (el) el.textContent = (n || 0) + ' amig@s';
+    }
   } catch(e) { cont.innerHTML = '<div style="color:var(--gris);padding:16px;">No se pudo cargar.</div>'; }
+}
+
+// ── CUMPLEAÑERO: regala crédito en tu mes (1 vez al año) ──────
+async function checkCumple(session) {
+  if (!session?.id) return;
+  try {
+    const { data } = await sb.rpc('otorgar_cumple', { p_cliente_id: session.id });
+    if (data?.ok) showToast('🎂 ¡Feliz mes de cumpleaños! Te regalamos $' + (data.credito || 0).toLocaleString('es-CL') + ' de crédito');
+  } catch(e) { /* silencioso */ }
 }
 
 // ── RANKING MUSICAL DEL PUEBLO ────────────────────────────────

@@ -572,6 +572,12 @@
         <div style="text-align:center;padding:24px;color:var(--muted);">Cargando...</div>
       </div></div>
 
+      <div style="font-size:0.7rem;letter-spacing:1px;text-transform:uppercase;color:var(--muted);margin:22px 0 10px;">🎚️ Valores configurables</div>
+      <p style="color:var(--muted);font-size:0.78rem;margin-bottom:10px;">Montos y reglas editables (puntos, regalo de cumpleaños, referidos…).</p>
+      <div class="card"><div class="cb" id="config-valores-list">
+        <div style="text-align:center;padding:24px;color:var(--muted);">Cargando...</div>
+      </div></div>
+
       <div style="font-size:0.7rem;letter-spacing:1px;text-transform:uppercase;color:var(--muted);margin:22px 0 10px;">📝 Textos del sitio</div>
       <p style="color:var(--muted);font-size:0.78rem;margin-bottom:10px;">Edita cualquier texto de frate.cl. Se guarda al salir del campo y se aplica al instante (recarga la web pública).</p>
       <div class="card"><div class="cb" id="config-textos-list">
@@ -3021,9 +3027,29 @@ async function saveTexto(clave, valor) {
   else showToast('✓ Texto guardado — recarga frate.cl para verlo');
 }
 
+async function renderValoresConfig() {
+  const wrap = document.getElementById('config-valores-list');
+  if (!wrap) return;
+  try {
+    const { data } = await sb.from('config_valores').select('*').order('clave');
+    if (!data || !data.length) { wrap.innerHTML = '<div style="color:var(--muted);padding:12px;">No hay valores. Corre los SQL de Puntos/Fase2.</div>'; return; }
+    wrap.innerHTML = data.map(v => `
+      <div style="display:flex;align-items:center;justify-content:space-between;gap:14px;padding:12px 4px;border-bottom:1px solid #1e1e20;">
+        <span style="font-size:0.85rem;color:#fff;flex:1;">${v.label || v.clave}</span>
+        <input type="text" value="${(v.valor||'').replace(/"/g,'&quot;')}" onchange="saveValor('${v.clave}',this.value)" style="width:120px;background:var(--bg3);border:1px solid var(--border);color:var(--text);padding:8px 10px;border-radius:6px;text-align:right;" />
+      </div>`).join('');
+  } catch(e) { wrap.innerHTML = `<div style="color:var(--rojo);padding:12px;">Error: ${e.message}</div>`; }
+}
+async function saveValor(clave, valor) {
+  const { error } = await sb.from('config_valores').update({ valor: String(valor).trim() }).eq('clave', clave);
+  if (error) showToast('Error: ' + error.message, true);
+  else showToast('✓ Guardado');
+}
+
 async function renderConfigSecciones() {
   const wrap = document.getElementById('config-secciones-list');
   cargarPreviewVideo();
+  renderValoresConfig();
   renderTextos();
   try {
     const config = await sbGetConfigSitio();

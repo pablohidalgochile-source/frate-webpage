@@ -51,8 +51,10 @@
       <div id="song-done" style="display:none;color:#4ade80;font-size:13px;padding:8px 0;">✓ ¡Gracias! Tu canción se sumó al ranking 🎶</div>
     </div>
 
-    <a href="/" class="btn">VOLVER A FRATE</a><br>
+    <button onclick="generarHistoria()" class="btn" style="background:linear-gradient(45deg,#E8363D,#D4A832);margin-bottom:10px;">📲 Comparte tu historia</button><br>
+    <a href="/" class="btn" style="background:transparent;border:1px solid #2a2a2c;">VOLVER A FRATE</a><br>
     <a href="/#cuenta" class="btn-ghost">Ver mis entradas en mi cuenta →</a>
+    <canvas id="historia-canvas" width="1080" height="1920" style="display:none;"></canvas>
   </div>
 
   <script>
@@ -93,6 +95,48 @@
           </div>`).join('');
       } catch(e) { sOut.innerHTML = '<div style="color:#71717a;padding:8px;">Error al buscar.</div>'; }
     }
+    // ── Historia para Instagram (imagen 1080x1920) ──
+    window.generarHistoria = function() {
+      let nombre = '';
+      try { nombre = (JSON.parse(localStorage.getItem('frate_session')||'null')||{}).nombres || ''; } catch(e) {}
+      const c = document.getElementById('historia-canvas');
+      const x = c.getContext('2d');
+      // Fondo
+      const g = x.createLinearGradient(0, 0, 0, 1920);
+      g.addColorStop(0, '#1a0508'); g.addColorStop(0.5, '#0A0A0B'); g.addColorStop(1, '#0A0A0B');
+      x.fillStyle = g; x.fillRect(0, 0, 1080, 1920);
+      // Glow rojo
+      const rg = x.createRadialGradient(540, 700, 50, 540, 700, 700);
+      rg.addColorStop(0, 'rgba(232,54,61,0.35)'); rg.addColorStop(1, 'rgba(232,54,61,0)');
+      x.fillStyle = rg; x.fillRect(0, 0, 1080, 1400);
+      x.textAlign = 'center';
+      // FRATE
+      x.fillStyle = '#fff'; x.font = '900 150px Arial'; x.textBaseline = 'middle';
+      x.fillText('FRATE', 540, 560);
+      // Subtítulo
+      x.fillStyle = '#71717a'; x.font = '700 34px Arial';
+      x.fillText('FRATERNIDAD CAMPUS CENTRAL', 540, 660);
+      // Mensaje grande
+      x.fillStyle = '#fff'; x.font = '900 110px Arial';
+      x.fillText('NOS VEMOS', 540, 980);
+      x.fillStyle = '#E8363D';
+      x.fillText('EN LA PISTA', 540, 1110);
+      x.fillStyle = '#fff'; x.font = '900 100px Arial';
+      x.fillText('🔥', 540, 1260);
+      // Nombre
+      if (nombre) {
+        x.fillStyle = '#D4A832'; x.font = '700 56px Arial';
+        x.fillText('— ' + nombre.toUpperCase() + ' —', 540, 1430);
+      }
+      // Footer
+      x.fillStyle = '#fff'; x.font = '900 60px Arial';
+      x.fillText('frate.cl', 540, 1760);
+      // Descargar
+      const url = c.toDataURL('image/png');
+      const a = document.createElement('a');
+      a.href = url; a.download = 'voy-a-frate.png'; a.click();
+    };
+
     window.votarSong = async function(i) {
       const s = songResults[i];
       if (!s) return;

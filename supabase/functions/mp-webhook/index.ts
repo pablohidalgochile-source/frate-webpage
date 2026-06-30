@@ -108,6 +108,31 @@ Deno.serve(async (req: Request) => {
       } catch (e) { console.error('[mp-webhook] puntos:', e); }
     }
 
+    // ── REFERIDOS: recompensa al primer pago del invitado ────────
+    if (pedido.cliente_id) {
+      try {
+        const { data: buyer } = await sb.from('clientes')
+          .select('id, username, referido_por_codigo, referido_recompensado').eq('id', pedido.cliente_id).maybeSingle();
+        if (buyer && buyer.referido_por_codigo && !buyer.referido_recompensado) {
+          const { data: ref } = await sb.from('clientes')
+            .select('id, credito, username').eq('username', String(buyer.referido_por_codigo).toLowerCase()).maybeSingle();
+          if (ref && ref.id !== buyer.id) {
+            const { data: cfg } = await sb.from('config_valores').select('valor').eq('clave', 'referido_monto').maybeSingle();
+            const monto = Math.max(0, parseInt(cfg?.valor || '1000'));
+            if (monto > 0) {
+              const { data: bc } = await sb.from('clientes').select('credito').eq('id', buyer.id).maybeSingle();
+              await sb.from('clientes').update({ credito: (bc?.credito || 0) + monto, referido_recompensado: true }).eq('id', buyer.id);
+              await sb.from('movimientos').insert({ cliente_id: buyer.id, tipo: 'credito', monto, concepto: 'Te invitó @' + ref.username });
+              await sb.from('clientes').update({ credito: (ref.credito || 0) + monto }).eq('id', ref.id);
+              await sb.from('movimientos').insert({ cliente_id: ref.id, tipo: 'credito', monto, concepto: 'Referiste a @' + (buyer.username || 'un amig@') });
+            }
+          } else {
+            await sb.from('clientes').update({ referido_recompensado: true }).eq('id', buyer.id); // código inválido/propio
+          }
+        }
+      } catch (e) { console.error('[mp-webhook] referido:', e); }
+    }
+
     // ── MEMBRESÍA: si el pedido es la compra de un pase, activarla ──
     if (pedido.membresia_id) {
       try {

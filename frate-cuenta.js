@@ -157,6 +157,7 @@ function renderCuenta(session) {
   // Historial y membresías
   renderHistorialPuntos(session);
   renderMembresias(session);
+  if (typeof checkCumple === 'function') checkCumple(session);
 }
 
 function calcularPuntos(session) {

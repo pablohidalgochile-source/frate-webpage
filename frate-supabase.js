@@ -8,7 +8,7 @@ const SUPABASE_ANON = 'sb_publishable_-_7GeDU_h84zf2v--lWQaQ_15ZFxOWt';
 const sb = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON);
 
 // ── REGISTRO ─────────────────────────────────────────────────
-async function sbSignUp({ nombres, apellidos, nombre, username, email, password, telefono, rut, universidad, carrera }) {
+async function sbSignUp({ nombres, apellidos, nombre, username, email, password, telefono, rut, universidad, carrera, fechaNacimiento }) {
   // Verificar que el username no esté tomado
   if (username) {
     const { data: existing } = await sb.from('clientes').select('id').eq('username', username.toLowerCase()).maybeSingle();
@@ -19,6 +19,9 @@ async function sbSignUp({ nombres, apellidos, nombre, username, email, password,
   if (data.user) {
     const n = nombres || (nombre || '').split(' ')[0] || '';
     const a = apellidos || (nombre || '').split(' ').slice(1).join(' ') || '';
+    // Referido: si el usuario llegó por un link ?ref=
+    let refCode = null;
+    try { refCode = (localStorage.getItem('frate_ref') || '').trim().toLowerCase() || null; } catch(e) {}
     await sb.from('clientes').upsert({
       id:          data.user.id,
       username:    (username || '').toLowerCase(),
@@ -28,8 +31,11 @@ async function sbSignUp({ nombres, apellidos, nombre, username, email, password,
       telefono:    telefono    || '',
       rut:         rut         || '',
       universidad: universidad || '',
-      carrera:     carrera     || ''
+      carrera:     carrera     || '',
+      fecha_nacimiento:   fechaNacimiento || null,
+      referido_por_codigo: refCode
     });
+    try { localStorage.removeItem('frate_ref'); } catch(e) {}
   }
   return data;
 }
