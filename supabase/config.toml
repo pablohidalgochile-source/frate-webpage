@@ -378,6 +378,12 @@ deno_version = 2
 # [edge_runtime.secrets]
 # secret_key = "env(SECRET_VALUE)"
 
+# MercadoPago llama a este webhook SIN el apikey de Supabase, por eso
+# debe estar público (sin verificación de JWT). La función verifica el
+# pago contra la API de MercadoPago, así que es seguro.
+[functions.mp-webhook]
+verify_jwt = false
+
 [analytics]
 enabled = true
 port = 54327

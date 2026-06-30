@@ -1,0 +1,1020 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" /><meta name="viewport" content="width=device-width,initial-scale=1.0" />
+  <title>Frate Admin v2 — Webpage Module</title>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Barlow+Condensed:wght@700;900&display=swap" rel="stylesheet" />
+  <style>
+    :root{--bg:#0d0d0f;--bg2:#111113;--bg3:#18181b;--border:#27272a;--border2:#3f3f46;--text:#fafafa;--muted:#71717a;--muted2:#52525b;--rojo:#E8363D;--dorado:#D4A832;--verde:#22c55e;--azul:#3b82f6;--r:4px;--font:'Inter',sans-serif;--disp:'Barlow Condensed',sans-serif;}
+    *{box-sizing:border-box;margin:0;padding:0;}
+    html,body{height:100%;}
+    body{background:var(--bg);color:var(--text);font-family:var(--font);font-size:14px;display:flex;height:100vh;overflow:hidden;}
+    /* SIDEBAR */
+    #sb{width:220px;flex-shrink:0;background:var(--bg2);border-right:1px solid var(--border);display:flex;flex-direction:column;height:100vh;overflow-y:auto;}
+    .sb-logo{padding:16px;border-bottom:1px solid var(--border);display:flex;align-items:center;gap:10px;}
+    .sb-badge{width:32px;height:32px;background:var(--rojo);border-radius:6px;display:flex;align-items:center;justify-content:center;font-family:var(--disp);font-weight:900;font-size:1rem;color:#fff;flex-shrink:0;}
+    .sb-name{font-weight:700;font-size:0.88rem;}.sb-sub{font-size:0.6rem;color:var(--muted);}
+    .sb-sect{padding:10px 12px 4px;font-size:0.58rem;letter-spacing:3px;text-transform:uppercase;color:var(--muted2);}
+    .sb-nav{flex:1;padding:6px;}
+    .ni{display:flex;align-items:center;gap:8px;padding:8px 10px;border-radius:4px;cursor:pointer;font-size:0.82rem;color:var(--muted);transition:all .15s;margin-bottom:1px;border:none;background:none;width:100%;text-align:left;font-family:var(--font);}
+    .ni:hover{background:var(--bg3);color:var(--text);}
+    .ni.active{background:rgba(232,54,61,.12);color:var(--rojo);}
+    .ni-icon{width:18px;text-align:center;font-size:0.9rem;}
+    .ni-badge{margin-left:auto;background:var(--rojo);color:#fff;font-size:0.58rem;font-weight:700;padding:1px 5px;border-radius:8px;}
+    .sb-foot{padding:10px 12px;border-top:1px solid var(--border);font-size:0.72rem;color:var(--muted);}
+    .sb-foot a{color:var(--rojo);text-decoration:none;}
+    /* MAIN */
+    #main{flex:1;display:flex;flex-direction:column;overflow:hidden;}
+    #topbar{height:52px;flex-shrink:0;background:var(--bg2);border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between;padding:0 20px;}
+    .tb-title{font-family:var(--disp);font-weight:900;font-size:1.2rem;letter-spacing:-.5px;}
+    .tb-actions{display:flex;gap:6px;}
+    #content{flex:1;overflow-y:auto;padding:20px;}
+    /* BUTTONS */
+    .btn{padding:7px 14px;border-radius:var(--r);border:none;cursor:pointer;font-family:var(--font);font-size:0.78rem;font-weight:500;transition:all .15s;display:inline-flex;align-items:center;gap:5px;}
+    .btn-p{background:var(--rojo);color:#fff;}.btn-p:hover{background:#c42d34;}
+    .btn-s{background:var(--bg3);color:var(--text);border:1px solid var(--border);}.btn-s:hover{border-color:var(--border2);}
+    .btn-g{background:none;color:var(--muted);border:1px solid var(--border);}.btn-g:hover{color:var(--text);}
+    .btn-ok{background:rgba(34,197,94,.1);color:var(--verde);border:1px solid rgba(34,197,94,.3);}
+    .btn-del{background:rgba(232,54,61,.1);color:var(--rojo);border:1px solid rgba(232,54,61,.2);}
+    .btn-gold{background:rgba(212,168,50,.1);color:var(--dorado);border:1px solid rgba(212,168,50,.3);}
+    .btn-sm{padding:4px 9px;font-size:0.72rem;}
+    /* CARDS */
+    .card{background:var(--bg2);border:1px solid var(--border);border-radius:var(--r);}
+    .ch{padding:14px 18px;border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between;}
+    .ct{font-weight:600;font-size:0.88rem;}
+    .cb{padding:18px;}
+    /* KPI */
+    .kpi-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin-bottom:20px;}
+    .kpi{background:var(--bg2);border:1px solid var(--border);border-radius:var(--r);padding:14px 18px;border-top:3px solid transparent;}
+    .kpi-l{font-size:0.65rem;letter-spacing:2px;text-transform:uppercase;color:var(--muted);margin-bottom:6px;}
+    .kpi-v{font-family:var(--disp);font-weight:900;font-size:1.8rem;line-height:1;margin-bottom:4px;}
+    .kpi-s{font-size:0.7rem;color:var(--muted);}
+    /* TABLE */
+    .tw{overflow-x:auto;}
+    table{width:100%;border-collapse:collapse;}
+    th{padding:8px 12px;text-align:left;font-size:0.62rem;letter-spacing:2px;text-transform:uppercase;color:var(--muted);border-bottom:1px solid var(--border);white-space:nowrap;}
+    td{padding:10px 12px;border-bottom:1px solid var(--border);font-size:0.8rem;vertical-align:middle;}
+    tr:last-child td{border-bottom:none;}
+    tr:hover td{background:rgba(255,255,255,.015);}
+    .tb{font-weight:600;color:var(--text);}
+    .tm{color:var(--muted);}
+    /* BADGES */
+    .badge{display:inline-block;padding:2px 7px;border-radius:3px;font-size:0.62rem;font-weight:600;}
+    .b-g{background:rgba(34,197,94,.1);color:var(--verde);border:1px solid rgba(34,197,94,.2);}
+    .b-r{background:rgba(232,54,61,.1);color:var(--rojo);border:1px solid rgba(232,54,61,.2);}
+    .b-o{background:rgba(212,168,50,.1);color:var(--dorado);border:1px solid rgba(212,168,50,.2);}
+    .b-b{background:rgba(59,130,246,.1);color:var(--azul);border:1px solid rgba(59,130,246,.2);}
+    .b-gr{background:rgba(113,113,122,.1);color:var(--muted);border:1px solid var(--border);}
+    /* FORMS */
+    .fg{display:flex;flex-direction:column;gap:5px;margin-bottom:12px;}
+    .fg label{font-size:0.68rem;font-weight:500;color:var(--muted);}
+    .fg input,.fg select,.fg textarea{background:var(--bg3);border:1px solid var(--border);color:var(--text);padding:8px 10px;border-radius:var(--r);font-family:var(--font);font-size:0.82rem;outline:none;transition:border-color .15s;width:100%;color-scheme:dark;}
+    .fg input:focus,.fg select:focus,.fg textarea:focus{border-color:var(--rojo);}
+    .fg textarea{resize:vertical;min-height:70px;}
+    .form-2{display:grid;grid-template-columns:1fr 1fr;gap:10px;}
+    .form-3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px;}
+    .form-4{display:grid;grid-template-columns:1fr 1fr 1fr 1fr;gap:10px;}
+    /* MODAL */
+    .mo{position:fixed;inset:0;background:rgba(0,0,0,.82);z-index:1000;display:flex;align-items:center;justify-content:center;padding:20px;opacity:0;pointer-events:none;transition:opacity .2s;}
+    .mo.open{opacity:1;pointer-events:all;}
+    .mb{background:var(--bg2);border:1px solid var(--border);border-radius:var(--r);width:100%;max-width:620px;max-height:88vh;overflow-y:auto;}
+    .mh{padding:14px 18px;border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between;}
+    .mht{font-weight:600;font-size:0.9rem;}
+    .mc{background:none;border:none;color:var(--muted);cursor:pointer;font-size:1rem;}
+    .mc:hover{color:var(--text);}
+    .mbody{padding:18px;}
+    .mfoot{padding:12px 18px;border-top:1px solid var(--border);display:flex;gap:6px;justify-content:flex-end;}
+    /* TABS */
+    .tabs{display:flex;border-bottom:1px solid var(--border);margin-bottom:18px;gap:0;overflow-x:auto;}
+    .tab{padding:9px 14px;font-size:0.78rem;color:var(--muted);cursor:pointer;border-bottom:2px solid transparent;margin-bottom:-1px;transition:all .15s;white-space:nowrap;background:none;border-top:none;border-left:none;border-right:none;font-family:var(--font);}
+    .tab:hover{color:var(--text);}
+    .tab.active{color:var(--text);border-bottom-color:var(--rojo);}
+    /* PANEL */
+    .panel{display:none;}.panel.active{display:block;}
+    /* TOGGLE */
+    .toggle-row{display:flex;align-items:center;justify-content:space-between;padding:10px 0;border-bottom:1px solid var(--border);}
+    .sw{position:relative;width:40px;height:22px;flex-shrink:0;}
+    .sw input{opacity:0;width:0;height:0;}
+    .sl{position:absolute;inset:0;background:#2a2a2c;border-radius:11px;cursor:pointer;transition:all .2s;}
+    .sl:before{content:'';position:absolute;width:16px;height:16px;border-radius:50%;background:#555;bottom:3px;left:3px;transition:all .2s;}
+    .sw input:checked+.sl{background:rgba(232,54,61,.3);border:1px solid var(--rojo);}
+    .sw input:checked+.sl:before{background:var(--rojo);transform:translateX(18px);}
+    /* CODE */
+    .code{background:var(--bg);border:1px solid var(--border);border-radius:var(--r);padding:14px;font-family:monospace;font-size:0.72rem;color:#a3e635;white-space:pre-wrap;overflow-x:auto;max-height:260px;overflow-y:auto;}
+    /* TOAST */
+    #toast{position:fixed;bottom:20px;right:20px;background:var(--bg3);border:1px solid var(--border);color:var(--text);padding:10px 18px;border-radius:var(--r);font-size:0.8rem;z-index:9999;opacity:0;transform:translateY(6px);transition:all .25s;pointer-events:none;}
+    #toast.show{opacity:1;transform:translateY(0);}
+    /* TICKET TYPE TABLE (like screenshot) */
+    .tt-row{display:grid;grid-template-columns:2.5fr 1fr 1fr 1fr 1fr 1fr 1fr 1fr auto;gap:6px;align-items:center;padding:12px 16px;border-bottom:1px solid var(--border);font-size:0.8rem;}
+    .tt-row:hover{background:rgba(255,255,255,.015);}
+    .tt-header{font-size:0.6rem;letter-spacing:2px;text-transform:uppercase;color:var(--muted);padding:8px 16px;border-bottom:1px solid var(--border);display:grid;grid-template-columns:2.5fr 1fr 1fr 1fr 1fr 1fr 1fr 1fr auto;gap:6px;}
+    .tt-nombre{font-weight:600;}
+    .tt-estado-badge{font-size:0.6rem;padding:2px 6px;border-radius:3px;}
+    /* IA Panel */
+    .ia-idea{background:var(--bg3);border:1px solid var(--border);border-radius:var(--r);padding:14px;margin-bottom:8px;}
+    .ia-idea-tag{font-size:0.6rem;letter-spacing:2px;text-transform:uppercase;color:var(--rojo);margin-bottom:6px;}
+    .ia-idea-text{font-size:0.82rem;color:var(--text);line-height:1.6;}
+    /* Upload area */
+    .upload-area{border:2px dashed var(--border);border-radius:var(--r);padding:32px;text-align:center;cursor:pointer;transition:all .2s;}
+    .upload-area:hover{border-color:var(--rojo);background:rgba(232,54,61,.04);}
+    /* Responsive */
+    @media(max-width:900px){#sb{display:none;}.kpi-grid{grid-template-columns:repeat(2,1fr);}}
+    @media(max-width:600px){.kpi-grid{grid-template-columns:1fr;}.form-2,.form-3,.form-4{grid-template-columns:1fr;}}
+  </style>
+</head>
+<body>
+
+<!-- SIDEBAR -->
+<div id="sb">
+  <div class="sb-logo">
+    <div class="sb-badge">F</div>
+    <div><div class="sb-name">Frate Admin</div><div class="sb-sub">Webpage Module v2</div></div>
+  </div>
+  <nav class="sb-nav">
+    <div class="sb-sect">Dashboard</div>
+    <button class="ni active" onclick="go('dashboard')"><span class="ni-icon">📊</span>Resumen</button>
+    <div class="sb-sect">Eventos & Tickets</div>
+    <button class="ni" onclick="go('eventos')"><span class="ni-icon">🎵</span>Eventos<span class="ni-badge" id="nb-eventos">0</span></button>
+    <button class="ni" onclick="go('tickets-tipos')"><span class="ni-icon">🎟️</span>Tipos de Ticket</button>
+    <button class="ni" onclick="go('cortesias')"><span class="ni-icon">🎁</span>Cortesías</button>
+    <button class="ni" onclick="go('ordenes')"><span class="ni-icon">📦</span>Órdenes<span class="ni-badge" id="nb-ordenes">0</span></button>
+    <div class="sb-sect">Contenido</div>
+    <button class="ni" onclick="go('ambientes')"><span class="ni-icon">🏠</span>Ambientes</button>
+    <button class="ni" onclick="go('media')"><span class="ni-icon">📸</span>Galería & Media</button>
+    <button class="ni" onclick="go('webeum')"><span class="ni-icon">▶️</span>WEBEUM</button>
+    <button class="ni" onclick="go('tiendita')"><span class="ni-icon">🛍️</span>La Tiendita</button>
+    <button class="ni" onclick="go('carta')"><span class="ni-icon">🍹</span>Carta</button>
+    <div class="sb-sect">Comunidad</div>
+    <button class="ni" onclick="go('usuarios')"><span class="ni-icon">👥</span>Usuarios<span class="ni-badge" id="nb-usuarios">0</span></button>
+    <button class="ni" onclick="go('reservas')"><span class="ni-icon">📋</span>Reservas<span class="ni-badge" id="nb-reservas">0</span></button>
+    <button class="ni" onclick="go('puntos')"><span class="ni-icon">⭐</span>Puntos & Premios</button>
+    <button class="ni" onclick="go('carga')"><span class="ni-icon">📤</span>Carga Masiva</button>
+    <div class="sb-sect">Herramientas</div>
+    <button class="ni" onclick="go('ia')"><span class="ni-icon">🤖</span>IA & Marketing</button>
+    <button class="ni" onclick="go('exportar')"><span class="ni-icon">⚙️</span>Exportar</button>
+  </nav>
+  <div class="sb-foot">
+    frate-erp.vercel.app<br/>
+    <a href="https://frate.cl" target="_blank">→ Ver frate.cl</a>
+  </div>
+</div>
+
+<!-- MAIN -->
+<div id="main">
+  <div id="topbar">
+    <div class="tb-title" id="tb-title">Resumen</div>
+    <div class="tb-actions">
+      <button class="btn btn-s btn-sm" onclick="syncAll()">↻ Sync</button>
+      <button class="btn btn-p btn-sm" onclick="go('eventos');setTimeout(()=>openModal('modal-evento'),100)">+ Evento</button>
+    </div>
+  </div>
+  <div id="content">
+
+    <!-- DASHBOARD -->
+    <div class="panel active" id="p-dashboard">
+      <div class="kpi-grid">
+        <div class="kpi" style="border-top-color:var(--rojo)"><div class="kpi-l">Tickets vendidos hoy</div><div class="kpi-v" id="k-tickets" style="color:var(--rojo)">0</div><div class="kpi-s">órdenes</div></div>
+        <div class="kpi" style="border-top-color:var(--dorado)"><div class="kpi-l">Ingresos hoy</div><div class="kpi-v" id="k-ingresos" style="color:var(--dorado)">$0</div><div class="kpi-s">ticket online</div></div>
+        <div class="kpi" style="border-top-color:var(--verde)"><div class="kpi-l">Usuarios registrados</div><div class="kpi-v" id="k-usuarios" style="color:var(--verde)">0</div><div class="kpi-s">cuentas</div></div>
+        <div class="kpi" style="border-top-color:var(--azul)"><div class="kpi-l">Reservas pendientes</div><div class="kpi-v" id="k-reservas" style="color:var(--azul)">0</div><div class="kpi-s">sin confirmar</div></div>
+      </div>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:14px;">
+        <div class="card"><div class="ch"><span class="ct">Últimas órdenes</span><button class="btn btn-g btn-sm" onclick="go('ordenes')">Ver todas</button></div><div class="tw"><table><thead><tr><th>ID</th><th>Evento</th><th>Total</th><th>Estado</th></tr></thead><tbody id="d-orders"></tbody></table></div></div>
+        <div class="card"><div class="ch"><span class="ct">Eventos activos</span><button class="btn btn-g btn-sm" onclick="go('eventos')">Gestionar</button></div><div class="tw"><table><thead><tr><th>Evento</th><th>Fecha</th><th>Min. precio</th></tr></thead><tbody id="d-eventos"></tbody></table></div></div>
+      </div>
+    </div>
+
+    <!-- EVENTOS -->
+    <div class="panel" id="p-eventos">
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:18px;">
+        <h2 style="font-family:var(--disp);font-weight:900;font-size:1.6rem;">EVENTOS</h2>
+        <button class="btn btn-p" onclick="openModal('modal-evento')">+ Nuevo evento</button>
+      </div>
+      <div class="card"><div class="tw"><table><thead><tr><th>Evento</th><th>Fecha</th><th>Ambiente</th><th>DJs</th><th>Tipos ticket</th><th>Estado</th><th>Acciones</th></tr></thead><tbody id="tb-eventos"></tbody></table></div></div>
+    </div>
+
+    <!-- TIPOS DE TICKET -->
+    <div class="panel" id="p-tickets-tipos">
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px;">
+        <div>
+          <h2 style="font-family:var(--disp);font-weight:900;font-size:1.6rem;">TIPOS DE TICKET</h2>
+          <div style="font-size:0.75rem;color:var(--muted);margin-top:4px;">Selecciona un evento para gestionar sus tickets</div>
+        </div>
+        <div style="display:flex;gap:8px;align-items:center;">
+          <select id="tt-evento-sel" onchange="renderTiposTicket()" style="background:var(--bg3);border:1px solid var(--border);color:var(--text);padding:7px 12px;border-radius:var(--r);font-family:var(--font);font-size:0.82rem;outline:none;"></select>
+          <button class="btn btn-p btn-sm" onclick="openTicketTypeModal()">+ Agregar tipo</button>
+        </div>
+      </div>
+      <div class="card">
+        <div class="tt-header"><span>Nombre del ticket</span><span>Disponibles</span><span>Comprados</span><span>Devueltos</span><span>Cortesías</span><span>Validados</span><span>Valor</span><span>Total</span><span></span></div>
+        <div id="tt-list"></div>
+      </div>
+    </div>
+
+    <!-- CORTESÍAS -->
+    <div class="panel" id="p-cortesias">
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:18px;">
+        <h2 style="font-family:var(--disp);font-weight:900;font-size:1.6rem;">CORTESÍAS</h2>
+        <button class="btn btn-p" onclick="openModal('modal-cortesia')">+ Nueva cortesía</button>
+      </div>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-bottom:18px;">
+        <div class="card"><div class="ch"><span class="ct">Cortesías activas</span></div><div class="cb" style="font-size:2rem;font-family:var(--disp);font-weight:900;color:var(--dorado);" id="c-count">0</div></div>
+        <div class="card"><div class="ch"><span class="ct">Cortesías usadas</span></div><div class="cb" style="font-size:2rem;font-family:var(--disp);font-weight:900;color:var(--verde);" id="c-used">0</div></div>
+      </div>
+      <div class="card"><div class="tw"><table><thead><tr><th>Beneficiario</th><th>Email</th><th>Evento</th><th>Tipo</th><th>Cant.</th><th>Código</th><th>Estado</th><th>Acciones</th></tr></thead><tbody id="tb-cortesias"></tbody></table></div></div>
+    </div>
+
+    <!-- ÓRDENES -->
+    <div class="panel" id="p-ordenes">
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:18px;">
+        <h2 style="font-family:var(--disp);font-weight:900;font-size:1.6rem;">ÓRDENES & VALIDACIÓN</h2>
+      </div>
+      <div class="tabs">
+        <button class="tab active" onclick="switchTab(this,'ot-ordenes')">Todas las órdenes</button>
+        <button class="tab" onclick="switchTab(this,'ot-validar')">Validar QR</button>
+      </div>
+      <div id="ot-ordenes">
+        <div class="card"><div class="tw"><table><thead><tr><th>ID Orden</th><th>Comprador</th><th>Evento</th><th>Entradas</th><th>Total</th><th>Método</th><th>Fecha</th><th>Acciones</th></tr></thead><tbody id="tb-ordenes"></tbody></table></div></div>
+      </div>
+      <div id="ot-validar" style="display:none">
+        <div class="card cb" style="max-width:420px;margin:0 auto;text-align:center;">
+          <div style="font-size:2.5rem;margin-bottom:12px;">📷</div>
+          <h3 style="margin-bottom:8px;font-weight:600;">Validar entrada</h3>
+          <p style="color:var(--muted);font-size:0.8rem;margin-bottom:16px;">Ingresa el código del QR o del ticket</p>
+          <div style="display:flex;gap:8px;margin-bottom:12px;">
+            <input type="text" id="qr-input" placeholder="FCC-XXXXXX" style="flex:1;background:var(--bg3);border:1px solid var(--border);color:var(--text);padding:8px 12px;border-radius:var(--r);font-size:0.9rem;text-transform:uppercase;outline:none;" />
+            <button class="btn btn-p" onclick="validateQR()">Validar</button>
+          </div>
+          <div id="qr-result"></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- AMBIENTES -->
+    <div class="panel" id="p-ambientes">
+      <h2 style="font-family:var(--disp);font-weight:900;font-size:1.6rem;margin-bottom:18px;">AMBIENTES</h2>
+      <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:12px;" id="amb-cards"></div>
+    </div>
+
+    <!-- MEDIA -->
+    <div class="panel" id="p-media">
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:18px;">
+        <h2 style="font-family:var(--disp);font-weight:900;font-size:1.6rem;">GALERÍA & MEDIA</h2>
+        <button class="btn btn-p" onclick="openModal('modal-media')">+ Agregar foto/video</button>
+      </div>
+      <div class="tabs">
+        <button class="tab active" onclick="switchTab(this,'mt-fotos')">Fotos</button>
+        <button class="tab" onclick="switchTab(this,'mt-videos')">Videos</button>
+        <button class="tab" onclick="switchTab(this,'mt-hero')">Video Hero</button>
+      </div>
+      <div id="mt-fotos">
+        <div class="card cb">
+          <div class="upload-area" onclick="showToast('Conectar con Supabase Storage para subir fotos')">
+            <div style="font-size:2rem;margin-bottom:8px;">📸</div>
+            <div style="font-weight:600;margin-bottom:4px;">Subir fotos de la galería</div>
+            <div style="font-size:0.75rem;color:var(--muted);margin-bottom:12px;">JPG, PNG, WebP · Máx. 10MB por foto</div>
+            <button class="btn btn-s">Seleccionar archivos</button>
+          </div>
+          <p style="font-size:0.75rem;color:var(--muted);margin-top:12px;">Las fotos se guardan en Supabase Storage y se muestran automáticamente en la galería de frate.cl</p>
+        </div>
+      </div>
+      <div id="mt-videos" style="display:none">
+        <div class="card cb">
+          <div class="fg"><label>URL de YouTube / Vimeo</label><input type="url" placeholder="https://youtube.com/watch?v=..." /></div>
+          <div class="fg"><label>Sección</label><select><option>WEBEUM</option><option>Galería</option><option>Ambient (fondo)</option></select></div>
+          <button class="btn btn-p">Agregar video</button>
+        </div>
+      </div>
+      <div id="mt-hero" style="display:none">
+        <div class="card cb">
+          <div style="background:rgba(212,168,50,.06);border:1px solid rgba(212,168,50,.2);border-radius:var(--r);padding:14px;margin-bottom:16px;">
+            <div style="color:var(--dorado);font-weight:600;margin-bottom:4px;">Video Hero del sitio web</div>
+            <div style="font-size:0.78rem;color:var(--muted);">Este video aparece de fondo en la pantalla principal de frate.cl</div>
+          </div>
+          <div class="upload-area" onclick="showToast('Sube el video como assets/hero-video.mp4 en el deploy')">
+            <div style="font-size:2rem;margin-bottom:8px;">🎬</div>
+            <div style="font-weight:600;margin-bottom:4px;">hero-video.mp4</div>
+            <div style="font-size:0.75rem;color:var(--muted);margin-bottom:12px;">MP4 o WebM · Máx. 50MB · Recomendado: 1920×1080 / 30s loop</div>
+            <button class="btn btn-s">Subir video</button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- WEBEUM -->
+    <div class="panel" id="p-webeum">
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:18px;">
+        <h2 style="font-family:var(--disp);font-weight:900;font-size:1.6rem;">WEBEUM HUMANUM EST</h2>
+        <button class="btn btn-p" onclick="openModal('modal-webeum')">+ Episodio</button>
+      </div>
+      <div class="card"><div class="tw"><table><thead><tr><th>#</th><th>Título</th><th>Fecha</th><th>Duración</th><th>URL</th><th>Acciones</th></tr></thead><tbody id="tb-webeum"></tbody></table></div></div>
+    </div>
+
+    <!-- TIENDITA -->
+    <div class="panel" id="p-tiendita">
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:18px;">
+        <h2 style="font-family:var(--disp);font-weight:900;font-size:1.6rem;">LA TIENDITA</h2>
+        <button class="btn btn-p" onclick="openModal('modal-tiendita')">+ Producto</button>
+      </div>
+      <div class="card"><div class="tw"><table><thead><tr><th>Producto</th><th>Categoría</th><th>Precio</th><th>Stock</th><th>Estado</th><th>Acciones</th></tr></thead><tbody id="tb-tiendita"></tbody></table></div></div>
+    </div>
+
+    <!-- CARTA -->
+    <div class="panel" id="p-carta">
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:18px;">
+        <h2 style="font-family:var(--disp);font-weight:900;font-size:1.6rem;">CARTA DE TRAGOS</h2>
+        <button class="btn btn-p" onclick="openModal('modal-carta')">+ Ítem</button>
+      </div>
+      <div class="card"><div class="tw"><table><thead><tr><th>Nombre</th><th>Categoría</th><th>Descripción</th><th>Precio</th><th>Disponible</th><th>Acciones</th></tr></thead><tbody id="tb-carta"></tbody></table></div></div>
+    </div>
+
+    <!-- USUARIOS -->
+    <div class="panel" id="p-usuarios">
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:18px;">
+        <h2 style="font-family:var(--disp);font-weight:900;font-size:1.6rem;">USUARIOS</h2>
+        <div style="display:flex;gap:6px;">
+          <button class="btn btn-g btn-sm" onclick="exportCSV()">↓ CSV</button>
+          <button class="btn btn-gold btn-sm" onclick="openModal('modal-regalo')">🎁 Enviar regalo</button>
+        </div>
+      </div>
+      <div class="card"><div class="tw"><table><thead><tr><th>Nombre</th><th>Email</th><th>RUT</th><th>Teléfono</th><th>Universidad</th><th>Puntos</th><th>Membresía</th><th>Tickets</th><th>Registro</th><th>Acciones</th></tr></thead><tbody id="tb-usuarios"></tbody></table></div></div>
+    </div>
+
+    <!-- RESERVAS -->
+    <div class="panel" id="p-reservas">
+      <h2 style="font-family:var(--disp);font-weight:900;font-size:1.6rem;margin-bottom:18px;">RESERVAS</h2>
+      <div class="card"><div class="tw"><table><thead><tr><th>Nombre</th><th>Tipo</th><th>Fecha</th><th>Personas</th><th>Teléfono</th><th>Estado</th><th>Acciones</th></tr></thead><tbody id="tb-reservas"></tbody></table></div></div>
+    </div>
+
+    <!-- PUNTOS & PREMIOS -->
+    <div class="panel" id="p-puntos">
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:18px;">
+        <h2 style="font-family:var(--disp);font-weight:900;font-size:1.6rem;">PUNTOS & PREMIOS</h2>
+        <button class="btn btn-p" onclick="openModal('modal-premio')">+ Premio</button>
+      </div>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-bottom:18px;">
+        <div class="card cb">
+          <div style="font-size:0.65rem;letter-spacing:2px;text-transform:uppercase;color:var(--muted);margin-bottom:8px;">Sistema de puntos</div>
+          <div class="toggle-row"><span>Puntos activos</span><label class="sw"><input type="checkbox" checked onchange="showToast('Sistema de puntos '+(this.checked?'activado':'desactivado'))"><span class="sl"></span></label></div>
+          <div class="toggle-row"><span>Puntos x2 en fines de semana</span><label class="sw"><input type="checkbox" onchange="showToast('Configuración guardada')"><span class="sl"></span></label></div>
+          <div class="toggle-row"><span>Puntos por membresía</span><label class="sw"><input type="checkbox" checked onchange="showToast('Configuración guardada')"><span class="sl"></span></label></div>
+          <div class="fg" style="margin-top:14px;"><label>Puntos por $100 gastado</label><input type="number" value="1" min="1" max="10" /></div>
+          <div class="fg"><label>1 punto equivale a (en pesos)</label><input type="number" value="10" /></div>
+          <button class="btn btn-p" onclick="showToast('✅ Configuración de puntos guardada')">Guardar</button>
+        </div>
+        <div class="card cb">
+          <div style="font-size:0.65rem;letter-spacing:2px;text-transform:uppercase;color:var(--muted);margin-bottom:12px;">Catálogo de premios</div>
+          <div id="premios-list">
+            <div style="padding:12px;background:var(--bg3);border:1px solid var(--border);border-radius:var(--r);margin-bottom:6px;display:flex;justify-content:space-between;align-items:center;">
+              <div><div style="font-weight:600;font-size:0.85rem;">Entrada gratis viernes</div><div style="font-size:0.72rem;color:var(--muted);">500 puntos</div></div>
+              <div style="display:flex;gap:4px;"><button class="btn btn-g btn-sm">Editar</button><button class="btn btn-del btn-sm">×</button></div>
+            </div>
+            <div style="padding:12px;background:var(--bg3);border:1px solid var(--border);border-radius:var(--r);margin-bottom:6px;display:flex;justify-content:space-between;align-items:center;">
+              <div><div style="font-weight:600;font-size:0.85rem;">Polera Frate Classic</div><div style="font-size:0.72rem;color:var(--muted);">1.500 puntos</div></div>
+              <div style="display:flex;gap:4px;"><button class="btn btn-g btn-sm">Editar</button><button class="btn btn-del btn-sm">×</button></div>
+            </div>
+            <div style="padding:12px;background:var(--bg3);border:1px solid var(--border);border-radius:var(--r);display:flex;justify-content:space-between;align-items:center;">
+              <div><div style="font-weight:600;font-size:0.85rem;">Mesa VIP sábado</div><div style="font-size:0.72rem;color:var(--muted);">5.000 puntos</div></div>
+              <div style="display:flex;gap:4px;"><button class="btn btn-g btn-sm">Editar</button><button class="btn btn-del btn-sm">×</button></div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="card">
+        <div class="ch"><span class="ct">Ranking de usuarios por puntos</span></div>
+        <div class="tw"><table><thead><tr><th>#</th><th>Usuario</th><th>Puntos</th><th>Nivel</th><th>Acciones</th></tr></thead><tbody id="tb-puntos-ranking"></tbody></table></div>
+      </div>
+    </div>
+
+    <!-- CARGA MASIVA -->
+    <div class="panel" id="p-carga">
+      <h2 style="font-family:var(--disp);font-weight:900;font-size:1.6rem;margin-bottom:18px;">CARGA MASIVA</h2>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:14px;">
+        <div class="card cb">
+          <div style="font-size:0.65rem;letter-spacing:2px;text-transform:uppercase;color:var(--muted);margin-bottom:12px;">Lista de cortesías (CSV/Excel)</div>
+          <div class="upload-area" onclick="showToast('Sube un CSV con columnas: nombre,email,rut,evento,cantidad')">
+            <div style="font-size:1.8rem;margin-bottom:8px;">📋</div>
+            <div style="font-weight:600;margin-bottom:4px;">Subir lista masiva</div>
+            <div style="font-size:0.72rem;color:var(--muted);margin-bottom:10px;">CSV o Excel · Máx. 1.000 filas</div>
+            <button class="btn btn-s">Seleccionar archivo</button>
+          </div>
+          <div style="margin-top:14px;padding:10px;background:var(--bg3);border-radius:var(--r);">
+            <div style="font-size:0.7rem;color:var(--muted);margin-bottom:6px;">Formato esperado:</div>
+            <div style="font-family:monospace;font-size:0.7rem;color:#a3e635;">nombre,email,rut,evento_id,cantidad<br/>Juan Pérez,juan@email.com,12345678-9,1,2</div>
+          </div>
+        </div>
+        <div class="card cb">
+          <div style="font-size:0.65rem;letter-spacing:2px;text-transform:uppercase;color:var(--muted);margin-bottom:12px;">Lista de passline / RRPPs</div>
+          <div class="fg"><label>Nombre del RRPP / Lista</label><input type="text" placeholder="Lista VIP Sábado · DJ NANOOK" /></div>
+          <div class="fg"><label>Evento</label><select id="carga-evento-sel" style="background:var(--bg3);border:1px solid var(--border);color:var(--text);padding:8px 10px;border-radius:var(--r);width:100%;font-family:var(--font);outline:none;"></select></div>
+          <div class="fg"><label>Válida hasta</label><input type="time" value="02:00" style="color-scheme:dark" /></div>
+          <div class="upload-area" style="padding:20px;margin-top:8px;" onclick="showToast('Sube la lista de nombres')">
+            <div style="font-size:1.2rem;margin-bottom:4px;">📤</div>
+            <div style="font-size:0.78rem;font-weight:600;">Subir lista de nombres</div>
+            <div style="font-size:0.68rem;color:var(--muted);">Un nombre por línea o CSV</div>
+          </div>
+          <button class="btn btn-p" style="width:100%;margin-top:12px;" onclick="showToast('✅ Lista publicada')">Publicar lista</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- IA & MARKETING -->
+    <div class="panel" id="p-ia">
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:18px;">
+        <h2 style="font-family:var(--disp);font-weight:900;font-size:1.6rem;">IA & MARKETING</h2>
+        <button class="btn btn-p" onclick="generateIAIdeas()">✨ Generar ideas</button>
+      </div>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:14px;">
+        <div>
+          <div class="card cb" style="margin-bottom:14px;">
+            <div style="font-size:0.65rem;letter-spacing:2px;text-transform:uppercase;color:var(--rojo);margin-bottom:10px;">Generador de copy para redes</div>
+            <div class="fg"><label>Tipo de publicación</label>
+              <select id="ia-tipo"><option>Anuncio de evento</option><option>Preventa agotada</option><option>Reminder 24hs antes</option><option>Post-evento</option><option>WEBEUM nuevo episodio</option><option>Promoción tiendita</option></select>
+            </div>
+            <div class="fg"><label>Evento o contexto</label><input type="text" id="ia-contexto" placeholder="TRAP JUEVES · 1 Mayo · DJ KRE" /></div>
+            <div class="fg"><label>Tono</label><select id="ia-tono"><option>Urbano / Calle</option><option>Universitario / Fresco</option><option>Urgente / FOMO</option><option>Íntimo / Comunidad</option></select></div>
+            <button class="btn btn-p" style="width:100%" onclick="generateCopy()">✨ Generar</button>
+          </div>
+          <div class="card cb">
+            <div style="font-size:0.65rem;letter-spacing:2px;text-transform:uppercase;color:var(--rojo);margin-bottom:10px;">Copy generado</div>
+            <div id="ia-copy-result" style="background:var(--bg);border:1px solid var(--border);border-radius:var(--r);padding:12px;min-height:80px;font-size:0.82rem;color:var(--text);line-height:1.7;white-space:pre-wrap;">Presiona "Generar" para obtener copy personalizado...</div>
+            <button class="btn btn-g btn-sm" style="margin-top:8px;" onclick="copiarCopy()">Copiar</button>
+          </div>
+        </div>
+        <div>
+          <div class="card cb" style="margin-bottom:14px;">
+            <div style="font-size:0.65rem;letter-spacing:2px;text-transform:uppercase;color:var(--rojo);margin-bottom:10px;">Ideas y estrategias sugeridas</div>
+            <div id="ia-ideas-list">
+              <div class="ia-idea"><div class="ia-idea-tag">Crecimiento IG</div><div class="ia-idea-text">Publica Reels del "antes y después" de la noche: llegada vacía del local vs. pista llena a las 2am. Alto potencial de viral por contraste.</div></div>
+              <div class="ia-idea"><div class="ia-idea-tag">WEBEUM</div><div class="ia-idea-text">Crea un episodio "La semana más intensa de Frate" mostrando operación real, decisiones difíciles y momentos entre bambalinas. Formato documental honesto = alta retención.</div></div>
+              <div class="ia-idea"><div class="ia-idea-tag">Tiendita</div><div class="ia-idea-text">Lanza "Merch del mes" limitado: 50 unidades, diseño exclusivo, solo por frate.cl. Crea FOMO y refuerza comunidad de coleccionistas.</div></div>
+              <div class="ia-idea"><div class="ia-idea-tag">Comunidad</div><div class="ia-idea-text">Crea el "#FratePassport" — una tarjeta digital que registra cuántas noches llevas en Frate. Al llegar a 10, 25, 50 noches obtienes recompensas especiales.</div></div>
+            </div>
+          </div>
+          <div class="card cb">
+            <div style="font-size:0.65rem;letter-spacing:2px;text-transform:uppercase;color:var(--rojo);margin-bottom:10px;">Métricas para monitorear</div>
+            <div style="display:flex;flex-direction:column;gap:8px;font-size:0.8rem;color:var(--muted);">
+              <div>📊 <strong style="color:var(--text)">2.3M–2.4M</strong> visualizaciones/mes en Instagram</div>
+              <div>👁️ <strong style="color:var(--text)">37–40%</strong> de views desde no-seguidores</div>
+              <div>🎯 Meta: <strong style="color:var(--text)">+50K seguidores</strong> en 6 meses con contenido WEBEUM</div>
+              <div>🛒 Objetivo: <strong style="color:var(--text)">20% de asistentes</strong> comprando por frate.cl</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- EXPORTAR -->
+    <div class="panel" id="p-exportar">
+      <h2 style="font-family:var(--disp);font-weight:900;font-size:1.6rem;margin-bottom:18px;">EXPORTAR DATOS</h2>
+      <div style="display:grid;gap:14px;">
+        <div class="card"><div class="ch"><span class="ct">Generar frate-data.js</span><button class="btn btn-p btn-sm" onclick="generateDataJS()">Generar y copiar</button></div><div class="cb"><p style="color:var(--muted);font-size:0.8rem;margin-bottom:10px;">Genera el archivo con todos los datos actuales del sitio. Reemplaza el archivo en el deploy de Vercel.</p><div class="code" id="export-code">// Presiona "Generar y copiar"</div></div></div>
+        <div class="card"><div class="ch"><span class="ct">Conexión Supabase</span></div><div class="cb"><p style="color:var(--muted);font-size:0.8rem;margin-bottom:10px;">Para datos en tiempo real, conecta frate-data.js a la API:</p><div class="code">const SUPABASE_URL = 'https://zsilmmixlugwawzpmayx.supabase.co';
+const KEY = 'TU_ANON_KEY';
+const r = await fetch(`${SUPABASE_URL}/rest/v1/eventos`,
+  { headers: { apikey: KEY } });
+const FRATE_EVENTOS = await r.json();</div></div></div>
+      </div>
+    </div>
+
+  </div><!-- /content -->
+</div><!-- /main -->
+
+<!-- MODALES -->
+<!-- Evento -->
+<div class="mo" id="modal-evento"><div class="mb">
+  <div class="mh"><span class="mht" id="me-title">Nuevo evento</span><button class="mc" onclick="closeModal('modal-evento')">✕</button></div>
+  <div class="mbody">
+    <div class="form-2"><div class="fg"><label>Nombre del evento</label><input type="text" id="ev-nombre" placeholder="TRAP JUEVES" /></div><div class="fg"><label>Ambiente</label><select id="ev-ambiente"><option value="Fuego">Fuego</option><option value="Aire">Aire</option><option value="Tierra">Tierra</option></select></div></div>
+    <div class="form-2"><div class="fg"><label>Fecha</label><input type="text" id="ev-fecha" placeholder="Jueves 1 Mayo" /></div><div class="fg"><label>Hora</label><input type="text" id="ev-hora" placeholder="23:00" /></div></div>
+    <div class="fg"><label>DJs / Lineup (separados por coma)</label><input type="text" id="ev-djs" placeholder="DJ KRE, BASTIAN" /></div>
+    <div class="fg"><label>Tipo</label><select id="ev-tipo"><option>Viernes</option><option>Sábado</option><option>Especiales</option></select></div>
+  </div>
+  <div class="mfoot"><button class="btn btn-g" onclick="closeModal('modal-evento')">Cancelar</button><button class="btn btn-p" onclick="saveEvento()">Guardar evento</button></div>
+</div></div>
+
+<!-- Ticket Type -->
+<div class="mo" id="modal-tt"><div class="mb">
+  <div class="mh"><span class="mht">Tipo de Ticket</span><button class="mc" onclick="closeModal('modal-tt')">✕</button></div>
+  <div class="mbody">
+    <div class="fg"><label>Nombre del ticket</label><input type="text" id="tt-nombre" placeholder="Pre-Venta GRAL. MUJER (SABADO)" /></div>
+    <div class="fg"><label>Descripción</label><textarea id="tt-desc" placeholder="Exclusivo para mujeres. Al ingreso presenta C.I..."></textarea></div>
+    <div class="fg"><label>Texto en la entrada (impreso en el QR)</label><textarea id="tt-texto" placeholder="Texto adicional que aparece en el ticket digital..."></textarea></div>
+    <div class="form-2"><div class="fg"><label>Tipo</label><select id="tt-tipoe"><option>Presencial</option><option>Online</option></select></div><div class="fg"><label>Estado</label><select id="tt-estado"><option>Activo</option><option>Agotado</option><option>Cortesía</option><option>Cerrado</option><option>Venta solo RRPP</option><option>Venta Efectivo</option><option>Solo venta Boletería</option><option>Solo venta WEB</option><option>Venta Abonados</option><option>Agotado Manual</option><option>Oculto</option></select></div></div>
+    <div class="form-3"><div class="fg"><label>Precio (CLP)</label><input type="number" id="tt-precio" placeholder="9000" /></div><div class="fg"><label>Cant. disponible</label><input type="number" id="tt-disp" placeholder="30" /></div><div class="fg"><label>Máx. por compra</label><input type="number" id="tt-max" placeholder="6" /></div></div>
+    <div class="toggle-row"><span style="font-size:0.82rem;">Visible en web (frate.cl)</span><label class="sw"><input type="checkbox" id="tt-soloWeb" checked><span class="sl"></span></label></div>
+  </div>
+  <div class="mfoot"><button class="btn btn-g" onclick="closeModal('modal-tt')">Cancelar</button><button class="btn btn-p" onclick="saveTT()">Guardar tipo</button></div>
+</div></div>
+
+<!-- Cortesía -->
+<div class="mo" id="modal-cortesia"><div class="mb">
+  <div class="mh"><span class="mht">Nueva cortesía</span><button class="mc" onclick="closeModal('modal-cortesia')">✕</button></div>
+  <div class="mbody">
+    <div class="form-2"><div class="fg"><label>Nombre beneficiario</label><input type="text" id="co-nombre" placeholder="Nombre completo" /></div><div class="fg"><label>Email</label><input type="email" id="co-email" placeholder="email@ejemplo.com" /></div></div>
+    <div class="form-2"><div class="fg"><label>RUT</label><input type="text" id="co-rut" placeholder="12.345.678-9" /></div><div class="fg"><label>Teléfono</label><input type="tel" id="co-tel" placeholder="+569 xxxx xxxx" /></div></div>
+    <div class="form-2"><div class="fg"><label>Evento</label><select id="co-evento"></select></div><div class="fg"><label>Cantidad</label><input type="number" id="co-cant" value="1" min="1" /></div></div>
+    <div class="fg"><label>Motivo</label><select id="co-motivo"><option>Staff</option><option>Artista / DJ</option><option>RRPP</option><option>Concurso RRSS</option><option>Prensa</option><option>Cumpleaños especial</option><option>VIP / Sponsor</option><option>Otro</option></select></div>
+    <div class="fg"><label>Válida hasta (hora)</label><input type="time" id="co-hora" value="02:00" style="color-scheme:dark" /></div>
+  </div>
+  <div class="mfoot"><button class="btn btn-g" onclick="closeModal('modal-cortesia')">Cancelar</button><button class="btn btn-p" onclick="saveCortesia()">Generar cortesía</button></div>
+</div></div>
+
+<!-- WEBEUM -->
+<div class="mo" id="modal-webeum"><div class="mb">
+  <div class="mh"><span class="mht">Episodio WEBEUM</span><button class="mc" onclick="closeModal('modal-webeum')">✕</button></div>
+  <div class="mbody">
+    <div class="fg"><label>Título</label><input type="text" id="we-titulo" placeholder="EP. 48 — Nombre del episodio" /></div>
+    <div class="fg"><label>URL YouTube</label><input type="url" id="we-url" placeholder="https://youtube.com/watch?v=..." /></div>
+    <div class="form-2"><div class="fg"><label>Fecha</label><input type="date" id="we-fecha" style="color-scheme:dark" /></div><div class="fg"><label>Duración</label><input type="text" id="we-dur" placeholder="12:34" /></div></div>
+  </div>
+  <div class="mfoot"><button class="btn btn-g" onclick="closeModal('modal-webeum')">Cancelar</button><button class="btn btn-p" onclick="saveWebeum()">Agregar</button></div>
+</div></div>
+
+<!-- Tiendita -->
+<div class="mo" id="modal-tiendita"><div class="mb">
+  <div class="mh"><span class="mht">Producto Tiendita</span><button class="mc" onclick="closeModal('modal-tiendita')">✕</button></div>
+  <div class="mbody">
+    <div class="form-2"><div class="fg"><label>Nombre</label><input type="text" id="ti-nombre" placeholder="Polera FRATE Classic" /></div><div class="fg"><label>Categoría</label><select id="ti-cat"><option>Ropa</option><option>Accesorios</option><option>Coleccionables</option></select></div></div>
+    <div class="fg"><label>Descripción</label><textarea id="ti-desc" placeholder="Descripción del producto..."></textarea></div>
+    <div class="form-3"><div class="fg"><label>Precio (CLP)</label><input type="number" id="ti-precio" placeholder="18900" /></div><div class="fg"><label>Stock</label><input type="number" id="ti-stock" placeholder="50" /></div><div class="fg"><label>URL imagen</label><input type="url" id="ti-img" placeholder="https://..." /></div></div>
+    <div class="form-2"><div class="fg"><label>Tallas (separadas por coma)</label><input type="text" id="ti-tallas" placeholder="S,M,L,XL,XXL" /></div><div class="fg"><label>Colores</label><input type="text" id="ti-colores" placeholder="Negro,Blanco,Rojo" /></div></div>
+  </div>
+  <div class="mfoot"><button class="btn btn-g" onclick="closeModal('modal-tiendita')">Cancelar</button><button class="btn btn-p" onclick="saveTiendita()">Guardar</button></div>
+</div></div>
+
+<!-- Carta -->
+<div class="mo" id="modal-carta"><div class="mb">
+  <div class="mh"><span class="mht">Ítem Carta</span><button class="mc" onclick="closeModal('modal-carta')">✕</button></div>
+  <div class="mbody">
+    <div class="form-2"><div class="fg"><label>Nombre</label><input type="text" id="ca-nombre" placeholder="Frate Sour" /></div><div class="fg"><label>Categoría</label><select id="ca-cat"><option>Cócteles Firma</option><option>Cervezas</option><option>Shots & Chupitos</option><option>Sin Alcohol</option><option>Paquetes VIP</option></select></div></div>
+    <div class="fg"><label>Descripción</label><input type="text" id="ca-desc" placeholder="Pisco premium, limón, clara de huevo..." /></div>
+    <div class="form-2"><div class="fg"><label>Precio (CLP)</label><input type="number" id="ca-precio" placeholder="6500" /></div><div class="fg"><label>Disponible</label><select id="ca-disp"><option value="true">Sí</option><option value="false">No</option></select></div></div>
+  </div>
+  <div class="mfoot"><button class="btn btn-g" onclick="closeModal('modal-carta')">Cancelar</button><button class="btn btn-p" onclick="saveCarta()">Guardar</button></div>
+</div></div>
+
+<!-- Regalo usuario -->
+<div class="mo" id="modal-regalo"><div class="mb">
+  <div class="mh"><span class="mht">🎁 Enviar regalo a usuario</span><button class="mc" onclick="closeModal('modal-regalo')">✕</button></div>
+  <div class="mbody">
+    <div class="fg"><label>Tipo de regalo</label><select id="rg-tipo"><option>Puntos extra</option><option>Cortesía de entrada</option><option>Descuento % en próxima compra</option><option>Producto tiendita</option><option>Membresía gratuita</option></select></div>
+    <div class="fg"><label>Seleccionar usuario</label><select id="rg-usuario"></select></div>
+    <div class="fg"><label>Cantidad / Valor</label><input type="text" id="rg-valor" placeholder="500 puntos / 20% / 1 entrada..." /></div>
+    <div class="fg"><label>Mensaje personalizado</label><textarea id="rg-msg" placeholder="¡Gracias por ser parte de Frate! Este es un regalo especial para ti..."></textarea></div>
+  </div>
+  <div class="mfoot"><button class="btn btn-g" onclick="closeModal('modal-regalo')">Cancelar</button><button class="btn btn-p" onclick="enviarRegalo()">Enviar regalo</button></div>
+</div></div>
+
+<!-- Premio -->
+<div class="mo" id="modal-premio"><div class="mb">
+  <div class="mh"><span class="mht">Nuevo premio</span><button class="mc" onclick="closeModal('modal-premio')">✕</button></div>
+  <div class="mbody">
+    <div class="fg"><label>Nombre del premio</label><input type="text" id="pr-nombre" placeholder="Entrada gratis viernes" /></div>
+    <div class="form-2"><div class="fg"><label>Puntos requeridos</label><input type="number" id="pr-puntos" placeholder="500" /></div><div class="fg"><label>Stock disponible</label><input type="number" id="pr-stock" placeholder="10" /></div></div>
+    <div class="fg"><label>Descripción</label><textarea id="pr-desc" placeholder="Descripción del premio..."></textarea></div>
+  </div>
+  <div class="mfoot"><button class="btn btn-g" onclick="closeModal('modal-premio')">Cancelar</button><button class="btn btn-p" onclick="savePremio()">Guardar</button></div>
+</div></div>
+
+<!-- Media -->
+<div class="mo" id="modal-media"><div class="mb">
+  <div class="mh"><span class="mht">Agregar foto/video</span><button class="mc" onclick="closeModal('modal-media')">✕</button></div>
+  <div class="mbody">
+    <div class="fg"><label>Tipo</label><select id="med-tipo"><option>Foto galería</option><option>Video WEBEUM</option><option>Video hero (fondo)</option></select></div>
+    <div class="fg"><label>URL del archivo</label><input type="url" id="med-url" placeholder="https://..." /></div>
+    <div class="form-2"><div class="fg"><label>Ambiente</label><select id="med-ambiente"><option>Fuego</option><option>Aire</option><option>Tierra</option><option>General</option></select></div><div class="fg"><label>Alto (px)</label><input type="number" id="med-alto" placeholder="280" /></div></div>
+  </div>
+  <div class="mfoot"><button class="btn btn-g" onclick="closeModal('modal-media')">Cancelar</button><button class="btn btn-p" onclick="saveMedia()">Guardar</button></div>
+</div></div>
+
+<div id="toast"></div>
+
+<script>
+// ── UTILS ──
+const S = { get: k => { try { return JSON.parse(localStorage.getItem(k)); } catch { return null; } }, set: (k,v) => localStorage.setItem(k,JSON.stringify(v)) };
+function clp(n) { return '$' + (n||0).toLocaleString('es-CL'); }
+function showToast(msg) { const t=document.getElementById('toast'); t.textContent=msg; t.classList.add('show'); setTimeout(()=>t.classList.remove('show'),3000); }
+function openModal(id) { document.getElementById(id)?.classList.add('open'); }
+function closeModal(id) { document.getElementById(id)?.classList.remove('open'); }
+document.querySelectorAll('.mo').forEach(m => m.addEventListener('click',e => { if(e.target===m) m.classList.remove('open'); }));
+// Strip sensitive fields before displaying
+function safeUser(u) { const {password, ...safe} = u; return safe; }
+
+// ── DATA GETTERS ──
+function getEventos() { return S.get('admin_eventos') || defaultEventos(); }
+function getOrders()  { return S.get('frate_orders')  || []; }
+function getUsers()   { return S.get('frate_users')   || []; }
+function getCortesias(){ return S.get('admin_cortesias') || []; }
+function getWebeum()  { return S.get('admin_webeum')  || defaultWebeum(); }
+function getTiendita(){ return S.get('admin_tiendita') || defaultTiendita(); }
+function getCarta()   { return S.get('admin_carta')   || defaultCarta(); }
+
+function defaultEventos() {
+  return [
+    { id:1, nombre:"TRAP JUEVES", fecha:"Jueves 1 Mayo", hora:"23:00", djs:["DJ KRE","BASTIAN"], tipo:"Viernes", ambiente:"Fuego", activo:true,
+      tiposTicket:[
+        { id:"tt-1-1", nombre:"Pre-Venta MUJER", descripcion:"Exclusivo para mujeres.", precio:3000, disponible:80, total:100, comprados:20, devueltos:0, cortesias:0, validados:0, estado:"Activo", soloWeb:true, maxPorCompra:4 },
+        { id:"tt-1-2", nombre:"Pre-Venta HOMBRE UNIV.", descripcion:"Universitarios con credencial.", precio:4000, disponible:50, total:80, comprados:30, devueltos:0, cortesias:0, validados:0, estado:"Activo", soloWeb:true, maxPorCompra:4 },
+        { id:"tt-1-3", nombre:"General", descripcion:"Entrada general.", precio:5000, disponible:100, total:150, comprados:50, devueltos:0, cortesias:0, validados:0, estado:"Activo", soloWeb:true, maxPorCompra:6 }
+      ]
+    },
+    { id:2, nombre:"REGGAETON VIERNES", fecha:"Viernes 2 Mayo", hora:"00:00", djs:["DJ PABLOX"], tipo:"Viernes", ambiente:"Aire", activo:true,
+      tiposTicket:[
+        { id:"tt-2-1", nombre:"Pre-Venta PRO MUJER", descripcion:"Precio especial para mujeres.", precio:4000, disponible:104, total:190, comprados:86, devueltos:0, cortesias:0, validados:81, estado:"Activo", soloWeb:true, maxPorCompra:6 },
+        { id:"tt-2-2", nombre:"Pre-Venta REBAJADA MUJER", descripcion:"Precio especial limitado.", precio:3500, disponible:0, total:30, comprados:30, devueltos:0, cortesias:0, validados:29, estado:"Agotado", soloWeb:true, maxPorCompra:4 }
+      ]
+    }
+  ];
+}
+function defaultWebeum() { return [
+  { id:1, titulo:"EP. 47 — Sábado Eléctrico", fecha:"2025-04-20", duracion:"12:34", url:"https://www.youtube.com/@fraternidadcampuscentral" },
+  { id:2, titulo:"EP. 46 — Noche de Afrobeats", fecha:"2025-04-13", duracion:"09:21", url:"https://www.youtube.com/@fraternidadcampuscentral" }
+];}
+function defaultTiendita() { return [
+  { id:"t1", nombre:"Polera FRATE Classic", categoria:"Ropa", precio:18900, stock:50, disponible:true },
+  { id:"t2", nombre:"Gorra Snapback FRATE", categoria:"Accesorios", precio:14900, stock:30, disponible:true }
+];}
+function defaultCarta() { return [
+  { id:"c1", nombre:"Frate Sour", categoria:"Cócteles Firma", descripcion:"Pisco, limón, clara.", precio:6500, disponible:true },
+  { id:"c2", nombre:"Schop Litro", categoria:"Cervezas", descripcion:"Artesanal de barril.", precio:5500, disponible:true }
+];}
+
+// ── NAV ──
+const panelTitles = { dashboard:'Resumen', eventos:'Eventos', 'tickets-tipos':'Tipos de Ticket', cortesias:'Cortesías', ordenes:'Órdenes & Validación', ambientes:'Ambientes', media:'Galería & Media', webeum:'WEBEUM', tiendita:'La Tiendita', carta:'Carta', usuarios:'Usuarios', reservas:'Reservas', puntos:'Puntos & Premios', carga:'Carga Masiva', ia:'IA & Marketing', exportar:'Exportar' };
+
+function go(name) {
+  document.querySelectorAll('.panel').forEach(p => p.classList.remove('active'));
+  document.querySelectorAll('.ni').forEach(n => n.classList.remove('active'));
+  document.getElementById('p-' + name)?.classList.add('active');
+  document.querySelectorAll('.ni').forEach(n => { if(n.getAttribute('onclick')?.includes(`'${name}'`)) n.classList.add('active'); });
+  document.getElementById('tb-title').textContent = panelTitles[name] || name;
+  render(name);
+}
+
+function switchTab(el, tabId) {
+  const tabs = el.closest('.tabs').querySelectorAll('.tab');
+  tabs.forEach(t => t.classList.remove('active')); el.classList.add('active');
+  const allTabs = ['ot-ordenes','ot-validar','mt-fotos','mt-videos','mt-hero'];
+  allTabs.forEach(id => { const e=document.getElementById(id); if(e) e.style.display = id===tabId?'block':'none'; });
+}
+
+// ── RENDER ──
+function render(name) {
+  if(name==='dashboard') renderDash();
+  else if(name==='eventos') renderEventos();
+  else if(name==='tickets-tipos') renderTiposTicketPanel();
+  else if(name==='cortesias') renderCortesias();
+  else if(name==='ordenes') renderOrdenes();
+  else if(name==='ambientes') renderAmbientes();
+  else if(name==='webeum') renderWebeum();
+  else if(name==='tiendita') renderTiendita();
+  else if(name==='carta') renderCarta();
+  else if(name==='usuarios') renderUsuarios();
+  else if(name==='reservas') renderReservas();
+  else if(name==='puntos') renderPuntos();
+}
+
+function renderDash() {
+  const orders = getOrders(); const users = getUsers();
+  const today = new Date().toDateString();
+  const todayOrders = orders.filter(o => new Date(o.fecha).toDateString()===today);
+  const totalHoy = todayOrders.reduce((s,o)=>s+o.total,0);
+  document.getElementById('k-tickets').textContent = todayOrders.length;
+  document.getElementById('k-ingresos').textContent = clp(totalHoy);
+  document.getElementById('k-usuarios').textContent = users.length;
+  document.getElementById('nb-usuarios').textContent = users.length;
+  document.getElementById('nb-ordenes').textContent = orders.length;
+  document.getElementById('nb-eventos').textContent = getEventos().length;
+  const cortesias = getCortesias(); const pendRes = S.get('admin_reservas')?.filter(r=>r.estado==='pendiente')?.length || 0;
+  document.getElementById('k-reservas').textContent = pendRes;
+  document.getElementById('nb-reservas').textContent = pendRes;
+  const dob = document.getElementById('d-orders');
+  dob.innerHTML = orders.length ? orders.slice(-5).reverse().map(o=>`<tr><td class="tb" style="font-family:monospace;font-size:0.72rem;">${o.id}</td><td>${o.items?.[0]?.nombre||'—'}</td><td style="color:var(--dorado)">${clp(o.total)}</td><td><span class="badge b-g">Pagado</span></td></tr>`).join('') : `<tr><td colspan="4" style="text-align:center;color:var(--muted);padding:20px">Sin órdenes</td></tr>`;
+  const dev = document.getElementById('d-eventos');
+  dev.innerHTML = getEventos().slice(0,4).map(ev=>`<tr><td class="tb">${ev.nombre}</td><td class="tm">${ev.fecha}</td><td style="color:var(--dorado)">${ev.tiposTicket?.length ? clp(Math.min(...ev.tiposTicket.map(t=>t.precio)))+'+'  : '—'}</td></tr>`).join('');
+}
+
+function renderEventos() {
+  const tbody = document.getElementById('tb-eventos');
+  const evs = getEventos();
+  tbody.innerHTML = evs.map((ev,i)=>`
+    <tr>
+      <td class="tb">${ev.nombre}</td>
+      <td class="tm">${ev.fecha} · ${ev.hora}h</td>
+      <td><span class="badge b-${ev.ambiente==='Fuego'?'r':ev.ambiente==='Aire'?'o':'b'}">${ev.ambiente}</span></td>
+      <td class="tm" style="font-size:0.72rem;">${Array.isArray(ev.djs)?ev.djs.join(', '):ev.djs}</td>
+      <td><span class="badge b-b">${ev.tiposTicket?.length||0} tipos</span></td>
+      <td><span class="badge ${ev.activo!==false?'b-g':'b-gr'}">${ev.activo!==false?'Activo':'Inactivo'}</span></td>
+      <td><div style="display:flex;gap:4px;">
+        <button class="btn btn-g btn-sm" onclick="editEvento(${i})">Editar</button>
+        <button class="btn btn-s btn-sm" onclick="go('tickets-tipos');setTimeout(()=>{document.getElementById('tt-evento-sel').value=${ev.id};renderTiposTicket()},100)">Tickets</button>
+        <button class="btn btn-del btn-sm" onclick="deleteEvento(${i})">×</button>
+      </div></td>
+    </tr>`).join('');
+}
+
+function renderTiposTicketPanel() {
+  const evs = getEventos();
+  const sel = document.getElementById('tt-evento-sel');
+  if(sel) { sel.innerHTML = evs.map(ev=>`<option value="${ev.id}">${ev.nombre}</option>`).join(''); }
+  renderTiposTicket();
+}
+
+let currentTTEvId = null; let editingTTIdx = null;
+function renderTiposTicket() {
+  const sel = document.getElementById('tt-evento-sel');
+  const evId = parseInt(sel?.value);
+  currentTTEvId = evId;
+  const evs = getEventos();
+  const ev = evs.find(e=>e.id===evId);
+  const list = document.getElementById('tt-list');
+  if(!ev || !ev.tiposTicket?.length) { list.innerHTML=`<div style="padding:24px;text-align:center;color:var(--muted);">Sin tipos de ticket — agrega el primero</div>`; return; }
+  const estadoColor = { 'Activo':'b-g', 'Agotado':'b-r', 'Cortesía':'b-o', 'Cerrado':'b-gr', 'Solo venta WEB':'b-b', 'Venta solo RRPP':'b-gr', 'Oculto':'b-gr' };
+  list.innerHTML = ev.tiposTicket.map((tt,i)=>`
+    <div class="tt-row">
+      <div>
+        <div class="tt-nombre">${tt.nombre}</div>
+        <span class="badge ${estadoColor[tt.estado]||'b-gr'} tt-estado-badge">${tt.estado}</span>
+        ${tt.soloWeb ? '<span class="badge b-b tt-estado-badge" style="margin-left:4px;">WEB</span>' : ''}
+      </div>
+      <div>${tt.disponible} <span style="color:var(--muted)">/ ${tt.total||tt.disponible+tt.comprados}</span></div>
+      <div>${tt.comprados||0}</div>
+      <div>${tt.devueltos||0}</div>
+      <div>${tt.cortesias||0}</div>
+      <div>${tt.validados||0}</div>
+      <div style="color:var(--dorado)">${clp(tt.precio)}</div>
+      <div style="color:var(--verde)">${clp(tt.precio*(tt.comprados||0))}</div>
+      <div style="display:flex;gap:4px;">
+        <button class="btn btn-del btn-sm" onclick="toggleTTEstado(${evId},${i})">${tt.estado==='Activo'?'CERRAR':'ABRIR'}</button>
+        <button class="btn btn-g btn-sm" onclick="editTT(${evId},${i})">EDITAR</button>
+      </div>
+    </div>`).join('');
+}
+
+function openTicketTypeModal(evId, ttIdx) {
+  editingTTIdx = ttIdx ?? null;
+  const evs = getEventos();
+  const sel = document.getElementById('tt-evento-sel');
+  currentTTEvId = evId || parseInt(sel?.value) || evs[0]?.id;
+  const ev = evs.find(e=>e.id===currentTTEvId);
+  const tt = ttIdx!=null ? ev?.tiposTicket?.[ttIdx] : null;
+  document.getElementById('tt-nombre').value = tt?.nombre||'';
+  document.getElementById('tt-desc').value = tt?.descripcion||'';
+  document.getElementById('tt-texto').value = tt?.textoEntrada||'';
+  document.getElementById('tt-tipoe').value = tt?.tipoEntrada||'Presencial';
+  document.getElementById('tt-estado').value = tt?.estado||'Activo';
+  document.getElementById('tt-precio').value = tt?.precio||'';
+  document.getElementById('tt-disp').value = tt?.disponible||'';
+  document.getElementById('tt-max').value = tt?.maxPorCompra||6;
+  document.getElementById('tt-soloWeb').checked = tt?.soloWeb!==false;
+  openModal('modal-tt');
+}
+
+function editTT(evId, ttIdx) { openTicketTypeModal(evId, ttIdx); }
+
+function saveTT() {
+  const evs = getEventos();
+  const ev = evs.find(e=>e.id===currentTTEvId);
+  if(!ev) return;
+  if(!ev.tiposTicket) ev.tiposTicket=[];
+  const data = {
+    id: editingTTIdx!=null ? ev.tiposTicket[editingTTIdx]?.id : 'tt-'+Date.now(),
+    nombre: document.getElementById('tt-nombre').value.trim(),
+    descripcion: document.getElementById('tt-desc').value.trim(),
+    textoEntrada: document.getElementById('tt-texto').value.trim(),
+    tipoEntrada: document.getElementById('tt-tipoe').value,
+    estado: document.getElementById('tt-estado').value,
+    precio: parseInt(document.getElementById('tt-precio').value)||0,
+    disponible: parseInt(document.getElementById('tt-disp').value)||0,
+    total: parseInt(document.getElementById('tt-disp').value)||0,
+    comprados: editingTTIdx!=null ? ev.tiposTicket[editingTTIdx]?.comprados||0 : 0,
+    devueltos: 0, cortesias: 0, validados: 0,
+    maxPorCompra: parseInt(document.getElementById('tt-max').value)||6,
+    soloWeb: document.getElementById('tt-soloWeb').checked
+  };
+  if(!data.nombre) { showToast('Ingresa un nombre'); return; }
+  if(editingTTIdx!=null) ev.tiposTicket[editingTTIdx]=data;
+  else ev.tiposTicket.push(data);
+  S.set('admin_eventos',evs);
+  closeModal('modal-tt'); renderTiposTicket(); showToast('✅ Tipo de ticket guardado');
+}
+
+function toggleTTEstado(evId, ttIdx) {
+  const evs = getEventos();
+  const ev = evs.find(e=>e.id===evId);
+  if(!ev?.tiposTicket?.[ttIdx]) return;
+  const tt = ev.tiposTicket[ttIdx];
+  tt.estado = tt.estado==='Activo' ? 'Cerrado' : 'Activo';
+  S.set('admin_eventos',evs); renderTiposTicket(); showToast('Estado actualizado');
+}
+
+function renderCortesias() {
+  const list = getCortesias();
+  document.getElementById('c-count').textContent = list.filter(c=>c.estado==='activa').length;
+  document.getElementById('c-used').textContent = list.filter(c=>c.estado==='usada').length;
+  const tbody = document.getElementById('tb-cortesias');
+  if(!list.length) { tbody.innerHTML=`<tr><td colspan="8" style="text-align:center;color:var(--muted);padding:20px">Sin cortesías generadas</td></tr>`; return; }
+  tbody.innerHTML = list.map((c,i)=>`
+    <tr>
+      <td class="tb">${c.nombre}</td><td class="tm">${c.email}</td>
+      <td>${c.evento||'—'}</td><td class="tm">${c.motivo}</td><td>${c.cantidad}</td>
+      <td style="font-family:monospace;font-size:0.72rem;color:var(--dorado)">${c.codigo}</td>
+      <td><span class="badge ${c.estado==='activa'?'b-g':c.estado==='usada'?'b-gr':'b-r'}">${c.estado}</span></td>
+      <td><button class="btn btn-del btn-sm" onclick="deleteCortesia(${i})">×</button></td>
+    </tr>`).join('');
+}
+
+function saveCortesia() {
+  const evs = getEventos();
+  const evId = parseInt(document.getElementById('co-evento').value);
+  const ev = evs.find(e=>e.id===evId);
+  const codigo = 'COR-'+Math.random().toString(36).toUpperCase().slice(2,8);
+  const list = getCortesias();
+  list.push({ nombre:document.getElementById('co-nombre').value, email:document.getElementById('co-email').value, rut:document.getElementById('co-rut').value, tel:document.getElementById('co-tel').value, evento:ev?.nombre||'—', eventoId:evId, cantidad:parseInt(document.getElementById('co-cant').value)||1, motivo:document.getElementById('co-motivo').value, hora:document.getElementById('co-hora').value, codigo, estado:'activa', createdAt:new Date().toISOString() });
+  S.set('admin_cortesias',list); closeModal('modal-cortesia'); renderCortesias(); showToast('✅ Cortesía generada: '+codigo);
+}
+
+function deleteCortesia(i) { const l=getCortesias(); l.splice(i,1); S.set('admin_cortesias',l); renderCortesias(); }
+
+function renderOrdenes() {
+  const orders = getOrders().slice().reverse();
+  const tbody = document.getElementById('tb-ordenes');
+  if(!orders.length) { tbody.innerHTML=`<tr><td colspan="8" style="text-align:center;color:var(--muted);padding:24px">Sin órdenes</td></tr>`; return; }
+  tbody.innerHTML = orders.map(o=>`
+    <tr>
+      <td class="tb" style="font-family:monospace;font-size:0.72rem;color:var(--dorado)">${o.id}</td>
+      <td><div class="tb">${o.comprador?.nombre||'—'}</div><div class="tm" style="font-size:0.7rem">${o.comprador?.email||''}</div></td>
+      <td>${o.items?.[0]?.nombre||'—'}</td>
+      <td>${o.items?.reduce((s,i)=>s+i.cantidad,0)||0}</td>
+      <td class="tb" style="color:var(--dorado)">${clp(o.total)}</td>
+      <td class="tm">${o.metodoPago||'—'}</td>
+      <td class="tm" style="font-size:0.7rem">${o.fecha?new Date(o.fecha).toLocaleDateString('es-CL'):'-'}</td>
+      <td><button class="btn btn-ok btn-sm" onclick="showToast('Orden: '+JSON.stringify(o.comprador))">Ver</button></td>
+    </tr>`).join('');
+}
+
+function validateQR() {
+  const code = document.getElementById('qr-input').value.trim().toUpperCase();
+  const orders = getOrders(); const order = orders.find(o=>o.id===code);
+  const burned = S.get('frate_burned_tickets')||[];
+  const result = document.getElementById('qr-result');
+  if(!order) { result.innerHTML=`<div style="padding:14px;background:rgba(232,54,61,.1);border:1px solid rgba(232,54,61,.3);border-radius:4px;color:var(--rojo)">❌ Ticket no encontrado</div>`; return; }
+  if(burned.includes(code)) { result.innerHTML=`<div style="padding:14px;background:rgba(212,168,50,.1);border:1px solid rgba(212,168,50,.3);border-radius:4px;color:var(--dorado)">⚠️ Ticket ya utilizado</div>`; return; }
+  burned.push(code); S.set('frate_burned_tickets',burned);
+  result.innerHTML=`<div style="padding:14px;background:rgba(34,197,94,.1);border:1px solid rgba(34,197,94,.3);border-radius:4px;"><div style="color:var(--verde);font-weight:600;margin-bottom:6px">✅ Válido — Ingreso autorizado</div><div style="font-size:0.78rem;color:var(--muted);line-height:1.8">Comprador: <strong style="color:var(--text)">${order.comprador?.nombre}</strong><br/>Evento: <strong style="color:var(--text)">${order.items?.[0]?.nombre}</strong><br/>Entradas: <strong style="color:var(--text)">${order.items?.reduce((s,i)=>s+i.cantidad,0)}</strong><br/><span style="color:var(--rojo);font-size:0.7rem">QR quemado — no puede volver a usarse</span></div></div>`;
+}
+
+function renderAmbientes() {
+  const data=[{nombre:'FUEGO',musica:'Reggaeton · Urban · Trap',cap:'350 personas',color:'#E8363D',icon:'🔥',desc:'La pista principal.'},{nombre:'AIRE',musica:'Nacional Hits · Afrobeats',cap:'200 personas',color:'#D4A832',icon:'🌬️',desc:'El espacio donde suena lo nuestro.'},{nombre:'TIERRA',musica:'Guaracha · Dembow',cap:'150 personas',color:'#8B1A1E',icon:'🌿',desc:'La terraza de la casita.'}];
+  document.getElementById('amb-cards').innerHTML=data.map(a=>`<div class="card"><div style="padding:14px 18px;border-bottom:1px solid var(--border);border-top:3px solid ${a.color};display:flex;align-items:center;gap:10px;"><span style="font-size:1.4rem">${a.icon}</span><div><div style="font-family:var(--disp);font-weight:900;font-size:1.2rem">${a.nombre}</div><div style="font-size:0.68rem;color:var(--muted)">${a.cap}</div></div></div><div class="cb"><div style="font-size:0.75rem;color:var(--muted);margin-bottom:6px">${a.desc}</div><div style="font-size:0.68rem;color:${a.color};letter-spacing:1px;text-transform:uppercase">${a.musica}</div></div></div>`).join('');
+}
+
+function renderWebeum() {
+  const eps=getWebeum(); const tbody=document.getElementById('tb-webeum');
+  tbody.innerHTML=eps.map((ep,i)=>`<tr><td class="tb" style="color:var(--rojo)">EP.${eps.length-i}</td><td class="tb">${ep.titulo}</td><td class="tm">${ep.fecha}</td><td class="tm">${ep.duracion}</td><td><a href="${ep.url}" target="_blank" style="color:var(--azul);font-size:0.72rem;text-decoration:none">${ep.url.substring(0,35)}...</a></td><td><div style="display:flex;gap:4px"><a href="${ep.url}" target="_blank" class="btn btn-g btn-sm">▶</a><button class="btn btn-del btn-sm" onclick="deleteWebeum(${i})">×</button></div></td></tr>`).join('');
+}
+function saveWebeum() {
+  const eps=getWebeum(); const f=document.getElementById('we-fecha').value;
+  eps.unshift({id:Date.now(),titulo:document.getElementById('we-titulo').value,url:document.getElementById('we-url').value,fecha:f?new Date(f).toLocaleDateString('es-CL',{day:'numeric',month:'short',year:'numeric'}):'',duracion:document.getElementById('we-dur').value});
+  S.set('admin_webeum',eps); closeModal('modal-webeum'); renderWebeum(); showToast('✅ Episodio agregado');
+}
+function deleteWebeum(i) { const eps=getWebeum(); eps.splice(i,1); S.set('admin_webeum',eps); renderWebeum(); }
+
+function renderTiendita() {
+  const items=getTiendita(); const tbody=document.getElementById('tb-tiendita');
+  tbody.innerHTML=items.map((p,i)=>`<tr><td class="tb">${p.nombre}</td><td class="tm">${p.categoria}</td><td style="color:var(--dorado)">${clp(p.precio)}</td><td>${p.stock||'—'}</td><td><span class="badge ${p.disponible?'b-g':'b-gr'}">${p.disponible?'Disponible':'Sin stock'}</span></td><td><div style="display:flex;gap:4px"><button class="btn btn-g btn-sm" onclick="editTiendita(${i})">Editar</button><button class="btn btn-del btn-sm" onclick="deleteTiendita(${i})">×</button></div></td></tr>`).join('');
+}
+function saveTiendita() {
+  const items=getTiendita();
+  items.push({id:'t'+Date.now(),nombre:document.getElementById('ti-nombre').value,categoria:document.getElementById('ti-cat').value,descripcion:document.getElementById('ti-desc').value,precio:parseInt(document.getElementById('ti-precio').value)||0,stock:parseInt(document.getElementById('ti-stock').value)||0,disponible:true,tallas:document.getElementById('ti-tallas').value.split(',').map(s=>s.trim()),colores:document.getElementById('ti-colores').value.split(',').map(s=>s.trim())});
+  S.set('admin_tiendita',items); closeModal('modal-tiendita'); renderTiendita(); showToast('✅ Producto guardado');
+}
+function editTiendita(i){} function deleteTiendita(i){const l=getTiendita();l.splice(i,1);S.set('admin_tiendita',l);renderTiendita();}
+
+function renderCarta() {
+  const items=getCarta(); const tbody=document.getElementById('tb-carta');
+  tbody.innerHTML=items.map((c,i)=>`<tr><td class="tb">${c.nombre}</td><td class="tm">${c.categoria}</td><td class="tm">${c.descripcion}</td><td style="color:var(--dorado)">${clp(c.precio)}</td><td><span class="badge ${c.disponible?'b-g':'b-gr'}">${c.disponible?'Disponible':'No disponible'}</span></td><td><div style="display:flex;gap:4px"><button class="btn btn-del btn-sm" onclick="deleteCarta(${i})">×</button></div></td></tr>`).join('');
+}
+function saveCarta() {
+  const items=getCarta();
+  items.push({id:'c'+Date.now(),nombre:document.getElementById('ca-nombre').value,categoria:document.getElementById('ca-cat').value,descripcion:document.getElementById('ca-desc').value,precio:parseInt(document.getElementById('ca-precio').value)||0,disponible:document.getElementById('ca-disp').value==='true'});
+  S.set('admin_carta',items); closeModal('modal-carta'); renderCarta(); showToast('✅ Ítem guardado');
+}
+function deleteCarta(i){const l=getCarta();l.splice(i,1);S.set('admin_carta',l);renderCarta();}
+
+function renderUsuarios() {
+  const users=getUsers(); const tbody=document.getElementById('tb-usuarios');
+  const rg=document.getElementById('rg-usuario');
+  if(rg) rg.innerHTML=users.map(u=>`<option value="${u.email}">${u.nombre} — ${u.email}</option>`).join('');
+  const orders=getOrders();
+  if(!users.length){tbody.innerHTML=`<tr><td colspan="10" style="text-align:center;color:var(--muted);padding:24px">Sin usuarios</td></tr>`;return;}
+  tbody.innerHTML=users.map(u=>{
+    const pts=orders.filter(o=>o.comprador?.email===u.email).reduce((s,o)=>s+Math.floor(o.total/100),0);
+    return `<tr><td class="tb">${u.nombre}</td><td class="tm">${u.email}</td><td class="tm" style="font-family:monospace;font-size:0.7rem">${u.rut||'—'}</td><td><a href="https://wa.me/${(u.telefono||'').replace(/\D/g,'')}" target="_blank" style="color:var(--verde);text-decoration:none">${u.telefono||'—'}</a></td><td class="tm">${u.univ||'—'}</td><td style="color:var(--dorado)">${pts}</td><td><span class="badge ${u.membresia?'b-o':'b-gr'}">${u.membresia||'Ninguna'}</span></td><td><span class="badge b-b">${(u.tickets||[]).length}</span></td><td class="tm" style="font-size:0.7rem">${u.createdAt?new Date(u.createdAt).toLocaleDateString('es-CL'):'-'}</td><td><button class="btn btn-gold btn-sm" onclick="openModal('modal-regalo');document.getElementById('rg-usuario').value='${u.email}'">🎁</button></td></tr>`;
+  }).join('');
+}
+
+function renderReservas() {
+  const res=S.get('admin_reservas')||[]; const tbody=document.getElementById('tb-reservas');
+  if(!res.length){tbody.innerHTML=`<tr><td colspan="7" style="text-align:center;color:var(--muted);padding:24px">Sin reservas</td></tr>`;return;}
+  tbody.innerHTML=res.map((r,i)=>`<tr><td class="tb">${r.nombre}</td><td><span class="badge b-o">${r.tipo}</span></td><td class="tm">${r.fecha}</td><td>${r.personas}</td><td><a href="https://wa.me/${(r.telefono||'').replace(/\D/g,'')}" target="_blank" style="color:var(--verde);text-decoration:none">${r.telefono}</a></td><td><select onchange="updateRes(${i},this.value)" style="background:var(--bg3);border:1px solid var(--border);color:var(--text);padding:4px 8px;border-radius:4px;font-size:0.72rem;"><option ${r.estado==='pendiente'?'selected':''} value="pendiente">Pendiente</option><option ${r.estado==='confirmada'?'selected':''} value="confirmada">Confirmada</option><option ${r.estado==='cancelada'?'selected':''} value="cancelada">Cancelada</option></select></td><td><a href="https://wa.me/${(r.telefono||'').replace(/\D/g,'')}?text=Hola+${encodeURIComponent(r.nombre)}" target="_blank" class="btn btn-ok btn-sm">💬</a></td></tr>`).join('');
+}
+function updateRes(i,estado){const r=S.get('admin_reservas')||[];if(r[i]){r[i].estado=estado;S.set('admin_reservas',r);showToast('Estado actualizado');}}
+
+function renderPuntos() {
+  const users=getUsers(); const orders=getOrders();
+  const tbody=document.getElementById('tb-puntos-ranking');
+  const ranked=users.map(u=>({...u,puntos:orders.filter(o=>o.comprador?.email===u.email).reduce((s,o)=>s+Math.floor(o.total/100),0)})).sort((a,b)=>b.puntos-a.puntos);
+  tbody.innerHTML=ranked.slice(0,10).map((u,i)=>`<tr><td class="tb" style="color:${i===0?'var(--dorado)':i===1?'#aaa':i===2?'#cd7f32':'var(--muted)'}">${i===0?'🥇':i===1?'🥈':i===2?'🥉':'#'+(i+1)}</td><td class="tb">${u.nombre}</td><td style="color:var(--dorado);font-weight:700">${u.puntos}</td><td><span class="badge ${u.puntos>1000?'b-o':u.puntos>500?'b-b':'b-gr'}">${u.puntos>1000?'Oro':u.puntos>500?'Plata':'Bronce'}</span></td><td><button class="btn btn-gold btn-sm" onclick="openModal('modal-regalo')">🎁 Regalo</button></td></tr>`).join('') || `<tr><td colspan="5" style="text-align:center;color:var(--muted);padding:20px">Sin datos</td></tr>`;
+}
+
+// ── EVENTOS CRUD ──
+let editEvIdx = null;
+function editEvento(i) {
+  editEvIdx=i; const ev=getEventos()[i]; openModal('modal-evento');
+  document.getElementById('me-title').textContent='Editar evento';
+  document.getElementById('ev-nombre').value=ev.nombre||'';
+  document.getElementById('ev-fecha').value=ev.fecha||'';
+  document.getElementById('ev-hora').value=ev.hora||'';
+  document.getElementById('ev-djs').value=Array.isArray(ev.djs)?ev.djs.join(', '):ev.djs||'';
+  document.getElementById('ev-ambiente').value=ev.ambiente||'Fuego';
+  document.getElementById('ev-tipo').value=ev.tipo||'Viernes';
+}
+function saveEvento() {
+  const evs=getEventos();
+  const ev={id:editEvIdx!=null?evs[editEvIdx].id:Date.now(),nombre:document.getElementById('ev-nombre').value.trim(),fecha:document.getElementById('ev-fecha').value.trim(),hora:document.getElementById('ev-hora').value.trim(),djs:document.getElementById('ev-djs').value.split(',').map(s=>s.trim()),ambiente:document.getElementById('ev-ambiente').value,tipo:document.getElementById('ev-tipo').value,activo:true,tiposTicket:editEvIdx!=null?evs[editEvIdx].tiposTicket||[]:[]};
+  if(!ev.nombre){showToast('Ingresa un nombre');return;}
+  if(editEvIdx!=null)evs[editEvIdx]=ev; else evs.push(ev);
+  S.set('admin_eventos',evs); closeModal('modal-evento'); renderEventos(); showToast('✅ Evento guardado'); editEvIdx=null;
+}
+function deleteEvento(i){if(!confirm('¿Eliminar?'))return;const evs=getEventos();evs.splice(i,1);S.set('admin_eventos',evs);renderEventos();showToast('Eliminado');}
+
+// ── REGALO ──
+function enviarRegalo() {
+  const email=document.getElementById('rg-usuario').value;
+  const tipo=document.getElementById('rg-tipo').value;
+  const valor=document.getElementById('rg-valor').value;
+  showToast(`✅ Regalo "${tipo}" enviado a ${email}`); closeModal('modal-regalo');
+}
+function savePremio() { showToast('✅ Premio agregado al catálogo'); closeModal('modal-premio'); }
+
+// ── IA ──
+const copies = {
+  'Anuncio de evento': (ctx,tono) => `🔥 ${ctx}\n\nEsta es LA noche.\nLa que no se puede perder.\nLa que después van a contar.\n\n📍 Pío Nono #430 · Bellavista\n🎟️ Tickets en frate.cl\n\n#Frate #CarreteUniversitario #Santiago`,
+  'Preventa agotada': (ctx,tono) => `⚠️ SE AGOTÓ LA PREVENTA\n\n${ctx}\n\nLos que esperaron, esperaron de más.\nQuedan entradas generales en puerta.\n\n📍 Pío Nono #430\n🚪 23:00 hrs\n\n#FrateAgotado #Santiago`,
+  'Reminder 24hs antes': (ctx,tono) => `⏰ MAÑANA ES EL DÍA\n\n${ctx}\n\n¿Tienes tu ticket?\nSi no, es ahora o nunca.\n\n🎟️ frate.cl\n📍 Pío Nono #430 · Bellavista`,
+  'Post-evento': (ctx,tono) => `Qué noche, caramba. 🔥\n\n${ctx} fue de esas que no se olvidan.\nGracias a todos los que estuvieron.\n\nLa próxima ya está en camino.\n\n📸 Fotos completas en IG\n🎬 WEBEUM esta semana en YouTube`,
+  'WEBEUM nuevo episodio': (ctx,tono) => `NUEVO EPISODIO 🎬\n\nWEBEUM HUMANUM EST\n${ctx}\n\nDocumentamos cada noche.\nGuardamos cada momento.\n\nYA DISPONIBLE en YouTube 👆\n\n#WEBEUM #Frate #Bellavista`,
+  'Promoción tiendita': (ctx,tono) => `🛍️ LA TIENDITA DE FRATE\n\n${ctx}\n\nLleva un pedazo de Frate a todos lados.\nStock limitado — disponible en frate.cl\n\n#FrateMerch #Tiendita #Santiago`
+};
+function generateCopy() {
+  const tipo=document.getElementById('ia-tipo').value;
+  const ctx=document.getElementById('ia-contexto').value || 'Fraternidad Campus Central';
+  const tono=document.getElementById('ia-tono').value;
+  const fn=copies[tipo];
+  const result=fn?fn(ctx,tono):`✨ Copy generado para: ${ctx}\n\nTono: ${tono}\nTipo: ${tipo}\n\n[Conecta con Claude API para copy personalizado con IA real]`;
+  document.getElementById('ia-copy-result').textContent=result;
+}
+function copiarCopy() { navigator.clipboard?.writeText(document.getElementById('ia-copy-result').textContent).then(()=>showToast('✅ Copiado')).catch(()=>showToast('Copia el texto manualmente')); }
+function generateIAIdeas() { showToast('✨ Ideas actualizadas con contexto de tus eventos actuales'); }
+
+// ── EXPORT ──
+function exportCSV() {
+  const users=getUsers();
+  const csv=['Nombre,Email,RUT,Telefono,Universidad,Carrera,Tickets,Registro',...users.map(u=>`"${u.nombre}","${u.email}","${u.rut||''}","${u.telefono||''}","${u.univ||''}","${u.carrera||''}",${(u.tickets||[]).length},"${u.createdAt||''}"`)].join('\n');
+  const a=document.createElement('a'); a.href='data:text/csv;charset=utf-8,'+encodeURIComponent(csv); a.download='frate-usuarios.csv'; a.click(); showToast('✅ CSV exportado');
+}
+
+function generateDataJS() {
+  const evs=getEventos(); const wes=getWebeum();
+  const code=`// FRATE DATA — generado ${new Date().toLocaleDateString('es-CL')} desde admin
+const FRATE_CONFIG={nombre:"Fraternidad Campus Central",tagline:"Tu Campus Central del Carrete Universitario",subtitulo:"Barrio Bellavista, Santiago · Desde 2013",direccion:"Pío Nono #430, Recoleta",horario:"Jue–Sáb desde las 23:00 hrs",whatsapp:"56912345678",instagram:"https://www.instagram.com/fraternidadcampuscentral/",youtube:"https://www.youtube.com/@fraternidadcampuscentral",facebook:"https://www.facebook.com/fraternidadclub"};
+
+const FRATE_EVENTOS=${JSON.stringify(evs,null,2)};
+
+const FRATE_AMBIENTES=[{id:"fuego",nombre:"FUEGO",descripcion:"El corazón del carrete.",musica:"Reggaeton · Urban & World Hits · Trap",capacidad:"350 personas",color_acento:"#E8363D"},{id:"aire",nombre:"AIRE",descripcion:"El espacio donde suena lo nuestro.",musica:"Nacional Hits · Afrobeats · Música Chilena",capacidad:"200 personas",color_acento:"#D4A832"},{id:"tierra",nombre:"TIERRA",descripcion:"La terraza de la casita.",musica:"Ambient · Guaracha · Dembow",capacidad:"150 personas",color_acento:"#8B1A1E"}];
+
+const FRATE_WEBEUM=${JSON.stringify(wes,null,2)};
+
+const FRATE_STATS=[{numero:"13",label:"Años de historia"},{numero:"+2.000",label:"Eventos realizados"},{numero:"+2M",label:"Visitantes desde 2013"},{numero:"3",label:"Ambientes únicos"}];`;
+  document.getElementById('export-code').textContent=code;
+  navigator.clipboard?.writeText(code).then(()=>showToast('✅ frate-data.js copiado')).catch(()=>showToast('Ver el código en pantalla'));
+}
+
+function syncAll() { render(document.querySelector('.ni.active')?.getAttribute('onclick')?.match(/'([^']+)'/)?.[1]||'dashboard'); showToast('✅ Sincronizado'); }
+
+// ── INIT ──
+function init() {
+  renderDash();
+  // Populate evento selects
+  const evs=getEventos();
+  ['tt-evento-sel','co-evento','carga-evento-sel'].forEach(id=>{
+    const el=document.getElementById(id);
+    if(el) el.innerHTML=evs.map(ev=>`<option value="${ev.id}">${ev.nombre}</option>`).join('');
+  });
+}
+init();
+</script>
+</body>
+</html>

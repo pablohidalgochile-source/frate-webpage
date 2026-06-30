@@ -149,7 +149,7 @@ function closeCart() {
 }
 
 // ── CHECKOUT ─────────────────────────────────────────────────
-let selectedPayMethod = 'webpay';
+let selectedPayMethod = 'mercadopago';
 
 function openCheckout() {
   if (cart.length === 0) return;
@@ -201,10 +201,13 @@ function selectPayMethod(method) {
 }
 
 // ── CONFIRMAR COMPRA ──────────────────────────────────────────
-// Persiste el pedido en Supabase, genera QR ids únicos, envía el comprobante.
-// Por ahora marca el pedido como 'pagado' directamente (sin pasarela real).
-// CUANDO se integre Webpay/MercadoPago: dejar en 'pendiente' y mover el
-// sbMarcarPedidoPagado al callback de pago exitoso.
+// Flujo MercadoPago (Checkout Pro):
+//   1) Llama a la Edge Function `crear-pago`, que calcula el total en el
+//      servidor, valida stock, crea el pedido PENDIENTE y genera la
+//      preferencia de pago.
+//   2) Redirige al usuario a la página segura de MercadoPago.
+//   3) El ticket NO se emite aquí — se emite cuando MercadoPago confirma
+//      el pago por webhook (mp-webhook). Así nadie obtiene entradas gratis.
 async function confirmPurchase() {
   const nombre = document.getElementById('co-nombre')?.value?.trim();
   const email  = document.getElementById('co-email')?.value?.trim();
@@ -215,78 +218,42 @@ async function confirmPurchase() {
   if (cart.length === 0)         { showToast('🛒 Carrito vacío.'); return; }
 
   const btn = document.getElementById('checkout-confirm-btn');
-  if (btn) { btn.textContent = 'PROCESANDO...'; btn.disabled = true; }
+  if (btn) { btn.textContent = 'REDIRIGIENDO A PAGO...'; btn.disabled = true; }
 
   try {
     const session = Storage.get('frate_session');
-    const total   = cartTotal();
-    const fee     = Math.round(total * 0.04);
 
-    // 1) Validar stock disponible antes de cobrar
-    if (typeof sbValidarStockCarrito === 'function') {
-      const check = await sbValidarStockCarrito(cart);
-      if (!check.ok) {
-        showToast('⚠️ ' + check.errores.join(' · '));
-        if (btn) { btn.textContent = 'CONFIRMAR COMPRA'; btn.disabled = false; }
-        return;
-      }
-    }
+    // Guarda datos del comprador por si vuelve de un pago fallido
+    Storage.set('frate_last_checkout', { nombre, email, tel, rut });
 
-    // 2) Crear pedido en Supabase
-    const pedido = await sbCrearPedido({
-      clienteId:     session?.id || null,
-      nombreCliente: nombre,
-      emailCliente:  email,
-      telefono:      tel,
-      rut:           rut || '',
-      items:         cart,
-      total:         total,
-      feeServicio:   fee,
-      metodoPago:    selectedPayMethod
+    // Llama a la Edge Function que crea el pedido + preferencia MercadoPago
+    const { data, error } = await sb.functions.invoke('crear-pago', {
+      body: {
+        items: cart,
+        comprador: { nombre, email, tel, rut: rut || '', clienteId: session?.id || null },
+      },
     });
 
-    // 3) Marcar como pagado (TODO: mover esto al callback de Webpay/MercadoPago)
-    const refPago = `SIM-${Date.now().toString(36).toUpperCase()}`;
-    await sbMarcarPedidoPagado(pedido.id, refPago);
+    if (error) throw new Error(error.message || 'No se pudo iniciar el pago.');
+    if (data?.error) throw new Error(data.error);
+    if (!data?.initPoint) throw new Error('MercadoPago no devolvió un link de pago.');
 
-    // 4) Construir orderData para UI + email
-    const orderId = 'FCC-' + String(pedido.id).padStart(6, '0');
-    const orderData = {
-      id:         orderId,
-      pedidoId:   pedido.id,
-      items:      [...cart],
-      comprador:  { nombre, email, tel, rut },
-      metodoPago: selectedPayMethod,
-      total:      total,
-      fee:        fee,
-      fecha:      new Date().toISOString()
-    };
-
-    // 5) Mostrar ticket digital
-    closeCheckout();
-    showTicket(orderData);
-
-    // 6) Enviar email con QRs individuales (no bloquea si falla)
-    if (typeof sbSendReceiptEmail === 'function') {
-      sbSendReceiptEmail(orderData).then(res => {
-        if (res?.ok) showToast('📧 Comprobante enviado a ' + email);
-      });
-    }
-
-    // 7) Vaciar carrito
+    // Vacía el carrito local (el pedido ya quedó guardado en el servidor)
     cart = [];
     saveCart();
     updateCartBadge();
 
+    // Redirige a la página segura de MercadoPago
+    window.location.href = data.initPoint;
+
   } catch (err) {
     console.error('[FRATE] Error en confirmPurchase:', err);
-    let msg = err?.message || 'Error al procesar la compra. Intenta de nuevo.';
+    let msg = err?.message || 'Error al iniciar el pago. Intenta de nuevo.';
     if (msg.includes('SIN_STOCK')) {
-      msg = msg.replace(/.*SIN_STOCK:\s*/, '') + ' — alguien lo compró justo antes que tú. Elige otra opción.';
+      msg = msg.replace(/.*SIN_STOCK:\s*/, '') + ' — alguien lo compró justo antes que tú.';
     }
     showToast('⚠️ ' + msg);
-  } finally {
-    if (btn) { btn.textContent = 'CONFIRMAR COMPRA'; btn.disabled = false; }
+    if (btn) { btn.textContent = 'PAGAR CON MERCADO PAGO'; btn.disabled = false; }
   }
 }
 
