@@ -60,6 +60,37 @@
 </script>
 
 <!-- ══════════════════════════════════════════════
+     VIDEO DE FONDO GLOBAL
+     Pon tu video en: assets/hero-video.mp4 (y opcional .webm)
+     Se activa automáticamente al cargar. Modo global/solo-portada
+     se controla desde el admin (Configuración → Video de fondo).
+════════════════════════════════════════════════ -->
+<div id="site-bg-video" aria-hidden="true">
+  <video id="site-bg-video-el" autoplay muted loop playsinline poster="assets/logo-insignia.png">
+    <source src="assets/hero-video.mp4" type="video/mp4">
+    <source src="assets/hero-video.webm" type="video/webm">
+  </video>
+  <div class="bg-veil"></div>
+</div>
+<script>
+  // Activa el video de fondo SOLO si carga bien (si no hay archivo, el sitio
+  // queda igual que siempre). El modo global vs solo-portada lo define la config.
+  (function(){
+    var el = document.getElementById('site-bg-video-el');
+    if (!el) return;
+    if (typeof window._videoBgGlobal === 'undefined') window._videoBgGlobal = true; // default: global
+    function activar(){
+      document.body.classList.add('video-bg-on');
+      if (window._videoBgGlobal) document.body.classList.add('video-bg-global');
+      el.style.opacity = '1';
+    }
+    window._activarVideoFondo = activar;
+    el.addEventListener('loadeddata', activar);
+    if (el.readyState >= 2) activar();
+  })();
+</script>
+
+<!-- ══════════════════════════════════════════════
      AGE GATE — flujo multi-paso
 ════════════════════════════════════════════════ -->
 <div id="age-gate">
@@ -1960,6 +1991,14 @@ async function aplicarConfigSecciones() {
   try {
     const config = await sbGetConfigSitio();
     config.forEach(c => {
+      // Config especial: video de fondo en todo el sitio (visible) vs solo portada (oculto)
+      if (c.clave === 'video_global') {
+        window._videoBgGlobal = !!c.visible;
+        if (document.body.classList.contains('video-bg-on')) {
+          document.body.classList.toggle('video-bg-global', !!c.visible);
+        }
+        return;
+      }
       const el = document.getElementById(c.clave);
       if (el) el.style.display = c.visible ? '' : 'none';
       // Oculta también los links de navegación (desktop, mobile, footer) que apuntan a esta sección

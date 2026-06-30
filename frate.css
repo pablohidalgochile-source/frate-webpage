@@ -978,3 +978,30 @@ section { padding: 100px 0; }
   .evento-fecha-block { display: none; }
   .stats-grid { grid-template-columns: 1fr; }
 }
+
+/* ════════════════════════════════════════════════
+   VIDEO DE FONDO GLOBAL (configurable desde admin)
+   - Se activa SOLO si el archivo de video carga bien.
+   - Sin video → el sitio se ve igual que siempre (fallback seguro).
+   ════════════════════════════════════════════════ */
+html { background: var(--negro); }
+#site-bg-video {
+  position: fixed; inset: 0; z-index: -2; overflow: hidden;
+  display: none; background: var(--negro);
+}
+#site-bg-video video {
+  position: absolute; inset: 0; width: 100%; height: 100%;
+  object-fit: cover; opacity: 0; transition: opacity 1.2s ease;
+}
+#site-bg-video .bg-veil {
+  position: absolute; inset: 0;
+  background: linear-gradient(rgba(10,10,11,0.5), rgba(10,10,11,0.68));
+}
+/* Activo (video cargado): el video aparece detrás de todo */
+body.video-bg-on #site-bg-video { display: block; }
+body.video-bg-on { background: transparent; }
+body.video-bg-on .hero-bg { background: transparent !important; }
+body.video-bg-on .hero-lights { display: none; }
+/* Modo GLOBAL: el video se ve detrás de TODAS las secciones */
+body.video-bg-global section { background: transparent !important; }
+body.video-bg-global .hero-overlay { background: rgba(10,10,11,0.5) !important; }
