@@ -1523,7 +1523,8 @@ async function reenviarComprobante(id) {
       ttId:       ip.tipo_ticket_id,
       productoId: ip.producto_id,
       detalle:    ip.detalle,
-      personas:   ip.personas || []
+      personas:   ip.personas || [],
+      qr_ids:     Array.isArray(ip.qr_ids) ? ip.qr_ids : []  // usa el código EXACTO guardado (= el que valida la puerta)
     }));
     const orderData = {
       id:        'FCC-' + String(o.id).padStart(6,'0'),
