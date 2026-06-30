@@ -493,16 +493,16 @@
       <img src="assets/logo-insignia.png" alt="Fraternidad Campus Central"
            style="height:140px;object-fit:contain;filter:drop-shadow(0 0 40px rgba(232,54,61,0.3));" />
     </div>
-    <div class="hero-pill">Santiago de Chile · Desde 2013</div>
+    <div class="hero-pill" data-txt="hero_pill">Santiago de Chile · Desde 2013</div>
     <h1 class="hero-title">
-      TU CAMPUS<br/>
-      <span class="accent">CENTRAL</span><br/>
-      DEL CARRETE
+      <span data-txt="hero_titulo1">TU CAMPUS</span><br/>
+      <span class="accent" data-txt="hero_titulo2">CENTRAL</span><br/>
+      <span data-txt="hero_titulo3">DEL CARRETE</span>
     </h1>
-    <p class="hero-subtitle">Reggaeton · Afrobeats · Urban Hits · Trap · Guaracha · Dembow</p>
+    <p class="hero-subtitle" data-txt="hero_subtitulo">Reggaeton · Afrobeats · Urban Hits · Trap · Guaracha · Dembow</p>
     <div class="hero-ctas">
-      <button onclick="openTicketsPopup()" class="btn-hero-primary">🎟️ COMPRAR TICKETS</button>
-      <a href="#eventos" class="btn-hero-secondary">PRÓXIMOS EVENTOS</a>
+      <button onclick="openTicketsPopup()" class="btn-hero-primary" data-txt="hero_cta1">🎟️ COMPRAR TICKETS</button>
+      <a href="#eventos" class="btn-hero-secondary" data-txt="hero_cta2">PRÓXIMOS EVENTOS</a>
     </div>
   </div>
   <div class="hero-scroll">
@@ -516,7 +516,7 @@
 ════════════════════════════════════════════════ -->
 <section id="eventos">
   <div class="section-inner">
-    <div class="section-label reveal">Esta semana en Frate</div>
+    <div class="section-label reveal" data-txt="eventos_label">Esta semana en Frate</div>
     <h2 class="section-title reveal">PRÓXIMOS<br/><span class="gold">EVENTOS</span></h2>
     <div class="eventos-filters reveal">
       <button class="filter-btn active" data-filter="Todos">Todos</button>
@@ -539,7 +539,7 @@
 ════════════════════════════════════════════════ -->
 <section id="ambientes">
   <div class="section-inner">
-    <div class="section-label reveal">El venue</div>
+    <div class="section-label reveal" data-txt="ambientes_label">El venue</div>
     <h2 class="section-title reveal">TRES MUNDOS.<br/>UNA NOCHE.</h2>
     <div class="ambientes-grid" id="ambientes-grid"></div>
   </div>
@@ -577,7 +577,7 @@
   <div class="section-inner">
     <div class="section-label reveal">El ranking del pueblo</div>
     <h2 class="section-title reveal">RANKING MUSICAL<br/><span class="gold">DEL PUEBLO</span></h2>
-    <p class="reveal" style="color:var(--gris);max-width:600px;margin-bottom:32px;line-height:1.8;">
+    <p class="reveal" data-txt="ranking_subtitulo" style="color:var(--gris);max-width:600px;margin-bottom:32px;line-height:1.8;">
       El Top 10 lo elige la gente. Vota tu canción y <strong style="color:var(--dorado)">gánate $1.000</strong> para tu próxima entrada, solo por registrarte.
     </p>
     <div id="ranking-list" class="ranking-list reveal">
@@ -618,7 +618,7 @@
 ════════════════════════════════════════════════ -->
 <section id="reservas">
   <div class="section-inner">
-    <div class="section-label reveal">Servicios especiales</div>
+    <div class="section-label reveal" data-txt="reservas_label">Servicios especiales</div>
     <h2 class="section-title reveal">RESERVA<br/><span class="gold">TU NOCHE</span></h2>
     <p class="reveal" style="color:var(--gris);font-size:0.95rem;max-width:600px;margin-bottom:48px;line-height:1.8">
       Vive Frate al máximo. Selecciona el servicio que necesitas y te contactamos para armar tu noche perfecta.
@@ -790,25 +790,25 @@
   <div class="section-inner">
     <div class="sobre-layout">
       <div class="sobre-text">
-        <div class="section-label reveal">Quiénes somos</div>
+        <div class="section-label reveal" data-txt="sobre_label">Quiénes somos</div>
         <h2 class="section-title reveal">DESDE 2013,<br/>HACEMOS<br/><span class="gold">HISTORIA</span></h2>
-        <p class="reveal reveal-delay-1">
+        <p class="reveal reveal-delay-1" data-txt="sobre_p1">
           Fraternidad Campus Central es la discoteca de música urbana más antigua de Chile.
-          Nacimos en el corazón del <strong style="color:var(--blanco)">Barrio Bellavista</strong>,
+          Nacimos en el corazón del Barrio Bellavista,
           el barrio bohemio más antiguo de Santiago, a pasos del Cerro San Cristóbal,
           el funicular y el Zoológico Metropolitano.
         </p>
-        <p class="reveal reveal-delay-2">
+        <p class="reveal reveal-delay-2" data-txt="sobre_p2">
           Cada fin de semana, de jueves a sábado, recibimos entre 2.500 y 3.000 personas.
           Artistas internacionales como Jason Derulo, Jowell &amp; Randy, Bad Gyal, Álvaro Díaz
           y más de 40 artistas extranjeros han pisado esta pista. Sellos como Sony y Rimas
           confían en nosotros para lanzar productos y traer artistas.
         </p>
-        <p class="reveal reveal-delay-3">
+        <p class="reveal reveal-delay-3" data-txt="sobre_p3">
           Somos el punto de encuentro y la banda sonora de historias, amores y amistades
           de varias generaciones. ¿Y tú pisaste la pista más famosa de Chile?
         </p>
-        <p class="reveal reveal-delay-4" style="color:var(--dorado)">
+        <p class="reveal reveal-delay-4" data-txt="sobre_p4" style="color:var(--dorado)">
           Lo que pasa en Frate, se queda en Frate.
         </p>
       </div>
@@ -2168,6 +2168,18 @@ async function _votar(s, clienteId) {
   } catch(e) { showToast('⚠️ No se pudo votar: ' + (e.message || e)); }
 }
 
+// ── CMS DE TEXTOS: inyecta los textos editables desde la BD ───
+async function aplicarTextos() {
+  try {
+    const { data } = await sb.from('textos').select('clave,valor');
+    if (!data) return;
+    data.forEach(t => {
+      if (t.valor == null) return;
+      document.querySelectorAll(`[data-txt="${t.clave}"]`).forEach(el => { el.textContent = t.valor; });
+    });
+  } catch(e) { console.warn('[FRATE] textos:', e?.message || e); }
+}
+
 // ── CONFIG SECCIONES: oculta/muestra secciones según config_sitio ──
 async function aplicarConfigSecciones() {
   try {
@@ -2267,6 +2279,7 @@ document.addEventListener('DOMContentLoaded', () => {
   // Carga datos en vivo desde Supabase y reemplaza la lista
   loadEventosDesdeSupabase();
   aplicarConfigSecciones();
+  aplicarTextos();
   loadRanking();
 
   // Event popup: cerrar con × y con click en backdrop
