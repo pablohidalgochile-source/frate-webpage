@@ -1152,6 +1152,17 @@ async function saveEvento() {
 }
 
 async function deleteEvento(evId) {
+  // Si el evento tiene ventas (órdenes), NO se puede borrar (rompería el historial)
+  const { count: ventas } = await sb.from('items_pedido').select('*', { count:'exact', head:true }).eq('evento_id', evId);
+  if (ventas && ventas > 0) {
+    if (confirm(`Este evento tiene ${ventas} venta(s) y no se puede borrar (perderías el historial).\n\n¿Quieres DESACTIVARLO? (deja de mostrarse en frate.cl pero conserva las ventas)`)) {
+      const { error } = await sb.from('eventos').update({ activo: false }).eq('id', evId);
+      if (error) { showToast('Error: '+error.message, true); return; }
+      showToast('Evento desactivado (oculto en frate.cl)');
+      renderEventos();
+    }
+    return;
+  }
   if (!confirm('¿Eliminar este evento y todos sus tickets?')) return;
   try {
     await sb.from('tipos_ticket').delete().eq('evento_id', evId);
