@@ -346,7 +346,6 @@
       <div class="tabs">
         <button class="tab active" onclick="switchTab(this,'mt-fotos')">Fotos</button>
         <button class="tab" onclick="switchTab(this,'mt-videos')">Videos</button>
-        <button class="tab" onclick="switchTab(this,'mt-hero')">Video Hero</button>
       </div>
       <div id="mt-fotos">
         <div class="card cb">
@@ -365,21 +364,6 @@
           <div class="fg"><label>URL de YouTube / Vimeo</label><input type="url" id="vid-url" placeholder="https://youtube.com/watch?v=..." /></div>
           <div class="fg"><label>Sección</label><select id="vid-sec"><option>WEBEUM</option><option>Galería</option></select></div>
           <button class="btn btn-p" onclick="saveVideo()">Agregar video</button>
-        </div>
-      </div>
-      <div id="mt-hero" style="display:none">
-        <div class="card cb">
-          <div style="background:rgba(212,168,50,.06);border:1px solid rgba(212,168,50,.2);border-radius:var(--r);padding:14px;margin-bottom:16px;">
-            <div style="color:var(--dorado);font-weight:600;margin-bottom:4px;">Video Hero del sitio web</div>
-            <div style="font-size:0.78rem;color:var(--muted);">Este video aparece de fondo en la pantalla principal de frate.cl</div>
-          </div>
-          <div class="upload-area">
-            <div style="font-size:2rem;margin-bottom:8px;">🎬</div>
-            <div style="font-weight:600;margin-bottom:4px;">hero-video.mp4</div>
-            <div style="font-size:0.75rem;color:var(--muted);margin-bottom:12px;">MP4 o WebM · Máx. 50MB · 1920×1080 / 30s loop</div>
-            <input type="file" id="hero-input" accept="video/*" style="display:none" onchange="uploadHero(this.files[0])" />
-            <button class="btn btn-s" onclick="document.getElementById('hero-input').click()">Subir video</button>
-          </div>
         </div>
       </div>
     </div>
@@ -892,7 +876,7 @@ function go(name) {
 function switchTab(el, tabId) {
   const tabs = el.closest('.tabs').querySelectorAll('.tab');
   tabs.forEach(t => t.classList.remove('active')); el.classList.add('active');
-  const allTabs = ['ot-ordenes','ot-validar','mt-fotos','mt-videos','mt-hero'];
+  const allTabs = ['ot-ordenes','ot-validar','mt-fotos','mt-videos'];
   allTabs.forEach(id => { const e=document.getElementById(id); if(e) e.style.display = id===tabId?'block':'none'; });
 }
 
