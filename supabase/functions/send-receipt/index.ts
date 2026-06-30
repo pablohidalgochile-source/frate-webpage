@@ -245,7 +245,7 @@ function buildReceiptHtml(order: Order, entries: Entry[]): string {
           • Muestra el QR individual de cada producto en la entrada del local<br>
           • Cada QR es de uso único — no compartas capturas de pantalla<br>
           • Solo válido para mayores de 18 años · No conducir tras consumir alcohol<br>
-          • Ante dudas escríbenos vía <a href="https://wa.me/56912345678" style="color:#E8363D;text-decoration:none;">WhatsApp</a>
+          • Ante dudas escríbenos vía <a href="https://wa.me/56926104782" style="color:#E8363D;text-decoration:none;">WhatsApp</a>
             o a <a href="mailto:hola@frate.cl" style="color:#E8363D;text-decoration:none;">hola@frate.cl</a>
         </div>
       </td></tr>
