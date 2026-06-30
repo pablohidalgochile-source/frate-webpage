@@ -143,7 +143,10 @@
     <div class="fg"><label>Contraseña</label><input type="password" id="al-pass" placeholder="••••••••" autocomplete="current-password" onkeydown="if(event.key==='Enter')adminLogin()" /></div>
     <div class="login-error" id="al-error"></div>
     <button class="btn btn-p" style="width:100%;margin-top:12px;padding:12px;font-size:0.88rem;" onclick="adminLogin()" id="al-btn">ENTRAR</button>
-    <div style="margin-top:18px;font-size:0.72rem;color:var(--muted);">
+    <div style="margin-top:14px;text-align:center;">
+      <a href="#" onclick="event.preventDefault();adminForgot()" style="color:var(--muted);text-decoration:none;font-size:0.78rem;">¿Olvidaste tu contraseña?</a>
+    </div>
+    <div style="margin-top:14px;font-size:0.72rem;color:var(--muted);">
       <a href="/" style="color:var(--rojo);text-decoration:none;">← Volver a frate.cl</a>
     </div>
   </div>
@@ -906,6 +909,24 @@ document.querySelectorAll('.mo').forEach(m => m.addEventListener('click', e => {
 function setSyncStatus(msg) { const el = document.getElementById('sync-status'); if(el) el.textContent = msg; }
 
 // ── AUTH ─────────────────────────────────────────────────────
+async function adminForgot() {
+  const errEl = document.getElementById('al-error');
+  const email = (document.getElementById('al-email').value || '').trim()
+    || prompt('Ingresa el email del admin para enviar el enlace de recuperación:') || '';
+  if (!email.trim()) return;
+  errEl.style.color = 'var(--muted)';
+  errEl.textContent = 'Enviando enlace...';
+  try {
+    const { error } = await sb.auth.resetPasswordForEmail(email.trim(), { redirectTo: window.location.origin + '/reset.html' });
+    if (error) throw error;
+    errEl.style.color = '#4ade80';
+    errEl.textContent = '✓ Te enviamos un enlace a ' + email.trim() + '. Revisa tu correo.';
+  } catch (e) {
+    errEl.style.color = '';
+    errEl.textContent = 'Error: ' + (e.message || e);
+  }
+}
+
 async function adminLogin() {
   const email = document.getElementById('al-email').value.trim();
   const pass  = document.getElementById('al-pass').value;
