@@ -67,6 +67,8 @@
 ════════════════════════════════════════════════ -->
 <div id="site-bg-video" aria-hidden="true">
   <video id="site-bg-video-el" autoplay muted loop playsinline poster="assets/logo-insignia.png">
+    <!-- Video subido desde el admin (Supabase Storage). Fallback a assets/ si no hay. -->
+    <source src="https://ydwlpraoaaijlfssevoh.supabase.co/storage/v1/object/public/frate-media/hero-video.mp4" type="video/mp4">
     <source src="assets/hero-video.mp4" type="video/mp4">
     <source src="assets/hero-video.webm" type="video/webm">
   </video>

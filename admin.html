@@ -519,6 +519,23 @@
     <div class="panel" id="p-config">
       <h2 style="font-family:var(--disp);font-weight:900;font-size:1.6rem;margin-bottom:6px;">CONFIGURACIÓN DEL SITIO</h2>
       <p style="color:var(--muted);font-size:0.8rem;margin-bottom:18px;">Activa o desactiva secciones de frate.cl sin hacer deploy. Útil mientras terminas de cargar contenido.</p>
+
+      <!-- VIDEO DE FONDO -->
+      <div class="card" style="margin-bottom:16px;">
+        <div class="ch"><span class="ct">🎬 Video de fondo del sitio</span></div>
+        <div class="cb">
+          <p style="color:var(--muted);font-size:0.8rem;margin-bottom:12px;">Sube el video que se mostrará de fondo. Recomendado: MP4 horizontal, loop corto (10–30s), bajo 8 MB.</p>
+          <input type="file" id="cfg-video-input" accept="video/mp4,video/webm" style="display:none" onchange="uploadVideoFondo(this.files[0])" />
+          <button class="btn btn-p btn-sm" onclick="document.getElementById('cfg-video-input').click()">⬆ Subir / cambiar video</button>
+          <span id="cfg-video-status" style="margin-left:10px;color:var(--muted);font-size:0.8rem;"></span>
+          <div style="margin-top:14px;">
+            <video id="cfg-video-preview" muted loop playsinline style="width:100%;max-width:380px;border-radius:8px;display:none;background:#000;"></video>
+            <div id="cfg-video-none" style="color:var(--muted);font-size:0.78rem;">Aún no hay video subido — el sitio usa su fondo normal.</div>
+          </div>
+        </div>
+      </div>
+
+      <div style="font-size:0.7rem;letter-spacing:1px;text-transform:uppercase;color:var(--muted);margin:6px 0 10px;">Secciones visibles</div>
       <div class="card"><div class="cb" id="config-secciones-list" style="display:grid;gap:0;">
         <div style="text-align:center;padding:24px;color:var(--muted);">Cargando...</div>
       </div></div>
@@ -2567,8 +2584,35 @@ function enviarRegalo() { showToast('✅ Función de regalo — próximamente co
 
 // ── EXPORT ───────────────────────────────────────────────────
 // ── CONFIGURACIÓN DEL SITIO (secciones visibles) ────────────────
+const VIDEO_FONDO_URL = 'https://ydwlpraoaaijlfssevoh.supabase.co/storage/v1/object/public/frate-media/hero-video.mp4';
+
+async function uploadVideoFondo(file) {
+  if (!file) return;
+  const status = document.getElementById('cfg-video-status');
+  status.textContent = 'Subiendo...';
+  const { error } = await sb.storage.from('frate-media').upload('hero-video.mp4', file, { upsert: true, contentType: file.type || 'video/mp4' });
+  if (error) { status.textContent = 'Error: ' + error.message; showToast('Error: ' + error.message, true); return; }
+  status.textContent = '✅ Listo — ya está en vivo en frate.cl';
+  const prev = document.getElementById('cfg-video-preview');
+  const none = document.getElementById('cfg-video-none');
+  prev.src = VIDEO_FONDO_URL + '?t=' + Date.now();
+  prev.style.display = 'block'; if (none) none.style.display = 'none';
+  prev.play().catch(()=>{});
+  showToast('✅ Video de fondo actualizado');
+}
+
+function cargarPreviewVideo() {
+  const prev = document.getElementById('cfg-video-preview');
+  const none = document.getElementById('cfg-video-none');
+  if (!prev) return;
+  prev.src = VIDEO_FONDO_URL + '?t=' + Date.now();
+  prev.onloadeddata = () => { prev.style.display = 'block'; if (none) none.style.display = 'none'; };
+  prev.onerror     = () => { prev.style.display = 'none';  if (none) none.style.display = 'block'; };
+}
+
 async function renderConfigSecciones() {
   const wrap = document.getElementById('config-secciones-list');
+  cargarPreviewVideo();
   try {
     const config = await sbGetConfigSitio();
     if (!config.length) { wrap.innerHTML = '<div style="color:var(--muted);padding:12px;">No hay secciones configuradas. Corre frate-config-secciones.sql en Supabase.</div>'; return; }
