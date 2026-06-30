@@ -88,6 +88,12 @@ Deno.serve(async (req: Request) => {
       return ok();
     }
 
+    // Incrementar uso del código (solo en pagos confirmados)
+    if (pedido.codigo_id) {
+      try { await sb.rpc('incrementar_uso_codigo', { p_codigo_id: pedido.codigo_id }); }
+      catch (e) { console.error('[mp-webhook] incrementar_uso_codigo:', e); }
+    }
+
     // ── Construir orden y enviar comprobantes ────────────────────
     const order = buildOrder(pedido);
     const buyerEmail = (pedido.email_cliente || '').toLowerCase();

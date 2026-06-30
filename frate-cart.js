@@ -169,20 +169,12 @@ function openCheckout() {
     if (r) r.value = session.rut      || '';
   }
 
-  // Render summary
-  const summary = document.getElementById('checkout-summary');
-  if (summary) {
-    const fee = Math.round(cartTotal() * 0.04);
-    summary.innerHTML = cart.map(item => `
-      <div class="checkout-order-row">
-        <span>${item.nombre} × ${item.cantidad} (${item.tipo})</span>
-        <span>${formatCLP(item.precio * item.cantidad)}</span>
-      </div>
-    `).join('') + `
-      <div class="checkout-order-row"><span>Cargo por servicio (4%)</span><span>${formatCLP(fee)}</span></div>
-      <div class="checkout-order-row"><span>TOTAL</span><span>${formatCLP(cartTotal() + fee)}</span></div>
-    `;
-  }
+  // Resetear código aplicado al abrir
+  window._codigoAplicado = null;
+  const coCod = document.getElementById('co-codigo'); if (coCod) coCod.value = '';
+  const coMsg = document.getElementById('co-codigo-msg'); if (coMsg) coMsg.textContent = '';
+
+  renderCheckoutSummary();
 
   document.getElementById('checkout-overlay')?.classList.add('open');
   document.body.style.overflow = 'hidden';
@@ -191,6 +183,73 @@ function openCheckout() {
 function closeCheckout() {
   document.getElementById('checkout-overlay')?.classList.remove('open');
   document.body.style.overflow = '';
+}
+
+// Descuento del código aplicado (calculado sobre el subtotal). El servidor
+// recalcula de forma autoritativa; esto es solo para mostrar al usuario.
+function calcDescuento(subtotal) {
+  const c = window._codigoAplicado;
+  if (!c || !c.descuento_tipo) return 0;
+  if (c.descuento_tipo === 'porcentaje') return Math.round(subtotal * (c.descuento_valor || 0) / 100);
+  if (c.descuento_tipo === 'monto')      return Math.min(c.descuento_valor || 0, subtotal);
+  return 0;
+}
+
+function renderCheckoutSummary() {
+  const summary = document.getElementById('checkout-summary');
+  if (!summary) return;
+  const subtotal  = cartTotal();
+  const descuento = calcDescuento(subtotal);
+  const base      = subtotal - descuento;
+  const fee       = Math.round(base * 0.04);
+  const total     = base + fee;
+  let html = cart.map(item => `
+    <div class="checkout-order-row">
+      <span>${item.nombre} × ${item.cantidad} (${item.tipo})</span>
+      <span>${formatCLP(item.precio * item.cantidad)}</span>
+    </div>`).join('');
+  if (descuento > 0) {
+    const c = window._codigoAplicado;
+    html += `<div class="checkout-order-row" style="color:#4ade80;"><span>Descuento (${c.codigo})</span><span>−${formatCLP(descuento)}</span></div>`;
+  }
+  html += `
+    <div class="checkout-order-row"><span>Cargo por servicio (4%)</span><span>${formatCLP(fee)}</span></div>
+    <div class="checkout-order-row"><span>TOTAL</span><span>${formatCLP(total)}</span></div>`;
+  summary.innerHTML = html;
+}
+
+// Valida el código contra Supabase (RPC) y lo aplica al resumen.
+async function aplicarCodigo() {
+  const input = document.getElementById('co-codigo');
+  const msg   = document.getElementById('co-codigo-msg');
+  const code  = (input?.value || '').trim().toUpperCase();
+  if (!code) { window._codigoAplicado = null; renderCheckoutSummary(); if(msg) msg.textContent=''; return; }
+  if (msg) { msg.style.color = 'var(--gris)'; msg.textContent = 'Validando...'; }
+  // evento del carrito (primer ticket); si no hay, null → códigos globales
+  const ticket = cart.find(i => i.eventoId);
+  const eventoId = ticket ? Number(ticket.eventoId) : null;
+  try {
+    const { data, error } = await sb.rpc('validar_codigo', { p_codigo: code, p_evento_id: eventoId });
+    const c = Array.isArray(data) ? data[0] : data;
+    if (error || !c) {
+      window._codigoAplicado = null;
+      if (msg) { msg.style.color = '#f87171'; msg.textContent = '✕ Código inválido, vencido o no aplicable.'; }
+      renderCheckoutSummary();
+      return;
+    }
+    window._codigoAplicado = c;
+    if (msg) {
+      msg.style.color = '#4ade80';
+      const desc = c.descuento_tipo === 'porcentaje' ? `${c.descuento_valor}% de descuento`
+                 : c.descuento_tipo === 'monto' ? `${formatCLP(c.descuento_valor)} de descuento` : 'aplicado';
+      msg.textContent = `✓ Código ${c.codigo} — ${desc}${c.tipo==='rrpp' && c.rrpp_nombre ? ' · RRPP '+c.rrpp_nombre : ''}`;
+    }
+    renderCheckoutSummary();
+  } catch (e) {
+    window._codigoAplicado = null;
+    if (msg) { msg.style.color = '#f87171'; msg.textContent = '✕ No se pudo validar el código.'; }
+    renderCheckoutSummary();
+  }
 }
 
 function selectPayMethod(method) {
@@ -231,6 +290,7 @@ async function confirmPurchase() {
       body: {
         items: cart,
         comprador: { nombre, email, tel, rut: rut || '', clienteId: session?.id || null },
+        codigo: window._codigoAplicado?.codigo || null,
       },
     });
 

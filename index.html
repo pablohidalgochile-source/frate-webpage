@@ -407,6 +407,13 @@
       <div class="checkout-section-title">Resumen de tu orden</div>
       <div class="checkout-order-summary" id="checkout-summary"></div>
 
+      <div class="checkout-section-title">¿Tienes un código?</div>
+      <div style="display:flex;gap:8px;margin-bottom:6px;">
+        <input type="text" id="co-codigo" placeholder="Código de descuento o RRPP" style="flex:1;text-transform:uppercase;" />
+        <button type="button" onclick="aplicarCodigo()" style="background:var(--dorado);color:var(--negro);border:none;padding:0 18px;font-family:'Barlow Condensed',sans-serif;font-weight:700;letter-spacing:1px;text-transform:uppercase;border-radius:2px;cursor:pointer;">Aplicar</button>
+      </div>
+      <div id="co-codigo-msg" style="font-size:0.78rem;margin-bottom:20px;min-height:16px;"></div>
+
       <div class="checkout-section-title">Tus datos</div>
       <div class="modal-form" style="gap:12px;margin-bottom:24px;">
         <div class="form-row">

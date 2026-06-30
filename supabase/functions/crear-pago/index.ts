@@ -45,9 +45,10 @@ Deno.serve(async (req: Request) => {
     await sb.from('pedidos').update({ estado: 'expirado' })
       .eq('estado', 'pendiente').lt('created_at', hace30min);
 
-    const { items, comprador } = await req.json() as {
+    const { items, comprador, codigo } = await req.json() as {
       items: any[];
       comprador: { nombre: string; email: string; tel?: string; rut?: string; clienteId?: string };
+      codigo?: string | null;
     };
 
     if (!items?.length) throw new Error('Carrito vacío');
@@ -104,8 +105,25 @@ Deno.serve(async (req: Request) => {
       return new Response(JSON.stringify({ error: errores.join(' · ') }), { status: 409, headers: cors });
     }
 
-    const fee   = Math.round(total * FEE_PCT);
-    const totalPagado = total + fee;
+    // Validar código (descuento / RRPP) en el SERVIDOR
+    let codigoRow: any = null;
+    let descuento = 0;
+    if (codigo) {
+      const { data: cdata } = await sb.from('codigos')
+        .select('*').eq('codigo', String(codigo).trim().toUpperCase()).eq('activo', true).maybeSingle();
+      if (cdata && (cdata.max_usos == null || cdata.usos < cdata.max_usos)) {
+        const aplica = !cdata.evento_id || itemsValidados.some(i => Number(i.eventoId) === cdata.evento_id);
+        if (aplica) {
+          codigoRow = cdata;
+          if (cdata.descuento_tipo === 'porcentaje') descuento = Math.round(total * (cdata.descuento_valor || 0) / 100);
+          else if (cdata.descuento_tipo === 'monto')  descuento = Math.min(cdata.descuento_valor || 0, total);
+        }
+      }
+    }
+
+    const base        = total - descuento;          // subtotal con descuento aplicado
+    const fee         = Math.round(base * FEE_PCT);  // fee sobre el monto con descuento
+    const totalPagado = base + fee;
 
     // ── 3) Crear pedido pendiente ────────────────────────────────
     const { data: pedido, error: e1 } = await sb.from('pedidos').insert({
@@ -113,7 +131,10 @@ Deno.serve(async (req: Request) => {
       nombre_cliente: comprador.nombre,
       email_cliente:  comprador.email,
       estado:         'pendiente',
-      total,
+      total:          base,
+      descuento:      descuento,
+      codigo_id:      codigoRow?.id || null,
+      codigo_texto:   codigoRow?.codigo || null,
       fee_servicio:   fee,
       total_pagado:   totalPagado,
       metodo_pago:    'mercadopago',
