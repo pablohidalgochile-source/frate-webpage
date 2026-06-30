@@ -384,6 +384,10 @@ deno_version = 2
 [functions.mp-webhook]
 verify_jwt = false
 
+# La API del ERP se autentica con su propia clave (x-api-key), no con JWT.
+[functions.api-evento]
+verify_jwt = false
+
 [analytics]
 enabled = true
 port = 54327
