@@ -162,6 +162,7 @@
     <button class="ni" onclick="go('eventos')"><span class="ni-icon">🎵</span>Eventos<span class="ni-badge" id="nb-eventos">0</span></button>
     <button class="ni" onclick="go('tickets-tipos')"><span class="ni-icon">🎟️</span>Tipos de Ticket</button>
     <button class="ni" onclick="go('cortesias')"><span class="ni-icon">🎁</span>Cortesías</button>
+    <button class="ni" onclick="go('codigos')"><span class="ni-icon">🏷️</span>Códigos & RRPP</button>
     <button class="ni" onclick="go('ordenes')"><span class="ni-icon">📦</span>Órdenes<span class="ni-badge" id="nb-ordenes">0</span></button>
     <div class="sb-sect">Contenido</div>
     <button class="ni" onclick="go('ambientes')"><span class="ni-icon">🏠</span>Ambientes</button>
@@ -500,6 +501,19 @@
     </div>
 
     <!-- CONFIGURACIÓN DEL SITIO -->
+    <!-- CÓDIGOS & RRPP -->
+    <div class="panel" id="p-codigos">
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:6px;">
+        <h2 style="font-family:var(--disp);font-weight:900;font-size:1.6rem;">CÓDIGOS & RRPP</h2>
+        <button class="btn btn-p btn-sm" onclick="abrirCodigo()">+ Nuevo código</button>
+      </div>
+      <p style="color:var(--muted);font-size:0.8rem;margin-bottom:18px;">Cupones de descuento y códigos de promotores (RRPP). Un código RRPP atribuye la venta al promotor para medir cuánto vendió.</p>
+      <div class="tw"><table>
+        <thead><tr><th>Código</th><th>Tipo</th><th>Descuento</th><th>Evento</th><th>Usos</th><th>Ventas</th><th>Ingresos</th><th>Estado</th><th></th></tr></thead>
+        <tbody id="tb-codigos"><tr><td colspan="9" style="text-align:center;color:var(--muted);padding:20px">Cargando...</td></tr></tbody>
+      </table></div>
+    </div>
+
     <div class="panel" id="p-config">
       <h2 style="font-family:var(--disp);font-weight:900;font-size:1.6rem;margin-bottom:6px;">CONFIGURACIÓN DEL SITIO</h2>
       <p style="color:var(--muted);font-size:0.8rem;margin-bottom:18px;">Activa o desactiva secciones de frate.cl sin hacer deploy. Útil mientras terminas de cargar contenido.</p>
@@ -576,6 +590,36 @@
     <div class="fg"><label>Motivo</label><select id="co-motivo"><option>Staff</option><option>Artista / DJ</option><option>RRPP</option><option>Concurso RRSS</option><option>Prensa</option><option>Cumpleaños especial</option><option>VIP / Sponsor</option><option>Otro</option></select></div>
   </div>
   <div class="mfoot"><button class="btn btn-g" onclick="closeModal('modal-cortesia')">Cancelar</button><button class="btn btn-p" onclick="saveCortesia()">Generar cortesía</button></div>
+</div></div>
+
+<!-- Modal Código / RRPP -->
+<div class="mo" id="modal-codigo"><div class="mb">
+  <div class="mh"><span class="mht" id="cod-title">Nuevo código</span><button class="mc" onclick="closeModal('modal-codigo')">✕</button></div>
+  <div class="mbody">
+    <input type="hidden" id="cod-id" value="" />
+    <div class="form-2">
+      <div class="fg"><label>Código</label><input type="text" id="cod-codigo" placeholder="VERANO20 o JUAN-RRPP" style="text-transform:uppercase" /></div>
+      <div class="fg"><label>Tipo</label><select id="cod-tipo" onchange="codTipoChange()">
+        <option value="descuento">Descuento (cupón)</option>
+        <option value="rrpp">RRPP (promotor)</option>
+      </select></div>
+    </div>
+    <div class="fg" id="cod-rrpp-wrap" style="display:none"><label>Nombre del promotor (RRPP)</label><input type="text" id="cod-rrpp" placeholder="Ej: Juan Pérez" /></div>
+    <div class="form-2">
+      <div class="fg"><label>Tipo de descuento</label><select id="cod-desc-tipo">
+        <option value="">Sin descuento (solo trackear)</option>
+        <option value="porcentaje">Porcentaje (%)</option>
+        <option value="monto">Monto fijo ($)</option>
+      </select></div>
+      <div class="fg"><label>Valor del descuento</label><input type="number" id="cod-desc-valor" placeholder="20 (=20%) o 5000 (=$5.000)" min="0" /></div>
+    </div>
+    <div class="form-2">
+      <div class="fg"><label>Evento (opcional)</label><select id="cod-evento"><option value="">Todos los eventos</option></select></div>
+      <div class="fg"><label>Máx. usos (opcional)</label><input type="number" id="cod-max" placeholder="Ilimitado" min="1" /></div>
+    </div>
+    <div class="toggle-row"><span style="font-size:0.82rem;">Activo</span><label class="sw"><input type="checkbox" id="cod-activo" checked><span class="sl"></span></label></div>
+  </div>
+  <div class="mfoot"><button class="btn btn-g" onclick="closeModal('modal-codigo')">Cancelar</button><button class="btn btn-p" onclick="saveCodigo()">Guardar código</button></div>
 </div></div>
 
 <!-- IMPORTADOR MASIVO (CSV/XLSX) ─────────────────────────────── -->
@@ -862,7 +906,7 @@ async function checkSession() {
 }
 
 // ── NAV ──────────────────────────────────────────────────────
-const panelTitles = { dashboard:'Resumen', eventos:'Eventos', 'tickets-tipos':'Tipos de Ticket', cortesias:'Cortesías', ordenes:'Órdenes & Validación', ambientes:'Ambientes', media:'Galería & Media', webeum:'WEBEUM', tiendita:'La Tiendita', carta:'Carta', usuarios:'Usuarios', reservas:'Reservas', puntos:'Puntos & Premios', ia:'IA & Marketing', exportar:'Exportar', config:'Configuración del sitio' };
+const panelTitles = { dashboard:'Resumen', eventos:'Eventos', 'tickets-tipos':'Tipos de Ticket', cortesias:'Cortesías', codigos:'Códigos & RRPP', ordenes:'Órdenes & Validación', ambientes:'Ambientes', media:'Galería & Media', webeum:'WEBEUM', tiendita:'La Tiendita', carta:'Carta', usuarios:'Usuarios', reservas:'Reservas', puntos:'Puntos & Premios', ia:'IA & Marketing', exportar:'Exportar', config:'Configuración del sitio' };
 
 function go(name) {
   document.querySelectorAll('.panel').forEach(p => p.classList.remove('active'));
@@ -885,6 +929,7 @@ function render(name) {
   else if(name==='eventos') renderEventos();
   else if(name==='tickets-tipos') renderTiposTicketPanel();
   else if(name==='cortesias') renderCortesias();
+  else if(name==='codigos') renderCodigos();
   else if(name==='ordenes') renderOrdenes();
   else if(name==='ambientes') renderAmbientes();
   else if(name==='webeum') renderWebeum();
@@ -2568,6 +2613,109 @@ function enviarRegalo() { showToast('✅ Función de regalo — próximamente co
 
 // ── EXPORT ───────────────────────────────────────────────────
 // ── CONFIGURACIÓN DEL SITIO (secciones visibles) ────────────────
+// ── CÓDIGOS & RRPP ───────────────────────────────────────────
+async function renderCodigos() {
+  const tbody = document.getElementById('tb-codigos');
+  tbody.innerHTML = `<tr><td colspan="9" style="text-align:center;color:var(--muted);padding:20px">Cargando...</td></tr>`;
+  try {
+    const [{ data: codigos }, { data: eventos }, { data: pedidos }] = await Promise.all([
+      sb.from('codigos').select('*').order('created_at', { ascending: false }),
+      sb.from('eventos').select('id,nombre'),
+      sb.from('pedidos').select('codigo_id,total_pagado').eq('estado','pagado').not('codigo_id','is',null)
+    ]);
+    const evMap = new Map((eventos||[]).map(e => [e.id, e.nombre]));
+    const agg = {};
+    (pedidos||[]).forEach(p => { if(!agg[p.codigo_id]) agg[p.codigo_id]={n:0,t:0}; agg[p.codigo_id].n++; agg[p.codigo_id].t += (p.total_pagado||0); });
+    if (!codigos || !codigos.length) { tbody.innerHTML = `<tr><td colspan="9" style="text-align:center;color:var(--muted);padding:24px">Aún no hay códigos. Crea el primero con "+ Nuevo código".</td></tr>`; return; }
+    tbody.innerHTML = codigos.map(c => {
+      const a = agg[c.id] || { n:0, t:0 };
+      const desc = c.descuento_tipo==='porcentaje' ? `${c.descuento_valor}%` : c.descuento_tipo==='monto' ? clp(c.descuento_valor) : '—';
+      const tipoBadge = c.tipo==='rrpp' ? `<span class="badge b-b">RRPP${c.rrpp_nombre?' · '+c.rrpp_nombre:''}</span>` : `<span class="badge b-o">CUPÓN</span>`;
+      const ev = c.evento_id ? (evMap.get(c.evento_id)||'—') : 'Todos';
+      const usos = c.max_usos ? `${c.usos}/${c.max_usos}` : `${c.usos}`;
+      return `<tr>
+        <td class="tb" style="font-family:monospace;color:var(--dorado)">${c.codigo}</td>
+        <td>${tipoBadge}</td>
+        <td>${desc}</td>
+        <td class="tm">${ev}</td>
+        <td>${usos}</td>
+        <td>${a.n}</td>
+        <td class="tb" style="color:var(--dorado)">${clp(a.t)}</td>
+        <td><span class="badge ${c.activo?'b-g':'b-gr'}">${c.activo?'Activo':'Inactivo'}</span></td>
+        <td><div style="display:flex;gap:4px">
+          <button class="btn btn-ok btn-sm" onclick="abrirCodigo(${c.id})" title="Editar">✏️</button>
+          <button class="btn btn-g btn-sm" onclick="toggleCodigo(${c.id},${c.activo})" title="Activar/pausar">${c.activo?'⏸':'▶'}</button>
+          <button class="btn btn-del btn-sm" onclick="deleteCodigo(${c.id})" title="Eliminar">×</button>
+        </div></td>
+      </tr>`;
+    }).join('');
+  } catch(e) { tbody.innerHTML = `<tr><td colspan="9" style="color:var(--rojo);padding:16px">Error: ${e.message}</td></tr>`; }
+}
+
+async function abrirCodigo(id) {
+  const sel = document.getElementById('cod-evento');
+  if (sel && sel.options.length <= 1) {
+    const { data: evs } = await sb.from('eventos').select('id,nombre').order('fecha', { ascending: false });
+    (evs||[]).forEach(e => { const o=document.createElement('option'); o.value=e.id; o.textContent=e.nombre; sel.appendChild(o); });
+  }
+  const set = (k,v) => { const el=document.getElementById(k); if(el){ if(el.type==='checkbox') el.checked=v; else el.value=v; } };
+  set('cod-id',''); set('cod-codigo',''); set('cod-tipo','descuento'); set('cod-rrpp','');
+  set('cod-desc-tipo',''); set('cod-desc-valor',''); set('cod-evento',''); set('cod-max',''); set('cod-activo',true);
+  document.getElementById('cod-title').textContent = 'Nuevo código';
+  if (id) {
+    const { data: c } = await sb.from('codigos').select('*').eq('id', id).single();
+    if (c) {
+      set('cod-id',c.id); set('cod-codigo',c.codigo); set('cod-tipo',c.tipo); set('cod-rrpp',c.rrpp_nombre||'');
+      set('cod-desc-tipo',c.descuento_tipo||''); set('cod-desc-valor',c.descuento_valor||''); set('cod-evento',c.evento_id||'');
+      set('cod-max',c.max_usos||''); set('cod-activo',!!c.activo);
+      document.getElementById('cod-title').textContent = 'Editar código';
+    }
+  }
+  codTipoChange();
+  openModal('modal-codigo');
+}
+
+function codTipoChange() {
+  const t = document.getElementById('cod-tipo').value;
+  document.getElementById('cod-rrpp-wrap').style.display = t==='rrpp' ? 'block' : 'none';
+}
+
+async function saveCodigo() {
+  const id = document.getElementById('cod-id').value;
+  const codigo = document.getElementById('cod-codigo').value.trim().toUpperCase();
+  if (!codigo) { showToast('Ingresa un código', true); return; }
+  const eventoId = document.getElementById('cod-evento').value;
+  const maxUsos = parseInt(document.getElementById('cod-max').value);
+  const row = {
+    codigo,
+    tipo:            document.getElementById('cod-tipo').value,
+    descuento_tipo:  document.getElementById('cod-desc-tipo').value || null,
+    descuento_valor: parseInt(document.getElementById('cod-desc-valor').value) || 0,
+    rrpp_nombre:     document.getElementById('cod-rrpp').value.trim() || null,
+    evento_id:       eventoId ? parseInt(eventoId) : null,
+    max_usos:        isNaN(maxUsos) ? null : maxUsos,
+    activo:          document.getElementById('cod-activo').checked
+  };
+  try {
+    let error;
+    if (id) ({ error } = await sb.from('codigos').update(row).eq('id', id));
+    else    ({ error } = await sb.from('codigos').insert(row));
+    if (error) throw error;
+    closeModal('modal-codigo'); renderCodigos();
+    showToast('✅ Código guardado');
+  } catch(e) { showToast('Error: ' + (e.message||e), true); }
+}
+
+async function toggleCodigo(id, activo) {
+  await sb.from('codigos').update({ activo: !activo }).eq('id', id);
+  renderCodigos();
+}
+async function deleteCodigo(id) {
+  if (!confirm('¿Eliminar este código? (no afecta ventas ya hechas)')) return;
+  await sb.from('codigos').delete().eq('id', id);
+  renderCodigos();
+}
+
 const VIDEO_FONDO_URL = 'https://ydwlpraoaaijlfssevoh.supabase.co/storage/v1/object/public/frate-media/hero-video.mp4';
 
 async function uploadVideoFondo(file) {
