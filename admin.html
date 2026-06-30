@@ -2540,22 +2540,41 @@ async function renderConfigSecciones() {
   try {
     const config = await sbGetConfigSitio();
     if (!config.length) { wrap.innerHTML = '<div style="color:var(--muted);padding:12px;">No hay secciones configuradas. Corre frate-config-secciones.sql en Supabase.</div>'; return; }
-    wrap.innerHTML = config.map(c => `
-      <div class="toggle-row" style="padding:12px 0;border-bottom:1px solid var(--bd);">
-        <span style="font-size:0.85rem;">${c.label || c.clave}</span>
-        <label class="sw"><input type="checkbox" ${c.visible ? 'checked' : ''} onchange="toggleSeccion('${c.clave}', this.checked)"><span class="sl"></span></label>
-      </div>`).join('');
+    wrap.innerHTML = `<div style="max-width:560px;">` + config.map(c => `
+      <div id="cfg-row-${c.clave}" style="display:flex;align-items:center;justify-content:space-between;gap:16px;padding:14px 4px;border-bottom:1px solid #1e1e20;">
+        <span style="font-size:0.9rem;color:#fff;">${c.label || c.clave}</span>
+        <button onclick="toggleSeccion('${c.clave}', this)" data-on="${c.visible ? '1' : '0'}"
+          style="flex-shrink:0;display:inline-flex;align-items:center;gap:8px;border:none;cursor:pointer;border-radius:20px;padding:7px 14px 7px 10px;font-family:inherit;font-size:0.72rem;font-weight:700;letter-spacing:1px;text-transform:uppercase;transition:all .15s;
+          ${c.visible
+            ? 'background:rgba(34,197,94,.15);color:#4ade80;'
+            : 'background:rgba(113,113,122,.15);color:#71717a;'}">
+          <span style="width:9px;height:9px;border-radius:50%;background:${c.visible ? '#4ade80' : '#52525b'};"></span>
+          <span class="cfg-label">${c.visible ? 'VISIBLE' : 'OCULTO'}</span>
+        </button>
+      </div>`).join('') + `</div>`;
   } catch (err) {
     wrap.innerHTML = `<div style="color:var(--rojo);padding:12px;">Error: ${err?.message || err}</div>`;
   }
 }
 
-async function toggleSeccion(clave, visible) {
+async function toggleSeccion(clave, btn) {
+  const nuevoVisible = btn.dataset.on !== '1'; // invierte el estado actual
+  // Update visual inmediato (optimista)
+  btn.dataset.on = nuevoVisible ? '1' : '0';
+  const dot = btn.querySelector('span');
+  const lbl = btn.querySelector('.cfg-label');
+  if (nuevoVisible) {
+    btn.style.background = 'rgba(34,197,94,.15)'; btn.style.color = '#4ade80';
+    dot.style.background = '#4ade80'; lbl.textContent = 'VISIBLE';
+  } else {
+    btn.style.background = 'rgba(113,113,122,.15)'; btn.style.color = '#71717a';
+    dot.style.background = '#52525b'; lbl.textContent = 'OCULTO';
+  }
   try {
-    await sbSetSeccionVisible(clave, visible);
+    await sbSetSeccionVisible(clave, nuevoVisible);
   } catch (err) {
     alert('Error al guardar: ' + (err?.message || err));
-    renderConfigSecciones();
+    renderConfigSecciones(); // revierte al estado real de la BD
   }
 }
 
