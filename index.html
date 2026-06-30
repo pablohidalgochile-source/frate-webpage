@@ -549,7 +549,8 @@
      RANKING MUSICAL DEL PUEBLO
 ════════════════════════════════════════════════ -->
 <style>
-  #ranking .ranking-list{display:flex;flex-direction:column;gap:8px;max-width:680px;}
+  #ranking .ranking-list{display:grid;grid-template-columns:1fr 1fr;gap:8px;max-width:940px;}
+  @media(max-width:700px){#ranking .ranking-list{grid-template-columns:1fr;}}
   .ranking-row{display:flex;align-items:center;gap:14px;background:var(--negro-3);border:1px solid #1a1a1c;border-radius:6px;padding:10px 14px;}
   .ranking-pos{font-family:var(--fuente-display);font-weight:900;font-size:1.3rem;color:var(--dorado);width:28px;text-align:center;flex-shrink:0;}
   .ranking-cover{width:48px;height:48px;border-radius:4px;object-fit:cover;background:#222;flex-shrink:0;}
@@ -601,6 +602,13 @@
     <div id="votar-search" style="display:none;">
       <input id="votar-input" type="text" placeholder="Busca una canción o artista..." oninput="rankingBuscarDebounced()" />
       <div id="votar-results"></div>
+      <div style="padding:14px 20px 20px;border-top:1px solid #1e1e20;margin-top:8px;">
+        <div style="font-size:0.78rem;color:var(--gris);margin-bottom:8px;">¿No aparece? Agrégala a mano:</div>
+        <div style="display:flex;gap:8px;">
+          <input id="votar-manual-input" type="text" placeholder="Canción - Artista" style="flex:1;box-sizing:border-box;background:var(--negro-3);border:1px solid #2a2a2c;color:#fff;padding:11px;border-radius:6px;outline:none;" />
+          <button onclick="rankingVotarManual()" style="background:var(--dorado);color:var(--negro);border:none;padding:0 18px;font-weight:700;border-radius:6px;cursor:pointer;text-transform:uppercase;font-size:0.75rem;letter-spacing:1px;">Sumar</button>
+        </div>
+      </div>
     </div>
   </div>
 </div>
@@ -1164,30 +1172,9 @@
 
     <!-- PROMOS -->
     <div class="cuenta-tab-panel" id="cuenta-panel-promos" style="display:none">
-      <div class="cuenta-section-title">Promociones del mes</div>
-      <div class="promo-banner">
-        <div class="promo-banner-icon">🔥</div>
-        <div class="promo-banner-text">
-          <div class="promo-banner-titulo">2x1 JUEVES DE MAYO</div>
-          <div class="promo-banner-desc">Compra 2 anticipadas y la segunda es al precio de boleto general</div>
-        </div>
-        <button class="promo-banner-cta" onclick="openTicketsPopup()">Usar</button>
-      </div>
-      <div class="promo-banner">
-        <div class="promo-banner-icon">🎓</div>
-        <div class="promo-banner-text">
-          <div class="promo-banner-titulo">DESCUENTO UNIVERSIDAD</div>
-          <div class="promo-banner-desc">-20% en todos los viernes de mayo con credencial universitaria</div>
-        </div>
-        <button class="promo-banner-cta" onclick="showToast('Promo activa — aplica automáticamente')">Ver más</button>
-      </div>
-      <div class="promo-banner" style="background:linear-gradient(90deg,rgba(212,168,50,0.15),var(--negro-3));border-color:rgba(212,168,50,0.3);">
-        <div class="promo-banner-icon">👑</div>
-        <div class="promo-banner-text">
-          <div class="promo-banner-titulo">MIEMBRO VIP — ACCESO ANTICIPADO</div>
-          <div class="promo-banner-desc">Suscriptores VIP pueden comprar 48hrs antes que el público general</div>
-        </div>
-        <button class="promo-banner-cta" onclick="showCuentaTab('membresia')" style="background:var(--dorado);color:var(--negro);">Ver</button>
+      <div class="cuenta-section-title">Tus beneficios</div>
+      <div id="promos-content">
+        <div style="text-align:center;padding:24px;color:var(--gris);">Cargando...</div>
       </div>
     </div>
 
@@ -2055,6 +2042,34 @@ function syncFloatingCount() {
 }
 
 // ── Carga eventos desde Supabase y reemplaza FRATE_EVENTOS ────────────────
+// ── PROMOS: muestra el crédito del usuario ────────────────────
+async function renderPromos() {
+  const cont = document.getElementById('promos-content');
+  if (!cont) return;
+  const session = Storage.get('frate_session');
+  if (!session?.id) { cont.innerHTML = '<div style="color:var(--gris);padding:16px;">Inicia sesión para ver tus beneficios.</div>'; return; }
+  try {
+    const { data } = await sb.from('clientes').select('credito').eq('id', session.id).maybeSingle();
+    const credito = data?.credito || 0;
+    if (credito > 0) {
+      cont.innerHTML = `
+        <div style="background:linear-gradient(90deg,rgba(34,197,94,0.15),var(--negro-3));border:1px solid rgba(34,197,94,0.35);border-radius:8px;padding:20px;">
+          <div style="font-size:0.7rem;letter-spacing:2px;text-transform:uppercase;color:#4ade80;margin-bottom:6px;">🎁 Tu crédito disponible</div>
+          <div style="font-family:var(--fuente-display);font-weight:900;font-size:2.2rem;color:#4ade80;">$${credito.toLocaleString('es-CL')}</div>
+          <div style="font-size:0.82rem;color:var(--gris);margin-top:6px;">Se aplica automáticamente en tu próxima compra. 🎟️</div>
+        </div>`;
+    } else {
+      cont.innerHTML = `
+        <div style="background:var(--negro-3);border:1px solid #1a1a1c;border-radius:8px;padding:24px;text-align:center;">
+          <div style="font-size:2rem;margin-bottom:8px;">🎵</div>
+          <div style="color:#fff;font-weight:600;margin-bottom:6px;">Vota en el Ranking del Pueblo</div>
+          <div style="font-size:0.85rem;color:var(--gris);margin-bottom:16px;line-height:1.6;">Gánate <strong style="color:var(--dorado)">$1.000 de crédito</strong> la primera vez que votas tu canción.</div>
+          <button onclick="closeCuenta();setTimeout(()=>document.getElementById('ranking')?.scrollIntoView({behavior:'smooth'}),200);" class="btn-rojo" style="border:none;cursor:pointer;padding:12px 24px;font-family:'Barlow Condensed',sans-serif;font-weight:900;letter-spacing:2px;text-transform:uppercase;border-radius:2px;">Ir a votar 🎶</button>
+        </div>`;
+    }
+  } catch(e) { cont.innerHTML = '<div style="color:var(--gris);padding:16px;">No se pudo cargar.</div>'; }
+}
+
 // ── RANKING MUSICAL DEL PUEBLO ────────────────────────────────
 let _rankingTimer = null;
 window._rankingResults = [];
@@ -2120,15 +2135,29 @@ async function rankingBuscar() {
   } catch(e) { out.innerHTML = '<div style="color:var(--gris);padding:12px;">Error al buscar.</div>'; }
 }
 
+// Voto manual: cuando la canción no aparece en Deezer
+async function rankingVotarManual() {
+  const session = Storage.get('frate_session');
+  if (!session) { openVotarModal(); return; }
+  const txt = (document.getElementById('votar-manual-input').value || '').trim();
+  if (!txt) { showToast('Escribe la canción y artista'); return; }
+  const clave = 'manual:' + txt.toLowerCase().replace(/\s+/g, ' ');
+  await _votar({ deezer_id: clave, titulo: txt, artista: '', album: '', cover: '', preview: '' }, session.id);
+}
+
 async function rankingVotar(idx) {
   const session = Storage.get('frate_session');
   if (!session) { openVotarModal(); return; }
   const s = window._rankingResults[idx];
   if (!s) return;
+  await _votar(s, session.id);
+}
+
+async function _votar(s, clienteId) {
   try {
     const { data, error } = await sb.rpc('votar_cancion', {
       p_deezer_id: s.deezer_id, p_titulo: s.titulo, p_artista: s.artista, p_album: s.album,
-      p_cover: s.cover, p_preview: s.preview, p_cliente_id: session.id, p_origen: 'ranking'
+      p_cover: s.cover, p_preview: s.preview, p_cliente_id: clienteId, p_origen: 'ranking'
     });
     if (error) throw error;
     closeVotarModal();
@@ -2144,6 +2173,15 @@ async function aplicarConfigSecciones() {
   try {
     const config = await sbGetConfigSitio();
     config.forEach(c => {
+      // Config especial: pestañas de la cuenta (puntos/promos/membresia)
+      if (c.clave === 'cuenta_puntos' || c.clave === 'cuenta_promos' || c.clave === 'cuenta_membresia') {
+        const tab = c.clave.replace('cuenta_', '');
+        const btn = document.querySelector(`.cuenta-tab[data-tab="${tab}"]`);
+        const panel = document.getElementById('cuenta-panel-' + tab);
+        if (btn) btn.style.display = c.visible ? '' : 'none';
+        if (panel && !c.visible) panel.style.display = 'none';
+        return;
+      }
       // Config especial: video de fondo en todo el sitio (visible) vs solo portada (oculto)
       if (c.clave === 'video_global') {
         window._videoBgGlobal = !!c.visible;

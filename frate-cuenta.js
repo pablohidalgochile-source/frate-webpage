@@ -96,6 +96,9 @@ function showCuentaTab(tab) {
   if (tab === 'tickets' && typeof cuentaCargarHistorial === 'function') {
     cuentaCargarHistorial();
   }
+  if (tab === 'promos' && typeof renderPromos === 'function') {
+    renderPromos();
+  }
 }
 
 function renderCuenta(session) {
