@@ -84,6 +84,8 @@ interface CartItem {
   ttId?:      string | number;
   eventoId?:  string | number;
   personas?:  Persona[];
+  qr_ids?:    string[];
+  _qrOverride?: string;
 }
 interface Order {
   id:        string;
@@ -112,7 +114,8 @@ function buildEntries(order: Order): Entry[] {
   for (const item of order.items as any[]) {
     if (item.tipo === 'carta' || item.tipo === 'merch') {
       for (let u = 0; u < item.cantidad; u++) {
-        const uid = item._qrOverride || `${order.id}-${item.productoId || item.tipo}-${u}`;
+        // Prioridad: override (email individual) → código guardado en BD → fallback computado
+        const uid = item._qrOverride || item.qr_ids?.[u] || `${order.id}-${item.productoId || item.tipo}-${u}`;
         entries.push({
           qrId:   uid,
           icon:   item.tipo === 'carta' ? '🍹' : '🛍️',
@@ -127,8 +130,8 @@ function buildEntries(order: Order): Entry[] {
       // Ticket de evento — 1 QR por persona
       for (let p = 0; p < item.cantidad; p++) {
         const persona = item.personas?.[p] ?? null;
-        // Si _qrOverride está, usar ese exacto (caso importador: 1 persona = 1 email)
-        const uid = item._qrOverride || `${order.id}-${item.ttId || item.tipo}-${p}`;
+        // Prioridad: override (email individual) → código guardado en BD → fallback computado
+        const uid = item._qrOverride || item.qr_ids?.[p] || `${order.id}-${item.ttId || item.tipo}-${p}`;
         entries.push({
           qrId:    uid,
           icon:    '🎟️',

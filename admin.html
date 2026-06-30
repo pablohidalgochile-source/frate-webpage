@@ -204,6 +204,7 @@
         <div class="kpi" style="border-top-color:var(--dorado)"><div class="kpi-l">Ingresos hoy</div><div class="kpi-v" id="k-ingresos" style="color:var(--dorado)">—</div><div class="kpi-s">ticket online</div></div>
         <div class="kpi" style="border-top-color:var(--verde)"><div class="kpi-l">Usuarios registrados</div><div class="kpi-v" id="k-usuarios" style="color:var(--verde)">—</div><div class="kpi-s">cuentas</div></div>
         <div class="kpi" style="border-top-color:var(--azul)"><div class="kpi-l">Reservas pendientes</div><div class="kpi-v" id="k-reservas" style="color:var(--azul)">—</div><div class="kpi-s">sin confirmar</div></div>
+        <div class="kpi" style="border-top-color:#f59e0b;cursor:pointer" onclick="go('ordenes');setTimeout(()=>filtrarOrdenes('no-pagadas'),120)"><div class="kpi-l">Reservaron sin pagar</div><div class="kpi-v" id="k-nopagadas" style="color:#f59e0b">—</div><div class="kpi-s">pendientes + expiradas</div></div>
       </div>
       <div style="display:grid;grid-template-columns:1fr 1fr;gap:14px;">
         <div class="card"><div class="ch"><span class="ct">Últimas órdenes</span><button class="btn btn-g btn-sm" onclick="go('ordenes')">Ver todas</button></div><div class="tw"><table><thead><tr><th>ID</th><th>Comprador</th><th>Total</th><th>Estado</th></tr></thead><tbody id="d-orders"></tbody></table></div></div>
@@ -270,6 +271,7 @@
             <button class="btn btn-sm ord-filter-btn active" data-estado="todos"     onclick="filtrarOrdenes('todos')">Todas</button>
             <button class="btn btn-sm ord-filter-btn"        data-estado="pagado"    onclick="filtrarOrdenes('pagado')" style="background:rgba(34,197,94,.15);color:#22c55e;">Pagadas</button>
             <button class="btn btn-sm ord-filter-btn"        data-estado="pendiente" onclick="filtrarOrdenes('pendiente')" style="background:rgba(245,158,11,.15);color:#f59e0b;">Pendientes</button>
+            <button class="btn btn-sm ord-filter-btn"        data-estado="expirado"  onclick="filtrarOrdenes('expirado')" style="background:rgba(113,113,122,.15);color:#a1a1aa;">Expiradas</button>
             <button class="btn btn-sm ord-filter-btn"        data-estado="cancelado" onclick="filtrarOrdenes('cancelado')" style="background:rgba(232,54,61,.15);color:#E8363D;">Canceladas</button>
           </div>
           <input type="text" placeholder="🔍 Buscar por ID, nombre o email..." oninput="buscarOrdenes(this.value)" style="flex:1;min-width:200px;background:var(--bg3);border:1px solid var(--border);color:var(--text);padding:8px 12px;border-radius:var(--r);font-size:0.85rem;outline:none;" />
@@ -900,9 +902,10 @@ async function renderDash() {
   setSyncStatus('Cargando...');
   try {
     const today = new Date().toISOString().split('T')[0];
-    const [{ count: totalUsers }, { count: pendRes }, { data: evs }, { data: recentOrders }] = await Promise.all([
+    const [{ count: totalUsers }, { count: pendRes }, { count: noPagadas }, { data: evs }, { data: recentOrders }] = await Promise.all([
       sb.from('clientes').select('*', { count:'exact', head:true }),
       sb.from('reservas').select('*', { count:'exact', head:true }).eq('estado','pendiente'),
+      sb.from('pedidos').select('*', { count:'exact', head:true }).in('estado',['pendiente','expirado']),
       sb.from('eventos').select('id,nombre,fecha,activo').eq('activo',true).order('fecha').limit(4),
       sb.from('pedidos').select('id,nombre_cliente,email_cliente,total,total_pagado,estado,created_at,items_pedido(nombre_evento,nombre_ticket,cantidad,producto_tipo)').order('created_at',{ascending:false}).limit(10)
     ]);
@@ -917,6 +920,7 @@ async function renderDash() {
     document.getElementById('k-ingresos').textContent = clp(totalHoy);
     document.getElementById('k-usuarios').textContent = totalUsers || 0;
     document.getElementById('k-reservas').textContent = pendRes || 0;
+    document.getElementById('k-nopagadas').textContent = noPagadas || 0;
     document.getElementById('nb-usuarios').textContent = totalUsers || 0;
     document.getElementById('nb-reservas').textContent = pendRes || 0;
     document.getElementById('nb-eventos').textContent = evs?.length || 0;
@@ -1335,7 +1339,8 @@ async function renderOrdenes() {
     let q = sb.from('pedidos')
       .select('*, items_pedido(nombre_evento,nombre_ticket,cantidad,precio_unitario,producto_tipo)')
       .order('created_at', { ascending: false }).limit(200);
-    if (ordenesFiltroEstado !== 'todos') q = q.eq('estado', ordenesFiltroEstado);
+    if (ordenesFiltroEstado === 'no-pagadas')      q = q.in('estado', ['pendiente','expirado']);
+    else if (ordenesFiltroEstado !== 'todos')      q = q.eq('estado', ordenesFiltroEstado);
 
     const { data: ordersRaw, error } = await q;
     if (error) throw error;
@@ -1557,10 +1562,21 @@ async function validateQR() {
     return;
   }
 
-  // Si tiene key+unit, buscar el item específico
+  // Buscar el item por el CÓDIGO EXACTO guardado en qr_ids (a prueba de colisiones,
+  // funciona con cualquier formato porque compara el string completo).
   let itemMatch = null;
   let personaMatch = null;
-  if (parts.length >= 3) {
+  for (const ip of (order.items_pedido || [])) {
+    const qrIds = Array.isArray(ip.qr_ids) ? ip.qr_ids : [];
+    const idx = qrIds.findIndex(q => String(q).toUpperCase() === code);
+    if (idx >= 0) {
+      itemMatch = ip;
+      if (Array.isArray(ip.personas)) personaMatch = ip.personas[idx] || null;
+      break;
+    }
+  }
+  // Fallback legacy: pedidos viejos sin qr_ids → método anterior por key+unit
+  if (!itemMatch && parts.length >= 3) {
     const key  = parts[1];
     const unit = parseInt(parts[2]);
     itemMatch = (order.items_pedido || []).find(ip => {

@@ -120,15 +120,17 @@ Deno.serve(async (req: Request) => {
     }).select().single();
     if (e1) throw e1;
 
-    // items_pedido con QR ids
-    const rows = itemsValidados.map(i => {
+    // items_pedido con QR ids — el índice de línea (lineIdx) garantiza
+    // que NUNCA se repita un código aunque dos líneas compartan el mismo
+    // tipo de ticket. El índice u (dentro de la línea) mapea a personas[u].
+    const rows = itemsValidados.map((i, lineIdx) => {
       const isTicket = !!i.ttId;
       const isCarta  = i.tipo === 'carta';
       const isMerch  = i.tipo === 'merch';
       const personas = Array.isArray(i.personas) ? i.personas : [];
       const qrIds: string[] = [];
       const key = i.ttId || i.productoId || i.tipo;
-      for (let u = 0; u < i.cantidad; u++) qrIds.push(`FCC-${pedido.id}-${key}-${u}`);
+      for (let u = 0; u < i.cantidad; u++) qrIds.push(`FCC-${pedido.id}-${key}-${lineIdx}-${u}`);
       return {
         pedido_id:        pedido.id,
         producto_tipo:    isTicket ? 'ticket' : (isCarta ? 'carta' : (isMerch ? 'merch' : 'otro')),

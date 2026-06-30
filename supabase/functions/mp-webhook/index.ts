@@ -88,19 +88,33 @@ Deno.serve(async (req: Request) => {
       return ok();
     }
 
-    // ── Construir orden y enviar comprobante con QRs ─────────────
+    // ── Construir orden y enviar comprobantes ────────────────────
     const order = buildOrder(pedido);
-    try {
-      await fetch(`${Deno.env.get('SUPABASE_URL')}/functions/v1/send-receipt`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          Authorization: `Bearer ${Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')}`,
-        },
-        body: JSON.stringify({ order }),
-      });
-    } catch (e) {
-      console.error('[mp-webhook] receipt email falló (pago OK):', e);
+    const buyerEmail = (pedido.email_cliente || '').toLowerCase();
+
+    // 1) Email al COMPRADOR con TODOS los QRs
+    await sendReceipt({ order });
+
+    // 2) Email INDIVIDUAL a cada invitado (persona con email propio,
+    //    distinto al del comprador) — solo su propio QR.
+    for (const item of order.items as any[]) {
+      const personas = Array.isArray(item.personas) ? item.personas : [];
+      const qrIds    = Array.isArray(item.qr_ids)   ? item.qr_ids   : [];
+      for (let p = 0; p < personas.length; p++) {
+        const persona = personas[p];
+        const email   = (persona?.email || '').trim();
+        if (!email) continue;
+        if (email.toLowerCase() === buyerEmail) continue; // el comprador ya recibió todos
+        const guestOrder = {
+          id:        order.id,
+          pedidoId:  order.pedidoId,
+          items:     [{ ...item, cantidad: 1, personas: [persona], _qrOverride: qrIds[p] || undefined }],
+          comprador: { nombre: persona.nombre || 'Invitado', email },
+          total:     item.precio,
+          fecha:     order.fecha,
+        };
+        await sendReceipt({ order: guestOrder });
+      }
     }
 
     return ok();
@@ -116,6 +130,22 @@ function ok() {
   });
 }
 
+// Llama a send-receipt. No lanza error (un email fallido no debe romper el webhook).
+async function sendReceipt(payload: any) {
+  try {
+    await fetch(`${Deno.env.get('SUPABASE_URL')}/functions/v1/send-receipt`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        Authorization: `Bearer ${Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')}`,
+      },
+      body: JSON.stringify(payload),
+    });
+  } catch (e) {
+    console.error('[mp-webhook] send-receipt falló (pago OK):', e);
+  }
+}
+
 // Reconstruye el objeto `order` que espera send-receipt desde el pedido en DB.
 function buildOrder(pedido: any) {
   const items = (pedido.items_pedido || []).map((ip: any) => ({
@@ -128,6 +158,7 @@ function buildOrder(pedido: any) {
     ttId:       ip.tipo_ticket_id || undefined,
     eventoId:   ip.evento_id || undefined,
     personas:   Array.isArray(ip.personas) ? ip.personas : [],
+    qr_ids:     Array.isArray(ip.qr_ids) ? ip.qr_ids : [],
   }));
   return {
     id:        'FCC-' + String(pedido.id).padStart(6, '0'),
