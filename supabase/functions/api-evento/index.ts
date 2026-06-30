@@ -36,9 +36,13 @@ Deno.serve(async (req: Request) => {
     let eventoId: number | null = null;
     if (req.method === 'POST') { const b = await req.json().catch(() => ({})); eventoId = Number(b.evento_id) || null; }
     else { eventoId = Number(new URL(req.url).searchParams.get('evento_id')) || null; }
-    if (!eventoId) return j({ error: 'Falta evento_id' }, 400, cors);
-
     const sb = createClient(Deno.env.get('SUPABASE_URL')!, Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!);
+
+    // Sin evento_id → devolver la LISTA de eventos (para el selector del ERP)
+    if (!eventoId) {
+      const { data: eventos } = await sb.from('eventos').select('id, nombre, fecha, hora, activo').order('fecha', { ascending: false });
+      return j({ ok: true, eventos: eventos || [] }, 200, cors);
+    }
 
     const [{ data: evento }, { data: tipos }, { data: items }, { data: usados }] = await Promise.all([
       sb.from('eventos').select('id, nombre, fecha, hora, ambiente').eq('id', eventoId).maybeSingle(),
