@@ -174,6 +174,15 @@ function openCheckout() {
   const coCod = document.getElementById('co-codigo'); if (coCod) coCod.value = '';
   const coMsg = document.getElementById('co-codigo-msg'); if (coMsg) coMsg.textContent = '';
 
+  // Cargar crédito del usuario (se aplica solo en el resumen)
+  window._creditoUsuario = 0;
+  if (session?.id) {
+    sb.from('clientes').select('credito').eq('id', session.id).maybeSingle().then(({ data }) => {
+      window._creditoUsuario = data?.credito || 0;
+      renderCheckoutSummary();
+    });
+  }
+
   renderCheckoutSummary();
 
   document.getElementById('checkout-overlay')?.classList.add('open');
@@ -201,8 +210,10 @@ function renderCheckoutSummary() {
   const subtotal  = cartTotal();
   const descuento = calcDescuento(subtotal);
   const base      = subtotal - descuento;
-  const fee       = Math.round(base * 0.04);
-  const total     = base + fee;
+  const credito   = Math.min(window._creditoUsuario || 0, base);
+  const base2     = base - credito;
+  const fee       = Math.round(base2 * 0.04);
+  const total     = base2 + fee;
   let html = cart.map(item => `
     <div class="checkout-order-row">
       <span>${item.nombre} × ${item.cantidad} (${item.tipo})</span>
@@ -211,6 +222,9 @@ function renderCheckoutSummary() {
   if (descuento > 0) {
     const c = window._codigoAplicado;
     html += `<div class="checkout-order-row" style="color:#4ade80;"><span>Descuento (${c.codigo})</span><span>−${formatCLP(descuento)}</span></div>`;
+  }
+  if (credito > 0) {
+    html += `<div class="checkout-order-row" style="color:#4ade80;"><span>🎁 Tu crédito</span><span>−${formatCLP(credito)}</span></div>`;
   }
   html += `
     <div class="checkout-order-row"><span>Cargo por servicio (4%)</span><span>${formatCLP(fee)}</span></div>

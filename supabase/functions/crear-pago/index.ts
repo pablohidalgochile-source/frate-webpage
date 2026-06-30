@@ -42,6 +42,16 @@ Deno.serve(async (req: Request) => {
     // pendientes hace más de 30 min (compras abandonadas / links MP vencidos).
     // Así no se acumulan en el admin ni en los perfiles. No bloquea el flujo.
     const hace30min = new Date(Date.now() - 30 * 60 * 1000).toISOString();
+    // Restaurar crédito de pedidos que van a expirar (compras abandonadas)
+    const { data: expirando } = await sb.from('pedidos')
+      .select('id, cliente_id, credito_usado')
+      .eq('estado', 'pendiente').lt('created_at', hace30min).gt('credito_usado', 0);
+    for (const o of (expirando || [])) {
+      if (o.cliente_id) {
+        const { data: cli } = await sb.from('clientes').select('credito').eq('id', o.cliente_id).maybeSingle();
+        await sb.from('clientes').update({ credito: (cli?.credito || 0) + o.credito_usado }).eq('id', o.cliente_id);
+      }
+    }
     await sb.from('pedidos').update({ estado: 'expirado' })
       .eq('estado', 'pendiente').lt('created_at', hace30min);
 
@@ -121,9 +131,20 @@ Deno.serve(async (req: Request) => {
       }
     }
 
-    const base        = total - descuento;          // subtotal con descuento aplicado
-    const fee         = Math.round(base * FEE_PCT);  // fee sobre el monto con descuento
-    const totalPagado = base + fee;
+    const base = total - descuento;  // subtotal con descuento por código
+
+    // Crédito del usuario ($1.000 por votar, etc.) — se aplica después del código
+    let creditoUsado = 0;
+    if (comprador.clienteId) {
+      const { data: cli } = await sb.from('clientes').select('credito').eq('id', comprador.clienteId).maybeSingle();
+      const credito = cli?.credito || 0;
+      creditoUsado = Math.min(credito, base);
+      if (creditoUsado > 0) await sb.from('clientes').update({ credito: credito - creditoUsado }).eq('id', comprador.clienteId);
+    }
+
+    const base2       = base - creditoUsado;
+    const fee         = Math.round(base2 * FEE_PCT);
+    const totalPagado = base2 + fee;
 
     // ── 3) Crear pedido pendiente ────────────────────────────────
     const { data: pedido, error: e1 } = await sb.from('pedidos').insert({
@@ -131,8 +152,9 @@ Deno.serve(async (req: Request) => {
       nombre_cliente: comprador.nombre,
       email_cliente:  comprador.email,
       estado:         'pendiente',
-      total:          base,
+      total:          base2,
       descuento:      descuento,
+      credito_usado:  creditoUsado,
       codigo_id:      codigoRow?.id || null,
       codigo_texto:   codigoRow?.codigo || null,
       fee_servicio:   fee,

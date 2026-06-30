@@ -546,6 +546,66 @@
 </section>
 
 <!-- ══════════════════════════════════════════════
+     RANKING MUSICAL DEL PUEBLO
+════════════════════════════════════════════════ -->
+<style>
+  #ranking .ranking-list{display:flex;flex-direction:column;gap:8px;max-width:680px;}
+  .ranking-row{display:flex;align-items:center;gap:14px;background:var(--negro-3);border:1px solid #1a1a1c;border-radius:6px;padding:10px 14px;}
+  .ranking-pos{font-family:var(--fuente-display);font-weight:900;font-size:1.3rem;color:var(--dorado);width:28px;text-align:center;flex-shrink:0;}
+  .ranking-cover{width:48px;height:48px;border-radius:4px;object-fit:cover;background:#222;flex-shrink:0;}
+  .ranking-info{flex:1;min-width:0;}
+  .ranking-titulo{color:#fff;font-weight:600;font-size:0.95rem;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+  .ranking-artista{color:var(--gris);font-size:0.8rem;}
+  .ranking-votos{color:var(--rojo);font-weight:900;font-family:var(--fuente-display);font-size:1.1rem;text-align:right;flex-shrink:0;}
+  .ranking-votos span{display:block;font-size:0.6rem;color:var(--gris);font-weight:400;letter-spacing:1px;}
+  .votar-backdrop{display:none;position:fixed;inset:0;z-index:10001;background:rgba(0,0,0,0.85);align-items:flex-start;justify-content:center;padding:60px 20px;overflow-y:auto;}
+  .votar-backdrop.open{display:flex;}
+  .votar-box{background:var(--negro-2);border:1px solid #2a2a2c;border-radius:10px;max-width:480px;width:100%;overflow:hidden;}
+  .votar-head{display:flex;justify-content:space-between;align-items:center;padding:18px 20px;border-bottom:1px solid #1e1e20;font-family:var(--fuente-display);font-weight:900;letter-spacing:1px;text-transform:uppercase;color:#fff;}
+  .votar-close{background:none;border:none;color:var(--gris);font-size:1.2rem;cursor:pointer;}
+  #votar-input{width:100%;box-sizing:border-box;background:var(--negro-3);border:1px solid #2a2a2c;color:#fff;padding:14px;border-radius:6px;margin:16px 20px;width:calc(100% - 40px);outline:none;}
+  #votar-results{padding:0 20px 20px;max-height:50vh;overflow-y:auto;}
+  .votar-result{display:flex;align-items:center;gap:12px;padding:10px;border-radius:6px;cursor:pointer;transition:background .15s;}
+  .votar-result:hover{background:var(--negro-3);}
+  .votar-result img{width:44px;height:44px;border-radius:4px;object-fit:cover;flex-shrink:0;}
+  .vr-titulo{color:#fff;font-size:0.9rem;font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+  .vr-artista{color:var(--gris);font-size:0.78rem;}
+  .vr-btn{background:var(--rojo);color:#fff;padding:6px 14px;border-radius:20px;font-size:0.72rem;font-weight:700;text-transform:uppercase;letter-spacing:1px;flex-shrink:0;}
+</style>
+<section id="ranking">
+  <div class="section-inner">
+    <div class="section-label reveal">El ranking del pueblo</div>
+    <h2 class="section-title reveal">RANKING MUSICAL<br/><span class="gold">DEL PUEBLO</span></h2>
+    <p class="reveal" style="color:var(--gris);max-width:600px;margin-bottom:32px;line-height:1.8;">
+      El Top 10 lo elige la gente. Vota tu canción y <strong style="color:var(--dorado)">gánate $1.000</strong> para tu próxima entrada, solo por registrarte.
+    </p>
+    <div id="ranking-list" class="ranking-list reveal">
+      <div style="color:var(--gris);padding:24px;text-align:center;">Cargando ranking...</div>
+    </div>
+    <div style="margin-top:24px;">
+      <button onclick="openVotarModal()" class="btn-rojo" style="border:none;cursor:pointer;padding:16px 32px;font-family:'Barlow Condensed',sans-serif;font-weight:900;letter-spacing:2px;text-transform:uppercase;border-radius:2px;font-size:1rem;">
+        🎵 ¿Qué canción debería estar Top Ten?
+      </button>
+    </div>
+  </div>
+</section>
+
+<!-- Modal votar canción -->
+<div id="votar-modal" class="votar-backdrop" onclick="if(event.target===this)closeVotarModal()">
+  <div class="votar-box">
+    <div class="votar-head"><span>🎵 Vota tu canción</span><button class="votar-close" onclick="closeVotarModal()">✕</button></div>
+    <div id="votar-loginmsg" style="display:none;text-align:center;padding:28px 24px;">
+      <p style="color:var(--gris);margin-bottom:18px;line-height:1.7;">Para votar necesitas una cuenta. <strong style="color:var(--dorado)">Al registrarte ganas $1.000</strong> de descuento para tu próxima compra. 🎁</p>
+      <button onclick="closeVotarModal();document.getElementById('nav-user-btn').click();" class="btn-rojo" style="border:none;cursor:pointer;padding:14px 28px;font-family:'Barlow Condensed',sans-serif;font-weight:900;letter-spacing:2px;text-transform:uppercase;border-radius:2px;">Crear cuenta / Ingresar</button>
+    </div>
+    <div id="votar-search" style="display:none;">
+      <input id="votar-input" type="text" placeholder="Busca una canción o artista..." oninput="rankingBuscarDebounced()" />
+      <div id="votar-results"></div>
+    </div>
+  </div>
+</div>
+
+<!-- ══════════════════════════════════════════════
      RESERVAS
 ════════════════════════════════════════════════ -->
 <section id="reservas">
@@ -1995,6 +2055,90 @@ function syncFloatingCount() {
 }
 
 // ── Carga eventos desde Supabase y reemplaza FRATE_EVENTOS ────────────────
+// ── RANKING MUSICAL DEL PUEBLO ────────────────────────────────
+let _rankingTimer = null;
+window._rankingResults = [];
+
+async function loadRanking() {
+  const wrap = document.getElementById('ranking-list');
+  if (!wrap) return;
+  try {
+    const { data } = await sb.from('canciones').select('*').order('votos', { ascending: false }).order('id').limit(10);
+    if (!data || !data.length) {
+      wrap.innerHTML = '<div style="color:var(--gris);padding:24px;text-align:center;">Aún no hay votos. ¡Sé el primero en proponer una canción! 🎵</div>';
+      return;
+    }
+    wrap.innerHTML = data.map((c, i) => `
+      <div class="ranking-row">
+        <span class="ranking-pos">${i+1}</span>
+        ${c.cover_url ? `<img src="${c.cover_url}" class="ranking-cover" alt="">` : '<div class="ranking-cover"></div>'}
+        <div class="ranking-info">
+          <div class="ranking-titulo">${c.titulo}</div>
+          <div class="ranking-artista">${c.artista||''}</div>
+        </div>
+        <div class="ranking-votos">${c.votos}<span>votos</span></div>
+      </div>`).join('');
+  } catch(e) { wrap.innerHTML = '<div style="color:var(--gris);padding:24px;text-align:center;">No se pudo cargar el ranking.</div>'; }
+}
+
+function openVotarModal() {
+  const session = Storage.get('frate_session');
+  document.getElementById('votar-modal').classList.add('open');
+  document.body.style.overflow = 'hidden';
+  const login = document.getElementById('votar-loginmsg');
+  const search = document.getElementById('votar-search');
+  if (!session) { login.style.display = 'block'; search.style.display = 'none'; }
+  else {
+    login.style.display = 'none'; search.style.display = 'block';
+    document.getElementById('votar-input').value = '';
+    document.getElementById('votar-results').innerHTML = '';
+    setTimeout(() => document.getElementById('votar-input').focus(), 120);
+  }
+}
+function closeVotarModal() {
+  document.getElementById('votar-modal').classList.remove('open');
+  document.body.style.overflow = '';
+}
+function rankingBuscarDebounced() { clearTimeout(_rankingTimer); _rankingTimer = setTimeout(rankingBuscar, 350); }
+
+async function rankingBuscar() {
+  const q = document.getElementById('votar-input').value.trim();
+  const out = document.getElementById('votar-results');
+  if (!q) { out.innerHTML = ''; return; }
+  out.innerHTML = '<div style="color:var(--gris);padding:12px;">Buscando...</div>';
+  try {
+    const { data } = await sb.functions.invoke('buscar-cancion', { body: { q } });
+    const r = data?.results || [];
+    window._rankingResults = r;
+    if (!r.length) { out.innerHTML = '<div style="color:var(--gris);padding:12px;">Sin resultados.</div>'; return; }
+    out.innerHTML = r.map((s, i) => `
+      <div class="votar-result" onclick="rankingVotar(${i})">
+        ${s.cover ? `<img src="${s.cover}" alt="">` : ''}
+        <div style="flex:1;min-width:0;"><div class="vr-titulo">${s.titulo}</div><div class="vr-artista">${s.artista}</div></div>
+        <span class="vr-btn">Votar</span>
+      </div>`).join('');
+  } catch(e) { out.innerHTML = '<div style="color:var(--gris);padding:12px;">Error al buscar.</div>'; }
+}
+
+async function rankingVotar(idx) {
+  const session = Storage.get('frate_session');
+  if (!session) { openVotarModal(); return; }
+  const s = window._rankingResults[idx];
+  if (!s) return;
+  try {
+    const { data, error } = await sb.rpc('votar_cancion', {
+      p_deezer_id: s.deezer_id, p_titulo: s.titulo, p_artista: s.artista, p_album: s.album,
+      p_cover: s.cover, p_preview: s.preview, p_cliente_id: session.id, p_origen: 'ranking'
+    });
+    if (error) throw error;
+    closeVotarModal();
+    if (data?.ya_votaste)            showToast('Ya habías votado esa canción 🎵');
+    else if (data?.credito_otorgado) showToast('🎉 ¡Voto registrado! Ganaste $1.000 para tu próxima entrada');
+    else                             showToast('🎵 ¡Voto registrado! Gracias por sumar');
+    loadRanking();
+  } catch(e) { showToast('⚠️ No se pudo votar: ' + (e.message || e)); }
+}
+
 // ── CONFIG SECCIONES: oculta/muestra secciones según config_sitio ──
 async function aplicarConfigSecciones() {
   try {
@@ -2085,6 +2229,7 @@ document.addEventListener('DOMContentLoaded', () => {
   // Carga datos en vivo desde Supabase y reemplaza la lista
   loadEventosDesdeSupabase();
   aplicarConfigSecciones();
+  loadRanking();
 
   // Event popup: cerrar con × y con click en backdrop
   document.getElementById('ep-close')?.addEventListener('click', closeEventPopup);
