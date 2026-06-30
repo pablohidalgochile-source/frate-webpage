@@ -1390,6 +1390,12 @@ async function rePrintPedido(pedidoId) {
       .select('*, items_pedido(*)').eq('id', pedidoId).single();
     if (error || !pedido) throw error || new Error('Pedido no encontrado');
 
+    // Defensa: nunca mostrar QRs de un pedido que no está pagado
+    if (pedido.estado !== 'pagado') {
+      if (typeof showToast === 'function') showToast('⏳ Este pedido aún no está pagado. Las entradas aparecen al confirmarse el pago.');
+      return;
+    }
+
     // Reconstruir orderData con el mismo formato que usa showTicket()
     var items = (pedido.items_pedido || []).map(function(ip) {
       return {
@@ -1432,12 +1438,21 @@ async function cuentaCargarHistorial() {
     if (typeof sbMisPedidos === 'function' && session.id) {
       pedidos = await sbMisPedidos(session.id);
     }
-    if (!pedidos || !pedidos.length) {
+    // Solo mostrar: pagados (siempre) y pendientes recientes (<60 min) como "en proceso".
+    // Los pendientes viejos / cancelados / expirados NO se muestran (son compras abandonadas).
+    var ahora = Date.now();
+    pedidos = (pedidos || []).filter(function(p){
+      if (p.estado === 'pagado') return true;
+      if (p.estado === 'pendiente') return (ahora - new Date(p.created_at).getTime()) / 60000 < 60;
+      return false;
+    });
+    if (!pedidos.length) {
       container.innerHTML = '<div style="text-align:center;padding:32px;color:var(--gris);"><div style="font-size:2rem;margin-bottom:8px;">🎟️</div><div>Aún no has comprado tickets</div><div style="font-size:0.75rem;margin-top:8px;"><a href="#tickets" onclick="closeCuenta()" style="color:var(--rojo);text-decoration:none;">Ver próximos eventos →</a></div></div>';
       return;
     }
     var fmt = function(n){ return '$'+n.toLocaleString('es-CL'); };
     container.innerHTML = pedidos.map(function(p){
+      var pagado = p.estado === 'pagado';
       var items = p.items_pedido||[];
       var totalItems = items.reduce(function(s,i){return s+(i.cantidad||0);},0);
       var firstItem = items[0];
@@ -1464,7 +1479,9 @@ async function cuentaCargarHistorial() {
             +'</div>';
         }).join('')+'</div>' : '')
         +'<div style="display:flex;justify-content:space-between;align-items:center;">'
-        +'<button onclick="rePrintPedido('+p.id+')" style="background:transparent;border:1px solid var(--rojo);color:var(--rojo);padding:6px 12px;font-size:0.65rem;letter-spacing:2px;text-transform:uppercase;border-radius:2px;cursor:pointer;font-weight:700;">🖨️ Ver QRs ('+nQR+')</button>'
+        +(pagado
+          ? '<button onclick="rePrintPedido('+p.id+')" style="background:transparent;border:1px solid var(--rojo);color:var(--rojo);padding:6px 12px;font-size:0.65rem;letter-spacing:2px;text-transform:uppercase;border-radius:2px;cursor:pointer;font-weight:700;">🖨️ Ver QRs ('+nQR+')</button>'
+          : '<span style="font-size:0.65rem;color:#f59e0b;letter-spacing:1px;">⏳ Pago en proceso — tus entradas aparecerán al confirmarse</span>')
         +'<span style="font-family:var(--fuente-display);font-weight:900;font-size:1.1rem;color:var(--dorado);">'+fmt(p.total_pagado||p.total)+'</span>'
         +'</div>'
         +'</div>';

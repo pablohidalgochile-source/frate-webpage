@@ -38,6 +38,13 @@ Deno.serve(async (req: Request) => {
       Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!,
     );
 
+    // Limpieza oportunista: marca como 'expirado' los pedidos que quedaron
+    // pendientes hace más de 30 min (compras abandonadas / links MP vencidos).
+    // Así no se acumulan en el admin ni en los perfiles. No bloquea el flujo.
+    const hace30min = new Date(Date.now() - 30 * 60 * 1000).toISOString();
+    await sb.from('pedidos').update({ estado: 'expirado' })
+      .eq('estado', 'pendiente').lt('created_at', hace30min);
+
     const { items, comprador } = await req.json() as {
       items: any[];
       comprador: { nombre: string; email: string; tel?: string; rut?: string; clienteId?: string };
