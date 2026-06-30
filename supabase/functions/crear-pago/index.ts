@@ -129,6 +129,20 @@ Deno.serve(async (req: Request) => {
       }
     }
 
+    // Descuento por GRUPO (si el grupo del cliente llegó a la meta)
+    if (comprador.clienteId) {
+      const eventoId = itemsValidados.find(i => i.ttId)?.eventoId;
+      if (eventoId) {
+        try {
+          const { data: pct } = await sb.rpc('grupo_descuento_pct', { p_cliente: comprador.clienteId, p_evento: Number(eventoId) });
+          if (pct && pct > 0) {
+            const ticketSubtotal = itemsValidados.filter(i => i.ttId).reduce((s, i) => s + i._precio * i.cantidad, 0);
+            membDesc += Math.round(ticketSubtotal * Number(pct) / 100);
+          }
+        } catch (e) { /* sin grupo */ }
+      }
+    }
+
     // Validar código (descuento / RRPP) en el SERVIDOR
     let codigoRow: any = null;
     let descuento = 0;

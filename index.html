@@ -60,6 +60,8 @@
 
   // Referidos: si llega ?ref=username, lo guardamos para el registro
   try { var _r = new URLSearchParams(location.search).get('ref'); if (_r) localStorage.setItem('frate_ref', _r.trim().toLowerCase()); } catch(e) {}
+  // Grupos: si llega ?grupo=CODE, lo guardamos para unirse
+  try { var _g = new URLSearchParams(location.search).get('grupo'); if (_g) localStorage.setItem('frate_grupo', _g.trim().toUpperCase()); } catch(e) {}
 </script>
 
 <!-- ══════════════════════════════════════════════
@@ -619,6 +621,14 @@
         </div>
       </div>
     </div>
+  </div>
+</div>
+
+<!-- Modal Arma tu grupo -->
+<div id="grupo-modal" class="votar-backdrop" onclick="if(event.target===this)closeGrupoModal()">
+  <div class="votar-box">
+    <div class="votar-head"><span>🎟️ Arma tu grupo</span><button class="votar-close" onclick="closeGrupoModal()">✕</button></div>
+    <div id="grupo-body" style="padding:22px;"></div>
   </div>
 </div>
 
@@ -2142,6 +2152,11 @@ async function renderPromos() {
           <button onclick="navigator.clipboard.writeText('${link}').then(()=>showToast('🔗 Link copiado'))" style="flex:1;min-width:120px;background:var(--negro-2);border:1px solid #2a2a2c;color:#fff;padding:11px;border-radius:6px;cursor:pointer;font-size:0.8rem;">📋 Copiar link</button>
           <a href="https://wa.me/?text=${waMsg}" target="_blank" style="flex:1;min-width:120px;text-align:center;background:#25D366;color:#000;padding:11px;border-radius:6px;text-decoration:none;font-weight:700;font-size:0.8rem;">Compartir por WhatsApp</a>
         </div>
+      </div>
+      <div style="background:var(--negro-3);border:1px solid #1a1a1c;border-radius:8px;padding:18px;margin-top:14px;">
+        <div style="color:#fff;font-weight:700;margin-bottom:4px;">🎟️ Arma tu grupo</div>
+        <div style="font-size:0.82rem;color:var(--gris);margin-bottom:12px;line-height:1.6;">Junta a tus amig@s para un evento y, al llegar a la meta, <strong style="color:var(--dorado)">todos obtienen descuento</strong>.</div>
+        <button onclick="closeCuenta();setTimeout(openGrupoModal,200);" class="btn-rojo" style="width:100%;border:none;cursor:pointer;padding:12px;font-family:'Barlow Condensed',sans-serif;font-weight:900;letter-spacing:2px;text-transform:uppercase;border-radius:2px;">Crear / ver mi grupo</button>
       </div>`;
     if (credito <= 0) {
       html += `
@@ -2166,6 +2181,76 @@ async function checkCumple(session) {
     const { data } = await sb.rpc('otorgar_cumple', { p_cliente_id: session.id });
     if (data?.ok) showToast('🎂 ¡Feliz mes de cumpleaños! Te regalamos $' + (data.credito || 0).toLocaleString('es-CL') + ' de crédito');
   } catch(e) { /* silencioso */ }
+}
+
+// ── ARMA TU GRUPO ─────────────────────────────────────────────
+function closeGrupoModal() { document.getElementById('grupo-modal').classList.remove('open'); document.body.style.overflow = ''; }
+function openGrupoModal() {
+  const session = Storage.get('frate_session');
+  document.getElementById('grupo-modal').classList.add('open');
+  document.body.style.overflow = 'hidden';
+  if (!session?.id) {
+    document.getElementById('grupo-body').innerHTML = `<div style="text-align:center;"><p style="color:var(--gris);margin-bottom:16px;">Inicia sesión para armar o unirte a un grupo.</p><button onclick="closeGrupoModal();document.getElementById('nav-user-btn').click();" class="btn-rojo" style="border:none;cursor:pointer;padding:12px 24px;font-family:'Barlow Condensed',sans-serif;font-weight:900;letter-spacing:2px;text-transform:uppercase;border-radius:2px;">Ingresar</button></div>`;
+    return;
+  }
+  let pend = null; try { pend = localStorage.getItem('frate_grupo'); } catch(e) {}
+  if (pend) { unirseGrupo(pend); return; }
+  showGrupoCrear();
+}
+function showGrupoCrear() {
+  const evs = (typeof FRATE_EVENTOS !== 'undefined' ? FRATE_EVENTOS : []).filter(e => e.id);
+  const opts = evs.map(e => `<option value="${e.id}">${e.nombre}</option>`).join('');
+  document.getElementById('grupo-body').innerHTML = `
+    <p style="color:var(--gris);font-size:0.88rem;margin-bottom:14px;line-height:1.6;">Crea un grupo, comparte el link y cuando se sumen suficientes, <strong style="color:var(--dorado)">todos obtienen descuento</strong> en sus entradas. 🔥</p>
+    <label style="font-size:0.75rem;color:var(--gris);">Evento</label>
+    <select id="grupo-evento" style="width:100%;box-sizing:border-box;background:var(--negro-3);border:1px solid #2a2a2c;color:#fff;padding:11px;border-radius:6px;margin:6px 0 14px;">${opts || '<option value="">No hay eventos disponibles</option>'}</select>
+    <button onclick="crearGrupo()" class="btn-rojo" style="width:100%;border:none;cursor:pointer;padding:13px;font-family:'Barlow Condensed',sans-serif;font-weight:900;letter-spacing:2px;text-transform:uppercase;border-radius:2px;">Crear grupo</button>`;
+}
+async function crearGrupo() {
+  const session = Storage.get('frate_session');
+  const evId = parseInt(document.getElementById('grupo-evento').value);
+  if (!evId) { showToast('Selecciona un evento'); return; }
+  const nombre = session.username || session.nombres || 'Anfitrión';
+  try {
+    const { data, error } = await sb.rpc('crear_grupo', { p_creador: session.id, p_evento: evId, p_nombre: nombre });
+    if (error || !data?.ok) throw new Error('No se pudo crear el grupo');
+    showGrupoEstado(data.codigo);
+  } catch(e) { showToast('⚠️ ' + (e.message || e)); }
+}
+async function unirseGrupo(codigo) {
+  const session = Storage.get('frate_session');
+  if (!session?.id) { openGrupoModal(); return; }
+  const nombre = session.username || session.nombres || 'Invitado';
+  try {
+    const { data } = await sb.rpc('unirse_grupo', { p_codigo: codigo, p_cliente: session.id, p_nombre: nombre });
+    try { localStorage.removeItem('frate_grupo'); } catch(e) {}
+    if (!data?.ok) { showToast('⚠️ ' + (data?.error || 'Grupo no encontrado')); showGrupoCrear(); return; }
+    showGrupoEstado(codigo);
+  } catch(e) { showToast('⚠️ ' + (e.message || e)); }
+}
+async function showGrupoEstado(codigo) {
+  const body = document.getElementById('grupo-body');
+  document.getElementById('grupo-modal').classList.add('open'); document.body.style.overflow = 'hidden';
+  body.innerHTML = '<div style="color:var(--gris);text-align:center;padding:12px;">Cargando grupo...</div>';
+  try {
+    const { data } = await sb.rpc('estado_grupo', { p_codigo: codigo });
+    if (!data?.ok) { body.innerHTML = '<div style="color:var(--gris);text-align:center;">Grupo no encontrado.</div>'; return; }
+    const link = 'https://frate.cl/?grupo=' + data.codigo;
+    const pct = Math.min(100, Math.round(data.miembros / data.meta * 100));
+    const wa = encodeURIComponent('¡Súmate a mi grupo en FRATE y obtengamos descuento juntos! ' + link);
+    body.innerHTML = `
+      <div style="text-align:center;margin-bottom:14px;">
+        <div style="color:#fff;font-weight:700;font-size:1.05rem;">${data.evento || 'Tu grupo'}</div>
+        <div style="font-size:0.82rem;color:${data.alcanzado ? '#4ade80' : 'var(--gris)'};margin-top:4px;">${data.alcanzado ? '🎉 ¡Meta alcanzada! ' + data.descuento + '% para todos' : 'Faltan ' + (data.meta - data.miembros) + ' para el ' + data.descuento + '% de descuento'}</div>
+      </div>
+      <div style="background:#1a1a1c;border-radius:20px;height:14px;overflow:hidden;margin-bottom:6px;"><div style="height:100%;width:${pct}%;background:${data.alcanzado ? '#4ade80' : 'var(--rojo)'};transition:width .4s;"></div></div>
+      <div style="text-align:center;color:var(--gris);font-size:0.8rem;margin-bottom:16px;">${data.miembros}/${data.meta} personas</div>
+      <div style="display:flex;gap:8px;margin-bottom:12px;">
+        <button onclick="navigator.clipboard.writeText('${link}').then(()=>showToast('🔗 Link copiado'))" style="flex:1;background:var(--negro-3);border:1px solid #2a2a2c;color:#fff;padding:11px;border-radius:6px;cursor:pointer;font-size:0.8rem;">📋 Copiar link</button>
+        <a href="https://wa.me/?text=${wa}" target="_blank" style="flex:1;text-align:center;background:#25D366;color:#000;padding:11px;border-radius:6px;text-decoration:none;font-weight:700;font-size:0.8rem;">WhatsApp</a>
+      </div>
+      <div style="font-size:0.75rem;color:var(--gris);line-height:1.8;">${(data.nombres || []).filter(Boolean).map(n => '👤 ' + n).join(' · ')}</div>`;
+  } catch(e) { body.innerHTML = '<div style="color:var(--gris);text-align:center;">No se pudo cargar el grupo.</div>'; }
 }
 
 // ── RANKING MUSICAL DEL PUEBLO ────────────────────────────────
@@ -2379,6 +2464,8 @@ document.addEventListener('DOMContentLoaded', () => {
   aplicarConfigSecciones();
   aplicarTextos();
   loadRanking();
+  // Si llegó por un link de grupo (?grupo=), abrir el flujo de unirse
+  try { if (localStorage.getItem('frate_grupo')) setTimeout(openGrupoModal, 900); } catch(e) {}
 
   // Event popup: cerrar con × y con click en backdrop
   document.getElementById('ep-close')?.addEventListener('click', closeEventPopup);

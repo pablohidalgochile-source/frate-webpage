@@ -572,6 +572,16 @@
         <div style="text-align:center;padding:24px;color:var(--muted);">Cargando...</div>
       </div></div>
 
+      <div style="font-size:0.7rem;letter-spacing:1px;text-transform:uppercase;color:var(--muted);margin:22px 0 10px;">👥 Roles & Admins</div>
+      <p style="color:var(--muted);font-size:0.78rem;margin-bottom:10px;">Da de alta administradores. Un admin puede entrar a este panel y gestionar todo.</p>
+      <div class="card"><div class="cb">
+        <div id="config-admins-list" style="margin-bottom:14px;"><div style="color:var(--muted);padding:8px;">Cargando...</div></div>
+        <div style="display:flex;gap:8px;flex-wrap:wrap;">
+          <input id="nuevo-admin" type="text" placeholder="email o username del nuevo admin" style="flex:1;min-width:200px;background:var(--bg3);border:1px solid var(--border);color:var(--text);padding:9px 11px;border-radius:6px;" />
+          <button class="btn btn-p btn-sm" onclick="promoverAdmin()">Hacer admin</button>
+        </div>
+      </div></div>
+
       <div style="font-size:0.7rem;letter-spacing:1px;text-transform:uppercase;color:var(--muted);margin:22px 0 10px;">🎚️ Valores configurables</div>
       <p style="color:var(--muted);font-size:0.78rem;margin-bottom:10px;">Montos y reglas editables (puntos, regalo de cumpleaños, referidos…).</p>
       <div class="card"><div class="cb" id="config-valores-list">
@@ -3046,9 +3056,45 @@ async function saveValor(clave, valor) {
   else showToast('✓ Guardado');
 }
 
+async function renderRolesAdmins() {
+  const wrap = document.getElementById('config-admins-list');
+  if (!wrap) return;
+  try {
+    const { data } = await sb.from('clientes').select('id,username,email,nombres,apellidos,rol').eq('rol','admin').order('email');
+    if (!data || !data.length) { wrap.innerHTML = '<div style="color:var(--muted);padding:8px;">No hay admins. Agrega el primero abajo.</div>'; return; }
+    wrap.innerHTML = data.map(u => `
+      <div style="display:flex;align-items:center;justify-content:space-between;gap:10px;padding:9px 4px;border-bottom:1px solid #1e1e20;">
+        <div><div class="tb" style="font-size:0.88rem">${u.username?'@'+u.username:((u.nombres||'')+' '+(u.apellidos||'')).trim()||'—'}</div><div class="tm" style="font-size:0.72rem">${u.email||''}</div></div>
+        <button class="btn btn-del btn-sm" onclick="quitarAdmin('${u.id}','${(u.email||'').replace(/'/g,'')}')">Quitar admin</button>
+      </div>`).join('');
+  } catch(e) { wrap.innerHTML = `<div style="color:var(--rojo);padding:8px;">Error: ${e.message}</div>`; }
+}
+async function promoverAdmin() {
+  const v = (document.getElementById('nuevo-admin').value || '').trim().toLowerCase();
+  if (!v) { showToast('Ingresa email o username', true); return; }
+  try {
+    const { data } = await sb.from('clientes').select('id,email,username,rol').or(`email.eq.${v},username.eq.${v}`).maybeSingle();
+    if (!data) { showToast('No se encontró ese usuario. ¿Ya tiene cuenta?', true); return; }
+    const { error } = await sb.from('clientes').update({ rol: 'admin' }).eq('id', data.id);
+    if (error) throw error;
+    document.getElementById('nuevo-admin').value = '';
+    showToast('✅ ' + (data.username?'@'+data.username:data.email) + ' ahora es admin');
+    renderRolesAdmins();
+  } catch(e) { showToast('Error: ' + (e.message||e), true); }
+}
+async function quitarAdmin(id, email) {
+  const { data: { user } } = await sb.auth.getUser();
+  if (user && user.id === id) { showToast('No puedes quitarte admin a ti mismo', true); return; }
+  if (!confirm('¿Quitar permisos de admin a ' + email + '?')) return;
+  const { error } = await sb.from('clientes').update({ rol: 'usuario' }).eq('id', id);
+  if (error) { showToast('Error: '+error.message, true); return; }
+  showToast('Admin removido'); renderRolesAdmins();
+}
+
 async function renderConfigSecciones() {
   const wrap = document.getElementById('config-secciones-list');
   cargarPreviewVideo();
+  renderRolesAdmins();
   renderValoresConfig();
   renderTextos();
   try {
