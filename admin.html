@@ -198,7 +198,7 @@
     <div class="tb-actions">
       <span id="sync-status" style="font-size:0.7rem;color:var(--muted);"></span>
       <button class="btn btn-s btn-sm" onclick="syncAll()">↻ Sync</button>
-      <button class="btn btn-p btn-sm" onclick="go('eventos');setTimeout(()=>openModal('modal-evento'),100)">+ Evento</button>
+      <button class="btn btn-p btn-sm" onclick="go('eventos');setTimeout(()=>{openModal('modal-evento');resetEventoForm()},100)">+ Evento</button>
     </div>
   </div>
   <div id="content">
