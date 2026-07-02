@@ -225,28 +225,27 @@
     <!-- EVENTOS -->
     <div class="panel" id="p-eventos">
       <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:18px;">
-        <h2 style="font-family:var(--disp);font-weight:900;font-size:1.6rem;">EVENTOS</h2>
-        <button class="btn btn-p" onclick="openModal('modal-evento');resetEventoForm()">+ Nuevo evento</button>
+        <h2 id="eventos-titulo" style="font-family:var(--disp);font-weight:900;font-size:1.6rem;">EVENTOS</h2>
+        <div style="display:flex;gap:8px;">
+          <button class="btn btn-s btn-sm" onclick="renderEventosArchivados()">🗄️ Archivados</button>
+          <button class="btn btn-s btn-sm" onclick="renderEventos()">← Activos</button>
+          <button class="btn btn-p" onclick="openModal('modal-evento');resetEventoForm()">+ Nuevo evento</button>
+        </div>
       </div>
-      <div class="card"><div class="tw"><table><thead><tr><th>Evento</th><th>Fecha</th><th>Ambiente</th><th>DJs</th><th>Tickets</th><th>Estado</th><th>Acciones</th></tr></thead><tbody id="tb-eventos"></tbody></table></div></div>
+      <div class="card"><div class="tw"><table><thead><tr><th>Evento</th><th>Fecha</th><th>Ambiente</th><th>Tickets</th><th>Ingresos</th><th>Estado</th><th>Acciones</th></tr></thead><tbody id="tb-eventos"></tbody></table></div></div>
     </div>
 
     <!-- TIPOS DE TICKET -->
     <div class="panel" id="p-tickets-tipos">
-      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px;">
-        <div>
-          <h2 style="font-family:var(--disp);font-weight:900;font-size:1.6rem;">TIPOS DE TICKET</h2>
-          <div style="font-size:0.75rem;color:var(--muted);margin-top:4px;">Selecciona un evento para gestionar sus tickets</div>
-        </div>
-        <div style="display:flex;gap:8px;align-items:center;">
-          <select id="tt-evento-sel" onchange="renderTiposTicket()" style="background:var(--bg3);border:1px solid var(--border);color:var(--text);padding:7px 12px;border-radius:var(--r);font-family:var(--font);font-size:0.82rem;outline:none;"></select>
-          <button class="btn btn-p btn-sm" onclick="openTicketTypeModal()">+ Agregar tipo</button>
-        </div>
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:6px;">
+        <h2 style="font-family:var(--disp);font-weight:900;font-size:1.6rem;">TIPOS DE TICKET</h2>
+        <button class="btn btn-p btn-sm" onclick="abrirCatalogoTicket()">+ Nuevo tipo</button>
       </div>
-      <div class="card">
-        <div class="tt-header"><span>Nombre del ticket</span><span>Disponibles</span><span>Comprados</span><span>Devueltos</span><span>Cortesías</span><span>Validados</span><span>Valor</span><span>Total</span><span></span></div>
-        <div id="tt-list"></div>
-      </div>
+      <p style="color:var(--muted);font-size:0.8rem;margin-bottom:16px;">Catálogo de todas las formas posibles de ticket. Al crear un evento eliges de aquí, y ajustas precio y stock para cada evento.</p>
+      <div class="tw"><table>
+        <thead><tr><th>Nombre</th><th>Descripción</th><th>Precio sugerido</th><th>Máx/compra</th><th>Estado</th><th></th></tr></thead>
+        <tbody id="tb-catalogo"><tr><td colspan="6" style="text-align:center;color:var(--muted);padding:20px">Cargando...</td></tr></tbody>
+      </table></div>
     </div>
 
     <!-- CORTESÍAS -->
@@ -611,14 +610,17 @@
       <div class="fg"><label>Descripción</label><textarea id="ev-desc" placeholder="La noche de trap más esperada..."></textarea></div>
       <div class="fg"><label>URL imagen del evento</label><input type="url" id="ev-img" placeholder="https://..." /></div>
     </div>
-    <div style="font-size:0.65rem;letter-spacing:2px;text-transform:uppercase;color:var(--rojo);margin:12px 0 6px;">Links & Tickets</div>
-    <div class="fg"><label>🎟️ Link de tickets externo (Passline, Fintoc, etc.)</label><input type="url" id="ev-link-ext" placeholder="https://passline.com/..." /></div>
-    <div class="form-3">
-      <div class="fg"><label>📸 Instagram (post del evento)</label><input type="url" id="ev-link-ig" placeholder="https://instagram.com/p/..." /></div>
-      <div class="fg"><label>🎵 TikTok</label><input type="url" id="ev-link-tiktok" placeholder="https://tiktok.com/..." /></div>
-      <div class="fg"><label>📘 Facebook</label><input type="url" id="ev-link-fb" placeholder="https://facebook.com/..." /></div>
+    <div class="fg"><label>🤝 Links de colaborador (opcional — productora/universidad asociada, uno por línea)</label><textarea id="ev-link-colab" placeholder="https://instagram.com/productora..."></textarea></div>
+
+    <div style="font-size:0.65rem;letter-spacing:2px;text-transform:uppercase;color:var(--rojo);margin:16px 0 8px;">🎟️ Tickets de este evento</div>
+    <div id="ev-tickets-list" style="display:flex;flex-direction:column;gap:8px;margin-bottom:10px;"></div>
+    <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap;">
+      <select id="ev-cat-sel" style="flex:1;min-width:180px;background:var(--bg3);border:1px solid var(--border);color:var(--text);padding:9px 11px;border-radius:6px;"></select>
+      <button type="button" class="btn btn-g btn-sm" onclick="agregarTicketDesdeCatalogo()">+ Agregar del catálogo</button>
+      <button type="button" class="btn btn-p btn-sm" onclick="abrirCatalogoTicket(null, true)">+ Crear nuevo tipo</button>
     </div>
-    <div class="toggle-row"><span style="font-size:0.82rem;">Evento activo (visible en frate.cl)</span><label class="sw"><input type="checkbox" id="ev-activo" checked><span class="sl"></span></label></div>
+
+    <div class="toggle-row" style="margin-top:16px;"><span style="font-size:0.82rem;">Evento activo (visible en frate.cl)</span><label class="sw"><input type="checkbox" id="ev-activo" checked><span class="sl"></span></label></div>
   </div>
   <div class="mfoot"><button class="btn btn-g" onclick="closeModal('modal-evento')">Cancelar</button><button class="btn btn-p" onclick="saveEvento()">Guardar evento</button></div>
 </div></div>
@@ -634,6 +636,22 @@
     <div class="form-3"><div class="fg"><label>Precio (CLP)</label><input type="number" id="tt-precio" placeholder="9000" /></div><div class="fg"><label>Cant. disponible</label><input type="number" id="tt-disp" placeholder="100" /></div><div class="fg"><label>Solo web</label><select id="tt-soloWeb"><option value="true">Sí</option><option value="false">No</option></select></div></div>
   </div>
   <div class="mfoot"><button class="btn btn-g" onclick="closeModal('modal-tt')">Cancelar</button><button class="btn btn-p" onclick="saveTT()">Guardar tipo</button></div>
+</div></div>
+
+<!-- Catálogo de ticket -->
+<div class="mo" id="modal-catalogo"><div class="mb">
+  <div class="mh"><span class="mht" id="cat-title">Nuevo tipo de ticket</span><button class="mc" onclick="closeModal('modal-catalogo')">✕</button></div>
+  <div class="mbody">
+    <input type="hidden" id="cat-id" value="" />
+    <div class="fg"><label>Nombre</label><input type="text" id="cat-nombre" placeholder="Anticipada, VIP, Preventa…" /></div>
+    <div class="fg"><label>Descripción</label><input type="text" id="cat-desc" placeholder="Ej: Preventa a precio reducido" /></div>
+    <div class="form-2">
+      <div class="fg"><label>Precio sugerido (CLP)</label><input type="number" id="cat-precio" placeholder="8000" /></div>
+      <div class="fg"><label>Máx. por compra</label><input type="number" id="cat-max" placeholder="6" /></div>
+    </div>
+    <div class="toggle-row"><span style="font-size:0.82rem;">Activo (disponible para eventos)</span><label class="sw"><input type="checkbox" id="cat-activo" checked><span class="sl"></span></label></div>
+  </div>
+  <div class="mfoot"><button class="btn btn-g" onclick="closeModal('modal-catalogo')">Cancelar</button><button class="btn btn-p" onclick="guardarCatalogoTicket()">Guardar tipo</button></div>
 </div></div>
 
 <!-- Cortesía -->
@@ -1126,6 +1144,7 @@ async function renderDash() {
 // ── EVENTOS ──────────────────────────────────────────────────
 async function renderEventos() {
   const tbody = document.getElementById('tb-eventos');
+  const tit = document.getElementById('eventos-titulo'); if (tit) tit.textContent = 'EVENTOS';
   tbody.innerHTML = `<tr><td colspan="7" style="text-align:center;color:var(--muted);padding:20px">Cargando...</td></tr>`;
   try {
     const [{ data: evs, error }, { data: itemsPagados }] = await Promise.all([
@@ -1144,9 +1163,11 @@ async function renderEventos() {
       ingresosPorEvento[eid] = (ingresosPorEvento[eid]||0) + ((ip.cantidad||0)*(ip.precio_unitario||0));
     });
 
-    document.getElementById('nb-eventos').textContent = evs?.length || 0;
-    tbody.innerHTML = evs?.length
-      ? evs.map(ev=>{
+    const activos = (evs||[]).filter(e => !e.archivado);
+    document.getElementById('nb-eventos').textContent = activos.length;
+    window._vendidosPorEvento = vendidosPorEvento;
+    tbody.innerHTML = activos.length
+      ? activos.map(ev=>{
           const vendidos = vendidosPorEvento[ev.id] || 0;
           const ingresos = ingresosPorEvento[ev.id] || 0;
           return `<tr>
@@ -1158,9 +1179,9 @@ async function renderEventos() {
           <td><span class="badge ${ev.activo?'b-g':'b-gr'}">${ev.activo?'Activo':'Inactivo'}</span></td>
           <td><div style="display:flex;gap:4px;">
             <button class="btn btn-g btn-sm" onclick="editEvento(${ev.id})">Editar</button>
-            <button class="btn btn-s btn-sm" onclick="go('tickets-tipos');setTimeout(()=>{document.getElementById('tt-evento-sel').value=${ev.id};renderTiposTicket()},200)" title="Gestionar tickets">🎟️</button>
             <button class="btn btn-gold btn-sm" onclick="exportarAsistentes(${ev.id})" title="Lista para puerta">📋</button>
-            <button class="btn btn-del btn-sm" onclick="deleteEvento(${ev.id})">×</button>
+            <button class="btn btn-s btn-sm" onclick="archivarEvento(${ev.id},${vendidos})" title="Archivar">🗄️</button>
+            <button class="btn btn-del btn-sm" onclick="deleteEvento(${ev.id},${vendidos})" title="Eliminar">×</button>
           </div></td>
         </tr>`;
         }).join('')
@@ -1214,9 +1235,12 @@ async function exportarAsistentes(eventoId) {
 function resetEventoForm() {
   document.getElementById('ev-id').value = '';
   document.getElementById('me-title').textContent = 'Nuevo evento';
-  ['ev-nombre','ev-fecha','ev-hora','ev-djs','ev-desc','ev-img','ev-link-ext','ev-link-ig','ev-link-tiktok','ev-link-fb'].forEach(id => { const el=document.getElementById(id); if(el) el.value=''; });
+  ['ev-nombre','ev-fecha','ev-hora','ev-djs','ev-desc','ev-img','ev-link-colab'].forEach(id => { const el=document.getElementById(id); if(el) el.value=''; });
   document.getElementById('ev-ambiente').value = 'Fuego';
   document.getElementById('ev-activo').checked = true;
+  window._evTickets = [];
+  renderEvTickets();
+  poblarCatalogoDropdown();
 }
 
 async function editEvento(evId) {
@@ -1231,11 +1255,10 @@ async function editEvento(evId) {
   document.getElementById('ev-ambiente').value = ev.ambiente || 'Fuego';
   document.getElementById('ev-desc').value = ev.descripcion || '';
   document.getElementById('ev-img').value = ev.imagen_url || '';
-  document.getElementById('ev-link-ext').value = ev.link_externo || '';
-  document.getElementById('ev-link-ig').value = ev.link_ig || '';
-  document.getElementById('ev-link-tiktok').value = ev.link_tiktok || '';
-  document.getElementById('ev-link-fb').value = ev.link_fb || '';
+  document.getElementById('ev-link-colab').value = ev.link_colaborador || '';
   document.getElementById('ev-activo').checked = ev.activo !== false;
+  await cargarEvTickets(ev.id);
+  poblarCatalogoDropdown();
   openModal('modal-evento');
 }
 
@@ -1245,68 +1268,228 @@ async function saveEvento() {
   if (!nombre) { showToast('Ingresa un nombre', true); return; }
   const data = {
     nombre,
-    fecha:         document.getElementById('ev-fecha').value || null,
-    hora:          document.getElementById('ev-hora').value || '23:00',
-    djs:           document.getElementById('ev-djs').value.split(',').map(s=>s.trim()).filter(Boolean),
-    ambiente:      document.getElementById('ev-ambiente').value,
-    descripcion:   document.getElementById('ev-desc').value,
-    imagen_url:    document.getElementById('ev-img').value || null,
-    link_externo:  document.getElementById('ev-link-ext').value.trim() || null,
-    link_ig:       document.getElementById('ev-link-ig').value.trim() || null,
-    link_tiktok:   document.getElementById('ev-link-tiktok').value.trim() || null,
-    link_fb:       document.getElementById('ev-link-fb').value.trim() || null,
-    activo:        document.getElementById('ev-activo').checked
+    fecha:            document.getElementById('ev-fecha').value || null,
+    hora:             document.getElementById('ev-hora').value || '23:00',
+    djs:              document.getElementById('ev-djs').value.split(',').map(s=>s.trim()).filter(Boolean),
+    ambiente:         document.getElementById('ev-ambiente').value,
+    descripcion:      document.getElementById('ev-desc').value,
+    imagen_url:       document.getElementById('ev-img').value || null,
+    link_colaborador: document.getElementById('ev-link-colab').value.trim() || null,
+    activo:           document.getElementById('ev-activo').checked
   };
   try {
-    if (evId) {
-      const { error } = await sb.from('eventos').update(data).eq('id', evId);
+    let eventoId = evId ? parseInt(evId) : null;
+    if (eventoId) {
+      const { error } = await sb.from('eventos').update(data).eq('id', eventoId);
       if (error) throw error;
-      showToast('✅ Evento actualizado');
     } else {
-      const { error } = await sb.from('eventos').insert(data);
+      const { data: nuevo, error } = await sb.from('eventos').insert(data).select().single();
       if (error) throw error;
-      showToast('✅ Evento creado — ahora agrega tipos de ticket');
+      eventoId = nuevo.id;
     }
+    await guardarEvTickets(eventoId);
     closeModal('modal-evento');
     renderEventos();
-    populateEventoSelects();
+    if (typeof populateEventoSelects === 'function') populateEventoSelects();
+    showToast('✅ Evento guardado');
   } catch(e) { showToast('Error: '+e.message, true); }
 }
 
-async function deleteEvento(evId) {
-  // Si el evento tiene ventas (órdenes), NO se puede borrar (rompería el historial)
-  const { count: ventas } = await sb.from('items_pedido').select('*', { count:'exact', head:true }).eq('evento_id', evId);
-  if (ventas && ventas > 0) {
-    if (confirm(`Este evento tiene ${ventas} venta(s) y no se puede borrar (perderías el historial).\n\n¿Quieres DESACTIVARLO? (deja de mostrarse en frate.cl pero conserva las ventas)`)) {
-      const { error } = await sb.from('eventos').update({ activo: false }).eq('id', evId);
-      if (error) { showToast('Error: '+error.message, true); return; }
-      showToast('Evento desactivado (oculto en frate.cl)');
-      renderEventos();
-    }
+// ── TICKETS DEL EVENTO (dentro del modal de evento) ──────────
+window._evTickets = [];
+window._evTicketsRemoved = [];
+window._catalogoCache = [];
+
+async function poblarCatalogoDropdown() {
+  const sel = document.getElementById('ev-cat-sel');
+  if (!sel) return;
+  const { data } = await sb.from('catalogo_tickets').select('*').eq('activo', true).order('orden').order('nombre');
+  window._catalogoCache = data || [];
+  sel.innerHTML = '<option value="">Elige un tipo del catálogo…</option>' + (data||[]).map(c=>`<option value="${c.id}">${c.nombre} · ${clp(c.precio)}</option>`).join('');
+}
+
+async function cargarEvTickets(eventoId) {
+  window._evTicketsRemoved = [];
+  const { data } = await sb.from('tipos_ticket').select('*').eq('evento_id', eventoId).order('id');
+  window._evTickets = (data||[]).map(t => ({ id:t.id, catalogo_id:t.catalogo_id, nombre:t.nombre, precio:t.precio, disponible:t.disponible, estado:t.estado }));
+  renderEvTickets();
+}
+
+function renderEvTickets() {
+  const wrap = document.getElementById('ev-tickets-list');
+  if (!wrap) return;
+  if (!window._evTickets.length) { wrap.innerHTML = '<div style="color:var(--muted);font-size:0.8rem;padding:8px;">Aún no agregaste tickets. Elige del catálogo o crea uno nuevo.</div>'; return; }
+  wrap.innerHTML = window._evTickets.map((t,i)=>`
+    <div style="display:grid;grid-template-columns:1fr 100px 100px 110px 32px;gap:8px;align-items:center;background:var(--bg2);border:1px solid var(--border);border-radius:8px;padding:8px 10px;">
+      <div style="font-size:0.85rem;font-weight:600;">${t.nombre}</div>
+      <input type="number" value="${t.precio}" onchange="window._evTickets[${i}].precio=parseInt(this.value)||0" title="Precio" style="background:var(--bg3);border:1px solid var(--border);color:var(--text);padding:6px 8px;border-radius:5px;font-size:0.8rem;" />
+      <input type="number" value="${t.disponible}" onchange="window._evTickets[${i}].disponible=parseInt(this.value)||0" title="Stock" style="background:var(--bg3);border:1px solid var(--border);color:var(--text);padding:6px 8px;border-radius:5px;font-size:0.8rem;" />
+      <select onchange="window._evTickets[${i}].estado=this.value" style="background:var(--bg3);border:1px solid var(--border);color:var(--text);padding:6px 8px;border-radius:5px;font-size:0.8rem;">
+        ${['Activo','Agotado','Cerrado','Oculto'].map(e=>`<option ${t.estado===e?'selected':''}>${e}</option>`).join('')}
+      </select>
+      <button type="button" class="btn btn-del btn-sm" onclick="quitarEvTicket(${i})">×</button>
+    </div>`).join('');
+}
+
+function agregarTicketDesdeCatalogo() {
+  const sel = document.getElementById('ev-cat-sel');
+  const catId = parseInt(sel.value);
+  if (!catId) { showToast('Elige un tipo del catálogo'); return; }
+  const cat = window._catalogoCache.find(c=>c.id===catId);
+  if (!cat) return;
+  if (window._evTickets.some(t=>t.catalogo_id===catId)) { showToast('Ese tipo ya está en el evento'); return; }
+  window._evTickets.push({ id:null, catalogo_id:catId, nombre:cat.nombre, precio:cat.precio, disponible:100, estado:'Activo' });
+  renderEvTickets(); sel.value = '';
+}
+
+function quitarEvTicket(i) {
+  const t = window._evTickets[i];
+  if (t.id) window._evTicketsRemoved.push(t.id);
+  window._evTickets.splice(i,1);
+  renderEvTickets();
+}
+
+async function guardarEvTickets(eventoId) {
+  for (const t of window._evTickets) {
+    const row = { evento_id: eventoId, catalogo_id: t.catalogo_id||null, nombre: t.nombre, precio: t.precio||0, disponible: t.disponible||0, estado: t.estado||'Activo', solo_web: true, max_por_compra: 6 };
+    if (t.id) await sb.from('tipos_ticket').update(row).eq('id', t.id);
+    else      await sb.from('tipos_ticket').insert(row);
+  }
+  for (const id of (window._evTicketsRemoved||[])) {
+    const { count } = await sb.from('items_pedido').select('*',{count:'exact',head:true}).eq('tipo_ticket_id', id);
+    if (count && count>0) { showToast('Un tipo con ventas no se borró (tiene entradas vendidas).'); continue; }
+    await sb.from('tipos_ticket').delete().eq('id', id);
+  }
+  window._evTicketsRemoved = [];
+}
+
+async function deleteEvento(evId, vendidos) {
+  if (vendidos && vendidos > 0) {
+    showToast('Este evento tiene ventas — archívalo (🗄️) en vez de borrarlo.', true);
     return;
   }
-  if (!confirm('¿Eliminar este evento y todos sus tickets?')) return;
+  if (!confirm('¿Eliminar este evento PARA SIEMPRE? Se borran también sus tipos de ticket.\n\nEsta acción NO se puede deshacer.')) return;
   try {
     await sb.from('tipos_ticket').delete().eq('evento_id', evId);
     const { error } = await sb.from('eventos').delete().eq('id', evId);
     if (error) throw error;
-    showToast('Evento eliminado');
+    showToast('Evento eliminado definitivamente');
     renderEventos();
   } catch(e) { showToast('Error: '+e.message, true); }
 }
 
+async function archivarEvento(evId, vendidos) {
+  const tieneVentas = vendidos && vendidos > 0;
+  const msg = tieneVentas
+    ? `Este evento tiene ${vendidos} entrada(s) vendida(s).\n\nAl archivarlo, esas compras quedan marcadas como "REQUIERE DEVOLUCIÓN" (las verás en la sección Devoluciones).\n\n¿Archivar?`
+    : '¿Archivar este evento? Podrás restaurarlo cuando quieras desde Archivados.';
+  if (!confirm(msg)) return;
+  try {
+    await sb.from('eventos').update({ archivado: true, activo: false, archivado_at: new Date().toISOString() }).eq('id', evId);
+    if (tieneVentas) {
+      const { data: items } = await sb.from('items_pedido').select('pedido_id, pedidos!inner(estado)').eq('evento_id', evId).eq('pedidos.estado', 'pagado');
+      const pedidoIds = [...new Set((items||[]).map(i=>i.pedido_id))];
+      if (pedidoIds.length) await sb.from('pedidos').update({ estado: 'requiere_reembolso' }).in('id', pedidoIds);
+    }
+    showToast(tieneVentas ? '🗄️ Archivado — quedaron devoluciones pendientes' : '🗄️ Evento archivado');
+    renderEventos();
+  } catch(e) { showToast('Error: '+e.message, true); }
+}
+
+async function restaurarEvento(evId) {
+  if (!confirm('¿Restaurar este evento? Volverá a la lista de eventos (inactivo por defecto).')) return;
+  await sb.from('eventos').update({ archivado: false, archivado_at: null }).eq('id', evId);
+  showToast('Evento restaurado');
+  renderEventosArchivados();
+}
+
+// ── EVENTOS ARCHIVADOS ───────────────────────────────────────
+async function renderEventosArchivados() {
+  const tbody = document.getElementById('tb-eventos');
+  document.getElementById('eventos-titulo').textContent = 'EVENTOS ARCHIVADOS';
+  tbody.innerHTML = `<tr><td colspan="7" style="text-align:center;color:var(--muted);padding:20px">Cargando...</td></tr>`;
+  try {
+    const [{ data: evs }, { data: itemsPagados }] = await Promise.all([
+      sb.from('eventos').select('*').eq('archivado', true).order('archivado_at', { ascending: false }),
+      sb.from('items_pedido').select('evento_id,cantidad,pedidos!inner(estado)').not('evento_id','is',null).eq('pedidos.estado','pagado')
+    ]);
+    const vend = {}; (itemsPagados||[]).forEach(i => { vend[i.evento_id] = (vend[i.evento_id]||0) + (i.cantidad||0); });
+    if (!evs || !evs.length) { tbody.innerHTML = `<tr><td colspan="7" style="text-align:center;color:var(--muted);padding:24px">No hay eventos archivados</td></tr>`; return; }
+    tbody.innerHTML = evs.map(ev=>{
+      const v = vend[ev.id] || 0;
+      return `<tr>
+        <td class="tb">${ev.nombre}</td>
+        <td class="tm">${ev.fecha} · ${ev.hora||''}h</td>
+        <td><span class="badge b-gr">${ev.ambiente||'—'}</span></td>
+        <td><strong style="color:var(--verde)">${v}</strong><div style="font-size:0.6rem;color:var(--muted)">asistentes</div></td>
+        <td>${v>0?'<span class="badge b-r">devoluciones</span>':'—'}</td>
+        <td><span class="badge b-gr">Archivado</span></td>
+        <td><div style="display:flex;gap:4px;">
+          <button class="btn btn-g btn-sm" onclick="restaurarEvento(${ev.id})">↩ Restaurar</button>
+          ${v>0?'':`<button class="btn btn-del btn-sm" onclick="deleteEvento(${ev.id},0)" title="Eliminar definitivo">×</button>`}
+        </div></td>
+      </tr>`;
+    }).join('');
+  } catch(e) { tbody.innerHTML = `<tr><td colspan="7" style="color:var(--rojo);padding:12px">Error: ${e.message}</td></tr>`; }
+}
+
 // ── TIPOS DE TICKET ──────────────────────────────────────────
 async function renderTiposTicketPanel() {
-  const { data: evs } = await sb.from('eventos').select('id,nombre').order('fecha');
-  const sel = document.getElementById('tt-evento-sel');
-  if (sel && evs?.length) {
-    sel.innerHTML = evs.map(ev=>`<option value="${ev.id}">${ev.nombre}</option>`).join('');
-    renderTiposTicket();
-  } else if (sel) {
-    sel.innerHTML = '<option>Sin eventos</option>';
-    document.getElementById('tt-list').innerHTML = '<div style="padding:24px;text-align:center;color:var(--muted);">Crea un evento primero</div>';
-  }
+  const tb = document.getElementById('tb-catalogo');
+  if (!tb) return;
+  try {
+    const { data } = await sb.from('catalogo_tickets').select('*').order('orden').order('nombre');
+    if (!data || !data.length) { tb.innerHTML = `<tr><td colspan="6" style="text-align:center;color:var(--muted);padding:20px">Sin tipos. Crea el primero con "+ Nuevo tipo".</td></tr>`; return; }
+    tb.innerHTML = data.map(c=>`<tr>
+      <td class="tb">${c.nombre}</td>
+      <td class="tm" style="font-size:0.78rem">${c.descripcion||'—'}</td>
+      <td class="tb" style="color:var(--dorado)">${clp(c.precio)}</td>
+      <td>${c.max_por_compra||6}</td>
+      <td><span class="badge ${c.activo?'b-g':'b-gr'}">${c.activo?'Activo':'Inactivo'}</span></td>
+      <td><div style="display:flex;gap:4px">
+        <button class="btn btn-ok btn-sm" onclick="abrirCatalogoTicket(${c.id})">✏️</button>
+        <button class="btn btn-g btn-sm" onclick="toggleCatalogo(${c.id},${c.activo})">${c.activo?'⏸':'▶'}</button>
+        <button class="btn btn-del btn-sm" onclick="deleteCatalogo(${c.id})">×</button>
+      </div></td></tr>`).join('');
+  } catch(e) { tb.innerHTML = `<tr><td colspan="6" style="color:var(--rojo);padding:12px">Error: ${e.message}</td></tr>`; }
 }
+
+// ── CATÁLOGO DE TICKETS (CRUD) ───────────────────────────────
+window._catAddToEvent = false;
+async function abrirCatalogoTicket(id, addToEvent) {
+  window._catAddToEvent = !!addToEvent;
+  const set = (k,v)=>{ const el=document.getElementById(k); if(el){ if(el.type==='checkbox') el.checked=v; else el.value=v; } };
+  set('cat-id',''); set('cat-nombre',''); set('cat-desc',''); set('cat-precio',''); set('cat-max',6); set('cat-activo',true);
+  document.getElementById('cat-title').textContent = 'Nuevo tipo de ticket';
+  if (id) {
+    const { data: c } = await sb.from('catalogo_tickets').select('*').eq('id', id).single();
+    if (c) { set('cat-id',c.id); set('cat-nombre',c.nombre); set('cat-desc',c.descripcion||''); set('cat-precio',c.precio); set('cat-max',c.max_por_compra||6); set('cat-activo',!!c.activo); document.getElementById('cat-title').textContent='Editar tipo'; }
+  }
+  openModal('modal-catalogo');
+}
+async function guardarCatalogoTicket() {
+  const id = document.getElementById('cat-id').value;
+  const nombre = document.getElementById('cat-nombre').value.trim();
+  if (!nombre) { showToast('Nombre obligatorio', true); return; }
+  const row = { nombre, descripcion: document.getElementById('cat-desc').value.trim()||null, precio: parseInt(document.getElementById('cat-precio').value)||0, max_por_compra: parseInt(document.getElementById('cat-max').value)||6, activo: document.getElementById('cat-activo').checked };
+  try {
+    let saved;
+    if (id) { const { error } = await sb.from('catalogo_tickets').update(row).eq('id', id); if (error) throw error; saved = { id: parseInt(id), ...row }; }
+    else    { const { data, error } = await sb.from('catalogo_tickets').insert(row).select().single(); if (error) throw error; saved = data; }
+    closeModal('modal-catalogo');
+    if (window._catAddToEvent && saved) {
+      await poblarCatalogoDropdown();
+      if (!window._evTickets.some(t=>t.catalogo_id===saved.id)) {
+        window._evTickets.push({ id:null, catalogo_id:saved.id, nombre:saved.nombre, precio:saved.precio, disponible:100, estado:'Activo' });
+        renderEvTickets();
+      }
+      window._catAddToEvent = false;
+    } else { renderTiposTicketPanel(); }
+    showToast('✅ Tipo guardado');
+  } catch(e) { showToast('Error: '+(e.message||e), true); }
+}
+async function toggleCatalogo(id, activo) { await sb.from('catalogo_tickets').update({ activo: !activo }).eq('id', id); renderTiposTicketPanel(); }
+async function deleteCatalogo(id) { if (!confirm('¿Eliminar este tipo del catálogo? (no afecta eventos ya creados)')) return; await sb.from('catalogo_tickets').delete().eq('id', id); renderTiposTicketPanel(); }
 
 async function renderTiposTicket() {
   const sel = document.getElementById('tt-evento-sel');
