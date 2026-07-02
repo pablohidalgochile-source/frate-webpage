@@ -167,6 +167,7 @@
     <button class="ni" onclick="go('cortesias')"><span class="ni-icon">🎁</span>Cortesías</button>
     <button class="ni" onclick="go('codigos')"><span class="ni-icon">🏷️</span>Códigos & RRPP</button>
     <button class="ni" onclick="go('ordenes')"><span class="ni-icon">📦</span>Órdenes<span class="ni-badge" id="nb-ordenes">0</span></button>
+    <button class="ni" onclick="go('devoluciones')"><span class="ni-icon">↩️</span>Devoluciones<span class="ni-badge" id="nb-devoluciones" style="background:var(--rojo)">0</span></button>
     <div class="sb-sect">Contenido</div>
     <button class="ni" onclick="go('ambientes')"><span class="ni-icon">🏠</span>Ambientes</button>
     <button class="ni" onclick="go('media')"><span class="ni-icon">📸</span>Galería & Media</button>
@@ -534,6 +535,16 @@
       </table></div>
     </div>
 
+    <!-- DEVOLUCIONES -->
+    <div class="panel" id="p-devoluciones">
+      <h2 style="font-family:var(--disp);font-weight:900;font-size:1.6rem;margin-bottom:6px;">DEVOLUCIONES</h2>
+      <p style="color:var(--muted);font-size:0.8rem;margin-bottom:18px;">Órdenes que requieren devolución (eventos archivados/cancelados o pagos sin stock). Devuelve automático por MercadoPago o marca la devolución manual.</p>
+      <div class="tw"><table>
+        <thead><tr><th>Orden</th><th>Cliente</th><th>Monto</th><th>Estado</th><th>Referencia</th><th></th></tr></thead>
+        <tbody id="tb-devoluciones"><tr><td colspan="6" style="text-align:center;color:var(--muted);padding:20px">Cargando...</td></tr></tbody>
+      </table></div>
+    </div>
+
     <!-- MEMBRESÍAS -->
     <div class="panel" id="p-membresias">
       <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:6px;">
@@ -652,6 +663,21 @@
     <div class="toggle-row"><span style="font-size:0.82rem;">Activo (disponible para eventos)</span><label class="sw"><input type="checkbox" id="cat-activo" checked><span class="sl"></span></label></div>
   </div>
   <div class="mfoot"><button class="btn btn-g" onclick="closeModal('modal-catalogo')">Cancelar</button><button class="btn btn-p" onclick="guardarCatalogoTicket()">Guardar tipo</button></div>
+</div></div>
+
+<!-- Devolución -->
+<div class="mo" id="modal-devolucion"><div class="mb">
+  <div class="mh"><span class="mht">↩️ Devolver pago</span><button class="mc" onclick="closeModal('modal-devolucion')">✕</button></div>
+  <div class="mbody">
+    <div id="dev-info" style="margin-bottom:18px;color:var(--text);font-size:0.9rem;"></div>
+    <div style="display:flex;flex-direction:column;gap:6px;">
+      <button class="btn btn-p" onclick="ejecutarDevolucion('automatico')">⚡ Devolver automático por MercadoPago</button>
+      <div style="font-size:0.74rem;color:var(--muted);margin-bottom:10px;">Le devuelve la plata al cliente al instante (solo pagos hechos por MercadoPago).</div>
+      <button class="btn btn-g" onclick="ejecutarDevolucion('manual')">✍️ Marcar como devuelto (manual)</button>
+      <div style="font-size:0.74rem;color:var(--muted);">Úsalo si ya devolviste por fuera (transferencia, efectivo, o en el panel de MercadoPago).</div>
+    </div>
+    <div id="dev-msg" style="margin-top:14px;font-size:0.82rem;"></div>
+  </div>
 </div></div>
 
 <!-- Cortesía -->
@@ -1045,7 +1071,7 @@ async function checkSession() {
 }
 
 // ── NAV ──────────────────────────────────────────────────────
-const panelTitles = { dashboard:'Resumen', eventos:'Eventos', 'tickets-tipos':'Tipos de Ticket', cortesias:'Cortesías', codigos:'Códigos & RRPP', membresias:'Membresías', ordenes:'Órdenes & Validación', ambientes:'Ambientes', media:'Galería & Media', webeum:'WEBEUM', tiendita:'La Tiendita', carta:'Carta', usuarios:'Usuarios', reservas:'Reservas', puntos:'Puntos & Premios', ia:'IA & Marketing', exportar:'Exportar', config:'Configuración del sitio' };
+const panelTitles = { dashboard:'Resumen', eventos:'Eventos', 'tickets-tipos':'Tipos de Ticket', cortesias:'Cortesías', codigos:'Códigos & RRPP', membresias:'Membresías', ordenes:'Órdenes & Validación', devoluciones:'Devoluciones', ambientes:'Ambientes', media:'Galería & Media', webeum:'WEBEUM', tiendita:'La Tiendita', carta:'Carta', usuarios:'Usuarios', reservas:'Reservas', puntos:'Puntos & Premios', ia:'IA & Marketing', exportar:'Exportar', config:'Configuración del sitio' };
 
 function go(name) {
   document.querySelectorAll('.panel').forEach(p => p.classList.remove('active'));
@@ -1070,6 +1096,7 @@ function render(name) {
   else if(name==='cortesias') renderCortesias();
   else if(name==='codigos') renderCodigos();
   else if(name==='membresias') renderMembresiasAdmin();
+  else if(name==='devoluciones') renderDevoluciones();
   else if(name==='ordenes') renderOrdenes();
   else if(name==='ambientes') renderAmbientes();
   else if(name==='webeum') renderWebeum();
@@ -2720,6 +2747,44 @@ async function savePremio() {
 }
 async function togglePremio(id, activo) { await sb.from('premios').update({ activo: !activo }).eq('id', id); renderPremios(); }
 async function deletePremio(id) { if (!confirm('¿Eliminar este premio?')) return; await sb.from('premios').delete().eq('id', id); renderPremios(); }
+
+// ── DEVOLUCIONES ─────────────────────────────────────────────
+window._devPedidoId = null;
+async function renderDevoluciones() {
+  const tb = document.getElementById('tb-devoluciones');
+  try {
+    const { data } = await sb.from('pedidos').select('*').eq('estado','requiere_reembolso').order('created_at',{ascending:false});
+    const badge = document.getElementById('nb-devoluciones'); if (badge) badge.textContent = data?.length || 0;
+    if (!data || !data.length) { tb.innerHTML = `<tr><td colspan="6" style="text-align:center;color:var(--muted);padding:24px">No hay devoluciones pendientes ✅</td></tr>`; return; }
+    tb.innerHTML = data.map(p=>`<tr>
+      <td class="tb" style="font-family:monospace;color:var(--dorado)">FCC-${String(p.id).padStart(6,'0')}</td>
+      <td><div class="tb">${p.nombre_cliente||'—'}</div><div class="tm" style="font-size:0.72rem">${p.email_cliente||''}</div></td>
+      <td class="tb" style="color:var(--dorado)">${clp(p.total_pagado||p.total)}</td>
+      <td><span class="badge b-r">requiere devolución</span></td>
+      <td style="font-family:monospace;font-size:0.72rem;color:var(--muted)">${p.referencia_pago||'—'}</td>
+      <td><button class="btn btn-p btn-sm" onclick="abrirDevolucion(${p.id},'${(p.nombre_cliente||'').replace(/'/g,'')}',${p.total_pagado||p.total})">Devolver</button></td>
+    </tr>`).join('');
+  } catch(e) { tb.innerHTML = `<tr><td colspan="6" style="color:var(--rojo);padding:12px">Error: ${e.message}</td></tr>`; }
+}
+function abrirDevolucion(pedidoId, nombre, monto) {
+  window._devPedidoId = pedidoId;
+  document.getElementById('dev-info').innerHTML = `Orden <strong style="color:var(--dorado)">FCC-${String(pedidoId).padStart(6,'0')}</strong> · ${nombre} · <strong>${clp(monto)}</strong>`;
+  document.getElementById('dev-msg').textContent = '';
+  openModal('modal-devolucion');
+}
+async function ejecutarDevolucion(modo) {
+  const msg = document.getElementById('dev-msg');
+  if (modo==='automatico' && !confirm('¿Devolver la plata al cliente por MercadoPago? Esta acción es REAL.')) return;
+  msg.style.color = 'var(--muted)'; msg.textContent = 'Procesando...';
+  try {
+    const { data, error } = await sb.functions.invoke('devolver-pago', { body: { pedidoId: window._devPedidoId, modo } });
+    if (error) throw new Error(error.message||'Error');
+    if (data?.error) throw new Error(data.error);
+    closeModal('modal-devolucion');
+    showToast(modo==='automatico' ? '✅ Devolución hecha por MercadoPago' : '✅ Marcada como devuelta');
+    renderDevoluciones();
+  } catch(e) { msg.style.color = 'var(--rojo)'; msg.textContent = '⚠️ ' + (e.message||e); }
+}
 
 // ── MEMBRESÍAS (admin) ───────────────────────────────────────
 async function renderMembresiasAdmin() {

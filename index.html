@@ -699,7 +699,7 @@
         <div class="section-label reveal" data-txt="galeria_label">Momentos que no se olvidan</div>
         <h2 class="section-title reveal" style="margin-bottom:0"><span data-txt="galeria_t1">ASÍ SE</span><br/><span data-txt="galeria_t2">VIVE EN</span><br/><span class="gold" data-txt="galeria_t3">FRATE</span></h2>
       </div>
-        <a href="https://www.instagram.com/fraternidadcampuscentral/" target="_blank" class="btn-dorado reveal" style="display:inline-block;max-width:260px">@fraternidadcampuscentral</a>
+        <a href="https://www.instagram.com/fraternidadcampuscentral/" data-red="red_instagram" target="_blank" class="btn-dorado reveal" style="display:inline-block;max-width:260px">@fraternidadcampuscentral</a>
     </div>
     <div class="galeria-filters reveal">
       <button class="filter-btn galeria-filter-btn active" data-filter="Todos">Todos</button>
@@ -724,7 +724,7 @@
           Documentamos cada noche. Guardamos cada momento.
         </p>
       </div>
-      <a href="https://www.youtube.com/@fraternidadcampuscentral" target="_blank" class="btn-dorado reveal" style="display:inline-block;max-width:200px;flex-shrink:0">VER EN YT</a>
+      <a href="https://www.youtube.com/@fraternidadcampuscentral" data-red="red_youtube" target="_blank" class="btn-dorado reveal" style="display:inline-block;max-width:200px;flex-shrink:0">VER EN YT</a>
     </div>
     <div class="webeum-grid" id="webeum-grid"></div>
   </div>
@@ -848,9 +848,9 @@
         <p class="footer-tagline">La discoteca urbana más antigua de Chile</p>
         <p style="font-size:0.75rem;color:#555;margin-bottom:20px;line-height:1.6">Barrio Bellavista · Al lado del Cerro San Cristóbal</p>
         <div class="footer-socials">
-          <a href="https://www.instagram.com/fraternidadcampuscentral/" target="_blank" class="footer-social" aria-label="Instagram">IG</a>
-          <a href="https://www.youtube.com/@fraternidadcampuscentral" target="_blank" class="footer-social" aria-label="YouTube">YT</a>
-          <a href="https://www.facebook.com/fraternidadclub" target="_blank" class="footer-social" aria-label="Facebook">FB</a>
+          <a href="https://www.instagram.com/fraternidadcampuscentral/" data-red="red_instagram" target="_blank" class="footer-social" aria-label="Instagram">IG</a>
+          <a href="https://www.youtube.com/@fraternidadcampuscentral" data-red="red_youtube" target="_blank" class="footer-social" aria-label="YouTube">YT</a>
+          <a href="https://www.facebook.com/fraternidadclub" data-red="red_facebook" target="_blank" class="footer-social" aria-label="Facebook">FB</a>
         </div>
       </div>
       <div>
@@ -2351,6 +2351,19 @@ async function _votar(s, clienteId) {
   } catch(e) { showToast('⚠️ No se pudo votar: ' + (e.message || e)); }
 }
 
+// ── REDES: lee los links de redes desde la config y los aplica ──
+async function aplicarRedes() {
+  try {
+    const { data } = await sb.from('config_valores').select('clave,valor').in('clave', ['red_instagram','red_tiktok','red_facebook','red_youtube']);
+    if (!data) return;
+    const map = {}; data.forEach(r => { map[r.clave] = r.valor; });
+    document.querySelectorAll('[data-red]').forEach(a => {
+      const v = map[a.getAttribute('data-red')];
+      if (v) a.href = v;
+    });
+  } catch(e) { /* silencioso */ }
+}
+
 // ── CMS DE TEXTOS: inyecta los textos editables desde la BD ───
 async function aplicarTextos() {
   try {
@@ -2463,6 +2476,7 @@ document.addEventListener('DOMContentLoaded', () => {
   loadEventosDesdeSupabase();
   aplicarConfigSecciones();
   aplicarTextos();
+  aplicarRedes();
   loadRanking();
   // Si llegó por un link de grupo (?grupo=), abrir el flujo de unirse
   try { if (localStorage.getItem('frate_grupo')) setTimeout(openGrupoModal, 900); } catch(e) {}
