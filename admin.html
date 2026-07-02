@@ -665,6 +665,12 @@
   <div class="mfoot"><button class="btn btn-g" onclick="closeModal('modal-catalogo')">Cancelar</button><button class="btn btn-p" onclick="guardarCatalogoTicket()">Guardar tipo</button></div>
 </div></div>
 
+<!-- Entradas vendidas de un evento -->
+<div class="mo" id="modal-entradas-evento"><div class="mb" style="max-width:780px;">
+  <div class="mh"><span class="mht" id="entradas-ev-title">Entradas del evento</span><button class="mc" onclick="closeModal('modal-entradas-evento')">✕</button></div>
+  <div class="mbody" id="entradas-ev-body"></div>
+</div></div>
+
 <!-- Devolución -->
 <div class="mo" id="modal-devolucion"><div class="mb">
   <div class="mh"><span class="mht">↩️ Devolver pago</span><button class="mc" onclick="closeModal('modal-devolucion')">✕</button></div>
@@ -1436,11 +1442,12 @@ async function renderEventosArchivados() {
   document.getElementById('eventos-titulo').textContent = 'EVENTOS ARCHIVADOS';
   tbody.innerHTML = `<tr><td colspan="7" style="text-align:center;color:var(--muted);padding:20px">Cargando...</td></tr>`;
   try {
-    const [{ data: evs }, { data: itemsPagados }] = await Promise.all([
+    const [{ data: evs }, { data: itemsVend }] = await Promise.all([
       sb.from('eventos').select('*').eq('archivado', true).order('archivado_at', { ascending: false }),
-      sb.from('items_pedido').select('evento_id,cantidad,pedidos!inner(estado)').not('evento_id','is',null).eq('pedidos.estado','pagado')
+      // Incluye pagado + requiere_reembolso + reembolsado (al archivar, las ventas pasan a devolución)
+      sb.from('items_pedido').select('evento_id,cantidad,pedidos!inner(estado)').not('evento_id','is',null).in('pedidos.estado', ['pagado','requiere_reembolso','reembolsado'])
     ]);
-    const vend = {}; (itemsPagados||[]).forEach(i => { vend[i.evento_id] = (vend[i.evento_id]||0) + (i.cantidad||0); });
+    const vend = {}; (itemsVend||[]).forEach(i => { vend[i.evento_id] = (vend[i.evento_id]||0) + (i.cantidad||0); });
     if (!evs || !evs.length) { tbody.innerHTML = `<tr><td colspan="7" style="text-align:center;color:var(--muted);padding:24px">No hay eventos archivados</td></tr>`; return; }
     tbody.innerHTML = evs.map(ev=>{
       const v = vend[ev.id] || 0;
@@ -1448,16 +1455,57 @@ async function renderEventosArchivados() {
         <td class="tb">${ev.nombre}</td>
         <td class="tm">${ev.fecha} · ${ev.hora||''}h</td>
         <td><span class="badge b-gr">${ev.ambiente||'—'}</span></td>
-        <td><strong style="color:var(--verde)">${v}</strong><div style="font-size:0.6rem;color:var(--muted)">asistentes</div></td>
-        <td>${v>0?'<span class="badge b-r">devoluciones</span>':'—'}</td>
+        <td><strong style="color:var(--verde)">${v}</strong><div style="font-size:0.6rem;color:var(--muted)">vendidas</div></td>
+        <td>${v>0?'<span class="badge b-r">requiere devolución</span>':'—'}</td>
         <td><span class="badge b-gr">Archivado</span></td>
         <td><div style="display:flex;gap:4px;">
+          ${v>0?`<button class="btn btn-ok btn-sm" onclick="verEntradasEvento(${ev.id},'${(ev.nombre||'').replace(/'/g,'')}')" title="Ver entradas vendidas">👁 Entradas</button>`:''}
           <button class="btn btn-g btn-sm" onclick="restaurarEvento(${ev.id})">↩ Restaurar</button>
           ${v>0?'':`<button class="btn btn-del btn-sm" onclick="deleteEvento(${ev.id},0)" title="Eliminar definitivo">×</button>`}
         </div></td>
       </tr>`;
     }).join('');
   } catch(e) { tbody.innerHTML = `<tr><td colspan="7" style="color:var(--rojo);padding:12px">Error: ${e.message}</td></tr>`; }
+}
+
+// ── VER ENTRADAS VENDIDAS DE UN EVENTO (archivado o no) ──────
+async function verEntradasEvento(eventoId, nombre) {
+  const body = document.getElementById('entradas-ev-body');
+  document.getElementById('entradas-ev-title').textContent = 'Entradas — ' + nombre;
+  body.innerHTML = '<div style="color:var(--muted);padding:16px;">Cargando...</div>';
+  openModal('modal-entradas-evento');
+  try {
+    const { data } = await sb.from('items_pedido')
+      .select('nombre_ticket, cantidad, precio_unitario, personas, pedidos!inner(id,nombre_cliente,email_cliente,estado)')
+      .eq('evento_id', eventoId)
+      .in('pedidos.estado', ['pagado','requiere_reembolso','reembolsado']);
+    if (!data || !data.length) { body.innerHTML = '<div style="color:var(--muted);padding:16px;">Sin entradas vendidas.</div>'; return; }
+    const badge = e => e==='reembolsado' ? '<span class="badge b-g">Devuelto</span>' : e==='requiere_reembolso' ? '<span class="badge b-r">Req. devolución</span>' : '<span class="badge b-g">Pagado</span>';
+    let rows = '', total = 0, n = 0;
+    data.forEach(ip => {
+      const personas = (Array.isArray(ip.personas) && ip.personas.length) ? ip.personas : Array.from({length: ip.cantidad||1}, ()=>({}));
+      personas.forEach(p => {
+        total += ip.precio_unitario || 0; n++;
+        rows += `<tr>
+          <td class="tb">${p.nombre || ip.pedidos.nombre_cliente || '—'}</td>
+          <td class="tm" style="font-size:0.72rem">${p.rut || ''}</td>
+          <td>${ip.nombre_ticket || '—'}</td>
+          <td style="color:var(--dorado)">${clp(ip.precio_unitario)}</td>
+          <td style="font-family:monospace;font-size:0.72rem;color:var(--muted)">FCC-${String(ip.pedidos.id).padStart(6,'0')}</td>
+          <td>${badge(ip.pedidos.estado)}</td>
+        </tr>`;
+      });
+    });
+    body.innerHTML = `
+      <div style="display:flex;gap:16px;margin-bottom:12px;font-size:0.85rem;">
+        <span>Entradas vendidas: <strong style="color:var(--verde)">${n}</strong></span>
+        <span>Total: <strong style="color:var(--dorado)">${clp(total)}</strong></span>
+      </div>
+      <div class="tw"><table>
+        <thead><tr><th>Asistente</th><th>RUT</th><th>Tipo</th><th>Monto</th><th>Orden</th><th>Estado</th></tr></thead>
+        <tbody>${rows}</tbody></table></div>
+      <div style="margin-top:14px;text-align:right;"><button class="btn btn-p btn-sm" onclick="closeModal('modal-entradas-evento');go('devoluciones')">Ir a Devoluciones →</button></div>`;
+  } catch(e) { body.innerHTML = `<div style="color:var(--rojo);padding:16px;">Error: ${e.message}</div>`; }
 }
 
 // ── TIPOS DE TICKET ──────────────────────────────────────────
