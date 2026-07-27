@@ -1,0 +1,209 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>FRATE OS · ERP 05 La bodega</title>
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🍾</text></svg>">
+<link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@600;800;900&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="/os-manual.css">
+<link rel="stylesheet" href="/os-erp.css">
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<style>
+  .medidor{display:flex;gap:28px;flex-wrap:wrap;align-items:center;justify-content:center}
+  .bot{position:relative;width:96px;height:250px;flex-shrink:0}
+  .bot .vidrio{position:absolute;inset:0;border:3px solid var(--bor2);border-radius:14px 14px 20px 20px;overflow:hidden;background:var(--neg)}
+  .bot .cuello{position:absolute;top:-30px;left:50%;transform:translateX(-50%);width:30px;height:33px;
+    border:3px solid var(--bor2);border-bottom:0;border-radius:6px 6px 0 0;background:var(--neg)}
+  .bot .liq{position:absolute;left:0;right:0;bottom:0;background:linear-gradient(180deg,#d4a832,#8a6a1a);transition:height .18s}
+  .bot .marca{position:absolute;left:0;right:0;height:1px;background:var(--bor2)}
+  .bot .marca span{position:absolute;right:calc(100% + 8px);top:-8px;font-size:.62rem;color:var(--gris2);font-family:var(--disp);letter-spacing:1px;white-space:nowrap}
+  .lect{flex:1;min-width:250px}
+  .lect .big{font-family:var(--disp);font-weight:900;font-size:3.2rem;line-height:.95;color:var(--oro);font-variant-numeric:tabular-nums}
+  .lect .un{font-family:var(--disp);font-size:.9rem;letter-spacing:3px;text-transform:uppercase;color:var(--gris2);margin-top:2px}
+  .lect table{width:100%;margin-top:16px;font-size:.87rem;border-collapse:collapse}
+  .lect td{padding:6px 0;color:var(--gris)}
+  .lect td:last-child{text-align:right;font-family:var(--disp);font-weight:800;color:var(--txt);font-variant-numeric:tabular-nums}
+  input[type=range]{width:100%;margin-top:20px;accent-color:var(--acc)}
+  .metodos{display:flex;gap:6px;flex-wrap:wrap;margin-top:14px;justify-content:center}
+  .metodos button{background:transparent;border:1px solid var(--bor2);color:var(--gris);border-radius:99px;padding:6px 14px;
+    font-size:.76rem;cursor:pointer;font-family:var(--font)}
+  .metodos button.on{background:var(--acc);color:#08080a;border-color:var(--acc);font-weight:700}
+  .ubis{display:flex;flex-wrap:wrap;gap:6px;margin-top:14px}
+  .ubi{background:var(--neg2);border:1px solid var(--bor);border-radius:99px;padding:5px 13px;font-size:.79rem;color:var(--gris)}
+  .ubi.b{border-color:rgba(96,165,250,.4);color:var(--azul)}
+</style>
+</head>
+<body>
+<div id="bar"></div>
+<div class="wrap">
+
+  <div class="hero">
+    <div class="eyebrow">ERP · Manual 05</div>
+    <h1>El viaje de<br>una <em>botella</em></h1>
+    <p class="sub">Desde que se pide al proveedor hasta que se sirve el último trago. Cómo el ERP sabe cuánto queda sin que nadie lo escriba a mano.</p>
+    <div class="meta"><span>Para barra y bodega</span><span>·</span><span>12 minutos</span></div>
+  </div>
+
+  <section>
+    <div class="stag">Capítulo 1</div>
+    <h2>El stock no se escribe: se deduce</h2>
+    <p class="lead">Este es el concepto que hay que entender antes que cualquier otro. En el ERP <b>nadie escribe «quedan 8 botellas»</b>. Se escribe lo que hay, y el sistema calcula el número.</p>
+    <div class="form-eq" style="background:var(--neg);border:1px solid var(--bor2);border-radius:14px;padding:22px 24px;margin-top:16px;text-align:center">
+      <div style="font-family:var(--disp);font-weight:900;font-size:clamp(1rem,3vw,1.55rem);line-height:1.3;text-wrap:balance">
+        BOTELLAS CERRADAS <span style="color:var(--verde)">+</span> LO QUE QUEDA EN LAS ABIERTAS
+        <span style="color:var(--gris2)">=</span> STOCK
+      </div>
+    </div>
+    <p style="color:var(--gris);margin-top:16px">¿Por qué así? Porque «8 botellas» esconde la pregunta importante: ¿8 cerradas, o 7 cerradas y una por la mitad? En una barra esa diferencia es un trago de más o de menos por cliente, todas las noches.</p>
+    <div class="peligro"><b>Nunca intentes escribir el stock directamente.</b> Si quieres cambiar la cantidad de un producto, cambias el <strong>desglose</strong>: cuántas cerradas y cuánto queda en la abierta. El número total se recalcula solo. Escribirlo a mano no funciona — la base lo vuelve a calcular y pisa lo que pusiste.</div>
+  </section>
+
+  <section>
+    <div class="stag">Capítulo 2</div>
+    <h2>Una botella abierta se mide en tragos</h2>
+    <p class="lead">No en «porcentaje lleno», no en «más o menos la mitad». En <b>tragos que todavía se pueden servir</b>, que es lo único que le importa a la barra.</p>
+    <p style="color:var(--gris)">Cada producto declara cuántas porciones da: un pisco de 750 da <b>25 tragos</b>, un fernet <b>33</b>, un vodka grande <b>58</b>. Cuando cuentas una botella abierta, el ERP traduce lo que ves a tragos usando ese número.</p>
+
+    <div class="demo">
+      <div class="dl">Pruébalo · mueve el nivel de la botella</div>
+      <div class="medidor">
+        <div class="bot">
+          <div class="cuello"></div>
+          <div class="vidrio">
+            <div class="liq" id="liq" style="height:40%"></div>
+            <div class="marca" style="bottom:75%"><span>3/4</span></div>
+            <div class="marca" style="bottom:50%"><span>1/2</span></div>
+            <div class="marca" style="bottom:25%"><span>1/4</span></div>
+          </div>
+        </div>
+        <div class="lect">
+          <div class="big" id="tragos">10</div>
+          <div class="un">tragos que quedan</div>
+          <table>
+            <tr><td>Producto</td><td id="p-nom">Pisco Alto del Carmen 750</td></tr>
+            <tr><td>Rinde por botella</td><td id="p-pp">25 tragos</td></tr>
+            <tr><td>Nivel que estás viendo</td><td id="p-niv">40%</td></tr>
+            <tr><td>En stock cuenta como</td><td id="p-frac">0,40 botellas</td></tr>
+          </table>
+          <input type="range" id="niv" min="0" max="100" value="40" aria-label="Nivel de la botella">
+        </div>
+      </div>
+      <div class="metodos" id="metodos">
+        <button data-pp="25" class="on">Pisco 750 · 25 tragos</button>
+        <button data-pp="33">Fernet · 33 tragos</button>
+        <button data-pp="58">Vodka grande · 58 tragos</button>
+        <button data-pp="12">Vino · 12 copas</button>
+      </div>
+    </div>
+    <div class="bien"><b>Bien resuelto.</b> El total nunca se escribe: es siempre resultado. Quien cuenta solo dice qué ve —a ojo, con la regla, en mililitros o pesando— y el sistema hace la traducción. Un error de tipeo no puede inventar stock.</div>
+  </section>
+
+  <section>
+    <div class="stag">Capítulo 3</div>
+    <h2>Los cuatro momentos de una botella</h2>
+    <div class="flujo">
+      <div class="paso"><div class="n">1</div><h4>Se pide</h4><p>Se arma el pedido por proveedor y se asigna a quién compra.</p><span class="sys s-erp">ERP</span></div>
+      <div class="paso"><div class="n">2</div><h4>Llega</h4><p>Quien compró sube la boleta y se recibe contra lo pedido.</p><span class="sys s-erp">ERP</span></div>
+      <div class="paso"><div class="n">3</div><h4>Se cuenta</h4><p>Cada semana: cerradas y abiertas, barra por barra.</p><span class="sys s-erp">ERP</span></div>
+      <div class="paso"><div class="n">4</div><h4>Se vende</h4><p>Cada venta del POS baja el stock, si la receta está enseñada.</p><span class="sys s-pos">POS</span></div>
+    </div>
+
+    <h3>Dónde vive el stock</h3>
+    <p style="color:var(--gris)">El stock no es un número del local: es un número <b>por ubicación</b>. La misma botella en la bodega y en la barra son dos cosas distintas, y por eso se cuentan aparte.</p>
+    <div class="ubis">
+      <span class="ubi b">BODEGA</span><span class="ubi">Barra Fuego</span><span class="ubi">Barra Aire</span>
+      <span class="ubi">Barra Terraza</span><span class="ubi">BARRA SCHOP</span>
+      <span class="ubi">Cooler Bodega 1</span><span class="ubi">Cooler Bodega 2</span>
+      <span class="ubi">Cooler Fuego 1</span><span class="ubi">Cooler Fuego 2</span>
+      <span class="ubi">Cooler Aire 1</span><span class="ubi">Cooler Aire 2</span>
+      <span class="ubi">Cooler Terraza</span><span class="ubi">Cooler Extra 1</span>
+      <span class="ubi">Almacenamiento Extra</span>
+    </div>
+    <div class="oro"><b>Regla de oro.</b> Se cuenta <strong>barra por barra</strong>, no todo junto. Si la Barra Fuego marca un consumo que no calza con lo que vendió, quieres saberlo de esa barra — no diluido en el total del local.</div>
+  </section>
+
+  <section>
+    <div class="stag">Capítulo 4</div>
+    <h2>Enseñarle al POS qué descontar</h2>
+    <p class="lead">El POS sabe que vendió «MOJITO XL». No sabe que eso saca ron, azúcar y menta de la bodega. Alguien tiene que enseñárselo una vez.</p>
+    <p style="color:var(--gris)">Y no basta con emparejar nombres, porque <b>el POS vende el mismo producto en varios formatos</b> —por tamaño, por combo, por horario— y cada uno descuenta una cantidad distinta:</p>
+    <div class="dato">Lo que vende el POS              Lo que sale de la bodega
+  Shot tequila 2x                  <span class="v">2</span> tragos de tequila
+  JUE - Mistral ice 2x             <span class="v">2</span> tragos de Mistral Ice
+  MOJITO XL                        <span class="v">2</span> tragos de ron <span class="o">+</span> menta <span class="o">+</span> azúcar
+  Red Bull                         <span class="v">1</span> lata
+  Entrada con cover - Corona       <span class="v">1</span> Corona  <span class="o">← el cover incluye el trago</span></div>
+    <div class="peligro"><b>Nunca aceptes un emparejamiento automático sin revisarlo.</b> El mapeo que propuso el POS hacía calzar «Piscola» con ESCOBAS y «Johnnie Walker Negra» con la Roja. Un nombre parecido no es el mismo producto. En la pantalla de mapeo tú apruebas cada uno, y nada se guarda solo.</div>
+    <div class="kpis">
+      <div class="kpi r"><b>65</b><span>ventas esperando</span></div>
+      <div class="kpi o"><b>11</b><span>ítems por enseñar</span></div>
+      <div class="kpi"><b>192</b><span>productos en catálogo</span></div>
+      <div class="kpi r"><b>23</b><span>sin costo cargado</span></div>
+    </div>
+    <p style="color:var(--gris);margin-top:12px">Mientras esos ítems no estén enseñados, las ventas quedan guardadas esperando. No se pierden: se procesan en cuanto el ERP sepa qué descontar.</p>
+  </section>
+
+  <section>
+    <div class="stag">Capítulo 5</div>
+    <h2>Sin costo no hay margen</h2>
+    <p class="lead">Un producto sin costo cargado no rompe nada — pero deja un agujero en todo lo que se calcula después.</p>
+    <ul>
+      <li>La <b>valorización de la bodega</b> queda corta: ese stock vale $0.</li>
+      <li>El <b>margen de un trago</b> no se puede calcular: no se sabe cuánto costó.</li>
+      <li>La <b>rentabilidad de la noche</b> se ve mejor de lo que fue.</li>
+    </ul>
+    <p style="color:var(--gris)">En Inventario → Catálogo hay un filtro <b>«⚠ Sin costo · 23»</b> que te deja exactamente esos productos en pantalla. Es media hora de trabajo y arregla los tres problemas de arriba.</p>
+    <div class="bien"><b>Bien resuelto.</b> El costo puede marcarse como «de referencia» cuando es un precio estimado y no una boleta real. Así sabes cuáles números son firmes y cuáles hay que confirmar con el proveedor.</div>
+  </section>
+
+  <section>
+    <div class="stag">Capítulo 6</div>
+    <h2>Lo que el ERP todavía no hace</h2>
+    <ul>
+      <li><b>No avisa que algo se está por acabar.</b> Tiene el stock y el consumo, pero no calcula punto de reposición.</li>
+      <li><b>No compara el consumo teórico con el real.</b> Sabe cuánto debió salir según las ventas y cuánto salió según el conteo, pero todavía no pone los dos números lado a lado.</li>
+      <li><b>Las ubicaciones tienen nombres inconsistentes.</b> Conviven «BODEGA» en mayúsculas con «Cooler Bodega 1». Funciona, pero se lee desordenado.</li>
+      <li><b>El costo no se actualiza solo</b> cuando llega una boleta con otro precio. Hay que editarlo a mano.</li>
+    </ul>
+  </section>
+
+  <div class="pie">FRATE OS · ERP · Manual 05 · <a href="/os-erp-caja">← La caja</a> · <a href="/os-erp-reglas">Siguiente: reglas de oro →</a></div>
+</div>
+
+<script src="/os-guard.js"></script>
+<script>
+  document.getElementById('bar').innerHTML = osBarra('05', 'erp');
+  osProteger();
+
+  (function(){
+    var pp = 25, nombre = 'Pisco Alto del Carmen 750', unidad = 'tragos';
+    var niv = document.getElementById('niv'), liq = document.getElementById('liq');
+
+    function pinta(){
+      var pct = parseInt(niv.value, 10);
+      liq.style.height = pct + '%';
+      var tragos = Math.round(pp * pct / 100);
+      document.getElementById('tragos').textContent = tragos;
+      document.querySelector('.un').textContent = unidad + ' que quedan';
+      document.getElementById('p-nom').textContent = nombre;
+      document.getElementById('p-pp').textContent = pp + ' ' + unidad;
+      document.getElementById('p-niv').textContent = pct + '%';
+      document.getElementById('p-frac').textContent = (tragos / pp).toFixed(2).replace('.', ',') + ' botellas';
+    }
+    niv.addEventListener('input', pinta);
+
+    document.getElementById('metodos').addEventListener('click', function(e){
+      var b = e.target.closest('button'); if(!b) return;
+      Array.prototype.forEach.call(this.querySelectorAll('button'), function(x){ x.classList.remove('on'); });
+      b.classList.add('on');
+      pp = parseInt(b.dataset.pp, 10);
+      nombre = b.textContent.split(' · ')[0];
+      unidad = b.dataset.pp === '12' ? 'copas' : 'tragos';
+      pinta();
+    });
+    pinta();
+  })();
+</script>
+</body>
+</html>

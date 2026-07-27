@@ -1,0 +1,219 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>FRATE OS · ERP 02 La noche</title>
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🌙</text></svg>">
+<link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@600;800;900&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="/os-manual.css">
+<link rel="stylesheet" href="/os-erp.css">
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<style>
+  .cal{display:grid;grid-template-columns:repeat(7,1fr);gap:5px;margin-top:14px;max-width:430px}
+  .cal .dh{font-family:var(--disp);font-size:.62rem;letter-spacing:1.5px;color:var(--gris2);text-align:center;padding-bottom:3px}
+  .cal button{aspect-ratio:1;border:1px solid var(--bor);background:var(--neg2);color:var(--gris);border-radius:9px;
+    font-family:var(--disp);font-weight:800;font-size:1rem;cursor:pointer;font-variant-numeric:tabular-nums}
+  .cal button.finde{border-color:rgba(232,54,61,.35);background:rgba(232,54,61,.07);color:var(--txt)}
+  .cal button.sel{background:var(--acc);color:#08080a;border-color:var(--acc)}
+  .res{margin-top:16px;background:var(--neg);border:1px solid var(--bor2);border-radius:12px;padding:18px 20px}
+  .res .q{font-family:var(--disp);font-weight:900;font-size:1.5rem;line-height:1.1}
+  .res .d{font-size:.84rem;color:var(--gris);margin-top:5px}
+  .res table{width:100%;margin-top:13px;font-size:.86rem;border-collapse:collapse}
+  .res td{padding:5px 0;color:var(--gris)} .res td:last-child{text-align:right;font-family:var(--disp);font-weight:800;font-variant-numeric:tabular-nums;color:var(--txt)}
+  .lin{display:flex;gap:16px;flex-wrap:wrap;margin-top:10px}
+  .lin label{font-size:.8rem;color:var(--gris);display:flex;align-items:center;gap:6px;cursor:pointer}
+  .estados{display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:10px;margin-top:14px}
+  .est{background:var(--neg2);border:1px solid var(--bor);border-radius:12px;padding:14px 16px;border-top:3px solid var(--bor2)}
+  .est.b{border-top-color:var(--gris2)} .est.c{border-top-color:var(--azul)}
+  .est.k{border-top-color:var(--verde)} .est.a{border-top-color:var(--gris2)}
+  .est h4{font-family:var(--disp);font-weight:800;font-size:1rem;text-transform:uppercase;margin-bottom:4px}
+  .est p{font-size:.79rem;color:var(--gris)}
+</style>
+</head>
+<body>
+<div id="bar"></div>
+<div class="wrap">
+
+  <div class="hero">
+    <div class="eyebrow">ERP · Manual 02</div>
+    <h1>El viaje de<br>un <em>turno</em></h1>
+    <p class="sub">Desde que se convoca a alguien hasta que su noche queda pagada y cerrada. Ocho pasos, y en cuál de ellos el monto deja de poder cambiar.</p>
+    <div class="meta"><span>Para quien arma el equipo</span><span>·</span><span>11 minutos</span></div>
+  </div>
+
+  <section>
+    <div class="stag">Capítulo 1</div>
+    <h2>Una noche puede nacer de tres formas</h2>
+    <p class="lead">Lo ideal es que el flyer la cree y la propague a los cuatro sistemas. Pero la operación no espera al diseño.</p>
+    <div class="tw"><table class="tabla">
+      <thead><tr><th>Cómo nace</th><th>Cuándo pasa</th><th>Qué nombre le queda</th></tr></thead>
+      <tbody>
+        <tr><td><b style="color:var(--mor)">🟣 Desde el flyer</b></td><td>Lo normal. El diseño está listo con días de anticipación.</td><td>El nombre real: <b>BESUCONA</b>, <b>A MI ME GUSTA</b>.</td></tr>
+        <tr><td><b style="color:var(--azul)">🔵 A mano en el ERP</b></td><td>Hay que convocar gente ya y el flyer todavía no existe.</td><td>Uno automático con la fecha. Se reemplaza cuando llega el flyer.</td></tr>
+        <tr><td><b style="color:var(--azul)">🔵 Sola, al pedir disponibilidad</b></td><td>Preguntas quién puede el jueves y ese jueves no tenía evento.</td><td>Automático. La noche se crea sola para poder colgarle la respuesta.</td></tr>
+      </tbody>
+    </table></div>
+    <div class="dato"><b>Hoy en el sistema</b>
+  2026-07-25  BESUCONA                 <span class="v">cerrado</span>
+  2026-07-24  BAILANDO NOS CONOCIMOS   <span class="v">cerrado</span>
+  2026-07-23  A MI ME GUSTA            <span class="v">cerrado</span>
+  2026-07-30  (nombre automático)      <span class="o">convocatoria</span>  <span class="r">← esperando el flyer</span>
+  2026-07-31  (nombre automático)      <span class="o">convocatoria</span>
+  2026-08-01  (nombre automático)      <span class="o">convocatoria</span></div>
+    <div class="oro"><b>Regla de oro.</b> Que una noche exista <strong>no significa que esté confirmada</strong>. Existe para poder preguntarle a la gente si puede. Recién cuando se le asignan posiciones y montos, se convierte en un evento de verdad.</div>
+  </section>
+
+  <section>
+    <div class="stag">Capítulo 2</div>
+    <h2>Los cuatro estados de una noche</h2>
+    <div class="estados">
+      <div class="est b"><h4>Borrador</h4><p>Existe la fecha. Nadie sabe todavía.</p></div>
+      <div class="est c"><h4>Convocatoria</h4><p>Se preguntó quién puede. La gente responde por el portal.</p></div>
+      <div class="est k"><h4>Cerrado</h4><p>Se contó la caja, se repartió la propina, se aprobaron los pagos.</p></div>
+      <div class="est a"><h4>Archivado</h4><p>Sale de la vista del día a día. Los números quedan.</p></div>
+    </div>
+    <div class="peligro"><b>Cerrar una noche pone candados.</b> Los montos de esa noche dejan de poder editarse desde la pantalla del evento. Es a propósito: después de cerrar, cambiar un monto significa que alguien cobró de menos o de más. Si de verdad hay que corregir, se hace desde Servicios &amp; Pagos y queda registrado quién lo hizo.</div>
+  </section>
+
+  <section>
+    <div class="stag">Capítulo 3</div>
+    <h2>Los ocho pasos de un turno</h2>
+    <p class="lead">Este es el viaje completo. Lo importante está en el paso 4.</p>
+    <div class="flujo">
+      <div class="paso"><div class="n">1</div><h4>Se convoca</h4><p>Le llega el aviso al portal y por WhatsApp.</p></div>
+      <div class="paso"><div class="n">2</div><h4>Responde</h4><p>Puedo / no puedo. Puede corregirse si se equivocó.</p></div>
+      <div class="paso"><div class="n">3</div><h4>Se le asigna posición</h4><p>Barra Fuego 1, Puerta 2, DJ. Cada puesto tiene su nombre.</p></div>
+      <div class="paso"><div class="n">4</div><h4>Se congela el monto</h4><p>Aquí se decide cuánto vale esa noche para esa persona.</p></div>
+    </div>
+    <div class="flujo" style="margin-top:6px">
+      <div class="paso"><div class="n">5</div><h4>Trabaja</h4><p>Marca asistencia. Puede tener bono o descuento.</p></div>
+      <div class="paso"><div class="n">6</div><h4>Se aprueba</h4><p>Un administrador confirma el monto. Sin esto no se paga.</p></div>
+      <div class="paso"><div class="n">7</div><h4>Se paga</h4><p>Efectivo, transferencia o queda acumulado.</p></div>
+      <div class="paso"><div class="n">8</div><h4>Se boletea</h4><p>A fin de mes, en una sola boleta por el total.</p></div>
+    </div>
+    <div class="kpis">
+      <div class="kpi a"><b>1.258</b><span>turnos registrados</span></div>
+      <div class="kpi v"><b>528</b><span>aprobados</span></div>
+      <div class="kpi o"><b>472</b><span>esperando aprobación</span></div>
+      <div class="kpi"><b>58</b><span>dobles funciones (alias)</span></div>
+    </div>
+  </section>
+
+  <section>
+    <div class="stag">Capítulo 4</div>
+    <h2>El monto se congela una sola vez</h2>
+    <p class="lead">Este es el concepto más importante del manual. Cuando alguien queda asignado a una noche, el ERP copia su tarifa a ese turno <b>y deja de mirar la ficha</b>.</p>
+    <p style="color:var(--gris)">¿Por qué? Porque si en octubre le subes la tarifa a alguien de $25.000 a $30.000, sus noches de julio <b>no</b> deben cambiar de precio. Ya se trabajaron y ya se pagaron a lo que valían entonces.</p>
+    <div class="dato">Ficha de la persona (hoy)        Turno del 25 de julio
+  monto_sem   $30.000            monto_dia   <b>$25.000</b>  <span class="o">← congelado en julio</span>
+  monto_finde $40.000
+                                 Subirle la tarifa hoy
+                                 <span class="v">NO</span> cambia lo que ya trabajó.</div>
+    <div class="bien"><b>Bien resuelto.</b> El congelado tiene además un candado anti-borrón: un $0 nunca pisa un monto que ya estaba puesto. Así, un guardado a medias no le deja la noche en cero a nadie.</div>
+  </section>
+
+  <section>
+    <div class="stag">Capítulo 5</div>
+    <h2>¿Cuánto vale esta noche?</h2>
+    <p class="lead">Cada persona tiene dos tarifas: entre semana y en finde. <b>Finde es viernes, sábado y domingo</b> — el domingo cuenta porque se trabaja la madrugada del sábado.</p>
+    <div class="demo">
+      <div class="dl">Pruébalo · toca un día de julio</div>
+      <div class="cal" id="cal"></div>
+      <div class="lin">
+        <label><input type="radio" name="tar" value="a" checked> Barra · $25.000 / $30.000</label>
+        <label><input type="radio" name="tar" value="b"> Jefe · $35.000 / $40.000</label>
+        <label><input type="radio" name="tar" value="c"> DJ invitado · $50.000 / $100.000</label>
+      </div>
+      <div class="res" id="res"></div>
+    </div>
+    <div class="oro"><b>Regla de oro.</b> El bono y el descuento se ponen <strong>en el turno</strong>, no en la ficha. Un bono es de esa noche: cerró la caja bien, se quedó dos horas más. Si lo pones en la ficha, se lo estás subiendo para siempre.</div>
+  </section>
+
+  <section>
+    <div class="stag">Capítulo 6</div>
+    <h2>Cerrar la noche es un puntaje</h2>
+    <p class="lead">Una noche no se cierra porque alguien apriete un botón: se cierra cuando está completa. El ERP lleva la cuenta.</p>
+    <ul>
+      <li><b>Un punto por cada caja cerrada.</b> Si hay 4 cajas, son 4 puntos.</li>
+      <li><b>Siete puntos por las tareas de cierre:</b> conteo de billetes, informe del POS, propinas repartidas, pagos aprobados, incidentes, observaciones y el conteo de barra.</li>
+      <li>El estado que ves es <b>puntos logrados sobre el total</b>. Cuando llega al 100%, la noche se puede cerrar.</li>
+    </ul>
+    <div class="peligro"><b>No cierres una noche con propinas sin repartir.</b> La ley da 7 días hábiles para entregar la propina digital. Si la noche se cierra y nadie marcó la entrega, ese plazo corre igual y nadie se acuerda. Hoy hay <b>201 turnos con propina</b> y solo <b>25</b> marcados como entregados.</div>
+  </section>
+
+  <section>
+    <div class="stag">Capítulo 7</div>
+    <h2>Lo que el ERP todavía no hace</h2>
+    <ul>
+      <li><b>No sabe si alguien llegó tarde.</b> Marca asistencia, no horario. Un atraso se refleja como descuento manual o no se refleja.</li>
+      <li><b>No avisa que faltan posiciones por cubrir.</b> Puedes cerrar la convocatoria con la barra a medias y el sistema no chista.</li>
+      <li><b>No propone quién debería trabajar.</b> Tiene el historial de quién rinde en cada puesto, pero no lo usa para sugerir.</li>
+      <li><b>El nombre automático no se reemplaza solo</b> cuando llega el flyer. Hoy hay que escribirlo a mano.</li>
+    </ul>
+  </section>
+
+  <div class="pie">FRATE OS · ERP · Manual 02 · <a href="/os-erp-persona">← La persona</a> · <a href="/os-erp-dinero">Siguiente: el dinero →</a></div>
+</div>
+
+<script src="/os-guard.js"></script>
+<script>
+  document.getElementById('bar').innerHTML = osBarra('02', 'erp');
+  osProteger();
+
+  (function(){
+    var TARIFAS = { a:{n:'Barra',sem:25000,fin:30000}, b:{n:'Jefe',sem:35000,fin:40000}, c:{n:'DJ invitado',sem:50000,fin:100000} };
+    var DIAS = ['Lun','Mar','Mié','Jue','Vie','Sáb','Dom'];
+    var cal = document.getElementById('cal'), res = document.getElementById('res');
+    var sel = 25;   // 25 de julio de 2026 — BESUCONA
+    function f(n){ return '$' + n.toLocaleString('es-CL'); }
+
+    DIAS.forEach(function(d){ var e=document.createElement('div'); e.className='dh'; e.textContent=d; cal.appendChild(e); });
+    // Julio 2026 arranca en miércoles → 2 celdas vacías (lunes y martes)
+    for(var i=0;i<2;i++){ cal.appendChild(document.createElement('span')); }
+    for(var d=1; d<=31; d++){
+      (function(dia){
+        var fecha = new Date(2026, 6, dia);
+        var dw = fecha.getDay();                 // 0 = domingo
+        var esFinde = dw===0 || dw===5 || dw===6;
+        var b = document.createElement('button');
+        b.textContent = dia;
+        b.className = esFinde ? 'finde' : '';
+        b.setAttribute('aria-label', dia + ' de julio, ' + (esFinde ? 'finde' : 'entre semana'));
+        b.addEventListener('click', function(){ sel = dia; pinta(); });
+        cal.appendChild(b);
+      })(d);
+    }
+
+    function pinta(){
+      var t = TARIFAS[document.querySelector('input[name=tar]:checked').value];
+      var fecha = new Date(2026, 6, sel);
+      var dw = fecha.getDay();
+      var esFinde = dw===0 || dw===5 || dw===6;
+      var monto = esFinde ? t.fin : t.sem;
+      var nombreDia = ['domingo','lunes','martes','miércoles','jueves','viernes','sábado'][dw];
+
+      Array.prototype.forEach.call(cal.querySelectorAll('button'), function(b){
+        b.classList.toggle('sel', parseInt(b.textContent,10) === sel);
+      });
+
+      res.innerHTML =
+        '<div class="q" style="color:' + (esFinde ? 'var(--rojo)' : 'var(--azul)') + '">' +
+          (esFinde ? 'Finde' : 'Entre semana') + '</div>' +
+        '<div class="d">' + sel + ' de julio de 2026 · ' + nombreDia +
+          (esFinde ? ' — viernes, sábado y domingo pagan tarifa de finde.' : ' — tarifa normal.') + '</div>' +
+        '<table><tr><td>' + t.n + ' · tarifa que aplica</td><td>' + f(monto) + '</td></tr>' +
+        '<tr><td>+ Bono (si lo hubo esa noche)</td><td style="color:var(--verde)">+ $0</td></tr>' +
+        '<tr><td>− Descuento</td><td style="color:var(--rojo)">− $0</td></tr>' +
+        '<tr style="border-top:1px solid var(--bor)"><td style="padding-top:9px"><b style="color:var(--txt)">Se le paga</b></td>' +
+        '<td style="padding-top:9px;font-size:1.35rem;color:var(--gold, var(--oro))">' + f(monto) + '</td></tr></table>' +
+        '<div class="d" style="margin-top:10px;color:var(--gris2)">La propina de esa noche va aparte y no suma acá. Se explica en el manual 03.</div>';
+    }
+    Array.prototype.forEach.call(document.querySelectorAll('input[name=tar]'), function(r){
+      r.addEventListener('change', pinta);
+    });
+    pinta();
+  })();
+</script>
+</body>
+</html>

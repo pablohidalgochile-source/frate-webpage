@@ -1,0 +1,203 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>FRATE OS · ERP 01 La persona</title>
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🪪</text></svg>">
+<link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@600;800;900&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="/os-manual.css">
+<link rel="stylesheet" href="/os-erp.css">
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<style>
+  .campos{display:grid;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));gap:12px;margin-top:14px}
+  .campo{background:var(--neg2);border:1px solid var(--bor);border-radius:12px;padding:15px 17px}
+  .campo h4{font-family:var(--disp);font-weight:800;font-size:1rem;text-transform:uppercase;margin-bottom:5px}
+  .campo p{font-size:.82rem;color:var(--gris)}
+  .form{display:grid;grid-template-columns:repeat(auto-fit,minmax(230px,1fr));gap:16px;margin-top:6px}
+  .f label{display:block;font-family:var(--disp);font-size:.68rem;letter-spacing:2px;text-transform:uppercase;color:var(--gris2);margin-bottom:6px}
+  .f input{width:100%;background:var(--neg);border:1px solid var(--bor2);color:var(--txt);padding:12px 14px;border-radius:9px;
+    font-size:1.15rem;font-family:var(--disp);font-weight:800;letter-spacing:1.5px;outline:none;font-variant-numeric:tabular-nums}
+  .f input:focus{border-color:var(--acc)}
+  .f .msg{font-size:.78rem;margin-top:7px;min-height:20px;color:var(--gris)}
+  .barras{display:flex;flex-direction:column;gap:7px;margin-top:14px}
+  .barra{display:flex;align-items:center;gap:11px;font-size:.84rem}
+  .barra .et{min-width:118px;color:var(--gris)}
+  .barra .bg{flex:1;height:15px;background:var(--neg);border-radius:99px;overflow:hidden;border:1px solid var(--bor)}
+  .barra .fill{height:100%;background:var(--acc);border-radius:99px}
+  .barra .n{min-width:34px;text-align:right;font-family:var(--disp);font-weight:800;font-variant-numeric:tabular-nums}
+</style>
+</head>
+<body>
+<div id="bar"></div>
+<div class="wrap">
+
+  <div class="hero">
+    <div class="eyebrow">ERP · Manual 01</div>
+    <h1>El viaje de<br>una <em>persona</em></h1>
+    <p class="sub">Desde que alguien manda su nombre por WhatsApp hasta que tiene ficha, banco, talla y un turno pagado. Todo lo que el ERP guarda de una persona, y por qué.</p>
+    <div class="meta"><span>Para administración y RRHH</span><span>·</span><span>10 minutos</span></div>
+  </div>
+
+  <section>
+    <div class="stag">Capítulo 1</div>
+    <h2>Una ficha, no una lista</h2>
+    <p class="lead">El error más caro que se puede cometer en el ERP no es escribir mal un monto: es crear dos veces a la misma persona. Cuando eso pasa, sus turnos se reparten entre dos fichas, su saldo queda partido y a una de las dos se le paga de menos.</p>
+    <p style="color:var(--gris)">Por eso el ERP revisa <b>dos cosas</b> antes de dejar crear a alguien: que el <b>RUT</b> no exista ya, y que el <b>nombre completo</b> no exista ya —comparado sin tildes y sin mayúsculas, para que «josé pérez» y «JOSE PEREZ» se reconozcan como la misma persona.</p>
+    <div class="oro"><b>Regla de oro.</b> Si el sistema te dice que la persona ya existe, <strong>no inventes una variación del nombre para saltarte el aviso</strong>. Búscala y edítala. El aviso está para protegerte a ti, no para molestarte.</div>
+    <div class="kpis">
+      <div class="kpi a"><b>83</b><span>activas hoy</span></div>
+      <div class="kpi"><b>11</b><span>dadas de baja</span></div>
+      <div class="kpi o"><b>94</b><span>fichas en total</span></div>
+    </div>
+  </section>
+
+  <section>
+    <div class="stag">Capítulo 2</div>
+    <h2>Los tres estados</h2>
+    <p class="lead">Una persona no se borra: se desactiva. Borrar de verdad es la última opción y no tiene vuelta.</p>
+    <div class="tw"><table class="tabla">
+      <thead><tr><th>Estado</th><th>Qué puede hacer</th><th>Qué pasa con su historial</th><th>Cómo se revierte</th></tr></thead>
+      <tbody>
+        <tr><td><b style="color:var(--verde)">Activo</b></td><td>Entra al portal, ve sus turnos, marca asistencia, cobra.</td><td>Todo visible.</td><td>—</td></tr>
+        <tr><td><b style="color:var(--oro)">Dado de baja</b></td><td>Entra al portal <b>solo a ver su historial</b>. No se le puede convocar.</td><td>Se conserva completo. Sus pagos pasados siguen ahí.</td><td>Un administrador lo reactiva. La persona <b>no</b> puede reactivarse sola.</td></tr>
+        <tr><td><b style="color:var(--rojo)">Eliminado</b></td><td>Nada. Deja de existir.</td><td><b>Se pierde.</b></td><td>No se revierte.</td></tr>
+      </tbody>
+    </table></div>
+    <div class="peligro"><b>Nunca elimines a alguien que ya trabajó una noche.</b> Sus turnos quedan huérfanos y el mes deja de cuadrar. Si ya no trabaja con nosotros, se da de baja. Eliminar es solo para fichas creadas por error que nunca tuvieron un turno.</div>
+  </section>
+
+  <section>
+    <div class="stag">Capítulo 3</div>
+    <h2>Qué guarda la ficha</h2>
+    <p class="lead">La ficha no es un directorio de teléfonos. Cada dato está ahí porque alguien lo necesita una noche puntual.</p>
+    <div class="campos">
+      <div class="campo"><h4>🪪 Identidad</h4><p>RUT validado, nombre, foto encuadrada, fecha de nacimiento. La foto sirve para reconocer a alguien en la puerta a las 3 de la mañana.</p></div>
+      <div class="campo"><h4>🏦 Banco</h4><p>Banco, tipo de cuenta y número. Sin esto no entra en la nómina de transferencias y hay que pagarle en efectivo.</p></div>
+      <div class="campo"><h4>👕 Tallas</h4><p>Polera, chaqueta, pantalón, zapatos. Se piden por prenda, no una talla única: nadie usa la misma arriba y abajo.</p></div>
+      <div class="campo"><h4>🩺 Salud</h4><p>Enfermedades crónicas, alergias y <b>medicamentos habituales</b>. Si alguien se descompensa en el turno, esto lo lee el jefe, no un doctor.</p></div>
+      <div class="campo"><h4>🚇 Movilización</h4><p>Cómo llega al trabajo. Define a quién se le puede pedir que cierre y a quién hay que ayudar a irse.</p></div>
+      <div class="campo"><h4>📄 Documentos</h4><p>CV, OS10 de los guardias, certificados. El OS10 vencido es un problema legal, no administrativo.</p></div>
+    </div>
+
+    <h3>Con qué banco cobra el equipo</h3>
+    <div class="barras">
+      <div class="barra"><span class="et">Banco Estado</span><span class="bg"><span class="fill" style="width:100%"></span></span><span class="n">31</span></div>
+      <div class="barra"><span class="et">Falabella</span><span class="bg"><span class="fill" style="width:68%"></span></span><span class="n">21</span></div>
+      <div class="barra"><span class="et">Banco de Chile</span><span class="bg"><span class="fill" style="width:39%"></span></span><span class="n">12</span></div>
+      <div class="barra"><span class="et">Santander</span><span class="bg"><span class="fill" style="width:32%"></span></span><span class="n">10</span></div>
+      <div class="barra"><span class="et">Mercado Pago</span><span class="bg"><span class="fill" style="width:16%"></span></span><span class="n">5</span></div>
+      <div class="barra"><span class="et">Ripley</span><span class="bg"><span class="fill" style="width:3%"></span></span><span class="n">1</span></div>
+    </div>
+    <div class="peligro"><b>El banco mal escrito rebota la nómina completa.</b> El archivo que se sube al Banco de Chile identifica al banco de destino por su RUT. Si la ficha dice «Ripley» pero la cuenta es de Santander, el banco rechaza esa línea — y a veces el archivo entero. Pasó dos veces en julio. Cuando alguien te diga «no me llegó», lo primero que se revisa es <b>qué banco dice su ficha</b>.</div>
+  </section>
+
+  <section>
+    <div class="stag">Capítulo 4</div>
+    <h2>Cuando una persona hace dos pegas</h2>
+    <p class="lead">Pasa seguido: alguien abre en la puerta y a medianoche se pasa a la barra. Son dos servicios, no uno.</p>
+    <p style="color:var(--gris)">Para eso existe el <b>alias</b>: la misma persona aparece dos veces en la noche, con dos posiciones y dos montos. El ERP sabe que es la misma ficha —la plata va a la misma cuenta corriente y a la misma boleta— pero la operación de la noche las ve separadas, porque son dos puestos que hay que cubrir.</p>
+    <div class="dato"><b>BESUCONA · 25 de julio</b>
+  Camila Rojas   · Puerta 1        · <span class="v">$30.000</span>
+  C. Rojas       · Barra Fuego 2   · <span class="v">$15.000</span>   <span class="o">← alias, media noche</span>
+  ────────────────────────────────────────
+  Una sola ficha · una sola boleta · <b>$45.000</b></div>
+    <p style="color:var(--gris);margin-top:12px">Hoy hay <b>58 turnos</b> registrados como alias. Sin esta figura, esas 58 dobles funciones se habrían perdido o se habrían pagado como si fueran otra persona.</p>
+    <div class="bien"><b>Bien resuelto.</b> El alias no rompe la identidad. La persona sigue siendo una, y en su agenda mensual el día aparece con las dos funciones, una debajo de la otra.</div>
+  </section>
+
+  <section>
+    <div class="stag">Capítulo 5</div>
+    <h2>Los formatos que el ERP corrige solo</h2>
+    <p class="lead">Nadie debería tener que acordarse de dónde van los puntos. El sistema los pone.</p>
+    <div class="demo">
+      <div class="dl">Pruébalo · escribe sin puntos ni guiones</div>
+      <div class="form">
+        <div class="f">
+          <label for="d-rut">RUT</label>
+          <input id="d-rut" inputmode="numeric" placeholder="120114913" aria-describedby="m-rut">
+          <div class="msg" id="m-rut">Se formatea y se valida el dígito verificador.</div>
+        </div>
+        <div class="f">
+          <label for="d-pat">Patente del vehículo</label>
+          <input id="d-pat" placeholder="jkxr45" aria-describedby="m-pat">
+          <div class="msg" id="m-pat">Formato chileno nuevo (4 letras + 2 números) o antiguo (2 + 4).</div>
+        </div>
+        <div class="f">
+          <label for="d-tel">Celular</label>
+          <input id="d-tel" inputmode="numeric" placeholder="+569" aria-describedby="m-tel">
+          <div class="msg" id="m-tel">El <b>+569</b> viene puesto. Se puede cambiar si la persona es extranjera.</div>
+        </div>
+      </div>
+    </div>
+    <div class="oro"><b>Regla de oro.</b> Cuando un campo tiene un patrón conocido, el ERP lo muestra <strong>pre-escrito pero editable</strong>. Nunca bloqueado. La persona decide si lo usa o lo cambia — siempre hay un caso raro que no calza.</div>
+  </section>
+
+  <section>
+    <div class="stag">Capítulo 6</div>
+    <h2>Lo que el ERP todavía no hace</h2>
+    <ul>
+      <li><b>No avisa cuando un OS10 está por vencer.</b> Guarda la fecha, pero nadie recibe un recordatorio. Hay que mirarlo a mano.</li>
+      <li><b>No conecta al staff con el CRM de clientes de la web.</b> Si alguien del equipo compra su cumpleaños en frate.cl, para la web es un cliente nuevo y para el ERP es un trabajador. Son dos personas distintas hasta que las unamos a mano.</li>
+      <li><b>No verifica que la cuenta bancaria exista.</b> Valida el RUT, no la cuenta. Eso solo se sabe cuando el banco rechaza.</li>
+      <li><b>El teléfono no se valida.</b> Se acepta cualquier cosa después del +569.</li>
+    </ul>
+  </section>
+
+  <div class="pie">FRATE OS · ERP · Manual 01 · <a href="/os-erp">← Volver al mapa</a> · <a href="/os-erp-noche">Siguiente: la noche →</a></div>
+</div>
+
+<script src="/os-guard.js"></script>
+<script>
+  document.getElementById('bar').innerHTML = osBarra('01', 'erp');
+  osProteger();
+
+  (function(){
+    // ── RUT ──
+    var rut = document.getElementById('d-rut'), mrut = document.getElementById('m-rut');
+    function dvDe(c){ var s=0,m=2; for(var i=c.length-1;i>=0;i--){ s+=parseInt(c[i],10)*m; m=m===7?2:m+1; }
+      var r=11-(s%11); return r===11?'0':r===10?'K':String(r); }
+    rut.addEventListener('input', function(){
+      var c=(rut.value||'').replace(/[^0-9kK]/g,'').toUpperCase();
+      if(c.length>9) c=c.slice(0,9);
+      if(c.length>1){
+        var cu=c.slice(0,-1), dv=c.slice(-1);
+        rut.value = cu.replace(/\B(?=(\d{3})+(?!\d))/g,'.') + '-' + dv;
+        var ok = dv === dvDe(cu);
+        mrut.style.color = ok ? 'var(--verde)' : 'var(--rojo)';
+        mrut.innerHTML = ok ? '✓ Válido — el ERP lo acepta.'
+          : '✕ El dígito debería ser <b style="color:var(--txt)">'+dvDe(cu)+'</b>. No se puede guardar.';
+      } else {
+        rut.value = c;
+        mrut.style.color=''; mrut.textContent='Se formatea y se valida el dígito verificador.';
+      }
+    });
+
+    // ── Patente ──
+    var pat = document.getElementById('d-pat'), mpat = document.getElementById('m-pat');
+    pat.addEventListener('input', function(){
+      var c=(pat.value||'').replace(/[^a-zA-Z0-9]/g,'').toUpperCase().slice(0,6);
+      var nuevo = /^[A-Z]{4}\d{0,2}$/.test(c), viejo = /^[A-Z]{2}\d{0,4}$/.test(c);
+      if(nuevo && c.length>4) pat.value = c.slice(0,4)+'-'+c.slice(4);
+      else if(viejo && c.length>2 && !/^[A-Z]{3}/.test(c)) pat.value = c.slice(0,2)+'-'+c.slice(2);
+      else pat.value = c;
+      var okN = /^[A-Z]{4}-\d{2}$/.test(pat.value), okV = /^[A-Z]{2}-\d{4}$/.test(pat.value);
+      if(okN||okV){ mpat.style.color='var(--verde)'; mpat.textContent = '✓ Patente '+(okN?'nueva':'antigua')+' válida.'; }
+      else { mpat.style.color=''; mpat.textContent='Formato chileno nuevo (4 letras + 2 números) o antiguo (2 + 4).'; }
+    });
+
+    // ── Celular ──
+    var tel = document.getElementById('d-tel'), mtel = document.getElementById('m-tel');
+    tel.value = '+569';
+    tel.addEventListener('focus', function(){ if(!tel.value) tel.value='+569'; });
+    tel.addEventListener('input', function(){
+      var d = (tel.value||'').replace(/[^\d+]/g,'');
+      tel.value = d;
+      var n = d.replace(/^\+?569/,'');
+      if(n.length===8){ mtel.style.color='var(--verde)'; mtel.textContent='✓ 8 dígitos — completo.'; }
+      else { mtel.style.color=''; mtel.innerHTML='Faltan '+Math.max(0,8-n.length)+' dígitos. El <b>+569</b> viene puesto y se puede cambiar.'; }
+    });
+  })();
+</script>
+</body>
+</html>

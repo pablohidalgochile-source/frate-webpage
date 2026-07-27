@@ -1,0 +1,225 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>FRATE OS · ERP 04 La caja</title>
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>💵</text></svg>">
+<link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@600;800;900&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="/os-manual.css">
+<link rel="stylesheet" href="/os-erp.css">
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<style>
+  .bill{display:flex;align-items:center;gap:11px;padding:8px 0;border-bottom:1px solid var(--bor)}
+  .bill .et{min-width:78px;font-family:var(--disp);font-weight:800;font-size:1.05rem;font-variant-numeric:tabular-nums}
+  .bill .ct{display:flex;gap:5px;align-items:center}
+  .bill button{width:32px;height:32px;border-radius:8px;border:1px solid var(--bor2);background:var(--neg2);color:var(--txt);
+    font-size:1.05rem;font-weight:800;cursor:pointer;line-height:1}
+  .bill button:hover{border-color:var(--acc)}
+  .bill .n{min-width:34px;text-align:center;font-family:var(--disp);font-weight:900;font-size:1.15rem;font-variant-numeric:tabular-nums}
+  .bill .sub{margin-left:auto;font-family:var(--disp);font-weight:800;color:var(--gris);font-variant-numeric:tabular-nums;min-width:92px;text-align:right}
+  .bill .sub.on{color:var(--oro)}
+  .marcador{margin-top:18px;border-radius:13px;padding:18px 20px;border:2px solid var(--bor2);background:var(--neg)}
+  .marcador .lin{display:flex;justify-content:space-between;font-size:.87rem;color:var(--gris);padding:4px 0;font-variant-numeric:tabular-nums}
+  .marcador .lin b{color:var(--txt);font-family:var(--disp);font-weight:800}
+  .marcador .fin{display:flex;justify-content:space-between;align-items:baseline;border-top:2px solid var(--bor2);margin-top:11px;padding-top:13px}
+  .marcador .fin .t{font-family:var(--disp);font-weight:900;font-size:1.25rem;text-transform:uppercase}
+  .marcador .fin .v{font-family:var(--disp);font-weight:900;font-size:2.1rem;font-variant-numeric:tabular-nums;line-height:1}
+  .pista{font-size:.8rem;color:var(--gris2);margin-top:9px;min-height:20px}
+  .dos{display:grid;grid-template-columns:repeat(auto-fit,minmax(260px,1fr));gap:12px;margin-top:14px}
+  .via{background:var(--neg2);border:1px solid var(--bor);border-radius:13px;padding:16px 18px}
+  .via h4{font-family:var(--disp);font-weight:800;font-size:1.05rem;text-transform:uppercase;margin-bottom:4px}
+  .via .c{font-size:.68rem;letter-spacing:1.3px;text-transform:uppercase;color:var(--gris2);margin-bottom:9px}
+  .via p{font-size:.83rem;color:var(--gris)}
+</style>
+</head>
+<body>
+<div id="bar"></div>
+<div class="wrap">
+
+  <div class="hero">
+    <div class="eyebrow">ERP · Manual 04</div>
+    <h1>Cuadrar<br>la <em>caja</em></h1>
+    <p class="sub">Qué significa que una caja cuadre, por qué el sencillo no es venta, y qué hacer cuando faltan $3.500 a las 5 de la mañana.</p>
+    <div class="meta"><span>Para jefes de turno y administración</span><span>·</span><span>10 minutos</span></div>
+  </div>
+
+  <section>
+    <div class="stag">Capítulo 1</div>
+    <h2>Qué significa cuadrar</h2>
+    <p class="lead">Cuadrar es comparar dos cosas que deberían ser iguales: <b>la plata que hay en la caja</b> y <b>la plata que el POS dice que se vendió</b>.</p>
+    <div class="form-eq" style="background:var(--neg);border:1px solid var(--bor2);border-radius:14px;padding:22px 24px;margin-top:16px;text-align:center">
+      <div style="font-family:var(--disp);font-weight:900;font-size:clamp(1rem,3vw,1.6rem);line-height:1.3;text-wrap:balance">
+        SENCILLO INICIAL <span style="color:var(--verde)">+</span> EFECTIVO DEL INFORME
+        <span style="color:var(--gris2)">=</span> LO QUE DEBE HABER EN LA CAJA
+      </div>
+    </div>
+    <p style="color:var(--gris);margin-top:16px">Si contaste los billetes y da esa cifra exacta, cuadra. Si da otra cosa, sobra o falta — y cualquiera de las dos hay que explicarla.</p>
+    <div class="oro"><b>Regla de oro.</b> Cuadra significa <strong>$0 de diferencia</strong>. Ni $300 ni $500: cero. Antes el sistema toleraba las faltas chicas y eso escondía el problema real — cuando falta poco todas las noches, no es un error de conteo, es una fuga.</div>
+  </section>
+
+  <section>
+    <div class="stag">Capítulo 2</div>
+    <h2>El sencillo no es venta</h2>
+    <p class="lead">Cada caja arranca la noche con un fondo para dar vuelto. Ese fondo no lo pagó ningún cliente.</p>
+    <p style="color:var(--gris)">Por eso la venta en efectivo de una caja es <b>lo que quedó al final menos lo que había al principio</b>. Si empezó con $80.000 de sencillo y terminó con $430.000, vendió $350.000 en efectivo — no $430.000.</p>
+    <div class="peligro"><b>Lo que NO entra al cuadre.</b> Las propinas, la plata de los cumpleaños y las reservas <strong>no son venta de esa caja</strong>. Tienen su propio camino. Meterlas al cuadre hace que sobre plata que en realidad es de otra persona.</div>
+    <div class="bien"><b>Bien resuelto.</b> Si una caja se configuró pero nadie la usó, el ERP la detecta como «caja fantasma» y te ofrece quitarla. Antes su sencillo restaba del pozo aunque nunca hubiera abierto, y la noche entera aparecía descuadrada por esa plata que jamás salió de la bodega.</div>
+  </section>
+
+  <section>
+    <div class="stag">Capítulo 3</div>
+    <h2>Cuadra una caja</h2>
+    <p class="lead">Esta caja empezó con <b>$80.000</b> de sencillo y el POS informó <b>$347.500</b> en efectivo. Cuenta los billetes hasta que cuadre.</p>
+    <div class="demo">
+      <div class="dl">Pruébalo · toca + y − para contar los billetes</div>
+      <div id="billetes"></div>
+      <div class="marcador" id="marcador"></div>
+      <div class="pista" id="pista"></div>
+      <button class="btn" id="resolver">Mostrar el conteo correcto</button>
+      <button class="btn" id="limpiar" style="background:transparent;border:1px solid var(--bor2);color:var(--txt);margin-left:8px">Empezar de nuevo</button>
+    </div>
+  </section>
+
+  <section>
+    <div class="stag">Capítulo 4</div>
+    <h2>El cotejo: verificar sin engañarse</h2>
+    <p class="lead">Cuando hay varias cajas, se cotejan todas juntas billete por billete, y cada denominación se marca con un ✓ cuando dos personas la contaron igual.</p>
+    <p style="color:var(--gris)">El ✓ no guarda un «sí»: guarda <b>cuántas unidades verificaste</b>. Si después alguien corrige ese billete, el ✓ se cae solo y aparece un <b style="color:var(--orange,#e67e22)">!</b> naranja. Es la diferencia entre «alguien dijo que estaba bien» y «este número exacto está verificado».</p>
+    <div class="dato">Billete    Contado   Estado
+  $20.000       12     <span class="v">✓ verificado</span>
+  $10.000       31     <span class="v">✓ verificado</span>
+  $5.000        18     <span class="o">! se contó 18, se había verificado con 17</span>
+  $1.000        45     — sin verificar</div>
+    <div class="oro"><b>Regla de oro.</b> Si quitas una caja, <strong>todos los ✓ se borran</strong>. Cambiaron los totales: lo que estaba verificado ya no es el número que verificaste.</div>
+  </section>
+
+  <section>
+    <div class="stag">Capítulo 5</div>
+    <h2>Cuando no cuadra</h2>
+    <p class="lead">Hay dos herramientas y sirven para cosas distintas. Usar las dos para el mismo descuadre lo corrige dos veces.</p>
+    <div class="dos">
+      <div class="via">
+        <h4>➕ Ajustar billetes</h4>
+        <div class="c">Cuando contaste mal</div>
+        <p>Se te pasó un billete de $10.000. La plata siempre estuvo ahí; el error fue el conteo. Corriges la cantidad y listo.</p>
+      </div>
+      <div class="via">
+        <h4>💬 Registrar un ajuste</h4>
+        <div class="c">Cuando la plata se movió</div>
+        <p>Se le devolvió a un cliente, se compró hielo, se pagó un taxi. La venta real cambió y hay que dejar el motivo por escrito.</p>
+      </div>
+    </div>
+    <p style="color:var(--gris);margin-top:14px">Mientras escribes el ajuste, el ERP te muestra en vivo: <b>«descuadre actual −$3.500 · con este ajuste quedaría $0»</b>. Así ves si estás cerrando el hoyo o abriendo otro.</p>
+    <div class="peligro"><b>Nunca ajustes para que cuadre y ya.</b> Un ajuste sin motivo real es esconder una diferencia. Si falta plata y no sabes por qué, se registra como <b>faltante real</b> con ese nombre. Un faltante explicado es información; un faltante maquillado es un problema que vuelve el próximo sábado.</div>
+  </section>
+
+  <section>
+    <div class="stag">Capítulo 6</div>
+    <h2>Las propinas tienen su propio reloj</h2>
+    <p class="lead">La propina no es del local. Es de la gente que trabajó esa noche, íntegra y sin comisión.</p>
+    <ul>
+      <li><b>La de efectivo</b> se reparte esa misma madrugada, en la mano.</li>
+      <li><b>La digital</b> —la que el cliente dejó con tarjeta— llega a la cuenta del local y hay que entregarla dentro de <b>7 días hábiles</b>. Es plazo legal, no una costumbre interna.</li>
+      <li><b>Ninguna de las dos</b> entra al cuadre de la caja ni al pago del turno.</li>
+    </ul>
+    <div class="peligro"><b>Marcar la entrega no es burocracia.</b> Es la prueba de que la plata llegó a quien correspondía. Hoy hay 201 turnos con propina y solo 25 marcados como entregados — 176 noches sin respaldo de que se repartió.</div>
+  </section>
+
+  <section>
+    <div class="stag">Capítulo 7</div>
+    <h2>Lo que el ERP todavía no hace</h2>
+    <ul>
+      <li><b>No cruza el cuadre con el video.</b> Sabe que faltan $5.000; no sabe en qué caja ni a qué hora.</li>
+      <li><b>El dólar usa un valor de referencia fijo.</b> Los dólares en caja se convierten a un tipo de cambio que no se actualiza solo.</li>
+      <li><b>No compara noches parecidas.</b> No te dice «esta caja siempre falta los sábados».</li>
+      <li><b>No exige motivo</b> para cerrar con diferencia. Deja cerrar una noche descuadrada sin explicación.</li>
+    </ul>
+  </section>
+
+  <div class="pie">FRATE OS · ERP · Manual 04 · <a href="/os-erp-dinero">← El dinero</a> · <a href="/os-erp-bodega">Siguiente: la bodega →</a></div>
+</div>
+
+<script src="/os-guard.js"></script>
+<script>
+  document.getElementById('bar').innerHTML = osBarra('04', 'erp');
+  osProteger();
+
+  (function(){
+    var SENCILLO = 80000, INFORME = 347500;
+    var ESPERADO = SENCILLO + INFORME;                 // $427.500
+    // Un conteo real que da exactamente $427.500
+    var SOLUCION = { 20000:15, 10000:9, 5000:6, 2000:3, 1000:1, 500:1 };
+    var DENOMS = [20000,10000,5000,2000,1000,500,100];
+    var cuenta = {};
+    DENOMS.forEach(function(d){ cuenta[d]=0; });
+
+    var cont = document.getElementById('billetes'), marc = document.getElementById('marcador'), pista = document.getElementById('pista');
+    function f(n){ return '$' + Math.round(n).toLocaleString('es-CL'); }
+
+    DENOMS.forEach(function(d){
+      var fila = document.createElement('div');
+      fila.className = 'bill';
+      fila.innerHTML =
+        '<span class="et">' + f(d) + '</span>' +
+        '<span class="ct"><button data-d="' + d + '" data-v="-1" aria-label="Quitar un billete de ' + f(d) + '">−</button>' +
+        '<span class="n" id="n-' + d + '">0</span>' +
+        '<button data-d="' + d + '" data-v="1" aria-label="Agregar un billete de ' + f(d) + '">+</button></span>' +
+        '<span class="sub" id="s-' + d + '">—</span>';
+      cont.appendChild(fila);
+    });
+
+    cont.addEventListener('click', function(e){
+      var b = e.target.closest('button'); if(!b) return;
+      var d = parseInt(b.dataset.d,10), v = parseInt(b.dataset.v,10);
+      cuenta[d] = Math.max(0, cuenta[d] + v);
+      pinta();
+    });
+
+    function pinta(){
+      var total = 0;
+      DENOMS.forEach(function(d){
+        var n = cuenta[d], sub = n * d; total += sub;
+        document.getElementById('n-'+d).textContent = n;
+        var s = document.getElementById('s-'+d);
+        s.textContent = n ? f(sub) : '—';
+        s.className = 'sub' + (n ? ' on' : '');
+      });
+      var dif = total - ESPERADO;
+      var cuadra = dif === 0 && total > 0;
+      var col = total === 0 ? 'var(--gris2)' : cuadra ? 'var(--verde)' : dif > 0 ? 'var(--oro)' : 'var(--rojo)';
+
+      marc.style.borderColor = col;
+      marc.innerHTML =
+        '<div class="lin"><span>Sencillo con el que abrió</span><b>' + f(SENCILLO) + '</b></div>' +
+        '<div class="lin"><span>+ Efectivo del informe del POS</span><b>' + f(INFORME) + '</b></div>' +
+        '<div class="lin" style="border-top:1px solid var(--bor);margin-top:6px;padding-top:9px"><span>= Debe haber en la caja</span><b>' + f(ESPERADO) + '</b></div>' +
+        '<div class="lin"><span>Contaste</span><b style="color:' + col + '">' + f(total) + '</b></div>' +
+        '<div class="fin"><span class="t" style="color:' + col + '">' +
+          (total === 0 ? 'Empieza a contar' : cuadra ? '✓ Cuadra' : dif > 0 ? 'Sobra' : 'Falta') + '</span>' +
+        '<span class="v" style="color:' + col + '">' + (total === 0 ? '—' : cuadra ? '$0' : (dif>0?'+':'−') + f(Math.abs(dif)).slice(1)) + '</span></div>';
+
+      if(total === 0) pista.textContent = '';
+      else if(cuadra) pista.innerHTML = '<b style="color:var(--verde)">Exacto al peso.</b> Esta caja se puede cerrar.';
+      else {
+        var a = Math.abs(dif), s = [];
+        [20000,10000,5000,2000,1000,500].forEach(function(d){ if(a % d === 0 && a/d <= 20) s.push((a/d) + ' de ' + f(d)); });
+        pista.innerHTML = s.length
+          ? 'Pista: la diferencia es exactamente <b style="color:var(--txt)">' + s[0] + '</b>. Suele ser un billete mal contado.'
+          : 'La diferencia no calza con billetes enteros — revisa si falta registrar un gasto o una devolución.';
+      }
+    }
+
+    document.getElementById('resolver').addEventListener('click', function(){
+      DENOMS.forEach(function(d){ cuenta[d] = SOLUCION[d] || 0; });
+      pinta();
+    });
+    document.getElementById('limpiar').addEventListener('click', function(){
+      DENOMS.forEach(function(d){ cuenta[d] = 0; });
+      pinta();
+    });
+    pinta();
+  })();
+</script>
+</body>
+</html>

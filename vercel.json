@@ -1,9 +1,316 @@
 {
   "rewrites": [
-    { "source": "/admin", "destination": "/admin.html" },
-    { "source": "/admin/", "destination": "/admin.html" }
+    {
+      "source": "/admin",
+      "destination": "/admin.html"
+    },
+    {
+      "source": "/admin/",
+      "destination": "/admin.html"
+    },
+    {
+      "source": "/validacion",
+      "destination": "/validacion.html"
+    },
+    {
+      "source": "/validacion/",
+      "destination": "/validacion.html"
+    },
+    {
+      "source": "/vivo",
+      "destination": "/vivo.html"
+    },
+    {
+      "source": "/os",
+      "destination": "/os.html"
+    },
+    {
+      "source": "/os-entrada",
+      "destination": "/os-entrada.html"
+    },
+    {
+      "source": "/os-dinero",
+      "destination": "/os-dinero.html"
+    },
+    {
+      "source": "/os-persona",
+      "destination": "/os-persona.html"
+    },
+    {
+      "source": "/os-noche",
+      "destination": "/os-noche.html"
+    },
+    {
+      "source": "/os-panel",
+      "destination": "/os-panel.html"
+    },
+    {
+      "source": "/os-reglas",
+      "destination": "/os-reglas.html"
+    },
+    {
+      "source": "/os-besucona",
+      "destination": "/os-besucona.html"
+    },
+    {
+      "source": "/os-comparar",
+      "destination": "/os-comparar.html"
+    },
+    {
+      "source": "/os-cliente",
+      "destination": "/os-cliente.html"
+    },
+    {
+      "source": "/os-flyer",
+      "destination": "/os-flyer.html"
+    },
+    {
+      "source": "/os-flyer-evento",
+      "destination": "/os-flyer-evento.html"
+    },
+    {
+      "source": "/os-flyer-diseno",
+      "destination": "/os-flyer-diseno.html"
+    },
+    {
+      "source": "/os-flyer-reel",
+      "destination": "/os-flyer-reel.html"
+    },
+    {
+      "source": "/os-flyer-brief",
+      "destination": "/os-flyer-brief.html"
+    },
+    {
+      "source": "/os-flyer-mesa",
+      "destination": "/os-flyer-mesa.html"
+    },
+    {
+      "source": "/os-flyer-reglas",
+      "destination": "/os-flyer-reglas.html"
+    },
+    {
+      "source": "/os-erp",
+      "destination": "/os-erp.html"
+    },
+    {
+      "source": "/os-erp-persona",
+      "destination": "/os-erp-persona.html"
+    },
+    {
+      "source": "/os-erp-noche",
+      "destination": "/os-erp-noche.html"
+    },
+    {
+      "source": "/os-erp-dinero",
+      "destination": "/os-erp-dinero.html"
+    },
+    {
+      "source": "/os-erp-caja",
+      "destination": "/os-erp-caja.html"
+    },
+    {
+      "source": "/os-erp-bodega",
+      "destination": "/os-erp-bodega.html"
+    },
+    {
+      "source": "/os-erp-reglas",
+      "destination": "/os-erp-reglas.html"
+    },
+    {
+      "source": "/devolucion",
+      "destination": "/devolucion.html"
+    },
+    {
+      "source": "/devolucion/",
+      "destination": "/devolucion.html"
+    },
+    {
+      "source": "/devoluciones",
+      "destination": "/devolucion.html"
+    },
+    {
+      "source": "/reembolso",
+      "destination": "/devolucion.html"
+    },
+    {
+      "source": "/vivo/",
+      "destination": "/vivo.html"
+    },
+    {
+      "source": "/rrpp",
+      "destination": "/rrpp.html"
+    },
+    {
+      "source": "/rrpp/",
+      "destination": "/rrpp.html"
+    },
+    {
+      "source": "/pase",
+      "destination": "/pase.html"
+    },
+    {
+      "source": "/pase/",
+      "destination": "/pase.html"
+    },
+    {
+      "source": "/connect",
+      "destination": "/connect.html"
+    },
+    {
+      "source": "/connect/",
+      "destination": "/connect.html"
+    },
+    {
+      "source": "/casita-demo",
+      "destination": "/casita-demo.html"
+    },
+    {
+      "source": "/casita",
+      "destination": "/casita.html"
+    },
+    {
+      "source": "/cedula",
+      "destination": "/cedula.html"
+    },
+    {
+      "source": "/cedula/",
+      "destination": "/cedula.html"
+    },
+    {
+      "source": "/link-demo",
+      "destination": "/link-demo.html"
+    },
+    {
+      "source": "/entrada",
+      "destination": "/entrada.html"
+    },
+    {
+      "source": "/entrada/:t",
+      "destination": "/entrada.html"
+    },
+    {
+      "source": "/estudio",
+      "destination": "/estudio.html"
+    },
+    {
+      "source": "/estudio/",
+      "destination": "/estudio.html"
+    },
+    {
+      "source": "/cam",
+      "destination": "/cam.html"
+    },
+    {
+      "source": "/cam/",
+      "destination": "/cam.html"
+    },
+    {
+      "source": "/VIVO",
+      "destination": "/vivo.html"
+    },
+    {
+      "source": "/VIVO/",
+      "destination": "/vivo.html"
+    },
+    {
+      "source": "/Vivo",
+      "destination": "/vivo.html"
+    },
+    {
+      "source": "/lista",
+      "destination": "/lista.html"
+    },
+    {
+      "source": "/lista/",
+      "destination": "/lista.html"
+    },
+    {
+      "source": "/lista/:code",
+      "destination": "/lista.html"
+    },
+    {
+      "source": "/manual",
+      "destination": "/manual.html"
+    },
+    {
+      "source": "/manual/",
+      "destination": "/manual.html"
+    },
+    {
+      "source": "/frat-friends",
+      "destination": "/frat-friends.html"
+    },
+    {
+      "source": "/frat-friends/",
+      "destination": "/frat-friends.html"
+    },
+    {
+      "source": "/fratandfriends",
+      "destination": "/frat-friends.html"
+    },
+    {
+      "source": "/fratfriends",
+      "destination": "/frat-friends.html"
+    },
+    {
+      "source": "/formcumple",
+      "destination": "/form.html?t=cumple"
+    },
+    {
+      "source": "/formreserva",
+      "destination": "/form.html?t=reserva"
+    },
+    {
+      "source": "/formfrecuente",
+      "destination": "/form.html?t=frecuente"
+    },
+    {
+      "source": "/e/:slug",
+      "destination": "/comprar.html"
+    },
+    {
+      "source": "/links",
+      "destination": "/links.html"
+    },
+    {
+      "source": "/links/",
+      "destination": "/links.html"
+    },
+    {
+      "source": "/manual-anfitriona",
+      "destination": "/manual-anfitriona.html"
+    },
+    {
+      "source": "/manual-rrpp",
+      "destination": "/manual-rrpp.html"
+    },
+    {
+      "source": "/manual-comunidad",
+      "destination": "/manual-comunidad.html"
+    },
+    {
+      "source": "/manual-bot",
+      "destination": "/manual-bot.html"
+    },
+    {
+      "source": "/manual-puerta",
+      "destination": "/manual-puerta.html"
+    },
+    {
+      "source": "/privacidad",
+      "destination": "/privacidad.html"
+    }
   ],
   "redirects": [
-    { "source": "/admin.html", "destination": "/admin", "permanent": true }
+    {
+      "source": "/admin.html",
+      "destination": "/admin",
+      "permanent": true
+    },
+    {
+      "source": "/validacion.html",
+      "destination": "/validacion",
+      "permanent": true
+    }
   ]
 }

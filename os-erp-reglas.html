@@ -1,0 +1,182 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>FRATE OS · ERP 06 Reglas de oro</title>
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>⚖️</text></svg>">
+<link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@600;800;900&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="/os-manual.css">
+<link rel="stylesheet" href="/os-erp.css">
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<style>
+  .regla{display:flex;gap:16px;align-items:flex-start;background:var(--neg2);border:1px solid var(--bor);
+    border-left:4px solid var(--oro);border-radius:12px;padding:16px 19px;margin-top:11px}
+  .regla .nn{font-family:var(--disp);font-weight:900;font-size:1.9rem;color:var(--oro);line-height:.85;min-width:34px}
+  .regla h4{font-family:var(--disp);font-weight:800;font-size:1.1rem;text-transform:uppercase;margin-bottom:4px;text-wrap:balance}
+  .regla p{font-size:.86rem;color:var(--gris)}
+  .regla.no{border-left-color:var(--rojo)} .regla.no .nn{color:var(--rojo)}
+  .falta{display:flex;gap:13px;align-items:flex-start;padding:13px 0;border-bottom:1px solid var(--bor)}
+  .falta .ic{font-size:1.2rem;flex-shrink:0;width:26px;text-align:center}
+  .falta h4{font-size:.95rem;font-weight:800;margin-bottom:3px}
+  .falta p{font-size:.82rem;color:var(--gris)}
+  .falta .et{display:inline-block;font-size:.58rem;letter-spacing:1.2px;text-transform:uppercase;padding:2px 8px;
+    border-radius:99px;border:1px solid var(--bor2);color:var(--gris2);margin-left:7px;vertical-align:middle}
+  .falta .et.alta{border-color:rgba(232,54,61,.5);color:var(--rojo)}
+  .falta .et.media{border-color:rgba(230,200,96,.5);color:var(--oro)}
+  .glos{display:grid;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));gap:11px;margin-top:14px}
+  .gl{background:var(--neg2);border:1px solid var(--bor);border-radius:12px;padding:14px 16px}
+  .gl h4{font-family:var(--disp);font-weight:800;font-size:.98rem;text-transform:uppercase;margin-bottom:4px;color:var(--acc)}
+  .gl p{font-size:.81rem;color:var(--gris)}
+</style>
+</head>
+<body>
+<div id="bar"></div>
+<div class="wrap">
+
+  <div class="hero">
+    <div class="eyebrow">ERP · Manual 06</div>
+    <h1>Reglas<br>de <em>oro</em></h1>
+    <p class="sub">Las diez cosas que hay que saber siempre, las seis que nunca se hacen, y la lista honesta de lo que el ERP todavía no resuelve.</p>
+    <div class="meta"><span>Para todo el equipo</span><span>·</span><span>8 minutos</span><span>·</span><span>Cierra la serie</span></div>
+  </div>
+
+  <section>
+    <div class="stag">Parte 1</div>
+    <h2>Las diez reglas</h2>
+    <p class="lead">Si alguien nuevo entra a administración y solo alcanza a leer una página, que sea esta.</p>
+
+    <div class="regla"><span class="nn">1</span><div><h4>El pago es servicio + bonos − descuentos</h4>
+      <p>La propina nunca entra. Es plata del cliente para la persona, no del local. Se muestra para saber cuánto ganó esa noche, pero no se paga por planilla ni se boletea.</p></div></div>
+
+    <div class="regla"><span class="nn">2</span><div><h4>El monto de una noche se congela al asignar</h4>
+      <p>Subirle la tarifa a alguien hoy no cambia lo que ya trabajó. Las noches pasadas valen lo que valían entonces.</p></div></div>
+
+    <div class="regla"><span class="nn">3</span><div><h4>Aprobar no es pagar</h4>
+      <p>Aprobar es decir «este monto está bien». Pagar es que la plata salió. Son dos actos, dos momentos y a veces dos personas.</p></div></div>
+
+    <div class="regla"><span class="nn">4</span><div><h4>Cada peso se registra una sola vez</h4>
+      <p>Un adelanto se descuenta una vez y queda saldado. Si un número aparece dos veces en dos pantallas, una de las dos está mal.</p></div></div>
+
+    <div class="regla"><span class="nn">5</span><div><h4>Cuadrar es $0, no «casi»</h4>
+      <p>Ni $300 ni $500. Cuando falta poco todas las noches, no es error de conteo: es una fuga.</p></div></div>
+
+    <div class="regla"><span class="nn">6</span><div><h4>El sencillo no es venta</h4>
+      <p>La venta en efectivo es lo que quedó menos lo que había al abrir. Las propinas, cumpleaños y reservas no entran al cuadre de la caja.</p></div></div>
+
+    <div class="regla"><span class="nn">7</span><div><h4>El stock se deduce, no se escribe</h4>
+      <p>Cerradas + lo que queda en las abiertas. Si quieres cambiar el stock, cambias el desglose. El total se recalcula solo.</p></div></div>
+
+    <div class="regla"><span class="nn">8</span><div><h4>Una persona, una ficha, un RUT</h4>
+      <p>El RUT es el hilo que amarra los cuatro sistemas. Se valida antes de crear a alguien, no después.</p></div></div>
+
+    <div class="regla"><span class="nn">9</span><div><h4>Cada dato tiene un dueño</h4>
+      <p>Si dos sistemas no coinciden, manda el dueño. El ERP no discute con la Web sobre entradas ni con el POS sobre lo que se vendió.</p></div></div>
+
+    <div class="regla"><span class="nn">10</span><div><h4>Supabase es la verdad; el celular es una copia</h4>
+      <p>Lo que ves sin señal es una copia local para poder trabajar. Cuando vuelve la conexión, la nube manda y reemplaza lo que había.</p></div></div>
+  </section>
+
+  <section>
+    <div class="stag">Parte 2</div>
+    <h2>Lo que nunca se hace</h2>
+
+    <div class="regla no"><span class="nn">✕</span><div><h4>Editar desde el ERP algo que es de la Web</h4>
+      <p>Precios de entrada, check-ins, datos del cliente. Acá se ven, no se tocan. La próxima sincronización te los pisa.</p></div></div>
+
+    <div class="regla no"><span class="nn">✕</span><div><h4>Eliminar a alguien que ya trabajó una noche</h4>
+      <p>Sus turnos quedan huérfanos y el mes deja de cuadrar. Si ya no trabaja con nosotros, se <b>da de baja</b>. Eliminar es solo para fichas creadas por error.</p></div></div>
+
+    <div class="regla no"><span class="nn">✕</span><div><h4>Inventar una variación del nombre para saltarse el aviso de duplicado</h4>
+      <p>Si el sistema dice que la persona ya existe, búscala y edítala. Dos fichas de la misma persona parten su plata en dos.</p></div></div>
+
+    <div class="regla no"><span class="nn">✕</span><div><h4>Ajustar la caja solo para que cuadre</h4>
+      <p>Un ajuste sin motivo real esconde una diferencia. Si falta plata y no sabes por qué, se registra como <b>faltante real</b>, con ese nombre.</p></div></div>
+
+    <div class="regla no"><span class="nn">✕</span><div><h4>Poner un bono en la ficha de la persona</h4>
+      <p>El bono es de esa noche. En la ficha se lo estás subiendo para siempre y nadie se va a acordar de bajarlo.</p></div></div>
+
+    <div class="regla no"><span class="nn">✕</span><div><h4>Aceptar un emparejamiento automático de productos sin revisarlo</h4>
+      <p>Un nombre parecido no es el mismo producto. El mapeo automático hacía calzar «Piscola» con ESCOBAS.</p></div></div>
+  </section>
+
+  <section>
+    <div class="stag">Parte 3</div>
+    <h2>Lo que el ERP no hace todavía</h2>
+    <p class="lead">Ser honesto acá evita que el equipo prometa cosas imposibles. Nada de esto está roto: simplemente no está construido.</p>
+
+    <h3>Plata</h3>
+    <div class="falta"><span class="ic">🧾</span><div><h4>No emite boletas al SII <span class="et">por diseño</span></h4>
+      <p>Calcula el bruto y arma el detalle. La boleta la emite cada persona en el sitio del SII.</p></div></div>
+    <div class="falta"><span class="ic">🏦</span><div><h4>No sabe si la transferencia llegó <span class="et alta">importante</span></h4>
+      <p>Genera el archivo del banco y marca pagado cuando tú confirmas que lo subiste. Si el banco rechaza una línea, el ERP no se entera.</p></div></div>
+    <div class="falta"><span class="ic">💼</span><div><h4>Los sueldos de los administradores están en $0 <span class="et alta">pendiente</span></h4>
+      <p>El sistema ya maneja tratos mensuales, pero los montos reales no se han cargado.</p></div></div>
+
+    <h3>Noche</h3>
+    <div class="falta"><span class="ic">⏰</span><div><h4>No sabe si alguien llegó tarde</h4>
+      <p>Marca asistencia, no horario. Un atraso se refleja como descuento manual o no se refleja.</p></div></div>
+    <div class="falta"><span class="ic">🧩</span><div><h4>No avisa que faltan posiciones por cubrir <span class="et media">útil</span></h4>
+      <p>Puedes cerrar la convocatoria con la barra a medias y el sistema no dice nada.</p></div></div>
+    <div class="falta"><span class="ic">🏷</span><div><h4>El nombre automático no se reemplaza solo cuando llega el flyer</h4>
+      <p>Hay que escribirlo a mano. Por eso hay noches en convocatoria con nombre de fecha.</p></div></div>
+
+    <h3>Caja y bodega</h3>
+    <div class="falta"><span class="ic">📉</span><div><h4>No compara el consumo teórico con el real <span class="et media">próximo</span></h4>
+      <p>Sabe cuánto debió salir según las ventas y cuánto salió según el conteo, pero no pone los dos números lado a lado.</p></div></div>
+    <div class="falta"><span class="ic">📦</span><div><h4>No avisa que algo se está por acabar</h4>
+      <p>Tiene el stock y el consumo, pero no calcula punto de reposición.</p></div></div>
+    <div class="falta"><span class="ic">💵</span><div><h4>El dólar usa un valor de referencia fijo</h4>
+      <p>Los dólares en caja se convierten a un tipo de cambio que no se actualiza solo.</p></div></div>
+
+    <h3>Entre sistemas</h3>
+    <div class="falta"><span class="ic">🔗</span><div><h4>El staff y los clientes son dos mundos separados</h4>
+      <p>Si alguien del equipo compra su cumpleaños en frate.cl, para la Web es un cliente nuevo y para el ERP es un trabajador. Son dos personas hasta que las unamos a mano.</p></div></div>
+    <div class="falta"><span class="ic">🍹</span><div><h4>Faltan recetas por enseñar <span class="et alta">65 ventas esperando</span></h4>
+      <p>Hasta que cada ítem del POS sepa qué descuenta, esas ventas quedan guardadas sin bajar el stock. No se pierden.</p></div></div>
+  </section>
+
+  <section>
+    <div class="stag">Parte 4</div>
+    <h2>Vocabulario</h2>
+    <p class="lead">Palabras que en el ERP significan algo preciso. Usarlas bien evita la mitad de las confusiones.</p>
+    <div class="glos">
+      <div class="gl"><h4>Servicio</h4><p>Una noche trabajada por una persona. Es la unidad de pago del que cobra por noche.</p></div>
+      <div class="gl"><h4>Turno</h4><p>La fila que conecta a una persona con una noche: su posición, su monto, su asistencia.</p></div>
+      <div class="gl"><h4>Trato</h4><p>Cómo cobra esa persona: por servicio, mensual, semanal o mixto.</p></div>
+      <div class="gl"><h4>Alias</h4><p>La misma persona haciendo dos funciones la misma noche. Dos turnos, una ficha, una boleta.</p></div>
+      <div class="gl"><h4>Finde</h4><p>Viernes, sábado y domingo. El domingo cuenta porque se trabaja la madrugada del sábado.</p></div>
+      <div class="gl"><h4>Acumulado</h4><p>Plata ganada que no se pagó todavía a propósito: queda sumando para cobrarla junta.</p></div>
+      <div class="gl"><h4>Líquido / Bruto</h4><p>Líquido es lo que recibe. Bruto es lo que boletea: líquido ÷ (1 − 15,25%).</p></div>
+      <div class="gl"><h4>Sencillo</h4><p>El fondo con el que abre una caja para dar vuelto. No es venta.</p></div>
+      <div class="gl"><h4>Caja fantasma</h4><p>Una caja configurada que nadie usó. Su sencillo no debe restar del pozo.</p></div>
+      <div class="gl"><h4>Porción</h4><p>Un trago. Cada botella declara cuántas da: un pisco 750 rinde 25.</p></div>
+      <div class="gl"><h4>Receta</h4><p>Lo que sale de la bodega cuando el POS vende algo. Un mojito = ron + menta + azúcar.</p></div>
+      <div class="gl"><h4>Devengo</h4><p>Plata que se genera sin que haya un turno: el sueldo del mensual, el fijo semanal.</p></div>
+    </div>
+  </section>
+
+  <section>
+    <div class="stag">La serie</div>
+    <h2>Los 7 manuales del ERP</h2>
+    <div class="serie">
+      <a class="mn" href="/os-erp"><span class="num2">00</span><div><h4>El mapa</h4><p>Los cuatro cerebros y de qué manda cada uno.</p></div></a>
+      <a class="mn" href="/os-erp-persona"><span class="num2">01</span><div><h4>La persona</h4><p>De postulante a ficha con banco, talla y contrato.</p></div></a>
+      <a class="mn" href="/os-erp-noche"><span class="num2">02</span><div><h4>La noche</h4><p>El viaje de un turno, de la convocatoria al cierre.</p></div></a>
+      <a class="mn" href="/os-erp-dinero"><span class="num2">03</span><div><h4>El dinero</h4><p>El viaje de un peso: trato, turno, pago, boleta.</p></div></a>
+      <a class="mn" href="/os-erp-caja"><span class="num2">04</span><div><h4>La caja</h4><p>Sencillo, billetes, cuadre y propinas.</p></div></a>
+      <a class="mn" href="/os-erp-bodega"><span class="num2">05</span><div><h4>La bodega</h4><p>El viaje de una botella, del pedido al trago.</p></div></a>
+      <a class="mn" href="/os-erp-reglas"><span class="num2">06</span><div><h4>Reglas de oro</h4><p>Lo que nunca se hace y lo que falta por hacer.</p><span class="tag">Estás aquí</span></div></a>
+    </div>
+  </section>
+
+  <div class="pie">FRATE OS · ERP · Manual 06 · <a href="/os-erp-bodega">← La bodega</a> · <a href="/os-erp">Volver al mapa</a> · <a href="/os">Serie de la Web</a></div>
+</div>
+
+<script src="/os-guard.js"></script>
+<script>
+  document.getElementById('bar').innerHTML = osBarra('06', 'erp');
+  osProteger();
+</script>
+</body>
+</html>

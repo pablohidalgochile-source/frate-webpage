@@ -1,0 +1,220 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>FRATE OS · ERP 00 El mapa</title>
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🧠</text></svg>">
+<link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@600;800;900&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="/os-manual.css">
+<link rel="stylesheet" href="/os-erp.css">
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<style>
+  .rutbox{display:flex;gap:14px;flex-wrap:wrap;align-items:center}
+  .rutbox input{background:var(--neg);border:1px solid var(--bor2);color:var(--txt);padding:13px 15px;border-radius:9px;
+    font-size:1.5rem;font-family:var(--disp);font-weight:800;letter-spacing:2px;width:230px;outline:none;font-variant-numeric:tabular-nums}
+  .rutbox input:focus{border-color:var(--acc)}
+  .veredicto{font-family:var(--disp);font-weight:900;font-size:1.6rem;line-height:1.15;min-width:230px;flex:1}
+  .veredicto small{display:block;font-family:var(--font);font-weight:400;font-size:.78rem;color:var(--gris);letter-spacing:0;text-transform:none;margin-top:3px}
+  .chips{display:flex;gap:6px;margin-top:14px;flex-wrap:wrap}
+  .chips button{background:transparent;border:1px solid var(--bor2);color:var(--gris);border-radius:99px;padding:5px 12px;
+    font-size:.74rem;cursor:pointer;font-family:var(--font)}
+  .chips button:hover{border-color:var(--acc);color:var(--txt)}
+</style>
+</head>
+<body>
+<div id="bar"></div>
+<div class="wrap">
+
+  <div class="hero">
+    <div class="eyebrow">ERP · Manual 00</div>
+    <h1>El cerebro<br>que <em>consolida</em></h1>
+    <p class="sub">Qué guarda el ERP, de qué datos manda él y de cuáles obedece. El mapa completo de los cuatro sistemas, para saber siempre dónde se arregla cada cosa.</p>
+    <div class="meta"><span>Para administración</span><span>·</span><span>12 minutos</span><span>·</span><span>Léelo antes de los otros 6</span></div>
+  </div>
+
+  <section>
+    <div class="stag">Capítulo 1</div>
+    <h2>Los cuatro cerebros</h2>
+    <p class="lead">Fraternidad no corre sobre un sistema: corre sobre cuatro. Cada uno es dueño de una parte de la verdad. Cuando dos no coinciden, no se discute en la reunión: manda el dueño del dato.</p>
+    <div class="cerebros">
+      <div class="cer fly"><div class="ic">🎨</div><h4>Flyer</h4><div class="rol">Nace el evento</div><p>Nombre, fecha y gráfica. Todo empieza cuando el flyer existe.</p></div>
+      <div class="cer web"><div class="ic">🌐</div><h4>Web</h4><div class="rol">Vende y registra</div><p>Precio, entradas, QR, check-in de puerta y la ficha del cliente.</p></div>
+      <div class="cer pos"><div class="ic">💵</div><h4>POS</h4><div class="rol">Cobra adentro</div><p>Lo que se consume en la barra durante la noche.</p></div>
+      <div class="cer erp"><span class="yo">Estás aquí</span><div class="ic">🧠</div><h4>ERP</h4><div class="rol">Consolida</div><p>Personal, plata, bodega y el cierre de la noche.</p></div>
+    </div>
+    <div class="oro"><b>Regla de oro.</b> El ERP no vende ni cobra: <strong>consolida</strong>. Si un número está mal en el ERP, casi siempre está mal en el sistema que lo produjo. Se arregla en el origen, no acá.</div>
+  </section>
+
+  <section>
+    <div class="stag">Capítulo 2</div>
+    <h2>De qué es dueño el ERP</h2>
+    <p class="lead">Dueño significa una sola cosa: si hay diferencia entre sistemas, manda este. Nadie más escribe estos datos.</p>
+    <div class="tw"><table class="tabla">
+      <thead><tr><th>Dato</th><th>Qué incluye</th><th>Dónde vive en el ERP</th></tr></thead>
+      <tbody>
+        <tr><td><b>La persona</b></td><td>RUT, nombre, banco y cuenta, tallas, salud, documentos, activo o dado de baja.</td><td>Personal / Staff</td></tr>
+        <tr><td><b>El trato</b></td><td>Por servicio, mensual, semanal o mixto. Cuánto vale su noche entre semana y cuánto en finde.</td><td>Personal → ficha</td></tr>
+        <tr><td><b>Quién trabajó</b></td><td>Posición, asistencia, bono, descuento y la propina que le tocó.</td><td>Eventos → Equipo</td></tr>
+        <tr><td><b>La plata de cada uno</b></td><td>Turnos que suman, pagos y adelantos que restan, saldo corrido, boleta mensual.</td><td>Servicios &amp; Pagos</td></tr>
+        <tr><td><b>La bodega</b></td><td>Productos, costos, stock, conteos, pedidos y proveedores.</td><td>Inventario</td></tr>
+        <tr><td><b>La caja de la noche</b></td><td>Sencillo inicial, billetes contados, cuadre contra el informe del POS.</td><td>Conteos</td></tr>
+        <tr><td><b>El estado del evento</b></td><td>Borrador, convocatoria, cerrado o archivado. Cerrar una noche la manda el ERP.</td><td>Eventos</td></tr>
+      </tbody>
+    </table></div>
+    <div class="kpis">
+      <div class="kpi a"><b>83</b><span>personas activas</span></div>
+      <div class="kpi"><b>18</b><span>noches cargadas</span></div>
+      <div class="kpi"><b>1.258</b><span>turnos registrados</span></div>
+      <div class="kpi o"><b>192</b><span>productos en bodega</span></div>
+    </div>
+    <div class="peligro"><b>Nunca.</b> No corrijas el precio de una entrada ni un check-in desde el ERP. Esos son de la Web: acá se ven, no se tocan. Si los editas, la próxima sincronización te los pisa y perdiste el rato.</div>
+  </section>
+
+  <section>
+    <div class="stag">Capítulo 3</div>
+    <h2>Qué recibe y qué manda</h2>
+    <p class="lead">El ERP casi siempre escucha. Lo poco que emite, lo emite fuerte.</p>
+    <div class="flujo">
+      <div class="paso"><div class="n">1</div><h4>Nace el evento</h4><p>Nombre, fecha y gráfica llegan del flyer y se propagan a todos.</p><span class="sys s-fly">Flyer</span></div>
+      <div class="paso"><div class="n">2</div><h4>Se vende</h4><p>Entradas, cortesías y check-ins entran solos por el webhook.</p><span class="sys s-web">Web</span></div>
+      <div class="paso"><div class="n">3</div><h4>Se cobra adentro</h4><p>Cada venta de barra baja el stock del ERP.</p><span class="sys s-pos">POS</span></div>
+      <div class="paso"><div class="n">4</div><h4>Se cierra</h4><p>Caja, propinas y pagos quedan cuadrados y auditados.</p><span class="sys s-erp">ERP</span></div>
+    </div>
+
+    <h3>Lo que el ERP le manda a los demás</h3>
+    <ul>
+      <li><b>Al POS:</b> con qué noche del ERP se corresponde cada cierre de caja, para que el cuadre tenga contra qué compararse.</li>
+      <li><b>Al staff:</b> el portal (turnos, pagos, tareas, colaciones) y los avisos por WhatsApp.</li>
+      <li><b>Al banco:</b> la nómina de transferencias, en el formato del Banco de Chile.</li>
+      <li><b>Al SII:</b> nada automático. Las boletas de honorarios las emite cada persona.</li>
+    </ul>
+    <div class="bien"><b>Bien resuelto.</b> El evento se identifica con el mismo código en los cuatro sistemas (<span class="num">FCC-2026-07-25</span>). Por eso una noche importada dos veces no se duplica: se reconoce y se actualiza.</div>
+  </section>
+
+  <section>
+    <div class="stag">Capítulo 4</div>
+    <h2>Una persona, una ficha</h2>
+    <p class="lead">El hilo que amarra los cuatro sistemas es el RUT. Si el RUT está malo, la persona se parte en dos y su plata también.</p>
+    <p style="color:var(--gris)">Hoy hay <b>83 personas activas</b> y <b>11 dadas de baja</b>. Una persona dada de baja no desaparece: sigue viendo su historial en el portal, pero no puede volver a registrarse sola. La reactiva un administrador.</p>
+
+    <div class="demo">
+      <div class="dl">Pruébalo · el mismo cálculo que hace el ERP antes de guardar</div>
+      <div class="rutbox">
+        <input id="rut" inputmode="numeric" placeholder="12.345.678-5" aria-label="Escribe un RUT">
+        <div class="veredicto" id="ver">Escribe un RUT<small>Se valida el dígito verificador con el módulo 11 del SII.</small></div>
+      </div>
+      <div class="chips">
+        <button data-r="76.086.428-5">Uno válido</button>
+        <button data-r="76.086.428-9">El mismo, mal tipeado</button>
+        <button data-r="97.947.000-2">RUT del Banco Ripley</button>
+      </div>
+    </div>
+    <div class="oro"><b>Regla de oro.</b> El RUT se valida <strong>antes</strong> de crear a alguien, no después. Un dígito verificador malo no es un detalle: es la diferencia entre que le llegue la transferencia y que el banco rechace la nómina completa. Ya nos pasó en julio.</div>
+  </section>
+
+  <section>
+    <div class="stag">Capítulo 5</div>
+    <h2>Qué pasa si uno se cae</h2>
+    <div class="tw"><table class="tabla">
+      <thead><tr><th>Si se cae…</th><th>El ERP</th><th>Qué haces esa noche</th></tr></thead>
+      <tbody>
+        <tr><td><b style="color:var(--mor)">🟣 Flyer</b></td><td>Sigue igual.</td><td>Creas la noche a mano en Eventos. El nombre se lo pones después.</td></tr>
+        <tr><td><b style="color:var(--rojo)">🔴 Web</b></td><td>Sigue igual, pero ciego.</td><td>No sabes cuánta gente entró por preventa. La puerta cuenta a mano y se carga al día siguiente.</td></tr>
+        <tr><td><b style="color:var(--verde)">🟢 POS</b></td><td>Sigue igual, pero el stock no baja solo.</td><td>El cuadre de caja se hace igual con los billetes contados. El consumo se ajusta con el conteo de barra.</td></tr>
+        <tr><td><b style="color:var(--azul)">🔵 ERP</b></td><td>—</td><td>La noche funciona igual: se vende y se cobra. Lo que se detiene es <strong>pagarle a la gente</strong>. Se anota en papel y se carga después.</td></tr>
+      </tbody>
+    </table></div>
+    <div class="bien"><b>Bien resuelto.</b> El conteo de bodega guarda lo que cuentas aunque te quedes sin señal, y lo sube solo cuando vuelve. En el subterráneo eso pasa todas las semanas.</div>
+  </section>
+
+  <section>
+    <div class="stag">Capítulo 6</div>
+    <h2>Dónde los sistemas se pisan</h2>
+    <p class="lead">Tres puntos donde más de un sistema cree tener la razón. Están decididos: esto es lo que vale.</p>
+
+    <div class="choque">
+      <div class="quien">🎨 Flyer &nbsp;vs&nbsp; 🌐 Web &nbsp;vs&nbsp; 🧠 ERP</div>
+      <b>¿Quién le pone el nombre a la noche?</b><br>
+      Manda el <strong>Flyer</strong>: ahí nace el nombre y desde ahí se propaga a los otros tres. Pero cualquiera de las apps puede ponerlo si el flyer todavía no existe — es lo que pasa hoy con las noches del 30 y 31 de julio, que están en convocatoria con nombre automático. Cuando llegue el flyer, ese nombre gana.
+    </div>
+
+    <div class="choque">
+      <div class="quien">🌐 Web &nbsp;vs&nbsp; 💵 POS &nbsp;vs&nbsp; 🧠 ERP</div>
+      <b>¿Cuánta gente hay adentro?</b><br>
+      Nadie es dueño único, y está bien así: <strong>los cuatro deben intentar saberlo siempre</strong>. La web sabe quién hizo check-in, el POS sabe quién pagó cover en la puerta y el ERP cuenta pulseras. Ninguna cifra sola es la verdad; la de más arriba es la que más se acerca. Si las tres se contradicen mucho, es señal de que alguien está entrando sin registrarse.
+    </div>
+
+    <div class="choque">
+      <div class="quien">💵 POS &nbsp;vs&nbsp; 🧠 ERP</div>
+      <b>Un código por producto no alcanza.</b><br>
+      El POS vende el mismo producto en varios formatos —por tamaño, por combo, por horario— y cada uno descuenta distinto de la bodega. <span class="num">«Shot tequila 2x»</span> saca dos tragos; <span class="num">«MOJITO XL»</span> saca ron, azúcar y menta. Un código por producto no puede expresar la <strong>cantidad</strong>. Se resuelve con recetas, no con códigos. Está en el manual <a href="/os-erp-bodega">05 · La bodega</a>.
+    </div>
+  </section>
+
+  <section>
+    <div class="stag">La serie</div>
+    <h2>Los 7 manuales del ERP</h2>
+    <div class="serie">
+      <a class="mn" href="/os-erp"><span class="num2">00</span><div><h4>El mapa</h4><p>Los cuatro cerebros y de qué manda cada uno.</p><span class="tag">Estás aquí</span></div></a>
+      <a class="mn" href="/os-erp-persona"><span class="num2">01</span><div><h4>La persona</h4><p>De postulante a ficha con banco, talla y contrato.</p><span class="tag">Demo: formato de RUT y patente</span></div></a>
+      <a class="mn" href="/os-erp-noche"><span class="num2">02</span><div><h4>La noche</h4><p>El viaje de un turno: convocar, asignar, marcar, cerrar.</p><span class="tag">Demo: ¿cuánto vale esta noche?</span></div></a>
+      <a class="mn" href="/os-erp-dinero"><span class="num2">03</span><div><h4>El dinero</h4><p>El viaje de un peso: trato, turno, pago, boleta.</p><span class="tag">Demo: líquido ↔ bruto</span></div></a>
+      <a class="mn" href="/os-erp-caja"><span class="num2">04</span><div><h4>La caja</h4><p>Sencillo, billetes, cuadre y propinas.</p><span class="tag">Demo: cuadra una caja</span></div></a>
+      <a class="mn" href="/os-erp-bodega"><span class="num2">05</span><div><h4>La bodega</h4><p>El viaje de una botella: pedido, conteo, trago vendido.</p><span class="tag">Demo: medidor de botella</span></div></a>
+      <a class="mn" href="/os-erp-reglas"><span class="num2">06</span><div><h4>Reglas de oro</h4><p>Lo que nunca se hace y lo que el ERP no hace todavía.</p><span class="tag">Cierra la serie</span></div></a>
+    </div>
+  </section>
+
+  <div class="pie">FRATE OS · ERP · Manual 00 · <a href="/os">Ver la serie de la Web</a> · <a href="/os-erp-persona">Siguiente: la persona →</a></div>
+</div>
+
+<script src="/os-guard.js"></script>
+<script>
+  document.getElementById('bar').innerHTML = osBarra('00', 'erp');
+  osProteger();
+
+  (function(){
+    var inp = document.getElementById('rut'), ver = document.getElementById('ver');
+    function fmt(v){
+      var c = (v||'').replace(/[^0-9kK]/g,'').toUpperCase();
+      if(!c) return '';
+      var dv = c.slice(-1), cu = c.slice(0,-1);
+      if(!cu) return dv;
+      return cu.replace(/\B(?=(\d{3})+(?!\d))/g,'.') + '-' + dv;
+    }
+    // Módulo 11 del SII — el mismo cálculo que corre el ERP antes de guardar
+    function dvDe(cuerpo){
+      var s = 0, m = 2;
+      for(var i = cuerpo.length - 1; i >= 0; i--){ s += parseInt(cuerpo[i],10) * m; m = m === 7 ? 2 : m + 1; }
+      var r = 11 - (s % 11);
+      return r === 11 ? '0' : r === 10 ? 'K' : String(r);
+    }
+    function revisa(){
+      var c = (inp.value||'').replace(/[^0-9kK]/g,'').toUpperCase();
+      if(c.length < 2){
+        ver.innerHTML = 'Escribe un RUT<small>Se valida el dígito verificador con el módulo 11 del SII.</small>';
+        ver.style.color = 'var(--gris)'; return;
+      }
+      var cuerpo = c.slice(0,-1), dv = c.slice(-1), esperado = dvDe(cuerpo);
+      if(dv === esperado){
+        ver.style.color = 'var(--verde)';
+        ver.innerHTML = '✓ RUT válido<small>El ERP lo acepta y crea la ficha.</small>';
+      } else {
+        ver.style.color = 'var(--rojo)';
+        ver.innerHTML = '✕ RUT inválido<small>El dígito debería ser <b style="color:var(--txt)">' + esperado + '</b>, no ' + dv + '. El ERP no deja guardar.</small>';
+      }
+    }
+    inp.addEventListener('input', function(){
+      var fin = inp.selectionStart === inp.value.length;
+      inp.value = fmt(inp.value);
+      if(fin) inp.selectionStart = inp.selectionEnd = inp.value.length;
+      revisa();
+    });
+    Array.prototype.forEach.call(document.querySelectorAll('.chips button'), function(b){
+      b.addEventListener('click', function(){ inp.value = b.dataset.r; revisa(); inp.focus(); });
+    });
+  })();
+</script>
+</body>
+</html>

@@ -1,0 +1,143 @@
+/* ============================================================
+   FRATE OS · estilo compartido de los manuales del sistema
+   Se lee como presentación (se proyecta) y como documento.
+   ============================================================ */
+:root{
+  --neg:#08080a; --neg2:#0f0f12; --neg3:#16161a; --bor:#232329; --bor2:#33333b;
+  --txt:#f2f2f4; --gris:#8b8b95; --gris2:#5a5a63;
+  --rojo:#E8363D; --oro:#E6C860; --verde:#4ade80; --azul:#60a5fa; --mor:#c4b5fd;
+  --disp:"Barlow Condensed","Oswald","Arial Narrow",sans-serif;
+  --font:-apple-system,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;
+}
+*{box-sizing:border-box;margin:0;padding:0}
+html{scroll-behavior:smooth}
+body{background:var(--neg);color:var(--txt);font-family:var(--font);line-height:1.6;-webkit-font-smoothing:antialiased}
+.wrap{max-width:1080px;margin:0 auto;padding:0 20px}
+.disp{font-family:var(--disp);font-weight:800;text-transform:uppercase;letter-spacing:.5px}
+a{color:var(--rojo)}
+
+/* ── barra superior ── */
+.topbar{position:sticky;top:0;z-index:50;background:rgba(8,8,10,.93);backdrop-filter:blur(10px);border-bottom:1px solid var(--bor)}
+.topbar .in{max-width:1080px;margin:0 auto;padding:9px 20px;display:flex;align-items:center;gap:12px;flex-wrap:wrap}
+.mark{font-family:var(--disp);font-weight:900;font-size:1.05rem;letter-spacing:2px}
+.mark em{font-style:normal;color:var(--rojo)}
+.navman{display:flex;gap:4px;margin-left:auto;flex-wrap:wrap}
+.navman a{font-family:var(--disp);font-weight:700;font-size:.72rem;letter-spacing:1px;text-transform:uppercase;color:var(--gris);
+  text-decoration:none;padding:5px 9px;border-radius:7px;border:1px solid transparent}
+.navman a:hover{color:var(--txt);border-color:var(--bor2)}
+.navman a.on{background:var(--rojo);color:#fff}
+@media print{.topbar{display:none}}
+
+/* ── portada ── */
+.hero{min-height:70vh;display:flex;flex-direction:column;justify-content:center;padding:56px 0 42px;border-bottom:1px solid var(--bor);position:relative;overflow:hidden}
+.hero::after{content:"";position:absolute;right:-140px;top:-90px;width:420px;height:420px;border-radius:50%;
+  background:radial-gradient(circle,rgba(232,54,61,.16),transparent 68%);pointer-events:none}
+.eyebrow{font-family:var(--disp);font-size:.8rem;letter-spacing:5px;color:var(--rojo);margin-bottom:12px}
+.hero h1{font-family:var(--disp);font-weight:900;font-size:clamp(2.9rem,9vw,6rem);line-height:.9;letter-spacing:-1px;text-transform:uppercase;text-wrap:balance}
+.hero h1 em{font-style:normal;color:var(--rojo)}
+.hero p.sub{max-width:620px;color:var(--gris);font-size:1.06rem;margin-top:18px}
+.meta{display:flex;gap:22px;margin-top:30px;flex-wrap:wrap;font-size:.72rem;color:var(--gris2);
+  font-family:var(--disp);letter-spacing:2px;text-transform:uppercase}
+
+/* ── secciones ── */
+section{padding:52px 0;border-bottom:1px solid var(--bor)}
+.stag{font-family:var(--disp);font-size:.72rem;letter-spacing:4px;color:var(--rojo);margin-bottom:9px}
+h2{font-family:var(--disp);font-weight:800;font-size:clamp(1.8rem,4.4vw,2.9rem);line-height:1;text-transform:uppercase;margin-bottom:8px;text-wrap:balance}
+h3{font-family:var(--disp);font-weight:800;font-size:1.25rem;text-transform:uppercase;margin:26px 0 8px}
+.lead{color:var(--gris);max-width:660px;margin-bottom:24px;font-size:1rem}
+p+p{margin-top:12px}
+ul,ol{margin:12px 0 12px 20px;color:var(--gris)}
+li{margin-bottom:7px}
+li b,p b{color:var(--txt)}
+strong{color:var(--txt)}
+
+/* ── cerebros ── */
+.cerebros{display:grid;grid-template-columns:repeat(4,1fr);gap:12px}
+@media(max-width:860px){.cerebros{grid-template-columns:repeat(2,1fr)}}
+@media(max-width:480px){.cerebros{grid-template-columns:1fr}}
+.cer{background:var(--neg2);border:1px solid var(--bor);border-radius:14px;padding:18px;position:relative;overflow:hidden}
+.cer::before{content:"";position:absolute;inset:0 auto auto 0;width:100%;height:3px}
+.cer.erp::before{background:var(--azul)} .cer.web::before{background:var(--rojo)}
+.cer.pos::before{background:var(--verde)} .cer.fly::before{background:var(--mor)}
+.cer .ic{font-size:1.5rem}
+.cer h4{font-family:var(--disp);font-weight:800;font-size:1.15rem;margin:7px 0 3px;text-transform:uppercase}
+.cer .rol{font-size:.68rem;color:var(--gris2);text-transform:uppercase;letter-spacing:1.4px;margin-bottom:9px}
+.cer p{font-size:.82rem;color:var(--gris)}
+.cer .yo{position:absolute;top:12px;right:12px;background:var(--rojo);color:#fff;font-size:.55rem;font-weight:800;padding:2px 7px;border-radius:99px;letter-spacing:1px}
+
+/* ── flujo por pasos ── */
+.flujo{display:flex;align-items:stretch;flex-wrap:wrap;margin-top:8px}
+.paso{flex:1;min-width:132px;background:var(--neg2);border:1px solid var(--bor);padding:14px 12px;position:relative}
+.paso:first-child{border-radius:12px 0 0 12px} .paso:last-child{border-radius:0 12px 12px 0}
+.paso+.paso{border-left:0}
+@media(max-width:700px){.paso{border-radius:12px!important;border-left:1px solid var(--bor)!important;margin-bottom:6px;flex:1 1 100%}}
+.paso .n{font-family:var(--disp);font-weight:900;font-size:1.5rem;color:var(--rojo);line-height:1}
+.paso h4{font-size:.84rem;font-weight:800;margin:4px 0 3px}
+.paso p{font-size:.73rem;color:var(--gris)}
+.paso .sys{position:absolute;bottom:8px;right:10px;font-size:.55rem;letter-spacing:1px;font-weight:800;text-transform:uppercase;opacity:.8}
+.s-fly{color:var(--mor)} .s-web{color:var(--rojo)} .s-pos{color:var(--verde)} .s-erp{color:var(--azul)}
+
+/* ── avisos ── */
+.oro{background:rgba(230,200,96,.07);border:1px solid rgba(230,200,96,.32);border-left:4px solid var(--oro);border-radius:12px;padding:15px 18px;margin-top:16px}
+.oro b{color:var(--oro)}
+.peligro{background:rgba(232,54,61,.08);border:1px solid rgba(232,54,61,.35);border-left:4px solid var(--rojo);border-radius:12px;padding:15px 18px;margin-top:14px}
+.peligro b{color:var(--rojo)}
+.bien{background:rgba(74,222,128,.07);border:1px solid rgba(74,222,128,.3);border-left:4px solid var(--verde);border-radius:12px;padding:15px 18px;margin-top:14px}
+.bien b{color:var(--verde)}
+
+/* ── demo ── */
+.demo{background:linear-gradient(160deg,var(--neg3),var(--neg2));border:1px solid var(--bor);border-radius:16px;padding:22px;margin-top:14px}
+.demo .dl{font-family:var(--disp);font-size:.68rem;letter-spacing:3px;color:var(--oro);margin-bottom:14px}
+.btn{display:inline-block;background:var(--rojo);color:#fff;font-family:var(--disp);font-weight:800;letter-spacing:2px;
+  text-transform:uppercase;font-size:.8rem;padding:11px 22px;border-radius:8px;border:0;margin-top:14px;cursor:pointer}
+.btn.g{background:transparent;border:1px solid var(--bor2);color:var(--txt)}
+.btn:active{transform:translateY(1px)}
+
+/* ── tablas ── */
+.tabla{width:100%;border-collapse:collapse;margin-top:14px;font-size:.86rem;overflow:hidden;border-radius:12px}
+.tw{overflow-x:auto;border:1px solid var(--bor);border-radius:12px;margin-top:14px}
+.tw .tabla{margin:0;border-radius:0}
+.tabla th{background:var(--neg3);text-align:left;padding:10px 13px;font-family:var(--disp);font-size:.72rem;
+  letter-spacing:1.5px;text-transform:uppercase;color:var(--gris);border-bottom:1px solid var(--bor);white-space:nowrap}
+.tabla td{padding:10px 13px;border-bottom:1px solid var(--bor);color:var(--gris);vertical-align:top}
+.tabla tr:last-child td{border-bottom:0}
+.tabla td b{color:var(--txt)}
+.num{font-variant-numeric:tabular-nums}
+
+/* ── cifras ── */
+.kpis{display:grid;grid-template-columns:repeat(auto-fit,minmax(140px,1fr));gap:10px;margin-top:14px}
+.kpi{background:var(--neg2);border:1px solid var(--bor);border-radius:12px;padding:14px 16px}
+.kpi b{display:block;font-family:var(--disp);font-weight:900;font-size:2rem;line-height:1;font-variant-numeric:tabular-nums}
+.kpi span{font-size:.64rem;letter-spacing:1.2px;text-transform:uppercase;color:var(--gris2)}
+.kpi.v b{color:var(--verde)} .kpi.o b{color:var(--oro)} .kpi.r b{color:var(--rojo)} .kpi.a b{color:var(--azul)}
+
+/* ── índice ── */
+.serie{display:grid;grid-template-columns:repeat(auto-fill,minmax(290px,1fr));gap:12px;margin-top:10px}
+.mn{background:var(--neg2);border:1px solid var(--bor);border-radius:14px;padding:17px;display:flex;gap:13px;align-items:flex-start;
+  text-decoration:none;color:inherit;transition:border-color .15s}
+.mn:hover{border-color:var(--rojo)}
+.mn .num2{font-family:var(--disp);font-weight:900;font-size:1.9rem;color:var(--rojo);line-height:.9;min-width:36px}
+.mn h4{font-family:var(--disp);font-weight:800;font-size:1.05rem;text-transform:uppercase;margin-bottom:3px}
+.mn p{font-size:.79rem;color:var(--gris)}
+.mn .tag{display:inline-block;margin-top:7px;font-size:.58rem;letter-spacing:1.2px;text-transform:uppercase;
+  color:var(--gris2);border:1px solid var(--bor);border-radius:99px;padding:2px 8px}
+
+/* ── pie ── */
+.pie{padding:34px 0 70px;color:var(--gris2);font-size:.8rem}
+.pie a{color:var(--gris)}
+
+/* ── conmutador de sistema (Web · ERP · POS · Flyer) ── */
+.sysw{display:flex;gap:3px;border:1px solid var(--bor2);border-radius:8px;padding:2px}
+.sysw a,.sysw span{font-family:var(--disp);font-weight:800;font-size:.66rem;letter-spacing:1.4px;text-transform:uppercase;
+  text-decoration:none;padding:3px 8px;border-radius:6px;color:var(--gris2)}
+.sysw a.web{color:var(--rojo)} .sysw a.erp{color:var(--azul)}
+.sysw a.pos{color:var(--verde)} .sysw a.fly{color:var(--mor)}
+.sysw a.here{background:var(--acc,var(--rojo));color:#08080a}
+@media print{.sysw{display:none}}
+
+/* ── login ── */
+#os-gate{position:fixed;inset:0;background:var(--neg);z-index:200;display:flex;align-items:center;justify-content:center;padding:20px}
+#os-gate .box{background:var(--neg2);border:1px solid var(--bor);border-radius:16px;padding:30px;max-width:360px;width:100%;text-align:center}
+#os-gate input{width:100%;background:var(--neg3);border:1px solid var(--bor2);color:var(--txt);padding:12px 14px;border-radius:9px;margin-top:9px;font-size:.95rem}
+#os-gate .btn{width:100%;margin-top:14px}
+#os-gate .err{color:var(--rojo);font-size:.8rem;margin-top:10px;min-height:18px}

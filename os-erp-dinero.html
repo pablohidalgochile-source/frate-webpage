@@ -1,0 +1,209 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>FRATE OS · ERP 03 El dinero</title>
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>💸</text></svg>">
+<link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@600;800;900&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="/os-manual.css">
+<link rel="stylesheet" href="/os-erp.css">
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<style>
+  .form-eq{background:var(--neg);border:1px solid var(--bor2);border-radius:14px;padding:22px 24px;margin-top:16px;text-align:center}
+  .form-eq .ec{font-family:var(--disp);font-weight:900;font-size:clamp(1.2rem,3.6vw,2rem);line-height:1.25;text-wrap:balance}
+  .form-eq .mas{color:var(--verde)} .form-eq .men{color:var(--rojo)} .form-eq .ig{color:var(--gris2)}
+  .form-eq .no{display:block;margin-top:14px;font-family:var(--font);font-weight:400;font-size:.9rem;color:var(--gris)}
+  .form-eq .no b{color:var(--violet,#c4b5fd)}
+  .calc{display:grid;grid-template-columns:repeat(auto-fit,minmax(215px,1fr));gap:18px;align-items:start;margin-top:6px}
+  .calc label{display:block;font-family:var(--disp);font-size:.68rem;letter-spacing:2px;text-transform:uppercase;color:var(--gris2);margin-bottom:6px}
+  .calc input{width:100%;background:var(--neg);border:1px solid var(--bor2);color:var(--txt);padding:13px 15px;border-radius:9px;
+    font-size:1.5rem;font-family:var(--disp);font-weight:800;outline:none;font-variant-numeric:tabular-nums}
+  .calc input:focus{border-color:var(--acc)}
+  .calc .out{background:var(--neg2);border:1px solid var(--bor);border-radius:11px;padding:14px 16px}
+  .calc .out .n{font-family:var(--disp);font-weight:900;font-size:1.8rem;line-height:1;font-variant-numeric:tabular-nums}
+  .calc .out .e{font-size:.72rem;color:var(--gris2);text-transform:uppercase;letter-spacing:1.3px;margin-bottom:4px}
+  .calc .out small{display:block;font-size:.76rem;color:var(--gris);margin-top:5px}
+  .tratos{display:grid;grid-template-columns:repeat(auto-fit,minmax(215px,1fr));gap:11px;margin-top:14px}
+  .tr{background:var(--neg2);border:1px solid var(--bor);border-radius:13px;padding:16px 18px}
+  .tr h4{font-family:var(--disp);font-weight:800;font-size:1.05rem;text-transform:uppercase;margin-bottom:4px}
+  .tr .q{font-size:.68rem;color:var(--gris2);text-transform:uppercase;letter-spacing:1.3px;margin-bottom:9px}
+  .tr p{font-size:.82rem;color:var(--gris)}
+  .libro{width:100%;border-collapse:collapse;font-size:.87rem;font-variant-numeric:tabular-nums}
+  .libro td{padding:8px 12px;border-bottom:1px solid var(--bor);color:var(--gris)}
+  .libro td:nth-child(3),.libro td:nth-child(4){text-align:right;font-family:var(--disp);font-weight:800}
+  .libro .sum td:nth-child(3){color:var(--verde)} .libro .res td:nth-child(3){color:var(--rojo)}
+  .libro tr:last-child td{border-bottom:0;border-top:2px solid var(--bor2);color:var(--txt);padding-top:11px}
+</style>
+</head>
+<body>
+<div id="bar"></div>
+<div class="wrap">
+
+  <div class="hero">
+    <div class="eyebrow">ERP · Manual 03</div>
+    <h1>El viaje de<br>un <em>peso</em></h1>
+    <p class="sub">Cómo se decide cuánto se le debe a alguien, cómo se le paga y cómo termina en una boleta de honorarios. Y por qué la propina nunca entra en esa cuenta.</p>
+    <div class="meta"><span>Para administración y finanzas</span><span>·</span><span>14 minutos</span><span>·</span><span>El más importante</span></div>
+  </div>
+
+  <section>
+    <div class="stag">Capítulo 1</div>
+    <h2>La regla que manda todo</h2>
+    <p class="lead">Si te quedas con una sola frase de los siete manuales, que sea esta.</p>
+    <div class="form-eq">
+      <div class="ec">SERVICIO <span class="mas">+</span> BONOS <span class="men">−</span> DESCUENTOS <span class="ig">=</span> LO QUE SE PAGA</div>
+      <span class="no">La <b>propina no entra</b>. Es plata del cliente para la persona, no del local. Se muestra para saber cuánto ganó esa noche, pero no se paga por planilla ni se boletea.</span>
+    </div>
+
+    <h3>Por qué esto importa tanto</h3>
+    <p style="color:var(--gris)">Una noche real: un jefe de barra hizo <b>$30.000</b> de servicio y le tocaron <b>$19.000</b> de propina. Si el sistema mezcla las dos cosas, pasan cuatro cosas malas al mismo tiempo:</p>
+    <ul>
+      <li>Se le <b>transfiere $49.000</b> cuando le corresponden $30.000 — y los $19.000 de propina ya se los llevó en efectivo esa madrugada. Se le paga dos veces.</li>
+      <li>Su <b>boleta de honorarios</b> sale por $49.000. Le estás haciendo declarar como ingreso una propina que no es honorario.</li>
+      <li>El <b>costo del evento</b> aparece inflado y el margen de la noche se ve peor de lo que fue.</li>
+      <li>La persona ve en su portal que le deben $49.000, recibe $30.000, y con toda razón reclama.</li>
+    </ul>
+    <div class="kpis">
+      <div class="kpi v"><b>$19,4M</b><span>en servicios · esto se paga</span></div>
+      <div class="kpi"><b>$3,3M</b><span>en propinas · esto no</span></div>
+      <div class="kpi o"><b>201</b><span>turnos con propina</span></div>
+    </div>
+    <div class="peligro"><b>Esto estaba mal en el sistema y se corrigió.</b> La base de datos calcula una columna «total» que sí suma la propina. Dos generadores de nómina bancaria la estaban usando. Hoy toda la app usa una sola función de pago, y la propina viaja siempre en su propia columna. Si alguna vez ves un «total» que no te cuadra, sospecha de eso primero.</div>
+  </section>
+
+  <section>
+    <div class="stag">Capítulo 2</div>
+    <h2>Los cuatro tratos</h2>
+    <p class="lead">No todos cobran igual. El trato de cada persona define si su plata nace de un turno o nace del calendario.</p>
+    <div class="tratos">
+      <div class="tr"><h4>Por servicio</h4><div class="q">72 personas</div><p>Cada noche que trabaja suma un servicio: $25.000, $30.000, lo que diga su tarifa. Si no viene, no suma. Es el trato de casi todo el equipo.</p></div>
+      <div class="tr"><h4>Mensual</h4><div class="q">11 personas</div><p>Cobra un sueldo fijo al mes, venga o no venga. Su asistencia <b>se marca igual</b> —hay que saber quién estuvo— pero esa noche no le suma plata.</p></div>
+      <div class="tr"><h4>Semanal</h4><div class="q">un fijo por semana</div><p>Un monto fijo cada semana, trabaje las noches que trabaje. Se usa para pegas que se miden por semana, no por noche.</p></div>
+      <div class="tr"><h4>Mixto</h4><div class="q">fijo + noches</div><p>Cobra sus noches <b>y además</b> un fijo por otra pega: el que hace los flyers y también trabaja en la barra.</p></div>
+    </div>
+    <div class="oro"><b>Regla de oro.</b> Al mensual <strong>se le marca la asistencia igual</strong> y aparece en todas las nóminas, aunque su noche valga $0. Necesitas saber quién estuvo en el local, y él necesita ver su mes completo. Lo que cambia no es si aparece: es si esa noche le suma plata.</div>
+  </section>
+
+  <section>
+    <div class="stag">Capítulo 3</div>
+    <h2>La cuenta corriente</h2>
+    <p class="lead">Cada persona tiene un libro. A la izquierda lo que gana, a la derecha lo que ya recibió. La diferencia es lo que se le debe. Nada más.</p>
+    <div class="tw"><table class="libro">
+      <tr class="sum"><td>25 jul</td><td>Servicio · BESUCONA — Barra Fuego 1</td><td>+ 30.000</td><td>30.000</td></tr>
+      <tr class="sum"><td>25 jul</td><td>Bono · cerró la caja</td><td>+ 10.000</td><td>40.000</td></tr>
+      <tr class="res"><td>26 jul</td><td>Adelanto en efectivo</td><td>− 20.000</td><td>20.000</td></tr>
+      <tr class="sum"><td>31 jul</td><td>Servicio · noche de cierre de mes</td><td>+ 30.000</td><td>50.000</td></tr>
+      <tr class="res"><td>02 ago</td><td>Transferencia</td><td>− 50.000</td><td>0</td></tr>
+      <tr><td colspan="3"><b>Saldo</b></td><td><b>$0</b></td></tr>
+    </table></div>
+    <p style="color:var(--gris);margin-top:12px">Fíjate que la propina de esa noche <b>no aparece en el libro</b>. Se muestra en su agenda del día, en morado, pero no suma al saldo: no es plata que el local le deba.</p>
+    <div class="bien"><b>Bien resuelto.</b> El libro tiene saldo corrido: cada línea muestra cómo va quedando. Si alguien reclama, se le muestra la fila exacta en la que se le pagó, con fecha y medio.</div>
+  </section>
+
+  <section>
+    <div class="stag">Capítulo 4</div>
+    <h2>Un adelanto se descuenta una sola vez</h2>
+    <p class="lead">Este fue un error caro y vale la pena entenderlo, porque describe cómo debe funcionar todo lo demás.</p>
+    <p style="color:var(--gris)">Antes, el sistema sumaba <b>todos</b> los adelantos históricos de una persona y los restaba contra la lista de turnos que estabas mirando. Un adelanto del 19 de julio se descontaba en la noche del 19, en la del 23, en la del 24… en todas. Y cuando por fin se le pagaba, el adelanto seguía vivo para volver a restarse la semana siguiente.</p>
+    <div class="dato"><b>Antes</b>                          <b>Ahora</b>
+  Adelanto $20.000               Adelanto $20.000
+  ─ se resta el 19  <span class="r">✕</span>            ─ se resta una vez  <span class="v">✓</span>
+  ─ se resta el 23  <span class="r">✕</span>            ─ queda marcado como saldado
+  ─ se resta el 24  <span class="r">✕</span>            ─ no vuelve a aparecer nunca
+  ─ y se paga el bruto igual</div>
+    <div class="oro"><b>Regla de oro.</b> Cada peso se registra <strong>una sola vez</strong> y queda marcado con quién lo hizo y cuándo. Si un número aparece dos veces en dos pantallas, una de las dos está mal — no es que «se cuenta distinto».</div>
+  </section>
+
+  <section>
+    <div class="stag">Capítulo 5</div>
+    <h2>Líquido y bruto: la boleta</h2>
+    <p class="lead">Se paga el <b>líquido</b> —lo que efectivamente recibe— pero la boleta se emite por el <b>bruto</b>, que incluye la retención del SII. Son dos números distintos y confundirlos es el error clásico.</p>
+    <div class="demo">
+      <div class="dl">Pruébalo · escribe lo que le vas a pagar</div>
+      <div class="calc">
+        <div>
+          <label for="liq">Le pagas (líquido)</label>
+          <input id="liq" inputmode="numeric" value="300.000" aria-describedby="o-bruto">
+          <div style="font-size:.78rem;color:var(--gris2);margin-top:8px">Retención vigente: <b style="color:var(--txt)">15,25%</b> · la tienen 82 de las 83 personas activas.</div>
+        </div>
+        <div class="out" id="o-bruto">
+          <div class="e">Boletea por (bruto)</div>
+          <div class="n" style="color:var(--oro)" id="v-bruto">$353.982</div>
+          <small>Este es el número que la persona escribe en el SII.</small>
+        </div>
+        <div class="out">
+          <div class="e">Retiene el SII</div>
+          <div class="n" style="color:var(--rojo)" id="v-ret">$53.982</div>
+          <small>El SII se lo queda a cuenta de su impuesto anual.</small>
+        </div>
+      </div>
+      <div style="margin-top:14px;font-size:.84rem;color:var(--gris)">
+        Es una división, no una resta: <b style="color:var(--txt)">bruto = líquido ÷ (1 − 0,1525)</b>.
+        Restarle 15,25% al líquido da otro número y deja la boleta corta.
+      </div>
+    </div>
+    <div class="peligro"><b>La boleta es mensual, el pago es diario.</b> A la gente se le paga noche a noche o semana a semana, pero emite <strong>una sola boleta al mes</strong> por la suma de todo. Si emite una por noche, se llena de boletas chicas y el SII lo ve raro.</div>
+  </section>
+
+  <section>
+    <div class="stag">Capítulo 6</div>
+    <h2>Aprobar no es pagar</h2>
+    <p class="lead">Son dos actos distintos, de dos personas que pueden ser distintas, en dos momentos distintos.</p>
+    <div class="tw"><table class="tabla">
+      <thead><tr><th>Acto</th><th>Qué significa</th><th>Quién lo hace</th><th>Si falta…</th></tr></thead>
+      <tbody>
+        <tr><td><b>Aprobar</b></td><td>«Este monto es correcto para esta noche».</td><td>El administrador que revisó la noche.</td><td>La persona no ve su monto en el portal y no entra a ninguna nómina.</td></tr>
+        <tr><td><b>Pagar</b></td><td>«La plata salió»: efectivo, transferencia o queda acumulado.</td><td>Quien maneja la caja o el banco.</td><td>Sigue apareciendo como deuda, y con razón.</td></tr>
+      </tbody>
+    </table></div>
+
+    <h3>Los tres caminos de la plata</h3>
+    <ul>
+      <li><b>💵 Efectivo</b> — sale de la caja esa misma noche. Se marca ahí mismo.</li>
+      <li><b>🏦 Transferencia</b> — entra al archivo que se sube al Banco de Chile. Se marca pagado cuando confirmas que lo subiste, no antes.</li>
+      <li><b>📦 Acumulado</b> — no se le paga ahora; queda sumando en su cuenta corriente para una liquidación más grande. Es lo que hacen los que prefieren cobrar todo junto a fin de mes.</li>
+    </ul>
+    <div class="bien"><b>Bien resuelto.</b> Si un turno ya se pagó en la planilla de la noche, el pago semanal lo salta y te avisa: «se pagaron 4 de 6 · 2 ya estaban pagados». Antes lo pagaba de nuevo sin decir nada.</div>
+  </section>
+
+  <section>
+    <div class="stag">Capítulo 7</div>
+    <h2>Lo que el ERP todavía no hace</h2>
+    <ul>
+      <li><b>No emite la boleta.</b> Calcula el bruto y arma el detalle, pero la boleta la emite cada persona en el sitio del SII. El ERP no habla con el SII.</li>
+      <li><b>No confirma que la transferencia llegó.</b> Genera el archivo del banco y marca pagado cuando tú confirmas que lo subiste. Si el banco rechaza una línea, el ERP no se entera.</li>
+      <li><b>No calcula finiquitos ni vacaciones.</b> Todos son honorarios; no hay contrato laboral que liquidar.</li>
+      <li><b>El sueldo de los administradores está en $0.</b> El sistema ya sabe manejar tratos mensuales, pero los montos reales no se han cargado.</li>
+    </ul>
+  </section>
+
+  <div class="pie">FRATE OS · ERP · Manual 03 · <a href="/os-erp-noche">← La noche</a> · <a href="/os-erp-caja">Siguiente: la caja →</a></div>
+</div>
+
+<script src="/os-guard.js"></script>
+<script>
+  document.getElementById('bar').innerHTML = osBarra('03', 'erp');
+  osProteger();
+
+  (function(){
+    var TASA = 15.25;
+    var liq = document.getElementById('liq'), vb = document.getElementById('v-bruto'), vr = document.getElementById('v-ret');
+    function f(n){ return '$' + Math.round(n).toLocaleString('es-CL'); }
+    function calc(){
+      var n = parseInt((liq.value||'').replace(/\D/g,''), 10) || 0;
+      // El bruto es una DIVISIÓN: restarle la tasa al líquido deja la boleta corta.
+      var bruto = n > 0 ? Math.round(n / (1 - TASA/100)) : 0;
+      vb.textContent = f(bruto);
+      vr.textContent = f(bruto - n);
+    }
+    liq.addEventListener('input', function(){
+      var n = (liq.value||'').replace(/\D/g,'');
+      liq.value = n ? parseInt(n,10).toLocaleString('es-CL') : '';
+      calc();
+    });
+    calc();
+  })();
+</script>
+</body>
+</html>
