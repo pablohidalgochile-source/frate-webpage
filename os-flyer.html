@@ -1,0 +1,212 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>FRATE OS · FLYER 00 El mapa</title>
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🎨</text></svg>">
+<link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@600;800;900&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="/os-manual.css">
+<link rel="stylesheet" href="/os-flyer.css">
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<style>
+  .uidbox{display:flex;gap:16px;flex-wrap:wrap;align-items:flex-end}
+  .uidbox .fld{display:flex;flex-direction:column;gap:6px}
+  .uidbox label{font-family:var(--disp);font-size:.66rem;letter-spacing:2px;text-transform:uppercase;color:var(--gris)}
+  .uidbox input{background:var(--neg);border:1px solid var(--bor2);color:var(--txt);padding:11px 13px;border-radius:9px;
+    font-size:1.1rem;font-family:ui-monospace,Menlo,monospace;outline:none;color-scheme:dark}
+  .uidbox input:focus{border-color:var(--acc)}
+  .uidres{font-family:ui-monospace,Menlo,monospace;font-size:clamp(1.1rem,4vw,1.7rem);font-weight:600;color:var(--mor);
+    background:var(--neg);border:1px dashed rgba(196,181,253,.45);border-radius:10px;padding:12px 16px;margin-top:16px;
+    display:inline-flex;gap:12px;align-items:center;flex-wrap:wrap}
+  .cand{font-family:var(--disp);font-size:.62rem;font-weight:800;letter-spacing:1.5px;text-transform:uppercase;color:var(--oro);
+    border:1px solid rgba(230,200,96,.4);border-radius:6px;padding:3px 8px}
+  .two{display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-top:14px}
+  @media(max-width:520px){.two{grid-template-columns:1fr}}
+  .mini{background:var(--neg);border:1px solid var(--bor);border-radius:10px;padding:13px 15px}
+  .mini .l{font-size:.68rem;letter-spacing:1px;text-transform:uppercase;color:var(--gris)}
+  .mini .v{font-family:ui-monospace,Menlo,monospace;font-size:1rem;color:var(--mor);margin-top:5px}
+  .mini input{background:var(--neg2);border:1px solid var(--bor2);color:var(--txt);border-radius:7px;padding:4px 8px;
+    font-family:ui-monospace,Menlo,monospace;margin-left:6px;color-scheme:dark}
+  .hide{display:none}
+</style>
+</head>
+<body>
+<div id="bar"></div>
+<div class="wrap">
+
+  <!-- PORTADA -->
+  <div class="hero">
+    <div class="eyebrow">FLYER · Manual 00</div>
+    <h1>Donde <em>nace</em><br>el evento</h1>
+    <p class="sub">FLYER es el cerebro creativo. Acá empieza cada noche: un nombre, una fecha, una gráfica — y el <strong>brief</strong> que despierta a los otros tres sistemas. Este manual explica qué manda FLYER, qué no, y cómo se conecta con todo lo demás.</p>
+    <div class="meta"><span>Para administración</span><span>·</span><span>6 minutos</span><span>·</span><span>Léelo antes que los otros 6</span></div>
+  </div>
+
+  <!-- 1. LOS CUATRO CEREBROS -->
+  <section>
+    <div class="stag">Capítulo 1</div>
+    <h2>Los cuatro cerebros</h2>
+    <p class="lead">Fraternidad no corre sobre un sistema: corre sobre cuatro. Cada uno es dueño de una parte de la verdad. Cuando dos no coinciden, no se discute en la reunión: manda el dueño del dato.</p>
+    <div class="cerebros">
+      <div class="cer fly"><span class="yo">Estás aquí</span><div class="ic">🎨</div><h4>Flyer</h4><div class="rol">Nace el evento</div><p>Nombre, fecha y gráfica. Todo empieza cuando el flyer existe.</p></div>
+      <div class="cer web"><div class="ic">🌐</div><h4>Web</h4><div class="rol">Vende y registra</div><p>Precio, entradas, QR, check-in de puerta y la ficha del cliente.</p></div>
+      <div class="cer pos"><div class="ic">💵</div><h4>POS</h4><div class="rol">Cobra adentro</div><p>Lo que se consume en la barra durante la noche.</p></div>
+      <div class="cer erp"><div class="ic">🧠</div><h4>ERP</h4><div class="rol">Consolida</div><p>Personal, plata y la ficha maestra de cada persona.</p></div>
+    </div>
+    <div class="oro"><b>Regla de oro.</b> FLYER es el <strong>origen creativo</strong>, no la caja. Nace la idea de la noche y su cara pública. Pero no vende, no cobra y no valida entradas: eso es de la Web y el POS.</div>
+  </section>
+
+  <!-- 2. DE QUÉ ES DUEÑO -->
+  <section>
+    <div class="stag">Capítulo 2</div>
+    <h2>De qué es dueño FLYER</h2>
+    <p class="lead">Dueño significa una sola cosa: si hay diferencia entre sistemas sobre estos datos, mandas tú. Nadie más los escribe primero.</p>
+    <div class="tw"><table class="tabla">
+      <thead><tr><th>Dato</th><th>Qué incluye</th><th>Dónde vive en FLYER</th></tr></thead>
+      <tbody>
+        <tr><td><b>La identidad del evento</b></td><td>Nombre, fecha, horario y ambiente (Fuego / Aire / Tierra). El nombre que ve todo el mundo nace acá.</td><td>Eventos → Campaña</td></tr>
+        <tr><td><b>La gráfica</b></td><td>El flyer y el reel. El look de la noche se diseña en Studio y en Reel.</td><td>Studio · Reel</td></tr>
+        <tr><td><b>El uid candidato</b></td><td>El <span class="num">FCC-2026-07-25</span> con el que los 4 sistemas reconocen la misma noche. FLYER lo <b>propone</b>.</td><td>Brief</td></tr>
+        <tr><td><b>La definición de entradas</b></td><td>Qué tipos van, a qué precio y con cuánto cupo. La Web las crea con esos valores.</td><td>Eventos → Entradas</td></tr>
+      </tbody>
+    </table></div>
+  </section>
+
+  <!-- 3. QUÉ MANDA Y QUÉ RECIBE -->
+  <section>
+    <div class="stag">Capítulo 3</div>
+    <h2>Qué manda y qué recibe</h2>
+    <p class="lead">FLYER no le habla a nadie por red directamente: entrega un <strong>brief</strong> — un archivo. El ERP lo recibe, confirma la identidad y lo reparte a los demás.</p>
+    <div class="flujo">
+      <div class="paso"><div class="n">1</div><h4>Flyer arma el brief</h4><p>Nombre, fecha, gráfica, entradas y el uid candidato.</p><span class="sys s-fly">Flyer</span></div>
+      <div class="paso"><div class="n">2</div><h4>El ERP lo recibe</h4><p>Confirma o reasigna el uid. Es la autoridad de la identidad.</p><span class="sys s-erp">ERP</span></div>
+      <div class="paso"><div class="n">3</div><h4>La Web recibe entradas</h4><p>Para vender online, con precio y cupo del brief.</p><span class="sys s-web">Web</span></div>
+      <div class="paso"><div class="n">4</div><h4>El POS recibe la noche</h4><p>Para la puerta y la barra.</p><span class="sys s-pos">POS</span></div>
+    </div>
+    <h3>Lo único que FLYER recibe</h3>
+    <p class="lead" style="margin-bottom:8px">El <b>catálogo de tickets de la Web</b>, para armar las entradas sin tipearlas a mano. FLYER lo <b>lee</b> — nunca escribe en la base de la ticketera.</p>
+    <div class="dato">catálogo de la Web  ·  <span class="v">solo lectura</span>
+Pre-Venta GRAL. MUJER            <span class="o">$8.000</span>
+Pre-Venta PRO MUJER              <span class="o">$9.000</span>
+Pre-Venta GRAL. HOMBRE UNIV.     <span class="o">$9.000</span>
+CORTESÍA INSTAGRAM               <span class="o">$0</span></div>
+  </section>
+
+  <!-- 4. EL HILO -->
+  <section>
+    <div class="stag">Capítulo 4</div>
+    <h2>El hilo que amarra todo</h2>
+    <p class="lead">Para que cuatro sistemas hablen de la misma cosa sin confundirse, cada cosa tiene un hilo. En FRATE hay dos.</p>
+    <h3>El hilo de la noche · el <span style="color:var(--mor)">event_uid</span></h3>
+    <p>Cada evento es una sola noche en los cuatro sistemas. El hilo es el <b>event_uid</b> (<span class="num">FCC-2026-07-25</span>). FLYER lo propone; el ERP lo confirma. Reexportar el mismo brief no crea un evento nuevo: el hilo es el mismo.</p>
+    <div class="oro"><b>Cómo trabajamos el uid.</b> Cualquier app puede editar el uid <strong>dentro de sí misma</strong> mientras trabaja. Después, internamente, conectamos los eventos por ese mismo hilo. Por eso FLYER lo marca como <b>candidato</b>: es una propuesta, no una orden.</div>
+    <h3>El hilo de la persona · el <span style="color:var(--rojo)">RUT + correo</span></h3>
+    <p>Una persona es una sola ficha en los cuatro sistemas. El <b>RUT y el correo</b> son el hilo que la amarra. Ese hilo <b>no es de FLYER</b>: lo mandan la Web (clientes) y el ERP (personal). FLYER nunca inventa una persona ni un cliente; solo nombra y viste la noche.</p>
+  </section>
+
+  <!-- 5. DOS CHOQUES RESUELTOS -->
+  <section>
+    <div class="stag">Capítulo 5</div>
+    <h2>Dos cosas que más de un sistema cree suyas</h2>
+    <p class="lead">Antes de la reunión conviene tenerlas escritas igual en los dos manuales. Ya están resueltas.</p>
+    <div class="choque">
+      <div class="quien">Flyer 🟣 vs ERP 🔵 — ¿quién es dueño del event_uid?</div>
+      <b>FLYER es dueño del uid candidato; el ERP del confirmado.</b> FLYER lo propone (<span class="num">FCC-fecha</span>, con sufijo por hora si hay dos la misma noche). El ERP es la autoridad: lo acepta o lo reasigna. Cualquier app lo edita en su copia; la conexión final es interna.
+    </div>
+    <div class="choque">
+      <div class="quien">Flyer 🟣 vs Web 🔴 — ¿quién es dueño del precio de las entradas?</div>
+      <b>FLYER siembra el precio y el cupo inicial; la Web es la verdad en vivo.</b> El brief crea los tipos de entrada con sus valores. Desde que se abre la venta, la Web manda: lo vendido y el disponible son de ella. Un reimport nunca le devuelve el cupo a una entrada ya vendida.
+    </div>
+  </section>
+
+  <!-- 6. DEMO -->
+  <section>
+    <div class="stag">Capítulo 6 · Tócalo</div>
+    <h2>El nacimiento del uid</h2>
+    <p class="lead">La regla que evita que dos sistemas hablen de noches distintas creyendo que son la misma. Cambia la fecha y míralo.</p>
+    <div class="demo">
+      <div class="dl">Demo en vivo</div>
+      <div class="uidbox">
+        <div class="fld"><label>Fecha del evento</label><input type="date" id="d" value="2026-07-25"></div>
+        <button class="btn g" id="add">+ Otra noche esa fecha</button>
+      </div>
+      <div class="uidres"><span id="uid1">FCC-2026-07-25</span> <span class="cand">candidato</span></div>
+      <div class="hide" id="sec2">
+        <p class="lead" style="margin:16px 0 0;font-size:.9rem">Dos eventos la misma fecha no chocan: el sufijo <b>-2</b> lo decide la <b>hora de inicio</b>, del más temprano al más tarde. Cambia las horas y mira cómo se reordena.</p>
+        <div class="two">
+          <div class="mini"><div class="l">Evento A · <input type="time" id="tA" value="20:00"></div><div class="v" id="uidA">—</div></div>
+          <div class="mini"><div class="l">Evento B · <input type="time" id="tB" value="23:30"></div><div class="v" id="uidB">—</div></div>
+        </div>
+      </div>
+    </div>
+    <div class="oro"><b>Flyer propone, el ERP dispone.</b> Por eso el uid dice <b>candidato</b>: si esa identidad ya está tomada por otro evento, el ERP la reasigna y le devuelve la corregida a FLYER.</div>
+  </section>
+
+  <!-- 7. SI ALGO SE CAE -->
+  <section>
+    <div class="stag">Capítulo 7</div>
+    <h2>Qué pasa si algo se cae</h2>
+    <p class="lead">FLYER trabaja con archivos, no con conexiones en vivo. Eso lo hace resistente: casi nada lo detiene.</p>
+    <div class="tw"><table class="tabla">
+      <thead><tr><th>Se cae…</th><th>Qué pasa en FLYER</th><th>Qué haces</th></tr></thead>
+      <tbody>
+        <tr><td><b>La Web</b></td><td>No carga el catálogo de tickets.</td><td>Cargas las entradas a mano. El brief sale igual.</td></tr>
+        <tr><td><b>El ERP</b></td><td>El brief no se puede subir todavía.</td><td>Guardas el <span class="num">.html</span>; lo subes cuando vuelva. Nada se pierde.</td></tr>
+        <tr><td><b>FLYER (tú)</b></td><td>No se crean campañas nuevas.</td><td>Los eventos ya importados siguen vivos en los otros 3. La noche no depende de FLYER una vez entregado el brief.</td></tr>
+      </tbody>
+    </table></div>
+    <div class="bien"><b>Bien resuelto.</b> Reexportar un brief no duplica el evento: el uid es el mismo hilo. Y renombrar una entrada no borra sus ventas, porque cada una lleva una llave propia que no cambia.</div>
+  </section>
+
+  <!-- 8. LA SERIE -->
+  <section>
+    <div class="stag">La serie completa</div>
+    <h2>Manual de FLYER</h2>
+    <div class="serie">
+      <a class="mn" href="/os-flyer"><span class="num2">00</span><div><h4>El mapa</h4><p>Los cuatro cerebros y de qué es dueño FLYER.</p><span class="tag">Estás aquí</span></div></a>
+      <a class="mn" href="/os-flyer-evento"><span class="num2">01</span><div><h4>Un evento</h4><p>De una fecha y una canción a una campaña completa.</p></div></a>
+      <a class="mn" href="/os-flyer-diseno"><span class="num2">02</span><div><h4>Un flyer</h4><p>Studio: de los datos a la gráfica final.</p></div></a>
+      <a class="mn" href="/os-flyer-reel"><span class="num2">03</span><div><h4>Un reel</h4><p>El mini-estudio de video: de un evento a un MP4.</p></div></a>
+      <a class="mn" href="/os-flyer-brief"><span class="num2">04</span><div><h4>El brief</h4><p>El documento que despierta a los otros tres sistemas.</p></div></a>
+      <a class="mn" href="/os-flyer-mesa"><span class="num2">05</span><div><h4>La mesa</h4><p>El flujo guiado: evento, diseño, video y descarga.</p></div></a>
+      <a class="mn" href="/os-flyer-reglas"><span class="num2">06</span><div><h4>Reglas de oro</h4><p>Lo que FLYER hace, lo que nunca hace y por qué.</p></div></a>
+    </div>
+  </section>
+
+  <div class="pie">
+    <p><b>FRATE OS · Manual de FLYER 00.</b> Siguiente: <a href="/os-flyer-evento">01 · Un evento →</a></p>
+  </div>
+
+</div>
+
+<script src="/os-guard.js"></script>
+<script>
+  document.getElementById('bar').innerHTML = osBarra('00','fly');
+  osProteger();
+
+  (function(){
+    var d=document.getElementById('d'),u1=document.getElementById('uid1'),
+        add=document.getElementById('add'),s2=document.getElementById('sec2'),
+        tA=document.getElementById('tA'),tB=document.getElementById('tB'),
+        uA=document.getElementById('uidA'),uB=document.getElementById('uidB');
+    function base(){return d.value?('FCC-'+d.value):'—'}
+    function render(){
+      u1.textContent=base();
+      if(s2.classList.contains('hide'))return;
+      var b=base(),arr=[{el:uA,h:tA.value,k:'A'},{el:uB,h:tB.value,k:'B'}];
+      arr.sort(function(x,y){var hx=x.h||'99:99',hy=y.h||'99:99';return hx<hy?-1:hx>hy?1:(x.k<y.k?-1:1)});
+      arr.forEach(function(o,i){o.el.textContent=(i===0)?b:(b+'-'+(i+1))});
+    }
+    add.addEventListener('click',function(){
+      var open=!s2.classList.contains('hide');
+      s2.classList.toggle('hide');
+      add.textContent=open?'+ Otra noche esa fecha':'– Quitar la segunda';
+      render();
+    });
+    [d,tA,tB].forEach(function(el){el.addEventListener('input',render)});
+    render();
+  })();
+</script>
+</body>
+</html>

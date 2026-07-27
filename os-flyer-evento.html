@@ -1,0 +1,114 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>FRATE OS · FLYER 01 Un evento</title>
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🎨</text></svg>">
+<link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@600;800;900&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="/os-manual.css">
+<link rel="stylesheet" href="/os-flyer.css">
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<style>
+  .campo{display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-top:14px}
+  @media(max-width:640px){.campo{grid-template-columns:1fr}}
+  .lado{background:var(--neg2);border:1px solid var(--bor);border-radius:14px;padding:18px}
+  .lado h4{font-family:var(--disp);text-transform:uppercase;font-size:1rem;margin-bottom:10px}
+  .lado.in{border-left:4px solid var(--mor)}
+  .lado.out{border-left:4px solid var(--verde)}
+  .lado ul{margin:0 0 0 18px}
+  .demo .btn{cursor:pointer}
+  .salida{margin-top:14px}
+  .salida .fila{display:flex;gap:10px;padding:9px 0;border-bottom:1px solid var(--bor)}
+  .salida .fila:last-child{border:0}
+  .salida .k{font-family:var(--disp);text-transform:uppercase;font-size:.7rem;letter-spacing:1.5px;color:var(--gris2);min-width:110px}
+  .salida .val{color:var(--txt);font-size:.95rem}
+  .blink{color:var(--mor)}
+</style>
+</head>
+<body>
+<div id="bar"></div>
+<div class="wrap">
+
+  <div class="hero">
+    <div class="eyebrow">FLYER · Manual 01</div>
+    <h1>De una fecha<br>a una <em>campaña</em></h1>
+    <p class="sub">Le das lo mínimo: una fecha, un link de YouTube y un premio. FLYER te devuelve el título, el copy, el concurso y el brief completo. Este es el viaje de un evento, de idea a campaña, en menos de un minuto.</p>
+    <div class="meta"><span>Para quien crea eventos</span><span>·</span><span>5 minutos</span></div>
+  </div>
+
+  <section>
+    <div class="stag">Capítulo 1</div>
+    <h2>Lo mínimo que le das</h2>
+    <p class="lead">FLYER no te pide un formulario largo. Con tres cosas ya arranca; el resto lo propone la IA y tú lo corriges.</p>
+    <div class="campo">
+      <div class="lado in"><h4>🎯 Lo que pones tú</h4><ul><li><b>La fecha</b> de la noche.</li><li><b>El link de YouTube</b> de la canción (opcional, pero da mucho).</li><li><b>El premio</b> del concurso.</li><li>Promos, DJs y extras: los eliges de una lista.</li></ul></div>
+      <div class="lado out"><h4>✨ Lo que arma la IA</h4><ul><li>El <b>título</b> del evento.</li><li>El <b>caption</b> para redes.</li><li>El <b>concurso</b> (la frase que engancha).</li><li>El <b>mood visual</b> para el diseñador.</li></ul></div>
+    </div>
+  </section>
+
+  <section>
+    <div class="stag">Capítulo 2</div>
+    <h2>La canción es el corazón</h2>
+    <p class="lead">Si le das el link de YouTube, FLYER entiende la noche: reconoce la canción, el artista, el género y el país, y arma la campaña alrededor de eso.</p>
+    <div class="oro"><b>Regla de oro.</b> Una buena canción es medio evento. FLYER usa la canción como semilla creativa: el título y el copy nacen de ella. Sin canción igual funciona, pero pierde ese hilo.</div>
+    <h3>Un ejemplo real</h3>
+    <div class="dato">canción         <span class="m">Tacones Rojos</span> — Sebastián Yatra
+título        → <span class="v">"NOCHE FUEGO"</span>
+caption       → <span class="v">"Nos fuimos al fuego 🔥"</span>
+concurso      → <span class="v">"Etiqueta a quien prende la noche"</span></div>
+  </section>
+
+  <section>
+    <div class="stag">Capítulo 3 · Tócalo</div>
+    <h2>La IA propone, tú mandas</h2>
+    <p class="lead">Nada de lo que arma la IA es definitivo. Cada campo lo puedes reescribir o pedir otro. Aprieta para ver cómo regenera.</p>
+    <div class="demo">
+      <div class="dl">Demo · genera un título</div>
+      <div class="salida" id="out">
+        <div class="fila"><span class="k">Título</span><span class="val" id="v-tit">NOCHE FUEGO</span></div>
+        <div class="fila"><span class="k">Caption</span><span class="val" id="v-cap">Nos fuimos al fuego 🔥</span></div>
+        <div class="fila"><span class="k">Concurso</span><span class="val" id="v-con">Etiqueta a quien prende la noche</span></div>
+      </div>
+      <button class="btn" id="regen">↻ Regenerar</button>
+      <button class="btn g" id="edit">✎ Editar a mano</button>
+    </div>
+    <div class="bien"><b>Bien resuelto.</b> Puedes regenerar solo un campo sin tocar los otros, o escribir el tuyo. La IA es un punto de partida, no una camisa de fuerza.</div>
+  </section>
+
+  <section>
+    <div class="stag">Capítulo 4</div>
+    <h2>Lo que la IA NO inventa</h2>
+    <p class="lead">Un dato que no tienes no se rellena con una mentira bonita: se deja en blanco.</p>
+    <div class="peligro"><b>Peligro.</b> Si un evento no tiene canción, hora de fin o premio, esos campos salen <b>vacíos</b> en el brief — no inventados. Un dato inventado viaja a la Web y al POS como si fuera verdad. Mejor vacío que falso.</div>
+    <div class="oro"><b>Regla de oro.</b> Revisa siempre el título y la hora de fin antes de exportar. Son los dos que más se olvidan y los que más necesitan la ticketera y el POS.</div>
+  </section>
+
+  <div class="pie">
+    <p><b>FRATE OS · Manual de FLYER 01.</b> <a href="/os-flyer">← 00 El mapa</a> · Siguiente: <a href="/os-flyer-diseno">02 · Un flyer →</a></p>
+  </div>
+
+</div>
+
+<script src="/os-guard.js"></script>
+<script>
+  document.getElementById('bar').innerHTML = osBarra('01','fly');
+  osProteger();
+  (function(){
+    var titulos=['NOCHE FUEGO','SE PRENDIÓ','MODO AVIÓN OFF','ÚLTIMO BAILE','FUEGO CRUZADO'];
+    var caps=['Nos fuimos al fuego 🔥','Hoy no se duerme 🌙','La noche es nuestra ✨','Se viene la buena 🔥'];
+    var cons=['Etiqueta a quien prende la noche','Etiqueta a tu compañero de after','Marca a quien nunca falla'];
+    var i=0,j=0,k=0;
+    var t=document.getElementById('v-tit'),c=document.getElementById('v-cap'),n=document.getElementById('v-con');
+    document.getElementById('regen').addEventListener('click',function(){
+      i=(i+1)%titulos.length;j=(j+1)%caps.length;k=(k+1)%cons.length;
+      [[t,titulos[i]],[c,caps[j]],[n,cons[k]]].forEach(function(p){p[0].textContent=p[1];p[0].classList.add('blink');setTimeout(function(){p[0].classList.remove('blink')},400)});
+    });
+    document.getElementById('edit').addEventListener('click',function(){
+      [t,c,n].forEach(function(el){el.contentEditable=true;el.style.outline='1px dashed var(--mor)';el.style.borderRadius='4px';el.style.padding='2px 6px'});
+      t.focus();
+    });
+  })();
+</script>
+</body>
+</html>

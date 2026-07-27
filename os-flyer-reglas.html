@@ -1,0 +1,79 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>FRATE OS · FLYER 06 Reglas de oro</title>
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🎨</text></svg>">
+<link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@600;800;900&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="/os-manual.css">
+<link rel="stylesheet" href="/os-flyer.css">
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+</head>
+<body>
+<div id="bar"></div>
+<div class="wrap">
+
+  <div class="hero">
+    <div class="eyebrow">FLYER · Manual 06</div>
+    <h1>Reglas<br>de <em>oro</em></h1>
+    <p class="sub">Todo el manual en una página. Lo que FLYER hace, lo que nunca hace, lo que ya está bien resuelto — y lo que todavía le falta. Si te sabes esta hoja, cualquier pantalla se te explica sola.</p>
+    <div class="meta"><span>Para tener a mano</span><span>·</span><span>4 minutos</span></div>
+  </div>
+
+  <section>
+    <div class="stag">Capítulo 1</div>
+    <h2>Lo que FLYER es</h2>
+    <p class="lead">Un solo trabajo, hecho bien: convertir una fecha en la cara pública de una noche y en el brief que la enciende en los otros sistemas.</p>
+    <div class="oro"><b>FLYER propone, no dispone.</b> Crea el uid candidato, siembra las entradas, nombra y viste la noche. La palabra final sobre la identidad y el estado la tiene el ERP.</div>
+    <div class="oro"><b>FLYER siembra el precio; la Web manda en vivo.</b> El brief crea las entradas con su precio y cupo. Desde que abre la venta, lo vendido y el disponible son de la Web.</div>
+  </section>
+
+  <section>
+    <div class="stag">Capítulo 2</div>
+    <h2>Lo que FLYER nunca hace</h2>
+    <div class="peligro"><b>No vende ni cobra.</b> No hay plata en FLYER. Vender es de la Web; cobrar adentro es del POS.</div>
+    <div class="peligro"><b>No valida entradas en la puerta.</b> El QR y el check-in son de la Web. FLYER no sabe quién entró.</div>
+    <div class="peligro"><b>No escribe en la ticketera.</b> El catálogo de tickets se <b>lee</b>, nunca se toca. FLYER solo mira.</div>
+    <div class="peligro"><b>No inventa datos.</b> Sin canción, sin hora de fin, sin premio → esos campos van <b>vacíos</b>, no rellenos con mentira.</div>
+    <div class="peligro"><b>No maneja personas.</b> Clientes y staff (RUT, correo) son de la Web y el ERP. FLYER no crea fichas de gente.</div>
+  </section>
+
+  <section>
+    <div class="stag">Capítulo 3</div>
+    <h2>Lo que está bien resuelto</h2>
+    <div class="bien"><b>Reexportar no duplica.</b> El uid es el mismo hilo: subir el brief dos veces deja un solo evento.</div>
+    <div class="bien"><b>Renombrar no borra ventas.</b> Cada entrada lleva una llave propia que no cambia; cambiarle el nombre no bifurca la línea.</div>
+    <div class="bien"><b>Vacío antes que falso.</b> Un dato en blanco es honesto; uno inventado viaja como verdad y ensucia a los otros tres.</div>
+    <div class="bien"><b>Trabaja con archivos.</b> Si el ERP o la Web se caen, guardas el brief y lo subes después. Nada se pierde.</div>
+  </section>
+
+  <section>
+    <div class="stag">Capítulo 4 · La verdad</div>
+    <h2>Lo que FLYER NO hace todavía</h2>
+    <p class="lead">Ser honesto acá evita prometer en la reunión cosas que aún no existen.</p>
+    <div class="tw"><table class="tabla">
+      <thead><tr><th>Todavía no…</th><th>Qué significa hoy</th></tr></thead>
+      <tbody>
+        <tr><td><b>Guardar el uid confirmado</b></td><td>FLYER manda el candidato. Cuando el ERP le devuelva el corregido, lo guardará solo — falta ese enganche del lado del ERP.</td></tr>
+        <tr><td><b>Promos estructuradas</b></td><td>Las promos viajan como texto, no como combos con precio y hora. Por ahora el POS las lee como nota.</td></tr>
+        <tr><td><b>Datos de la noche</b></td><td>Aforo, metas, vestuario, encargados: eso lo captura el ERP, no FLYER. FLYER se queda con lo creativo y las entradas.</td></tr>
+        <tr><td><b>Publicar a redes</b></td><td>FLYER genera el flyer y el reel; subirlos a Instagram lo haces tú. No postea solo.</td></tr>
+      </tbody>
+    </table></div>
+    <div class="oro"><b>Regla de oro.</b> Si algo no está en esta hoja, pregunta antes de prometerlo. Un "todavía no" dicho a tiempo vale más que una promesa que no se puede cumplir un jueves a las 2 de la mañana.</div>
+  </section>
+
+  <div class="pie">
+    <p><b>FRATE OS · Manual de FLYER 06 — fin de la serie.</b> Volver al <a href="/os-flyer">00 · El mapa</a> · o al <a href="/admin">Panel</a>.</p>
+  </div>
+
+</div>
+
+<script src="/os-guard.js"></script>
+<script>
+  document.getElementById('bar').innerHTML = osBarra('06','fly');
+  osProteger();
+</script>
+</body>
+</html>

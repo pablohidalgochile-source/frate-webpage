@@ -1,0 +1,98 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>FRATE OS · FLYER 05 La mesa</title>
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🎨</text></svg>">
+<link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@600;800;900&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="/os-manual.css">
+<link rel="stylesheet" href="/os-flyer.css">
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<style>
+  .ruta{display:flex;gap:0;margin-top:16px;flex-wrap:wrap}
+  .eta{flex:1;min-width:150px;background:var(--neg2);border:1px solid var(--bor);padding:16px 14px;cursor:pointer;transition:background .15s;position:relative}
+  .eta:first-child{border-radius:12px 0 0 12px} .eta:last-child{border-radius:0 12px 12px 0}
+  .eta+.eta{border-left:0}
+  @media(max-width:700px){.eta{border-radius:12px!important;border-left:1px solid var(--bor)!important;margin-bottom:6px;flex:1 1 100%}}
+  .eta.on{background:rgba(196,181,253,.1);border-color:var(--mor)}
+  .eta .p{font-family:var(--disp);font-weight:900;font-size:1.4rem;color:var(--mor);line-height:1}
+  .eta h4{font-family:var(--disp);text-transform:uppercase;font-size:.95rem;margin:5px 0 3px}
+  .eta p{font-size:.76rem;color:var(--gris)}
+  .paquete{display:grid;grid-template-columns:repeat(auto-fit,minmax(160px,1fr));gap:10px;margin-top:14px}
+  .pk{background:var(--neg2);border:1px solid var(--bor);border-radius:12px;padding:15px;text-align:center}
+  .pk .em{font-size:1.5rem} .pk h4{font-family:var(--disp);text-transform:uppercase;font-size:.88rem;margin:7px 0 2px}
+  .pk p{font-size:.72rem;color:var(--gris)}
+</style>
+</head>
+<body>
+<div id="bar"></div>
+<div class="wrap">
+
+  <div class="hero">
+    <div class="eyebrow">FLYER · Manual 05</div>
+    <h1>Todo en<br>una <em>mesa</em></h1>
+    <p class="sub">FLYER no es cuatro herramientas sueltas: es un recorrido. Creas el evento, lo diseñas, lo animas y lo descargas — todo en fila, sin perderte. Este es el mapa de la mesa de trabajo.</p>
+    <div class="meta"><span>Para el día a día</span><span>·</span><span>4 minutos</span></div>
+  </div>
+
+  <section>
+    <div class="stag">Capítulo 1 · Tócalo</div>
+    <h2>El recorrido guiado</h2>
+    <p class="lead">Cuatro pasos, siempre en el mismo orden. Cada uno te deja listo para el siguiente. Aprieta un paso para ver qué haces ahí.</p>
+    <div class="ruta">
+      <div class="eta on" data-i="0"><div class="p">1</div><h4>Evento</h4><p>Creas los datos.</p></div>
+      <div class="eta" data-i="1"><div class="p">2</div><h4>Studio</h4><p>Diseñas el flyer.</p></div>
+      <div class="eta" data-i="2"><div class="p">3</div><h4>Reel</h4><p>Armas el video.</p></div>
+      <div class="eta" data-i="3"><div class="p">4</div><h4>Exportar</h4><p>Descargas todo.</p></div>
+    </div>
+    <div class="demo" style="margin-top:14px">
+      <div class="dl">Estás en el paso <span id="np">1</span></div>
+      <p id="det" style="color:var(--gris);font-size:.95rem;margin:0">Pones fecha, canción y premio. La IA arma el título, el caption y el concurso. Defines las entradas con su precio y cupo.</p>
+    </div>
+  </section>
+
+  <section>
+    <div class="stag">Capítulo 2</div>
+    <h2>Guiado, pero no encerrado</h2>
+    <p class="lead">El recorrido te ordena, pero no te obliga. Puedes saltar a cualquier paso, o quedarte solo en el que necesitas.</p>
+    <div class="oro"><b>Regla de oro.</b> Si solo necesitas el flyer, haces el flyer. Si necesitas todo, sigues la fila. La mesa se adapta a ti, no al revés.</div>
+  </section>
+
+  <section>
+    <div class="stag">Capítulo 3</div>
+    <h2>El paquete de la noche</h2>
+    <p class="lead">Al final, en un lugar, descargas todo lo que armaste. Por separado o todo junto en un ZIP.</p>
+    <div class="paquete">
+      <div class="pk"><div class="em">🖼️</div><h4>Flyer</h4><p>PNG para redes.</p></div>
+      <div class="pk"><div class="em">🎬</div><h4>Reel</h4><p>MP4 vertical.</p></div>
+      <div class="pk"><div class="em">📄</div><h4>Brief</h4><p>Para subir al ERP.</p></div>
+      <div class="pk"><div class="em">📝</div><h4>Caption</h4><p>Texto listo para copiar.</p></div>
+    </div>
+    <div class="bien"><b>Bien resuelto.</b> Todo sale del mismo evento, así que todo cuadra: el flyer, el reel y el brief hablan de la misma noche, con el mismo nombre y la misma fecha.</div>
+  </section>
+
+  <div class="pie">
+    <p><b>FRATE OS · Manual de FLYER 05.</b> <a href="/os-flyer-brief">← 04 El brief</a> · Siguiente: <a href="/os-flyer-reglas">06 · Reglas de oro →</a></p>
+  </div>
+
+</div>
+
+<script src="/os-guard.js"></script>
+<script>
+  document.getElementById('bar').innerHTML = osBarra('05','fly');
+  osProteger();
+  (function(){
+    var det=['Pones fecha, canción y premio. La IA arma el título, el caption y el concurso. Defines las entradas con su precio y cupo.',
+             'Eliges una plantilla y mueves las capas: título, fecha, line-up, fotos. Exportas el flyer como imagen.',
+             'Configuras el video: efectos, sonido, duración. La canción es el fondo. Generas el MP4 en la nube.',
+             'Descargas el flyer, el reel, el brief y el caption — por separado o todo junto en un ZIP.'];
+    var np=document.getElementById('np'),d=document.getElementById('det'),etas=document.querySelectorAll('.eta');
+    etas.forEach(function(e){e.addEventListener('click',function(){
+      etas.forEach(function(x){x.classList.remove('on')});e.classList.add('on');
+      var i=+e.dataset.i; np.textContent=i+1; d.textContent=det[i];
+    })});
+  })();
+</script>
+</body>
+</html>

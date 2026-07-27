@@ -1,0 +1,83 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>FRATE OS · FLYER 02 Un flyer</title>
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🎨</text></svg>">
+<link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@600;800;900&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="/os-manual.css">
+<link rel="stylesheet" href="/os-flyer.css">
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<style>
+  .plantillas{display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:12px;margin-top:14px}
+  .pl{background:var(--neg2);border:1px solid var(--bor);border-radius:12px;padding:15px;text-align:center;transition:border-color .15s,transform .12s;cursor:default}
+  .pl:hover{border-color:var(--mor);transform:translateY(-2px)}
+  .pl .em{font-size:1.7rem}
+  .pl h4{font-family:var(--disp);text-transform:uppercase;font-size:.92rem;margin:8px 0 3px}
+  .pl p{font-size:.72rem;color:var(--gris)}
+</style>
+</head>
+<body>
+<div id="bar"></div>
+<div class="wrap">
+
+  <div class="hero">
+    <div class="eyebrow">FLYER · Manual 02</div>
+    <h1>El dato se<br>vuelve <em>cara</em></h1>
+    <p class="sub">Studio es donde el evento deja de ser texto y se vuelve imagen. Eliges una plantilla, mueves las capas, cambias los textos y sacas el flyer listo para redes. Sin diseñador, sin Photoshop.</p>
+    <div class="meta"><span>Para quien arma la gráfica</span><span>·</span><span>6 minutos</span></div>
+  </div>
+
+  <section>
+    <div class="stag">Capítulo 1</div>
+    <h2>Las plantillas</h2>
+    <p class="lead">No partes de una hoja en blanco. Cada plantilla es un estilo distinto de la misma noche; eliges la que le va al evento y los datos se acomodan solos.</p>
+    <div class="plantillas">
+      <div class="pl"><div class="em">🔍</div><h4>Scanner</h4><p>Archivo encontrado, estética de expediente.</p></div>
+      <div class="pl"><div class="em">📰</div><h4>The Frate Times</h4><p>Portada de diario.</p></div>
+      <div class="pl"><div class="em">💋</div><h4>Prohibida</h4><p>Estilo revista.</p></div>
+      <div class="pl"><div class="em">🃏</div><h4>Álbum</h4><p>Figuritas coleccionables.</p></div>
+      <div class="pl"><div class="em">🎬</div><h4>REC</h4><p>Cámara en vivo, crudo.</p></div>
+      <div class="pl"><div class="em">➕</div><h4>Y más</h4><p>La familia sigue creciendo.</p></div>
+    </div>
+    <div class="oro"><b>Regla de oro.</b> La plantilla no cambia el evento, cambia su <b>tono</b>. La misma noche puede salir como expediente secreto o como portada de diario. Elige por la sensación que quieres.</div>
+  </section>
+
+  <section>
+    <div class="stag">Capítulo 2</div>
+    <h2>El editor de capas</h2>
+    <p class="lead">Todo en el flyer es una capa que puedes tocar: el título, la fecha, el line-up, las fotos. Las mueves, las escalas, cambias su texto o las escondes.</p>
+    <div class="tw"><table class="tabla">
+      <thead><tr><th>Puedes</th><th>Cómo</th></tr></thead>
+      <tbody>
+        <tr><td><b>Mover y escalar</b></td><td>Arrastras la capa en el lienzo; la agarras de una esquina para agrandar.</td></tr>
+        <tr><td><b>Cambiar el texto</b></td><td>Editas cualquier texto, aunque venga de la plantilla.</td></tr>
+        <tr><td><b>Esconder</b></td><td>Dejas un texto en blanco y esa capa desaparece — no queda el texto de ejemplo.</td></tr>
+        <tr><td><b>Ordenar</b></td><td>Traes al frente o mandas al fondo, bloqueas lo que no quieres mover.</td></tr>
+        <tr><td><b>Fotos</b></td><td>Subes una imagen, la encuadras y le aplicas filtros (brillo, contraste, blanco y negro).</td></tr>
+      </tbody>
+    </table></div>
+    <div class="bien"><b>Bien resuelto.</b> Dejar un texto en blanco lo <b>oculta</b>. Nunca sale un flyer con "escribe aquí" o el nombre de otro evento pegado encima.</div>
+  </section>
+
+  <section>
+    <div class="stag">Capítulo 3</div>
+    <h2>Sacar el flyer</h2>
+    <p class="lead">Cuando te gusta, exportas. El flyer se genera como imagen <b>en el navegador</b>, al instante, lista para subir a Instagram.</p>
+    <div class="oro"><b>Regla de oro.</b> El flyer sale del mismo evento que va al brief. Lo que ves en Studio es lo que la Web mostrará como imagen del evento: una sola noche, una sola cara.</div>
+  </section>
+
+  <div class="pie">
+    <p><b>FRATE OS · Manual de FLYER 02.</b> <a href="/os-flyer-evento">← 01 Un evento</a> · Siguiente: <a href="/os-flyer-reel">03 · Un reel →</a></p>
+  </div>
+
+</div>
+
+<script src="/os-guard.js"></script>
+<script>
+  document.getElementById('bar').innerHTML = osBarra('02','fly');
+  osProteger();
+</script>
+</body>
+</html>

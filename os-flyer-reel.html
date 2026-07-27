@@ -1,0 +1,100 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>FRATE OS · FLYER 03 Un reel</title>
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🎨</text></svg>">
+<link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@600;800;900&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="/os-manual.css">
+<link rel="stylesheet" href="/os-flyer.css">
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<style>
+  .linea{display:flex;align-items:center;gap:10px;flex-wrap:wrap;margin-top:16px}
+  .globo{background:var(--neg2);border:1px solid var(--bor);border-radius:10px;padding:12px 15px;flex:1;min-width:140px}
+  .globo .t{font-family:var(--disp);text-transform:uppercase;font-size:.72rem;letter-spacing:1.5px;color:var(--mor)}
+  .globo .s{font-size:.8rem;color:var(--gris);margin-top:3px}
+  .fl{color:var(--gris2);font-size:1.2rem}
+  .barra{height:10px;background:var(--neg);border:1px solid var(--bor);border-radius:99px;overflow:hidden;margin-top:8px}
+  .barra i{display:block;height:100%;width:0;background:var(--mor);border-radius:99px;transition:width .3s}
+</style>
+</head>
+<body>
+<div id="bar"></div>
+<div class="wrap">
+
+  <div class="hero">
+    <div class="eyebrow">FLYER · Manual 03</div>
+    <h1>La noche<br>se <em>mueve</em></h1>
+    <p class="sub">El reel es el flyer, pero con movimiento, música y efectos. Un mini-estudio de video adentro de FLYER: eliges el look, la canción manda el ritmo, y en un clic se genera el MP4 vertical para redes.</p>
+    <div class="meta"><span>Para quien arma el video</span><span>·</span><span>6 minutos</span></div>
+  </div>
+
+  <section>
+    <div class="stag">Capítulo 1</div>
+    <h2>Un estudio, no un filtro</h2>
+    <p class="lead">Todo es configurable: tamaños, colores de letra, efectos, duración de cada parte. No es un molde fijo — es una mesa de edición.</p>
+    <div class="tw"><table class="tabla">
+      <thead><tr><th>Controlas</th><th>Qué incluye</th></tr></thead>
+      <tbody>
+        <tr><td><b>Las capas</b></td><td>Mueves y escalas cada texto igual que en el flyer.</td></tr>
+        <tr><td><b>Los efectos</b></td><td>Brillo, glitch, grano, destellos — todos dosificables, no "todo o nada".</td></tr>
+        <tr><td><b>El sonido</b></td><td>La canción de fondo + efectos de sonido en los golpes.</td></tr>
+        <tr><td><b>La duración</b></td><td>Cuánto dura cada sección del reel.</td></tr>
+      </tbody>
+    </table></div>
+    <div class="oro"><b>Regla de oro.</b> Menos glow es más. Los efectos suman cuando se sienten, no cuando se ven. Un reel recargado se lee como plantilla; uno medido se lee como marca.</div>
+  </section>
+
+  <section>
+    <div class="stag">Capítulo 2</div>
+    <h2>La canción es el fondo</h2>
+    <p class="lead">Por defecto, el fondo del reel es el video de YouTube que ya pusiste en el evento. La misma canción que define la noche le pone el ritmo al video.</p>
+    <div class="bien"><b>Bien resuelto.</b> No tienes que subir nada: el link de YouTube del evento se vuelve el fondo automáticamente. Igual puedes cambiarlo por otro video, una foto o lo que quieras.</div>
+  </section>
+
+  <section>
+    <div class="stag">Capítulo 3 · Tócalo</div>
+    <h2>Render en la nube, un clic</h2>
+    <p class="lead">Editar es liviano y fluido. Cuando te gusta, aprietas <b>Generar</b> y el video se arma en la nube; tú sigues trabajando mientras tanto. Vuelve como un MP4 listo.</p>
+    <div class="demo">
+      <div class="dl">Demo · así se ve el render</div>
+      <div class="linea">
+        <div class="globo"><div class="t">Editas</div><div class="s">Liviano, en vivo, fluido.</div></div>
+        <span class="fl">→</span>
+        <div class="globo"><div class="t">Generas</div><div class="s">Un clic. Se va a la nube.</div></div>
+        <span class="fl">→</span>
+        <div class="globo"><div class="t">Vuelve</div><div class="s">MP4 vertical, listo para subir.</div></div>
+      </div>
+      <div class="barra"><i id="prog"></i></div>
+      <p style="font-size:.82rem;color:var(--gris);margin-top:8px"><span id="lbl">Listo para generar</span></p>
+      <button class="btn" id="go">▶ Simular render</button>
+    </div>
+    <div class="oro"><b>Regla de oro.</b> El render tarda unos minutos y corre en la nube: no ocupa tu computador. Si cierras la pestaña, el video sigue armándose y lo recuperas después.</div>
+  </section>
+
+  <div class="pie">
+    <p><b>FRATE OS · Manual de FLYER 03.</b> <a href="/os-flyer-diseno">← 02 Un flyer</a> · Siguiente: <a href="/os-flyer-brief">04 · El brief →</a></p>
+  </div>
+
+</div>
+
+<script src="/os-guard.js"></script>
+<script>
+  document.getElementById('bar').innerHTML = osBarra('03','fly');
+  osProteger();
+  (function(){
+    var go=document.getElementById('go'),bar=document.getElementById('prog'),lbl=document.getElementById('lbl'),p=0,timer=null;
+    var fases=[[15,'Preparando la escena…'],[45,'Dibujando los cuadros…'],[80,'Pegando la música…'],[100,'¡MP4 listo! 🎬']];
+    go.addEventListener('click',function(){
+      if(timer)return; p=0;bar.style.width='0';go.disabled=true;go.textContent='Generando…';
+      timer=setInterval(function(){
+        p+=4; if(p>100)p=100; bar.style.width=p+'%';
+        for(var f=0;f<fases.length;f++){if(p<=fases[f][0]){lbl.textContent=fases[f][1];break;}}
+        if(p>=100){clearInterval(timer);timer=null;go.disabled=false;go.textContent='▶ Simular otra vez';}
+      },120);
+    });
+  })();
+</script>
+</body>
+</html>

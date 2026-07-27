@@ -1,0 +1,96 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>FRATE OS · FLYER 04 El brief</title>
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🎨</text></svg>">
+<link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@600;800;900&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="/os-manual.css">
+<link rel="stylesheet" href="/os-flyer.css">
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<style>
+  .secs{display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:8px;margin-top:14px}
+  .sc{background:var(--neg2);border:1px solid var(--bor);border-radius:10px;padding:11px 13px;font-size:.84rem}
+  .sc b{font-family:var(--disp);color:var(--mor);margin-right:5px}
+  .flip{margin-top:14px}
+  .flip .btn{cursor:pointer}
+</style>
+</head>
+<body>
+<div id="bar"></div>
+<div class="wrap">
+
+  <div class="hero">
+    <div class="eyebrow">FLYER · Manual 04</div>
+    <h1>El documento que<br><em>despierta</em> a los demás</h1>
+    <p class="sub">El brief es lo único que FLYER le entrega al resto. Un archivo que se ve como una ficha para el equipo — pero por dentro lleva, escondido, todo lo que la Web, el POS y el ERP necesitan para crear la noche sin tipear nada.</p>
+    <div class="meta"><span>Para entender la conexión</span><span>·</span><span>7 minutos</span></div>
+  </div>
+
+  <section>
+    <div class="stag">Capítulo 1</div>
+    <h2>Dos caras del mismo archivo</h2>
+    <p class="lead">El brief tiene una cara que lee una persona y otra que leen las máquinas. Las dos viven en el mismo <span class="num">.html</span>.</p>
+    <h3>La cara que lees tú — 7 secciones</h3>
+    <div class="secs">
+      <div class="sc"><b>1</b>Evento</div>
+      <div class="sc"><b>2</b>Canción</div>
+      <div class="sc"><b>3</b>Caption</div>
+      <div class="sc"><b>4</b>Concurso</div>
+      <div class="sc"><b>5</b>Operación</div>
+      <div class="sc"><b>6</b>Producción</div>
+      <div class="sc"><b>7</b>Entradas</div>
+    </div>
+    <h3>La cara que leen las máquinas</h3>
+    <p>Un bloque de datos escondido (el <b>JSON</b>). Los otros sistemas lo leen y crean el evento solos, sin adivinar nada del texto.</p>
+    <div class="peligro"><b>Peligro.</b> Ese bloque debe leerse <b>primero</b>, sobre el archivo crudo. Si un sistema limpia el HTML antes de mirarlo, borra el JSON y pierde toda la información — y termina adivinando (y pagando IA) por gusto.</div>
+  </section>
+
+  <section>
+    <div class="stag">Capítulo 2 · Tócalo</div>
+    <h2>Así viaja la noche</h2>
+    <p class="lead">Este es el bloque escondido de un evento real. Es lo que la Web y el POS reciben.</p>
+    <div class="dato" id="json"><span class="o">event_uid</span>      "<span class="m">FCC-2026-07-25</span>"   <span style="color:var(--gris2)">← el hilo · candidato</span>
+<span class="o">evento</span>        "NOCHE FUEGO" · 25-07 · 23:00→05:00
+<span class="o">ambiente</span>      "Fuego"
+<span class="o">tickets</span>       Pre-Venta GRAL. MUJER · <span class="v">$8.000</span> · cupo 200
+              Cortesía prensa       · <span class="v">$0</span>    · cupo 20</div>
+    <div class="oro"><b>Regla de oro.</b> El brief manda <b>contenido</b>: nombre, fecha, gráfica, entradas. Nunca manda si el evento está abierto, cerrado o cancelado — ese estado lo decide el ERP por otro canal.</div>
+  </section>
+
+  <section>
+    <div class="stag">Capítulo 3</div>
+    <h2>Las entradas dejan de tipearse</h2>
+    <p class="lead">Antes, cada tipo de entrada se escribía a mano en la Web, evento por evento. Ahora FLYER las define una vez en el brief y la Web las crea con esos valores.</p>
+    <div class="tw"><table class="tabla">
+      <thead><tr><th>Dato de la entrada</th><th>Quién lo pone</th></tr></thead>
+      <tbody>
+        <tr><td><b>Nombre y precio</b></td><td>FLYER (semilla) — se lee del catálogo de la Web.</td></tr>
+        <tr><td><b>Cupo</b></td><td>FLYER: cuántas salen a la venta.</td></tr>
+        <tr><td><b>Vendidas y disponible</b></td><td><b>La Web</b>, en vivo. FLYER nunca los toca.</td></tr>
+      </tbody>
+    </table></div>
+    <div class="bien"><b>Bien resuelto.</b> Cada entrada lleva una llave propia que no cambia. Si le cambias el nombre y reexportas, la Web actualiza la misma línea — no crea una nueva ni pierde las ventas.</div>
+  </section>
+
+  <section>
+    <div class="stag">Capítulo 4</div>
+    <h2>Reexportar es seguro</h2>
+    <p class="lead">Puedes corregir un evento y volver a subir el brief las veces que quieras.</p>
+    <div class="oro"><b>Regla de oro.</b> Reimportar el mismo brief <b>actualiza, no duplica</b>: el hilo (event_uid) es el mismo. Y nunca revive una noche cerrada ni le devuelve el cupo a una entrada ya vendida.</div>
+  </section>
+
+  <div class="pie">
+    <p><b>FRATE OS · Manual de FLYER 04.</b> <a href="/os-flyer-reel">← 03 Un reel</a> · Siguiente: <a href="/os-flyer-mesa">05 · La mesa →</a></p>
+  </div>
+
+</div>
+
+<script src="/os-guard.js"></script>
+<script>
+  document.getElementById('bar').innerHTML = osBarra('04','fly');
+  osProteger();
+</script>
+</body>
+</html>
