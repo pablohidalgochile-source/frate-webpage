@@ -1,0 +1,156 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>FRATE OS · El libro</title>
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>📖</text></svg>">
+<link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@600;800;900&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="/os-manual.css">
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<style>
+  .hero::after{background:radial-gradient(circle,rgba(255,45,139,.14),transparent 68%)}
+  .serie-h{display:flex;align-items:center;gap:12px;margin:6px 0 16px;flex-wrap:wrap}
+  .serie-h .dot{width:14px;height:14px;border-radius:50%;flex-shrink:0}
+  .serie-h h2{margin:0}
+  .serie-h .rol{color:var(--gris);font-size:.92rem;font-family:var(--font);text-transform:none;letter-spacing:0}
+  .serie-h .go{margin-left:auto;font-size:.74rem;font-family:var(--disp);font-weight:800;letter-spacing:1.5px;text-transform:uppercase;text-decoration:none}
+  section.g-web .go{color:var(--sys-web)} section.g-erp .go{color:var(--sys-erp)}
+  section.g-pos .go{color:var(--sys-pos)} section.g-fly .go{color:var(--sys-fly)}
+  .g-web .num2{color:var(--sys-web)} .g-web .mn:hover{border-color:var(--sys-web)}
+  .g-erp .num2{color:var(--sys-erp)} .g-erp .mn:hover{border-color:var(--sys-erp)}
+  .g-pos .num2{color:var(--sys-pos)} .g-pos .mn:hover{border-color:var(--sys-pos)}
+  .g-fly .num2{color:var(--sys-fly)} .g-fly .mn:hover{border-color:var(--sys-fly)}
+  .g-oficio .num2{color:var(--oro);font-size:1.4rem} .g-oficio .mn:hover{border-color:var(--oro)}
+  .g-oficio h3{margin-top:26px}
+  .wip{background:rgba(168,85,247,.06);border:1px dashed rgba(168,85,247,.4);border-left:4px solid var(--sys-pos);
+    border-radius:14px;padding:18px 20px;color:var(--gris);margin-top:6px}
+  .wip b{color:var(--sys-pos)}
+  .fam{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin-top:14px}
+  @media(max-width:720px){.fam{grid-template-columns:repeat(2,1fr)}}
+  .fam .c{background:var(--neg2);border:1px solid var(--bor);border-radius:12px;padding:14px;text-align:center}
+  .fam .c .d{width:22px;height:22px;border-radius:6px;margin:0 auto 8px}
+  .fam .c b{display:block;font-family:var(--disp);text-transform:uppercase;letter-spacing:.5px;font-size:.95rem}
+  .fam .c span{font-size:.66rem;color:var(--gris2);text-transform:uppercase;letter-spacing:1px}
+</style>
+</head>
+<body>
+<div id="bar"></div>
+<div class="wrap">
+
+  <div class="hero">
+    <div class="eyebrow">Fraternidad Campus Central · Grupo Familiar</div>
+    <h1>El libro del<br><em>sistema</em></h1>
+    <p class="sub">Todos los manuales de los cuatro cerebros, en un solo lugar. No explican botones: explican la lógica — para que si entiendes el manual, cualquier pantalla se te explique sola.</p>
+    <div class="meta"><span>4 sistemas</span><span>·</span><span>Una forma de pensar</span><span>·</span><span>Para el equipo de administración</span></div>
+  </div>
+
+  <section>
+    <div class="stag">Cómo leerlo</div>
+    <h2>Cuatro cerebros, un color cada uno</h2>
+    <p class="lead">Cada sistema es dueño de una parte de la verdad. Cuando dos no coinciden, no se discute: manda el dueño del dato. Reconócelos por su color en todo el libro.</p>
+    <div class="fam">
+      <div class="c"><div class="d" style="background:var(--sys-fly)"></div><b>Flyer</b><span>nace el evento</span></div>
+      <div class="c"><div class="d" style="background:var(--sys-web)"></div><b>Web</b><span>vende y registra</span></div>
+      <div class="c"><div class="d" style="background:var(--sys-pos)"></div><b>POS</b><span>cobra adentro</span></div>
+      <div class="c"><div class="d" style="background:var(--sys-erp)"></div><b>ERP</b><span>consolida</span></div>
+    </div>
+    <div class="oro"><b>Regla de oro.</b> Una persona es una sola ficha en los cuatro sistemas, y el hilo que la amarra es el <strong>RUT</strong>. El evento es uno solo, y el hilo es el <strong>event_uid</strong> (<span class="num">FCC-2026-07-25</span>). Si esos dos hilos están bien, todo lo demás calza.</div>
+  </section>
+
+  <section class="g-fly">
+    <div class="serie-h"><span class="dot" style="background:var(--sys-fly)"></span><h2>Flyer</h2><span class="rol">— acá nace el evento · 7 capítulos</span><a class="go" href="/os-flyer">Abrir la serie →</a></div>
+    <div class="serie">
+      <a class="mn" href="/os-flyer"><span class="num2">00</span><div><h4>El mapa</h4><p>Los cuatro cerebros y por qué todo empieza acá.</p></div></a>
+      <a class="mn" href="/os-flyer-evento"><span class="num2">01</span><div><h4>Un evento</h4><p>De una idea a una noche con nombre y fecha.</p></div></a>
+      <a class="mn" href="/os-flyer-diseno"><span class="num2">02</span><div><h4>Un flyer</h4><p>El viaje de una publicación: del concepto al arte.</p></div></a>
+      <a class="mn" href="/os-flyer-reel"><span class="num2">03</span><div><h4>Un reel</h4><p>Cómo se arma el video de la semana.</p></div></a>
+      <a class="mn" href="/os-flyer-brief"><span class="num2">04</span><div><h4>El brief</h4><p>El documento que despierta a los otros tres sistemas.</p></div></a>
+      <a class="mn" href="/os-flyer-mesa"><span class="num2">05</span><div><h4>La mesa</h4><p>Cómo se ordena el trabajo de la semana.</p></div></a>
+      <a class="mn" href="/os-flyer-reglas"><span class="num2">06</span><div><h4>Reglas de oro</h4><p>Lo que nunca se hace y lo que el Flyer no hace aún.</p></div></a>
+    </div>
+  </section>
+
+  <section class="g-web">
+    <div class="serie-h"><span class="dot" style="background:var(--sys-web)"></span><h2>Web · Ticketera</h2><span class="rol">— vende y registra · 15 capítulos</span><a class="go" href="/os">Abrir la serie →</a></div>
+    <div class="serie">
+      <a class="mn" href="/os"><span class="num2">00</span><div><h4>El mapa</h4><p>El sistema completo, de un vistazo.</p></div></a>
+      <a class="mn" href="/os-entrada"><span class="num2">01</span><div><h4>La entrada</h4><p>El viaje de una entrada: de la venta al QR.</p></div></a>
+      <a class="mn" href="/os-dinero"><span class="num2">02</span><div><h4>El dinero</h4><p>Precio, medios de pago y conciliación.</p></div></a>
+      <a class="mn" href="/os-persona"><span class="num2">03</span><div><h4>La persona</h4><p>La ficha del cliente y su historial.</p></div></a>
+      <a class="mn" href="/os-noche"><span class="num2">04</span><div><h4>La noche</h4><p>Qué pasa en la web durante el evento en vivo.</p></div></a>
+      <a class="mn" href="/os-panel"><span class="num2">05</span><div><h4>El panel</h4><p>El admin por dentro.</p></div></a>
+      <a class="mn" href="/os-reglas"><span class="num2">06</span><div><h4>Reglas de oro</h4><p>Lo que nunca se hace.</p></div></a>
+      <a class="mn" href="/os-besucona"><span class="num2">07</span><div><h4>BESUCONA</h4><p>El caso especial, explicado.</p></div></a>
+      <a class="mn" href="/os-comparar"><span class="num2">08</span><div><h4>Dos noches</h4><p>Cómo se comparan dos eventos.</p></div></a>
+      <a class="mn" href="/os-cliente"><span class="num2">09</span><div><h4>Un cliente</h4><p>El viaje completo de un cliente.</p></div></a>
+      <a class="mn" href="/os-usuario"><span class="num2">10</span><div><h4>🛠 Cliente</h4><p>Cómo se gestiona desde el panel.</p></div></a>
+      <a class="mn" href="/os-listas"><span class="num2">11</span><div><h4>🛠 Listas</h4><p>Listas y RRPP en detalle.</p></div></a>
+      <a class="mn" href="/os-entradas"><span class="num2">12</span><div><h4>🛠 Entradas</h4><p>Tipos de ticket, precio y stock.</p></div></a>
+      <a class="mn" href="/os-eventos"><span class="num2">13</span><div><h4>🛠 Eventos</h4><p>Crear y administrar eventos.</p></div></a>
+      <a class="mn" href="/os-datos"><span class="num2">14</span><div><h4>Calidad de datos</h4><p>Los tres números que no significan lo que parecen, y cuál mirar en su lugar.</p></div></a>
+    </div>
+  </section>
+
+  <section class="g-pos">
+    <div class="serie-h"><span class="dot" style="background:var(--sys-pos)"></span><h2>POS · Cajas</h2><span class="rol">— cobra adentro · 7 capítulos</span><a class="go" href="/os-pos">Abrir la serie →</a></div>
+    <div class="serie">
+      <a class="mn" href="/os-pos-mapa"><span class="num2">00</span><div><h4>El mapa</h4><p>Los cuatro cerebros y qué cobra el POS adentro.</p></div></a>
+      <a class="mn" href="/os-pos-turno"><span class="num2">01</span><div><h4>El turno</h4><p>Cotejo, cierre y cuadre de la caja. Demo: cuadra una caja.</p></div></a>
+      <a class="mn" href="/os-pos-venta"><span class="num2">02</span><div><h4>La venta</h4><p>El viaje de una venta: producto, pago, comprobante.</p></div></a>
+      <a class="mn" href="/os-pos-dinero"><span class="num2">03</span><div><h4>El dinero</h4><p>Esperado vs contado, y de dónde salen las diferencias.</p></div></a>
+      <a class="mn" href="/os-pos-puerta"><span class="num2">04</span><div><h4>Puerta y barra</h4><p>QR, entrada vs cover. Demo: un QR = un ingreso.</p></div></a>
+      <a class="mn" href="/os-pos-catalogo"><span class="num2">05</span><div><h4>El catálogo</h4><p>Combos, promos e inventario.</p></div></a>
+      <a class="mn" href="/os-pos-reglas"><span class="num2">06</span><div><h4>Reglas de oro</h4><p>Lo que nunca se hace y lo que el POS no hace aún.</p></div></a>
+    </div>
+  </section>
+
+  <section class="g-erp">
+    <div class="serie-h"><span class="dot" style="background:var(--sys-erp)"></span><h2>ERP</h2><span class="rol">— consolida todo · 7 capítulos</span><a class="go" href="/os-erp">Abrir la serie →</a></div>
+    <div class="serie">
+      <a class="mn" href="/os-erp"><span class="num2">00</span><div><h4>El mapa</h4><p>Los cuatro cerebros y de qué manda cada uno.</p></div></a>
+      <a class="mn" href="/os-erp-persona"><span class="num2">01</span><div><h4>La persona</h4><p>De postulante a ficha con banco, talla y contrato.</p></div></a>
+      <a class="mn" href="/os-erp-noche"><span class="num2">02</span><div><h4>La noche</h4><p>El viaje de un turno: convocar, marcar, cerrar.</p></div></a>
+      <a class="mn" href="/os-erp-dinero"><span class="num2">03</span><div><h4>El dinero</h4><p>El viaje de un peso: trato, turno, pago, boleta.</p></div></a>
+      <a class="mn" href="/os-erp-caja"><span class="num2">04</span><div><h4>La caja</h4><p>Sencillo, billetes, cuadre y propinas.</p></div></a>
+      <a class="mn" href="/os-erp-bodega"><span class="num2">05</span><div><h4>La bodega</h4><p>El viaje de una botella: pedido, conteo, trago.</p></div></a>
+      <a class="mn" href="/os-erp-reglas"><span class="num2">06</span><div><h4>Reglas de oro</h4><p>Lo que nunca se hace y lo que el ERP no hace aún.</p></div></a>
+    </div>
+  </section>
+
+  <!-- Los manuales de rol y del staff no son de un sistema: son del oficio.
+       Explican cómo se trabaja una noche, no cómo funciona una app. -->
+  <section class="g-oficio">
+    <div class="serie-h"><span class="dot" style="background:var(--oro)"></span><h2>El oficio</h2><span class="rol">— cómo se trabaja una noche, sin importar el sistema</span></div>
+    <p class="lead">Los de arriba explican los sistemas. Estos explican la pega: qué hace cada rol, qué se espera y qué nunca se hace. Son los que lee alguien que recién entra.</p>
+
+    <h3>Por rol</h3>
+    <div class="serie">
+      <a class="mn" href="/manual-anfitriona"><span class="num2">◆</span><div><h4>Anfitriona</h4><p>Recibir, acompañar y cuidar la experiencia de la mesa.</p></div></a>
+      <a class="mn" href="/manual-rrpp"><span class="num2">◆</span><div><h4>RRPP · Anfitrión</h4><p>Listas, invitados y cómo se mide lo que rinde cada uno.</p></div></a>
+      <a class="mn" href="/manual-comunidad"><span class="num2">◆</span><div><h4>Comunidad</h4><p>Cómo se habla desde FRATE y qué se responde.</p></div></a>
+      <a class="mn" href="/manual-puerta"><span class="num2">◆</span><div><h4>Puerta</h4><p>Mini-manual del ingreso: QR, pulseras y criterio.</p></div></a>
+      <a class="mn" href="/manual-bot"><span class="num2">◆</span><div><h4>El bot</h4><p>Qué contesta solo y cuándo pasa a una persona.</p></div></a>
+    </div>
+
+    <h3>Manual del staff</h3>
+    <p class="lead" style="margin-bottom:14px">Vive en el ERP porque se lee con la cuenta del portal. Siete capítulos de oficio, convivencia y caja.</p>
+    <div class="serie">
+      <a class="mn" href="https://erp.frate.cl/manuales.html"><span class="num2">📘</span><div><h4>Índice del staff</h4><p>Bienvenida · Cómo trabajamos · Barra · Puerta · Seguridad · Cajero · Reglas.</p><span class="tag">se abre en el ERP</span></div></a>
+      <a class="mn" href="https://erp.frate.cl/manual/marcaje.html"><span class="num2">📘</span><div><h4>Registrar tu servicio</h4><p>QR, código de 6 caracteres, break y salida.</p><span class="tag">se abre en el ERP</span></div></a>
+      <a class="mn" href="https://erp.frate.cl/manual/marcaje-admin.html"><span class="num2">📘</span><div><h4>Marcaje · para admin</h4><p>QR del evento, geocerca y cómo se verifica la identidad.</p><span class="tag">se abre en el ERP</span></div></a>
+    </div>
+
+    <div class="peligro"><b>Estos manuales están en revisión.</b> Una auditoría contra el código encontró afirmaciones que ya no son ciertas —sobre cómo se paga, sobre las propinas y sobre lo que el portal deja hacer—. Léelos con eso en mente hasta que estén corregidos.</div>
+  </section>
+
+  <div class="pie">FRATE OS · El libro · Manual interno del equipo — se lee con tu cuenta de FRATE. <a href="/admin">← Panel</a></div>
+</div>
+
+<script src="/os-guard.js"></script>
+<script>
+  document.getElementById('bar').innerHTML = osBarra('', 'web');
+  osProteger();
+</script>
+</body>
+</html>
