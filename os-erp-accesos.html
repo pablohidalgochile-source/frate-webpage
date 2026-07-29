@@ -1,0 +1,130 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>FRATE OS · ERP 07 Quién entra dónde</title>
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🔑</text></svg>">
+<link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@600;800;900&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="/os-manual.css">
+<link rel="stylesheet" href="/os-erp.css">
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<style>
+  .puertas{display:grid;grid-template-columns:repeat(auto-fit,minmax(250px,1fr));gap:12px;margin-top:14px}
+  .pu{background:var(--neg2);border:1px solid var(--bor);border-radius:12px;padding:16px 18px;border-top:3px solid var(--bor2)}
+  .pu.ok{border-top-color:var(--verde)} .pu.riesgo{border-top-color:var(--oro)}
+  .pu h4{font-family:var(--disp);font-weight:800;font-size:1.05rem;text-transform:uppercase;margin-bottom:5px}
+  .pu p{font-size:.82rem;color:var(--gris);line-height:1.55}
+  .pu .firma{margin-top:10px;padding-top:9px;border-top:1px solid var(--bor);font-size:.79rem;color:var(--gris2)}
+  .pu .firma b{font-family:var(--disp);font-size:.92rem}
+  .pu.ok .firma b{color:var(--verde)} .pu.riesgo .firma b{color:var(--oro)}
+  .roles{width:100%;border-collapse:collapse;margin-top:13px;font-size:.85rem}
+  .roles th{text-align:left;font-family:var(--disp);font-size:.7rem;letter-spacing:1.4px;color:var(--gris2);
+    text-transform:uppercase;padding:0 0 7px;border-bottom:1px solid var(--bor)}
+  .roles td{padding:8px 0;border-bottom:1px solid var(--bor);color:var(--gris);vertical-align:top}
+  .roles td:first-child{font-family:var(--disp);font-weight:800;color:var(--txt);white-space:nowrap;padding-right:16px}
+  .roles td.ve{color:var(--gris);font-size:.81rem}
+</style>
+</head>
+<body>
+<div id="bar"></div>
+<div class="wrap">
+
+  <div class="hero">
+    <div class="eyebrow">ERP · Manual 07</div>
+    <h1>Quién entra<br><em>dónde</em></h1>
+    <p class="sub">Dos puertas al panel, y por qué la que usas decide si lo que apruebes lleva tu nombre o no lleva ninguno.</p>
+    <div class="meta"><span>Para todo el que entra al panel</span><span>·</span><span>7 minutos</span></div>
+  </div>
+
+  <section>
+    <div class="stag">Capítulo 1</div>
+    <h2>El problema de tener una sola llave</h2>
+    <p class="lead">Durante mucho tiempo el panel preguntaba un PIN y nada más. No preguntaba quién eras.</p>
+    <p style="color:var(--gris)">Funcionaba: el que sabía el PIN entraba, y el que no, no. Pero al guardar, el sistema escribía la palabra <code>admin</code> en el campo de quién había hecho cada cosa. Aprobar un pago, cerrar una noche, marcar una transferencia como pagada — todo firmado por <code>admin</code>, que no es nadie.</p>
+    <div class="peligro"><b>Por acá pasan $21,8 millones al mes.</b> Ese es el total de los tratos mensuales del equipo, sin contar los turnos por noche. Con una sola llave compartida, si mañana aparece una aprobación rara, no hay forma de saber quién la hizo. No porque alguien la borre: porque nunca se guardó.</div>
+  </section>
+
+  <section>
+    <div class="stag">Capítulo 2</div>
+    <h2>Ahora hay dos puertas</h2>
+    <p class="lead">Las dos entran al mismo panel. La diferencia no está en lo que puedes hacer: está en lo que queda escrito.</p>
+
+    <div class="puertas">
+      <div class="pu ok">
+        <h4>Con mi ficha</h4>
+        <p>Tu <b>RUT</b> y el <b>PIN</b> del portal — el mismo con el que el equipo entra a ver sus turnos. El sistema busca tu ficha y sabe quién eres.</p>
+        <div class="firma">Lo que apruebas se firma<br><b>Camila Rojas</b></div>
+      </div>
+      <div class="pu riesgo">
+        <h4>Llave compartida</h4>
+        <p>El PIN de siempre, el que sabe todo el equipo. Sirve para cuando alguien pierde el suyo y hay que abrir la caja igual.</p>
+        <div class="firma">Lo que apruebas se firma<br><b>llave compartida</b></div>
+      </div>
+    </div>
+
+    <div class="oro"><b>Regla de oro.</b> La llave compartida <strong>no se elimina nunca</strong>. Un sistema que puede dejarte afuera un sábado a las 3 de la mañana es peor que uno con una llave imperfecta. Lo que se hace es distinto: se muestra de frente que no firma con nadie. Se desincentiva diciendo la verdad, no prohibiendo.</div>
+  </section>
+
+  <section>
+    <div class="stag">Capítulo 3</div>
+    <h2>Dónde queda tu nombre</h2>
+    <p class="lead">No en todas partes: en los actos donde importa saber quién fue.</p>
+    <ul>
+      <li><b>Aprobar el pago de un turno</b> — y aprobar la noche completa de una vez.</li>
+      <li><b>Marcar una transferencia como pagada</b>, después de subir la nómina al banco.</li>
+      <li><b>Registrar un adelanto</b> o un movimiento en la cuenta corriente de alguien.</li>
+      <li><b>Editar un monto de una noche ya cerrada</b> — que es justo el cambio que hay que poder auditar.</li>
+    </ul>
+    <div class="dato">Antes                        Ahora
+  pago_aprobado_by: <span class="r">"admin"</span>     pago_aprobado_by: <span class="v">"Camila Rojas"</span>
+                               pago_aprobado_by: <span class="o">"llave compartida"</span></div>
+    <div class="bien"><b>Bien resuelto.</b> La firma se lee de la sesión, no se pasa de pantalla en pantalla. Eso significa que cualquier parte del sistema que guarde algo importante puede firmarlo sin que haya que acordarse de enviarle el dato.</div>
+  </section>
+
+  <section>
+    <div class="stag">Capítulo 4</div>
+    <h2>No todos ven todo</h2>
+    <p class="lead">Hay nueve roles que pueden entrar al panel. Solo uno lo ve entero.</p>
+    <div class="tw"><table class="roles">
+      <thead><tr><th>Rol</th><th>Qué ve del panel</th></tr></thead>
+      <tbody>
+        <tr><td>admin</td><td class="ve">Todo.</td></tr>
+        <tr><td>productor</td><td class="ve">Inicio, eventos, producción, personal, RRHH y colaciones.</td></tr>
+        <tr><td>adquisiciones</td><td class="ve">Inventario, financiero y pañol.</td></tr>
+        <tr><td>audiovisual</td><td class="ve">Audiovisual, tickets, web, marketing y eventos.</td></tr>
+        <tr><td>servicios</td><td class="ve">Invitados y eventos.</td></tr>
+        <tr><td>bodega</td><td class="ve">Pañol e inventario.</td></tr>
+        <tr><td>puerta</td><td class="ve">Solo la puerta.</td></tr>
+        <tr><td>seguridad</td><td class="ve">Inicio, eventos, puerta, personal y documentación. <b>Nada de plata.</b></td></tr>
+        <tr><td>supervisor</td><td class="ve">Lo mismo que seguridad.</td></tr>
+      </tbody>
+    </table></div>
+    <p style="color:var(--gris);margin-top:12px">Quien no tiene ninguno de estos roles no entra al panel: entra al portal del colaborador, a ver sus turnos y sus pagos.</p>
+
+    <div class="oro"><b>Regla de oro.</b> Los permisos <strong>fallan cerrados</strong>. Si a un rol no se le asignó ningún módulo, no ve nada — no ve todo. Parece un detalle y es lo contrario: la alternativa cómoda («como no sé qué puede ver, que vea todo») es exactamente cómo se filtran los sueldos.</div>
+
+    <div class="peligro"><b>Ojo con esto.</b> Los roles acotados existían en el código desde hacía meses, pero la tabla de permisos estaba vacía y el menú nunca la aplicaba. Es decir: <b>existían y no recortaban nada</b>. Que un permiso esté escrito no significa que esté funcionando. Si vas a confiar en uno, entra con ese rol y compruébalo.</div>
+  </section>
+
+  <section>
+    <div class="stag">Capítulo 5</div>
+    <h2>Lo que el ERP todavía no hace</h2>
+    <ul>
+      <li><b>Los PIN están guardados en texto plano.</b> Cualquiera con acceso a la tabla del personal los puede leer. Cifrarlos deja a las 83 personas afuera hasta que los reconfiguren, así que necesita un plan de migración, no un parche. <b>Es la deuda más seria de este capítulo.</b></li>
+      <li><b>No hay registro de entradas al panel.</b> Se sabe quién aprobó algo, pero no quién entró y no hizo nada.</li>
+      <li><b>La llave compartida no caduca</b> ni avisa cuánto se usa. Si media empresa entra por ahí, el sistema no lo nota.</li>
+      <li><b>No hay sesión única entre los cuatro sistemas.</b> Entrar al ERP no te entra a la web ni al POS. Eso viene después: primero cada casa tiene que saber distinguir personas.</li>
+    </ul>
+  </section>
+
+  <div class="pie">FRATE OS · ERP · Manual 07 · <a href="/os-erp-reglas">← Reglas de oro</a> · <a href="/os-erp">Volver al mapa →</a></div>
+</div>
+
+<script src="/os-guard.js"></script>
+<script>
+  document.getElementById('bar').innerHTML = osBarra('07', 'erp');
+  osProteger();
+</script>
+</body>
+</html>
