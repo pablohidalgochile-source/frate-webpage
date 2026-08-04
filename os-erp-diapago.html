@@ -1,0 +1,276 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>FRATE OS · ERP 07 El día de pago</title>
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🏦</text></svg>">
+<link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@600;800;900&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="/os-manual.css">
+<link rel="stylesheet" href="/os-erp.css">
+<style>
+  .form-eq{background:var(--neg);border:1px solid var(--bor2);border-radius:14px;padding:22px 24px;margin-top:16px;text-align:center}
+  .form-eq .ec{font-family:var(--disp);font-weight:900;font-size:clamp(1.1rem,3.2vw,1.7rem);line-height:1.3;text-wrap:balance}
+  .form-eq .mas{color:var(--verde)} .form-eq .men{color:var(--rojo)} .form-eq .ig{color:var(--gris2)}
+  .form-eq .no{display:block;margin-top:14px;font-family:var(--font);font-weight:400;font-size:.88rem;color:var(--gris)}
+  .form-eq .no b{color:var(--violet,#c4b5fd)}
+  .mom{background:var(--neg2);border:1px solid var(--bor);border-radius:14px;padding:20px 22px;margin-top:14px}
+  .mom>.cab{display:flex;align-items:center;gap:11px;flex-wrap:wrap;margin-bottom:12px}
+  .mom .et{font-family:var(--disp);font-size:.64rem;letter-spacing:2px;text-transform:uppercase;color:var(--acc);
+    border:1px solid var(--bor2);border-radius:99px;padding:4px 11px}
+  .mom h3{font-family:var(--disp);font-weight:800;font-size:1.25rem;text-transform:uppercase;margin:0}
+  .mom .donde{font-size:.74rem;color:var(--gris2);font-family:var(--disp);letter-spacing:1.2px;text-transform:uppercase}
+  .tabla2{width:100%;border-collapse:collapse;font-size:.86rem;margin-top:10px}
+  .tabla2 td{padding:9px 12px;border-bottom:1px solid var(--bor);color:var(--gris);vertical-align:top}
+  .tabla2 td:first-child{width:32%;color:var(--txt);font-weight:500}
+  .tabla2 tr:last-child td{border-bottom:0}
+  .campo2{font-family:var(--mono,monospace);font-size:.8rem;color:var(--violet,#c4b5fd);background:var(--neg);
+    border:1px solid var(--bor);border-radius:5px;padding:1px 6px}
+  .ojo{border-left:3px solid var(--rojo);background:var(--neg);border-radius:0 10px 10px 0;padding:14px 18px;margin-top:14px}
+  .ojo h4{font-family:var(--disp);font-weight:800;font-size:.98rem;text-transform:uppercase;color:var(--rojo);margin-bottom:5px}
+  .ojo p{font-size:.85rem;color:var(--gris)}
+  .caso{background:var(--neg);border:1px solid var(--bor2);border-radius:13px;padding:17px 19px;margin-top:12px}
+  .caso h4{font-family:var(--disp);font-weight:800;font-size:1rem;text-transform:uppercase;margin-bottom:7px}
+  .caso p{font-size:.85rem;color:var(--gris);margin-bottom:6px}
+  .caso .mal{color:var(--rojo)} .caso .bien2{color:var(--verde)}
+  .est{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:11px;margin-top:14px}
+  .es{background:var(--neg2);border:1px solid var(--bor);border-radius:12px;padding:15px 17px}
+  .es h4{font-family:var(--disp);font-weight:800;font-size:.95rem;text-transform:uppercase;margin-bottom:4px}
+  .es .q{font-size:.66rem;color:var(--gris2);text-transform:uppercase;letter-spacing:1.2px;margin-bottom:8px;font-family:var(--disp)}
+  .es p{font-size:.8rem;color:var(--gris)}
+</style>
+</head>
+<body>
+<div id="bar"></div>
+<div class="wrap">
+
+  <div class="hero">
+    <div class="eyebrow">ERP · Manual 07</div>
+    <h1>El día<br>de <em>pago</em></h1>
+    <p class="sub">El mes completo visto desde administración: qué se hace cada noche, qué se hace una vez al mes, en qué orden, y por qué ese orden importa. Con las fórmulas exactas que usa el sistema.</p>
+    <div class="meta"><span>Para administración</span><span>·</span><span>16 minutos</span><span>·</span><span>El operativo</span></div>
+  </div>
+
+  <section>
+    <div class="stag">Antes de empezar</div>
+    <h2>Las tres cifras y de dónde sale cada una</h2>
+    <p class="lead">Todo el módulo de pagos se sostiene en tres números por persona. Ninguno se guarda: los tres se calculan cada vez, a partir de hechos.</p>
+
+    <div class="form-eq">
+      <div class="ec">GASTO <span class="ig">=</span> noches <span class="mas">+</span> sueldo del mes <span class="mas">+</span> ajustes del mes</div>
+      <span class="no">Lo que la empresa gastó en esa persona. <b>No es «lo que ganó»</b>: es un gasto, y así se llama en pantalla.</span>
+    </div>
+
+    <div class="form-eq">
+      <div class="ec">PAGADO <span class="ig">=</span> noches marcadas pagadas <span class="mas">+</span> pagos sueltos</div>
+      <span class="no">Solo cuenta lo que salió de verdad. Una noche marcada como <b>acumulada</b> no es un pago: es deuda que se arrastra.</span>
+    </div>
+
+    <div class="form-eq">
+      <div class="ec">SE DEBE <span class="ig">=</span> gasto <span class="men">−</span> pagado</div>
+      <span class="no">Si sale negativo, se le pagó de más. La app lo muestra aparte y <b>no lo resta</b> del total a transferir: esa plata no deja de salir, hay que recuperarla.</span>
+    </div>
+
+    <h3>Y la cuarta, que no es plata que salga</h3>
+    <div class="form-eq">
+      <div class="ec">BOLETA <span class="ig">=</span> líquido <span class="ig">÷</span> 0,8475</div>
+      <span class="no">Retención SII del 15,25%. El total del mes se suma <b>boleta por boleta</b>, nunca dividiendo el total una vez: da un peso de diferencia y ese peso es el que no cuadra con el SII. La categoría «con COVID» (÷ 0,825) <b>ya no existe</b>.</span>
+    </div>
+  </section>
+
+  <section>
+    <div class="stag">La lógica</div>
+    <h2>Quién cobra la noche y quién no</h2>
+    <p class="lead">Esta decisión la toma <b>una sola función</b> en todo el sistema. Si estuviera copiada en cada pantalla, cada pantalla se equivocaría distinto.</p>
+
+    <div class="est">
+      <div class="es"><div class="q">trato</div><h4>Servicio</h4><p>Cobra por noche trabajada. Es el caso normal: barra, puerta, seguridad, aseo.</p></div>
+      <div class="es"><div class="q">trato</div><h4>Mensual</h4><p>Cobra un sueldo fijo. Sus noches son <b>asistencia, no plata</b>: aparece en la convocatoria pero su turno no suma.</p></div>
+      <div class="es"><div class="q">trato</div><h4>Semanal</h4><p>Fijo por semana. Igual que mensual: la noche no suma salvo que se marque lo contrario.</p></div>
+      <div class="es"><div class="q">trato</div><h4>Mixto</h4><p>Fijo <b>más</b> noches. Mario Catalán: $200.000 semanales los sábados y además las noches sueltas.</p></div>
+    </div>
+
+    <div class="ojo">
+      <h4>Si la noche no suma al gasto, tampoco puede sumar al pagado</h4>
+      <p>Es el mismo candado leído al revés, y cuesta caro olvidarlo. A una persona con sueldo mensual una noche suya figuraba marcada como pagada por $100.000: no le sumaba al gasto (bien) pero sí al pagado (mal), y el sistema decía que se le debían $100.000 menos de los que se le debían.</p>
+    </div>
+  </section>
+
+  <section>
+    <div class="stag">Momento 1</div>
+    <h2>Cada noche</h2>
+
+    <div class="mom">
+      <div class="cab"><span class="et">antes</span><h3>Se convoca y se asigna</h3><span class="donde">Eventos → Equipo</span></div>
+      <table class="tabla2">
+        <tr><td>Convocar</td><td>Le llega el aviso al portal y por WhatsApp. Responde «puedo» o «no puedo», y puede corregirse si se equivocó.</td></tr>
+        <tr><td>Asignar posición</td><td>Barra Fuego 1, Puerta 2, DJ. <b>Acá se congela el monto de esa noche</b> en <span class="campo2">monto_dia</span>, tomado de la tarifa de su ficha según sea día de semana o fin de semana.</td></tr>
+        <tr><td>Por qué se congela</td><td>Subirle la tarifa a alguien hoy no puede cambiar lo que ya trabajó. Las noches pasadas valen lo que valían entonces.</td></tr>
+      </table>
+    </div>
+
+    <div class="mom">
+      <div class="cab"><span class="et">al cerrar</span><h3>Se aprueba el pago de la noche</h3><span class="donde">Eventos → Cerrar · o RRHH → Por aprobar</span></div>
+      <table class="tabla2">
+        <tr><td>Qué significa</td><td>«Este monto está bien». Escribe <span class="campo2">pago_aprobado</span> en cada turno.</td></tr>
+        <tr><td>Qué NO significa</td><td><b>Aprobar no paga.</b> Son dos actos, dos momentos y a veces dos personas.</td></tr>
+        <tr><td>Qué pasa hasta que apruebas</td><td>La persona no ve su monto en el portal y la noche no entra a ninguna nómina. Es a propósito: un monto a medio revisar no debe llegarle a nadie.</td></tr>
+        <tr><td>Bono y descuento</td><td>Se ponen <b>en la noche</b>, nunca en la ficha. En la ficha se lo estás subiendo para siempre y nadie se va a acordar de bajarlo.</td></tr>
+      </table>
+    </div>
+  </section>
+
+  <section>
+    <div class="stag">Momento 2</div>
+    <h2>Durante el mes · lo que no es noche</h2>
+    <p class="lead">Tres cosas que no salen de un turno y que igual son plata del mes.</p>
+
+    <div class="mom">
+      <div class="cab"><span class="et">sueldo</span><h3>Fijos mensuales</h3><span class="donde">RRHH → Fijos mensuales</span></div>
+      <table class="tabla2">
+        <tr><td>Qué hace</td><td>Genera el <b>devengo</b> del mes para cada persona de trato mensual o semanal: una fila en <span class="campo2">staff_devengos</span> con su monto pactado.</td></tr>
+        <tr><td>Cuándo cuenta</td><td>Solo si está en estado <b>aprobado</b> o <b>pagado</b>. Un devengo en borrador no suma al gasto.</td></tr>
+        <tr><td>Cuidado</td><td>Antes de generar los devengos de un mes, revisa que no haya ajustes de ese mes que ya cubran lo mismo. Si no, el sueldo se suma dos veces.</td></tr>
+      </table>
+    </div>
+
+    <div class="mom">
+      <div class="cab"><span class="et">ajuste</span><h3>Bono, descuento o deuda del mes</h3><span class="donde">RRHH → Extras / Ajustes</span></div>
+      <table class="tabla2">
+        <tr><td>Cuándo se usa</td><td>Plata del <b>mes</b>, no de una noche: un acuerdo, una corrección, una deuda por compras internas.</td></tr>
+        <tr><td>Siempre con motivo</td><td>Un ajuste sin motivo escrito es una cifra que dentro de tres meses nadie puede explicar. El campo no es burocracia: es lo que se audita.</td></tr>
+        <tr><td>Signo</td><td><b>bono</b> suma · <b>descuento</b> y <b>deuda</b> restan.</td></tr>
+      </table>
+      <div class="ojo">
+        <h4>Una deuda de OTRO mes no es un ajuste de este mes</h4>
+        <p>Si alguien quedó debiendo de junio y eso se compensa contra el pago de julio, <b>no baja lo que ganó en julio ni el monto de su boleta</b>: baja lo que se le transfiere. Se registra como <b>pago</b>, no como ajuste. Confundirlo le cambia la boleta que emite ante el SII por una que no corresponde.</p>
+      </div>
+    </div>
+
+    <div class="mom">
+      <div class="cab"><span class="et">adelanto</span><h3>Plata entregada antes</h3><span class="donde">RRHH → Cuenta corriente</span></div>
+      <table class="tabla2">
+        <tr><td>Qué es</td><td>Un adelanto en efectivo, o cualquier pago fuera del día de pago. Queda como <b>pago</b> del mes.</td></tr>
+        <tr><td>Regla</td><td>Cada peso se registra una sola vez. Si un número aparece en dos pantallas, una de las dos está mal.</td></tr>
+      </table>
+    </div>
+  </section>
+
+  <section>
+    <div class="stag">Momento 3</div>
+    <h2>El día de pago · los cinco pasos</h2>
+    <p class="lead">Acá la app propone y tú revisas. Es al revés de como se hacía antes, cuando sin planilla cargada no había pantalla y el resto del mes el sistema no sabía cuánto debía.</p>
+
+    <div class="mom">
+      <div class="cab"><span class="et">paso 1</span><h3>Eliges el mes</h3><span class="donde">RRHH → Día de pago</span></div>
+      <p style="font-size:.87rem;color:var(--gris)">Arranca en el <b>mes anterior</b>, porque el día de pago siempre es de un mes que ya terminó. La lista se arma sola con la fórmula de arriba, persona por persona. El mes se corta por <b>fecha del evento</b>: el sábado 1 de agosto no entra en julio aunque se haya trabajado hasta las 5 de la mañana.</p>
+      <table class="tabla2">
+        <tr><td>Costo total de staff</td><td>líquido + retención. Es lo que le cuesta a la empresa, no lo que recibe la gente.</td></tr>
+        <tr><td>Ya pagado</td><td>lo que ya salió, y cuántas personas están al día.</td></tr>
+        <tr><td>Falta transferir</td><td>la suma de los saldos positivos. <b>Es lo que va a salir del banco hoy.</b></td></tr>
+        <tr><td>Acumulado</td><td>deuda que se arrastra a propósito. No sale hoy y por eso va aparte.</td></tr>
+      </table>
+    </div>
+
+    <div class="mom">
+      <div class="cab"><span class="et">paso 2</span><h3>Cotejas con tu planilla</h3><span class="donde">botón «Cotejar con planilla»</span></div>
+      <p style="font-size:.87rem;color:var(--gris)">Cargas el CSV y sale un <b>semáforo, no un número</b>: cuántos calzan, cuántos difieren y cuántos no tienen ficha. La planilla no pisa nada. Sirve porque la app puede estar <b>corta</b>: una noche que nadie cargó no la reclama nadie, y la planilla es el único lugar donde eso aparece.</p>
+    </div>
+
+    <div class="mom">
+      <div class="cab"><span class="et">paso 3</span><h3>Generas el TEF y lo subes al banco</h3><span class="donde">botón «Generar TEF»</span></div>
+      <table class="tabla2">
+        <tr><td>Qué genera</td><td>El archivo del Banco de Chile: <b>TEC</b> de 216 caracteres para cuentas del propio banco, <b>TOB</b> de 219 para los demás. Una línea por persona, con su monto.</td></tr>
+        <tr><td>No confundir</td><td>La <b>Agenda de beneficiarios</b> es otro archivo y <b>no lleva monto</b>: da de alta a la gente en el banco, no transfiere nada.</td></tr>
+        <tr><td>Antes de bajarlo</td><td>Puedes corregir el monto de cualquiera a mano. La app avisa si dos fichas comparten RUT y ninguna declara titular.</td></tr>
+        <tr><td>Cuenta a nombre de otro</td><td>Si alguien cobra en la cuenta de un tercero, se declara en su ficha: <b>Banco → «la cuenta está a nombre de otra persona»</b>. La línea del banco sale a nombre del titular; <b>la boleta la sigue emitiendo quien trabajó</b>, con su propio RUT. Nunca se pisa el RUT de la persona: el banco rechaza una línea cuyo nombre no calce con el RUT.</td></tr>
+      </table>
+    </div>
+
+    <div class="mom" style="border-color:var(--rojo)">
+      <div class="cab"><span class="et" style="color:var(--rojo)">paso 4</span><h3>Marcar pagadas</h3><span class="donde">botón «Marcar pagadas»</span></div>
+      <div class="ojo">
+        <h4>Este es el paso que se olvida</h4>
+        <p>El ERP no sabe si la transferencia llegó. Genera el archivo y espera que tú confirmes que lo subiste. <b>Sin este paso todo lo demás queda perfecto y el resultado igual está mal</b>: la app sigue diciendo que debes esa plata, el portal le dice a la gente que se le debe, y el mes no cierra.</p>
+      </div>
+      <p style="font-size:.87rem;color:var(--gris);margin-top:12px">Lo que hace por dentro: marca cada noche cubierta como pagada, con su medio (transferencia o efectivo), y deja un pago suelto solo por lo que no es noche —el sueldo y los ajustes—.</p>
+    </div>
+
+    <div class="mom">
+      <div class="cab"><span class="et">paso 5</span><h3>Pides las boletas</h3><span class="donde">Día de pago → pestaña Boletas</span></div>
+      <table class="tabla2">
+        <tr><td>Hoja de revisión</td><td>El CSV con todo el equipo: quién, cuánto se le transfirió, por cuánto emite, la retención, sus datos bancarios y qué le falta. Es lo que revisas antes de mandar nada.</td></tr>
+        <tr><td>Envío de prueba</td><td>Obligatorio. Manda el mensaje real de la persona que estás leyendo, al correo que escribas. El botón de mandar a todos se enciende recién después.</td></tr>
+        <tr><td>Ritmo</td><td>Uno cada 400 milisegundos, porque el correo se corta a partir del sexto por segundo. Los que fallan quedan marcados para reintentarlos.</td></tr>
+        <tr><td>Sin RUT no es un bloqueo</td><td>Es el motivo del mensaje: a esas personas se les pide el dato. Son ellas las que lo tienen que dar.</td></tr>
+        <tr><td>El monto se congela</td><td>Al pedir la boleta. Si después cambia el total del mes, la que ya se emitió no cambia.</td></tr>
+      </table>
+    </div>
+  </section>
+
+  <section>
+    <div class="stag">Momento 4</div>
+    <h2>Cierre de mes</h2>
+    <div class="mom">
+      <div class="cab"><span class="et">fin de mes</span><h3>Se congela la foto</h3><span class="donde">RRHH → Cierre de mes</span></div>
+      <p style="font-size:.87rem;color:var(--gris)">Guarda por persona su gasto, lo pagado, el saldo y el monto de su boleta. Desde ahí, cualquier cambio en ese mes aparece como <b>diferencia contra la foto</b> en vez de reescribir la historia en silencio. Es lo que permite responder «¿y por qué julio dice otra cosa que en agosto?» sin adivinar.</p>
+    </div>
+  </section>
+
+  <section>
+    <div class="stag">Las trampas</div>
+    <h2>Cuatro errores que ya costaron plata</h2>
+    <p class="lead">Ninguno de estos es teórico. Los cuatro pasaron, y los cuatro se ven igual que si todo estuviera bien.</p>
+
+    <div class="caso">
+      <h4>1 · Anotar un pago como movimiento suelto en vez de en la noche</h4>
+      <p class="mal">Qué pasa: la noche queda sin marcar. Administración suma por persona y la ve pagada; el colaborador abre su portal, que mira fila por fila, y la ve pendiente.</p>
+      <p class="bien2">La regla: una noche pagada se marca <b>en la noche</b>. El movimiento suelto es solo para lo que no es noche.</p>
+    </div>
+
+    <div class="caso">
+      <h4>2 · Guardar el mismo hecho en dos campos</h4>
+      <p class="mal">Qué pasa: si están «pagado» y «el estado» por separado, alguien escribe uno y no el otro. Llegaron a contradecirse en 74 filas.</p>
+      <p class="bien2">La regla: el estado <b>se deriva</b> de si está marcada y con qué medio. Ya no se puede escribir a mano; la base lo recalcula sola.</p>
+    </div>
+
+    <div class="caso">
+      <h4>3 · Cotejar la planilla estando en el mes equivocado</h4>
+      <p class="mal">Qué pasa: se cargó la planilla de julio estando parado en agosto y se escribieron 20 ajustes por $25.060.000 con período agosto. Agosto mostraba $26 millones con un solo evento realizado.</p>
+      <p class="bien2">La regla: la pantalla arranca en el mes anterior. Mira siempre el selector de mes antes de cotejar.</p>
+    </div>
+
+    <div class="caso">
+      <h4>4 · Confiar en una pantalla que se quedó abierta</h4>
+      <p class="mal">Qué pasa: los números se cargan al abrir. Si aprobaste o pagaste en otra ventana, esta sigue mostrando lo de antes.</p>
+      <p class="bien2">La regla: antes de decidir sobre una cifra, recarga. Y si un contador del costado no calza con la lista de al lado, no le creas a ninguno de los dos hasta recargar.</p>
+    </div>
+  </section>
+
+  <section>
+    <div class="stag">Glosario</div>
+    <h2>Cómo se llama cada cosa</h2>
+    <table class="tabla2">
+      <tr><td>Marcar / marcada</td><td>Poner el visto bueno de <b>pagada</b> en una noche, con su medio. Es lo que le dice al sistema que esa plata salió.</td></tr>
+      <tr><td>Aprobar</td><td>Decir que el monto está bien. No es pagar.</td></tr>
+      <tr><td>Acumulado</td><td>Una noche que se deja debiendo a propósito para pagarla más adelante. No es un pago ni un pendiente del día.</td></tr>
+      <tr><td>Pendiente</td><td>Plata aprobada que todavía no sale. Es lo que va en el próximo TEF.</td></tr>
+      <tr><td>Devengo</td><td>El sueldo del mes de alguien con trato mensual o semanal.</td></tr>
+      <tr><td>Ajuste del mes</td><td>Plata del mes que no viene de una noche: bono, descuento o deuda.</td></tr>
+      <tr><td>Movimiento / pago suelto</td><td>Un pago que no está anotado en una noche. Solo para sueldo, ajustes y adelantos.</td></tr>
+      <tr><td>Titular de la cuenta</td><td>El dueño de la cuenta donde se deposita, cuando no es la misma persona que trabajó.</td></tr>
+      <tr><td>TEF / TOB / TEC</td><td>El archivo que se sube al banco. TEC para cuentas del Banco de Chile, TOB para los demás.</td></tr>
+      <tr><td>Líquido</td><td>Lo que la persona recibe en su cuenta.</td></tr>
+      <tr><td>Bruto</td><td>Lo que dice la boleta: el líquido dividido por 0,8475.</td></tr>
+    </table>
+  </section>
+
+  <div class="pie">
+    <p>Manual 07 de la serie ERP · Frate OS</p>
+    <p>Escrito el 4 de agosto de 2026, después de cerrar julio.</p>
+  </div>
+
+</div>
+<script src="/os-manual.js"></script>
+</body>
+</html>
