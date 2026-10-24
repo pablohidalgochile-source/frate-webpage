@@ -1,0 +1,201 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>FRATE WEB (TICKETERA) · LINK · MOCKUP DEL FLUJO</title>
+<link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@600;700;800;900&family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet" />
+<style>
+  :root{--bg:#0a0a0b;--card:#141416;--card2:#1b1b1f;--line:#26262b;--line2:#33333a;--txt:#f2f0f4;--dim:#8b8892;--faint:#5a5862;--rojo:#E8363D;--gold:#D4A832;--verde:#22c55e;--azul:#4d8dff;--disp:'Barlow Condensed',sans-serif;}
+  *{box-sizing:border-box;margin:0;padding:0;}
+  body{background:var(--bg);color:var(--txt);font-family:'Inter',system-ui,sans-serif;-webkit-font-smoothing:antialiased;padding:20px 14px 60px;}
+  .wrap{max-width:1080px;margin:0 auto;}
+  .hd{text-align:center;margin-bottom:8px;}
+  .hd h1{font-family:var(--disp);font-weight:900;font-size:2rem;letter-spacing:1px;}
+  .hd h1 b{color:var(--rojo);}
+  .hd p{color:var(--dim);font-size:.9rem;}
+  .mocklbl{display:inline-block;background:rgba(240,200,74,.14);border:1px solid var(--gold);color:var(--gold);font-size:.68rem;font-weight:700;padding:4px 12px;border-radius:99px;margin-top:8px;}
+  .grid{display:grid;grid-template-columns:380px 1fr;gap:26px;margin-top:26px;align-items:start;}
+  @media(max-width:860px){.grid{grid-template-columns:1fr;}}
+  .col-h{font-family:var(--disp);font-weight:800;font-size:1.25rem;letter-spacing:.5px;margin-bottom:12px;display:flex;align-items:center;gap:8px;}
+  /* Phone */
+  .phone{background:#000;border:9px solid #1c1c22;border-radius:38px;padding:0;overflow:hidden;box-shadow:0 30px 80px rgba(0,0,0,.6);}
+  .phone-sc{background:linear-gradient(180deg,#0d0d10,#0a0a0b);height:720px;overflow-y:auto;position:relative;}
+  .phone-sc::-webkit-scrollbar{width:0;}
+  .cover{height:150px;background:linear-gradient(135deg,#2a0d12,#3a1420 60%,#0a0a0b),radial-gradient(circle at 70% 20%,rgba(232,54,61,.4),transparent 60%);position:relative;display:flex;flex-direction:column;justify-content:flex-end;padding:16px;}
+  .cover .who{font-size:.7rem;letter-spacing:2px;text-transform:uppercase;color:var(--gold);font-weight:700;}
+  .cover .ev{font-family:var(--disp);font-weight:900;font-size:1.7rem;line-height:1;margin-top:2px;}
+  .cover .meta{font-size:.76rem;color:#d4d4d8;margin-top:5px;}
+  .cupos{position:absolute;top:14px;right:14px;background:rgba(0,0,0,.55);border:1px solid var(--line2);border-radius:99px;padding:5px 12px;font-size:.72rem;font-weight:700;}
+  .cupos b{color:var(--verde);}
+  .body{padding:16px;}
+  .fld{margin-bottom:12px;}
+  .fld label{font-size:.68rem;text-transform:uppercase;letter-spacing:1px;color:var(--dim);font-weight:700;display:block;margin-bottom:5px;}
+  .fld label .req{color:var(--rojo);}
+  .fld input{width:100%;background:#0e0e12;border:1px solid var(--line);border-radius:10px;color:#fff;padding:12px;font-size:.95rem;font-family:inherit;}
+  .fld input::placeholder{color:var(--faint);}
+  .ocr{width:100%;background:linear-gradient(90deg,rgba(212,168,50,.16),rgba(212,168,50,.05));border:1px dashed var(--gold);color:var(--gold);border-radius:12px;padding:13px;font-weight:800;font-size:.9rem;cursor:pointer;margin-bottom:14px;display:flex;align-items:center;justify-content:center;gap:8px;}
+  .hint{font-size:.72rem;color:var(--faint);text-align:center;margin:-6px 0 12px;}
+  .go{width:100%;background:var(--rojo);color:#fff;border:0;border-radius:12px;padding:15px;font-weight:900;font-size:1rem;cursor:pointer;letter-spacing:.5px;}
+  .steps{display:flex;gap:6px;justify-content:center;margin:14px 0;}
+  .steps button{background:var(--card2);border:1px solid var(--line);color:var(--dim);font-size:.7rem;font-weight:700;padding:6px 10px;border-radius:8px;cursor:pointer;font-family:inherit;}
+  .steps button.on{background:var(--rojo);color:#fff;border-color:var(--rojo);}
+  .screen{display:none;} .screen.on{display:block;}
+  /* OCR result */
+  .ocr-ok{background:rgba(34,197,94,.08);border:1px solid var(--verde);border-radius:12px;padding:14px;margin-bottom:14px;}
+  .ocr-ok .t{color:var(--verde);font-weight:800;font-size:.82rem;margin-bottom:8px;}
+  .ocr-ok .row{display:flex;justify-content:space-between;font-size:.86rem;padding:3px 0;border-bottom:1px solid var(--line);}
+  .ocr-ok .row span{color:var(--dim);}
+  .plus18{margin-top:8px;font-size:.76rem;color:var(--verde);font-weight:700;}
+  /* Croquis */
+  .plano{background:#0e0e12;border:1px solid var(--line);border-radius:12px;padding:10px;margin-bottom:12px;position:relative;height:230px;}
+  .mesa{position:absolute;border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:.66rem;font-weight:800;cursor:pointer;border:1.5px solid var(--line2);background:#17171c;color:var(--dim);}
+  .mesa.libre{border-color:var(--verde);color:var(--verde);} .mesa.sel{background:var(--verde);color:#04120a;border-color:var(--verde);} .mesa.ocup{opacity:.35;}
+  /* QR */
+  .qr-wrap{text-align:center;padding:8px 0;}
+  .qr{width:190px;height:190px;margin:12px auto;border-radius:14px;background:linear-gradient(45deg,#000 25%,transparent 25%) -8px 0/17px 17px,linear-gradient(-45deg,#000 25%,transparent 25%) -8px 0/17px 17px,linear-gradient(45deg,transparent 75%,#000 75%) -8px 0/17px 17px,linear-gradient(-45deg,transparent 75%,#000 75%) -8px 0/17px 17px,#fff;border:9px solid #fff;}
+  .badge-ok{display:inline-block;background:var(--verde);color:#04120a;font-weight:900;padding:6px 16px;border-radius:99px;font-size:.86rem;}
+  /* Right column (crear link) */
+  .card{background:var(--card);border:1px solid var(--line);border-radius:16px;padding:18px;margin-bottom:16px;}
+  .tipos{display:flex;flex-wrap:wrap;gap:8px;margin-bottom:6px;}
+  .tipo{background:var(--card2);border:1px solid var(--line2);border-radius:11px;padding:10px 13px;font-weight:700;font-size:.82rem;cursor:pointer;display:flex;align-items:center;gap:7px;}
+  .tipo.on{border-color:var(--rojo);background:rgba(232,54,61,.12);color:#fff;}
+  .tipo small{color:var(--dim);font-weight:500;font-size:.68rem;}
+  .seg{display:inline-flex;background:#0e0e12;border:1px solid var(--line2);border-radius:10px;overflow:hidden;margin:10px 0;}
+  .seg button{background:none;border:0;color:var(--dim);font-weight:700;font-size:.8rem;padding:9px 15px;cursor:pointer;font-family:inherit;}
+  .seg button.on{background:var(--card2);color:#fff;}
+  .cfgrow{display:flex;align-items:center;justify-content:space-between;padding:9px 0;border-bottom:1px solid var(--line);}
+  .cfgrow .nm{font-size:.86rem;font-weight:600;}
+  .tri{display:inline-flex;background:#0e0e12;border:1px solid var(--line2);border-radius:8px;overflow:hidden;}
+  .tri span{font-size:.68rem;font-weight:700;padding:5px 9px;cursor:pointer;color:var(--faint);}
+  .tri span.h{background:#2a2a30;color:#aaa;} .tri span.o{background:rgba(77,141,255,.2);color:var(--azul);} .tri span.r{background:rgba(232,54,61,.22);color:var(--rojo);}
+  .urlbox{background:#0e0e12;border:1px solid var(--line2);border-radius:10px;padding:11px 13px;font-family:ui-monospace,monospace;color:var(--gold);font-size:.86rem;display:flex;align-items:center;justify-content:space-between;gap:8px;margin-top:12px;}
+  .note{color:var(--dim);font-size:.82rem;line-height:1.6;}
+  .k{font-size:.66rem;letter-spacing:1.5px;text-transform:uppercase;color:var(--faint);font-weight:700;margin:2px 0 8px;}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <div class="hd">
+    <h1><b>●</b> FRATE <b>LINK</b></h1>
+    <p>Mockup del flujo — inscripción del invitado + creación del link</p>
+    <div class="mocklbl">MOCKUP · diseño de referencia, con la data real se conecta al toque</div>
+  </div>
+
+  <div class="grid">
+    <!-- IZQ: página pública -->
+    <div>
+      <div class="col-h">📱 Inscripción (lo que ve el invitado)</div>
+      <div class="steps">
+        <button class="on" onclick="paso(this,'s-form')">1 · Formulario</button>
+        <button onclick="paso(this,'s-ocr')">2 · Carnet</button>
+        <button onclick="paso(this,'s-mesa')">3 · Mesa</button>
+        <button onclick="paso(this,'s-qr')">4 · Listo</button>
+      </div>
+      <div class="phone"><div class="phone-sc">
+        <div class="cover">
+          <div class="cupos">Cupos: <b>34</b>/80</div>
+          <div class="who">Te invita · Embajadora Cotty</div>
+          <div class="ev">SOLTER@S DE INVIERNO</div>
+          <div class="meta">🗓 Jueves 10 de julio · 23:00 · Bellavista</div>
+        </div>
+        <div class="body">
+          <!-- 1 FORM -->
+          <div class="screen on" id="s-form">
+            <button class="ocr" onclick="paso(document.querySelectorAll('.steps button')[1],'s-ocr')">📸 Escanear mi carnet (autocompleta)</button>
+            <div class="hint">o llena a mano ↓</div>
+            <div class="fld"><label>Nombre y apellido <span class="req">*</span></label><input placeholder="Tu nombre" /></div>
+            <div class="fld"><label>RUT <span style="color:var(--dim)">(opcional)</span></label><input placeholder="12.345.678-9" /></div>
+            <div class="fld"><label>Email <span style="color:var(--dim)">(opcional)</span></label><input placeholder="tu@correo.cl" /></div>
+            <button class="go">Anotarme →</button>
+            <div class="hint" style="margin-top:10px;">Este link muestra solo los campos que el operador activó (form configurable).</div>
+          </div>
+          <!-- 2 OCR -->
+          <div class="screen" id="s-ocr">
+            <div class="ocr-ok">
+              <div class="t">✅ Carnet leído</div>
+              <div class="row"><span>Nombre</span><b>PABLO A. HIDALGO NAVARRO</b></div>
+              <div class="row"><span>RUT</span><b>16.127.358-9</b></div>
+              <div class="row" style="border:0;"><span>Nacimiento</span><b>1985-11-04</b></div>
+              <div class="plus18">✔ Mayor de 18 — puede ingresar</div>
+            </div>
+            <div class="hint">Barcode del carnet o foto (visión). Valida +18 solo.</div>
+            <button class="go" onclick="paso(document.querySelectorAll('.steps button')[2],'s-mesa')">Elegir mi mesa →</button>
+          </div>
+          <!-- 3 MESA -->
+          <div class="screen" id="s-mesa">
+            <div class="k">Elige tu mesa / zona</div>
+            <div class="plano">
+              <div class="mesa libre" style="left:14px;top:14px;width:70px;height:46px;">VIP 1</div>
+              <div class="mesa sel" style="left:100px;top:14px;width:70px;height:46px;">VIP 2 ✓</div>
+              <div class="mesa ocup" style="left:186px;top:14px;width:70px;height:46px;">VIP 3</div>
+              <div class="mesa libre" style="left:14px;top:80px;width:100px;height:52px;">Palco A</div>
+              <div class="mesa libre" style="left:130px;top:80px;width:120px;height:52px;">Barra</div>
+              <div class="mesa libre" style="left:40px;top:150px;width:180px;height:44px;">Pista / General</div>
+            </div>
+            <div class="hint">Elegiste <b style="color:var(--verde)">VIP 2</b>. Solo si el link permite selección de espacio.</div>
+            <button class="go" onclick="paso(document.querySelectorAll('.steps button')[3],'s-qr')">Confirmar inscripción</button>
+          </div>
+          <!-- 4 QR -->
+          <div class="screen" id="s-qr">
+            <div class="qr-wrap">
+              <span class="badge-ok">✅ ¡Estás en la lista!</span>
+              <div class="qr"></div>
+              <div style="font-weight:800;font-size:1.05rem;">PABLO HIDALGO · VIP 2</div>
+              <div class="hint" style="margin-top:6px;">Muestra este QR en la puerta. Se valida una sola vez.<br>Te llega también al correo/WhatsApp.</div>
+              <div style="margin-top:12px;font-size:.72rem;color:var(--gold);">Calidad de dato: <b>completa</b> (RUT + email)</div>
+            </div>
+          </div>
+        </div>
+      </div></div>
+    </div>
+
+    <!-- DER: crear link -->
+    <div>
+      <div class="col-h">🛠️ Crear el link (operador)</div>
+      <div class="card">
+        <div class="k">1 · Elige el tipo (trae su formulario)</div>
+        <div class="tipos">
+          <div class="tipo on">🎫 Lista <small>· general</small></div>
+          <div class="tipo">🎂 Cumpleaños</div>
+          <div class="tipo">🍾 Reserva</div>
+          <div class="tipo">🎤 Artista</div>
+          <div class="tipo">🎬 Producción</div>
+        </div>
+      </div>
+      <div class="card">
+        <div class="seg"><button class="on">⚡ Express</button><button>⚙️ Completa</button></div>
+        <div class="k" style="margin-top:6px;">Express — en 3 campos</div>
+        <div class="fld"><label>Quién invita</label><input value="Embajadora Cotty" style="pointer-events:none;" /></div>
+        <div class="fld"><label>Cupos</label><input value="80" style="pointer-events:none;width:120px;" /></div>
+        <div class="note" style="margin-top:2px;">El tipo ya trae el formulario y las reglas. Listo → genera el link.</div>
+        <div class="urlbox"><span>frate.cl/lista/COTTY-JUE</span><span style="color:var(--dim);cursor:pointer;">📋 copiar</span></div>
+      </div>
+      <div class="card">
+        <div class="k">⚙️ Completa — formulario campo por campo</div>
+        <div class="cfgrow"><span class="nm">Nombre</span><span style="color:var(--rojo);font-size:.72rem;font-weight:700;">siempre obligatorio</span></div>
+        <div class="cfgrow"><span class="nm">RUT</span><div class="tri"><span>oculto</span><span class="o">opcional</span><span>oblig.</span></div></div>
+        <div class="cfgrow"><span class="nm">Email</span><div class="tri"><span>oculto</span><span class="o">opcional</span><span>oblig.</span></div></div>
+        <div class="cfgrow"><span class="nm">Teléfono</span><div class="tri"><span class="h">oculto</span><span>opcional</span><span>oblig.</span></div></div>
+        <div class="cfgrow"><span class="nm">Instagram</span><div class="tri"><span class="h">oculto</span><span>opcional</span><span>oblig.</span></div></div>
+        <div class="cfgrow" style="border:0;"><span class="nm">Apodo · Rol · Productor · Nacionalidad</span><span style="color:var(--dim);font-size:.72rem;">según tipo</span></div>
+        <div class="note" style="margin-top:12px;">+ cover, cupos, cierre automático (fecha/hora), aprobación humana, permitir datos incompletos, elegir mesa (croquis), texto del beneficio.</div>
+      </div>
+      <div class="card" style="border-color:var(--line2);">
+        <div class="k">Después del envío (ya lo tiene la web)</div>
+        <div class="note">El operador <b>aprueba</b> → se genera el <b>QR</b> (cortesía $0) · se cruza contra el <b>CRM</b> (dedup RUT→email→nombre, suma visita → detecta <b>frecuente</b>) · el QR se <b>quema una vez</b> en la puerta. Todo reusando lo que ya funciona.</div>
+      </div>
+    </div>
+  </div>
+</div>
+<script>
+  function paso(btn, id){
+    document.querySelectorAll('.steps button').forEach(b=>b.classList.remove('on'));
+    if(btn) btn.classList.add('on');
+    document.querySelectorAll('.screen').forEach(s=>s.classList.remove('on'));
+    const t=document.getElementById(id); if(t) t.classList.add('on');
+    const sc=document.querySelector('.phone-sc'); if(sc) sc.scrollTop=0;
+  }
+</script>
+</body>
+</html>

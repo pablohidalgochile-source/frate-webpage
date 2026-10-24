@@ -1,0 +1,183 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>FRATE WEB (TICKETERA) · OS 11 RECETAS: LISTAS Y CORTESÍAS</title>
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🎁</text></svg>">
+<link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@600;800;900&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="/os-manual.css">
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+</head>
+<body>
+<div id="bar"></div>
+<div class="wrap">
+
+  <div class="hero">
+    <div class="eyebrow">Manual 11 · recetas</div>
+    <h1>Listas y<br><em>cortesías</em></h1>
+    <p class="sub">El trabajo del jueves, paso a paso: armar la lista, revisarla, emitirla y verificar que llegó. Más de la mitad de la gente de una noche entra por acá.</p>
+    <div class="meta"><span>Comunidad · RRPP</span><span>·</span><span>5 recetas</span></div>
+  </div>
+
+  <section>
+    <div class="stag">Antes de empezar</div>
+    <h2>El ciclo de una lista</h2>
+    <div class="flujo">
+      <div class="paso"><div class="n">1</div><h4>Se crea</h4><p>Con nombre, evento, cupos y condiciones.</p></div>
+      <div class="paso"><div class="n">2</div><h4>Se llena</h4><p>La embajadora, o tú importando.</p></div>
+      <div class="paso"><div class="n">3</div><h4>Se revisa</h4><p>Vetados, duplicados, menores, RUT malos.</p></div>
+      <div class="paso"><div class="n">4</div><h4>Se emite</h4><p>Se generan los QR y salen los correos.</p></div>
+      <div class="paso"><div class="n">5</div><h4>Se mide</h4><p>Cuántos llegaron de verdad.</p></div>
+    </div>
+    <div class="peligro"><b>El paso 3 nunca se salta.</b> Después de emitir, cada QR ya está en el teléfono de alguien y no hay vuelta atrás.</div>
+  </section>
+
+  <!-- A1 -->
+  <section>
+    <div class="receta">
+      <div class="rcab"><span class="cod">A1</span><h3>Enviar una lista de cortesías</h3><span class="quien">Comunidad · RRPP</span></div>
+      <div class="rbody">
+        <div class="cuando"><b>Cuándo:</b> el día del evento, cuando la lista ya está completa y hay que convertirla en entradas reales con QR.</div>
+
+        <div class="paso"><span class="n">1</span><div class="c"><div class="t">Abre la lista</div>
+          <div class="d">Comunidad → <b>🎁 Cortesías</b>. En la tabla, aprieta <b>📨 Enviar (N)</b>. Ese número es cuánta gente falta por emitir.</div></div></div>
+
+        <div class="paso"><span class="n">2</span><div class="c"><div class="t">Verifica el evento</div>
+          <div class="d">Arriba del detalle hay un selector <b>🎉 Evento / día</b>. Confirma que apunta a la noche correcta. <b>Es el error más caro y el más fácil de cometer.</b></div></div></div>
+
+        <div class="paso"><span class="n">3</span><div class="c"><div class="t">Revisa el semáforo</div>
+          <div class="d">El sistema marca cada persona antes de emitir.</div>
+          <div class="pant">
+            <div class="barra">Revisión de la lista · 152 personas</div>
+            <div class="fila"><span class="sem" style="background:var(--verde)"></span><span style="flex:1">CATALINA MUÑOZ SOTO · 12.345.678-9</span><span style="color:var(--verde);font-size:.68rem">OK</span></div>
+            <div class="fila"><span class="sem" style="background:var(--oro)"></span><span style="flex:1">MATÍAS ROJAS · <i>sin RUT</i></span><span style="color:var(--oro);font-size:.68rem">se valida por nombre</span></div>
+            <div class="fila"><span class="sem" style="background:var(--oro)"></span><span style="flex:1">ANTONIA SILVA · repetida</span><span style="color:var(--oro);font-size:.68rem">DUPLICADA</span></div>
+            <div class="fila"><span class="sem" style="background:var(--rojo)"></span><span style="flex:1">D. CASTRO LEÓN</span><span style="color:var(--rojo);font-size:.68rem">🚫 VETADO</span></div>
+          </div></div></div>
+
+        <div class="paso"><span class="n">4</span><div class="c"><div class="t">Saca los rojos y los duplicados</div>
+          <div class="d"><b>Vetado:</b> fuera, siempre. <b>Duplicada:</b> deja una sola — si no, esa persona recibe dos QR, ocupa dos cupos y entra dos veces (ya pasó: alguien entró a las 00:27 y a las 00:28).</div></div></div>
+
+        <div class="paso"><span class="n">5</span><div class="c"><div class="t">Emite</div>
+          <div class="d">Botón verde grande. Se emiten <b>por lotes</b> con una barra de progreso — no cierres la pestaña hasta que termine.</div>
+          <span class="bt v">📨 Enviar 148 cortesías</span></div></div>
+
+        <div class="paso"><span class="n">6</span><div class="c"><div class="t">Verifica</div>
+          <div class="d">Al terminar dice cuántas salieron. Si alguna falló, aparece <b>🔁 Reintentar las N</b> con el detalle de cuáles.</div></div></div>
+
+        <div class="ok"><b>Cómo saber que salió bien:</b> la lista queda como emitida, y en Órdenes aparecen como cortesías de $0. Abre una y revisa que tenga su QR.</div>
+        <div class="no"><b>Nunca:</b> emitir sin revisar, ni emitir dos veces la misma lista. Si dice "ya emitidas", ya está hecho — si emites de nuevo, se duplican las entradas.</div>
+      </div>
+    </div>
+  </section>
+
+  <!-- A2 -->
+  <section>
+    <div class="receta">
+      <div class="rcab"><span class="cod">A2</span><h3>Armar una lista desde cero</h3><span class="quien">Comunidad</span></div>
+      <div class="rbody">
+        <div class="cuando"><b>Cuándo:</b> quieres una lista nueva para una embajadora, para un cumpleaños o para invitados del local.</div>
+        <div class="paso"><span class="n">1</span><div class="c"><div class="t">Comunidad → 🎁 Cortesías → ＋ Nueva lista</div>
+          <div class="d">Ponle un nombre <b>que se entienda en la puerta</b>: ese nombre es el que ve el portero al escanear.</div>
+          <div class="pant">
+            <div class="barra">Nueva lista</div>
+            <div class="campo"><label>Nombre de la lista</label><div class="inp">CORTESIA MUJER (EMBAJADORA)</div></div>
+            <div class="campo"><label>Evento / día</label><div class="inp">BESUCONA · 2026-07-25</div></div>
+            <div class="campo"><label>Cupos</label><div class="inp">150</div></div>
+            <div class="campo"><label>Hora máxima de ingreso</label><div class="inp">01:00</div></div>
+            <div class="campo"><label>Condiciones (las lee el cliente en su correo)</label><div class="inp ph">Válida hasta la 01:00 · no transferible</div></div>
+          </div></div></div>
+        <div class="paso"><span class="n">2</span><div class="c"><div class="t">Elige quién es dueño</div>
+          <div class="d">Si es de una embajadora, asígnasela: así ella la ve y la llena desde <b>frate.cl/rrpp</b>, sin entrar al panel.</div></div></div>
+        <div class="paso"><span class="n">3</span><div class="c"><div class="t">Usa la biblioteca si existe</div>
+          <div class="d">📚 <b>Cargar desde biblioteca</b> trae condiciones y horarios ya escritos de listas anteriores. Evita escribir lo mismo cada semana.</div></div></div>
+        <div class="ok"><b>Buen nombre = buena puerta.</b> "CORTESIA MUJER (EMBAJADORA)" le dice al portero qué pulsera poner. "Lista 3" no le dice nada.</div>
+        <div class="oro"><b>Los cupos importan:</b> si pones 150, no se pueden inscribir más de 150. Deja holgura si esperas bajas, y recuerda que <b>las de embajadora rinden ~49%</b>: para 100 personas, emite ~205.</div>
+      </div>
+    </div>
+  </section>
+
+  <!-- A3 -->
+  <section>
+    <div class="receta">
+      <div class="rcab"><span class="cod">A3</span><h3>Importar desde Excel o WhatsApp</h3><span class="quien">Comunidad</span></div>
+      <div class="rbody">
+        <div class="cuando"><b>Cuándo:</b> te pasaron la lista en una planilla o pegada en un mensaje, y no la vas a escribir a mano.</div>
+
+        <h3 style="margin-top:6px">Camino corto · pegar desde WhatsApp</h3>
+        <div class="paso"><span class="n">1</span><div class="c"><div class="t">Abre la lista → 📥 Pegar</div>
+          <div class="d">Pegas el texto tal cual viene del chat. El sistema separa <b>nombre, RUT y correo</b> aunque vengan en cualquier orden y con cualquier formato.</div></div></div>
+        <div class="paso"><span class="n">2</span><div class="c"><div class="t">Revisa lo que entendió</div>
+          <div class="d">Muestra cómo quedó cada línea antes de guardar. Si algo salió mal, se corrige ahí.</div></div></div>
+
+        <h3>Camino largo · archivo Excel</h3>
+        <div class="paso"><span class="n">1</span><div class="c"><div class="t">Subir el archivo</div>
+          <div class="d">Arrastra el Excel o CSV.</div></div></div>
+        <div class="paso"><span class="n">2</span><div class="c"><div class="t">Emparejar columnas</div>
+          <div class="d">El sistema adivina cuál columna es el nombre, el RUT, el correo, la universidad… Tú corriges lo que no adivinó. <b>Lo que no emparejes igual se guarda</b> como dato extra en la ficha.</div></div></div>
+        <div class="paso"><span class="n">3</span><div class="c"><div class="t">Configurar</div>
+          <div class="d">Evento, tipo de entrada y condiciones para toda la carga.</div></div></div>
+        <div class="paso"><span class="n">4</span><div class="c"><div class="t">Pre-análisis</div>
+          <div class="d">Acá aparece el semáforo (igual que en A1) con vetados, duplicados y RUT inválidos.</div></div></div>
+        <div class="paso"><span class="n">5</span><div class="c"><div class="t">Procesar</div>
+          <div class="d">Barra de progreso hasta terminar.</div></div></div>
+
+        <div class="ok"><b>Un detalle que ahorra trabajo:</b> si el nombre viene como <b>"(ANDREA GONZÁLEZ) BARBARA TINEO"</b>, el sistema lo separa solo — el nombre queda limpio y guarda "vino por: Andrea". Así sabes qué cumpleaños trae más gente.</div>
+        <div class="no"><b>Ojo con importar dos veces</b> el mismo archivo: el sistema marca los repetidos, pero si los ignoras quedan duplicados y ocupan cupos de más.</div>
+      </div>
+    </div>
+  </section>
+
+  <!-- A4 -->
+  <section>
+    <div class="receta">
+      <div class="rcab"><span class="cod">A4</span><h3>Reenviar los correos que no llegaron</h3><span class="quien">Comunidad</span></div>
+      <div class="rbody">
+        <div class="cuando"><b>Cuándo:</b> emitiste la lista pero varias personas dicen que no les llegó el QR. Pasa cuando el envío se corta a la mitad en listas grandes.</div>
+        <div class="paso"><span class="n">1</span><div class="c"><div class="t">Abre la lista ya emitida</div>
+          <div class="d">Aparece la opción <b>📧 Reenviar correos con el QR a todos</b>.</div>
+          <span class="bt o">📧 Reenviar correos con el QR a todos</span></div></div>
+        <div class="paso"><span class="n">2</span><div class="c"><div class="t">Deja que termine</div>
+          <div class="d">Se manda de a varios a la vez con una barra de progreso. Si alguno falla, <b>te dice el nombre y el correo</b> y ofrece <b>🔁 Reintentar los N</b>.</div></div></div>
+        <div class="paso"><span class="n">3</span><div class="c"><div class="t">Los que siguen fallando</div>
+          <div class="d">Tienen el correo mal escrito. Mira <b>Devol. &amp; React. → 📧 Correos que rebotaron</b>, corrige y reenvía individualmente.</div></div></div>
+        <div class="ok"><b>Reenviar no duplica entradas.</b> Manda de nuevo el mismo QR que ya existe. Puedes hacerlo las veces que necesites.</div>
+      </div>
+    </div>
+  </section>
+
+  <!-- A5 -->
+  <section>
+    <div class="receta">
+      <div class="rcab"><span class="cod">A5</span><h3>Repetir la lista del jueves pasado</h3><span class="quien">Comunidad</span></div>
+      <div class="rbody">
+        <div class="cuando"><b>Cuándo:</b> todas las semanas armas las mismas listas (Cortesía Mujeres, Cortesía Hombres, la de cada embajadora). No las escribas de nuevo.</div>
+        <div class="paso"><span class="n">1</span><div class="c"><div class="t">Busca la lista de la semana pasada</div>
+          <div class="d">En Cortesías, filtra por el evento anterior. Las de eventos cerrados quedan ocultas pero <b>no se borran</b>: hay un filtro para ver las históricas.</div></div></div>
+        <div class="paso"><span class="n">2</span><div class="c"><div class="t">Duplícala al nuevo día</div>
+          <div class="d">Copia la lista con sus condiciones, cupos y dueño, apuntando al evento nuevo. <b>Sin la gente</b> — esa se llena de nuevo.</div></div></div>
+        <div class="ok"><b>Lo que se conserva:</b> nombre, cupos, hora máxima, condiciones y quién es la dueña. Lo que empieza vacío: los inscritos.</div>
+        <div class="oro"><b>Antes de duplicar, mira cómo rindió:</b> si la semana pasada emitiste 150 y llegaron 72, quizás esta semana con 100 basta — o hay que revisar cómo está invitando esa embajadora.</div>
+      </div>
+    </div>
+  </section>
+
+  <section>
+    <div class="stag">Cierre</div>
+    <h2>Los tres errores que más cuestan</h2>
+    <ol>
+      <li><b>Emitir con el evento equivocado.</b> Toda la lista queda inservible para esa noche. Se arregla con "cambiar de día", pero es un trabajo enorme. <b>Verifica el evento antes de emitir.</b></li>
+      <li><b>Ignorar los duplicados.</b> Cada duplicado es un cupo regalado que nadie usa, y ensucia el conteo de visitas de esa persona.</li>
+      <li><b>Emitir dos veces la misma lista.</b> Se duplican todas las entradas. Si dice "ya emitidas", no vuelvas a apretar.</li>
+    </ol>
+    <div class="bien"><b>La regla que resume todo:</b> antes de apretar el botón verde, mira dos cosas — <b>el evento</b> y <b>el semáforo</b>. Diez segundos que te ahorran la noche.</div>
+  </section>
+
+  <div class="pie">FRATE OS · Manual 11 · <a href="/os-usuario">← Guía del cliente</a> · <a href="/os-entradas">Siguiente: entradas y plata →</a></div>
+</div>
+
+<script src="/os-guard.js"></script>
+<script>document.getElementById('bar').innerHTML = osBarra('11'); osProteger();</script>
+</body>
+</html>

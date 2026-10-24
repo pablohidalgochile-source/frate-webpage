@@ -4,13 +4,31 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Fraternidad Campus Central | Discoteca Universitaria Santiago</title>
+<!-- Previsualización al compartir. Sin esto, un link de frate.cl en
+     WhatsApp o Instagram sale sin imagen y parece spam. -->
+<meta property="og:type" content="website" />
+<meta property="og:site_name" content="FRATE" />
+<meta property="og:title" content="FRATE · Fraternidad Campus Central" />
+<meta property="og:description" content="El campus central del carrete universitario. Entradas, eventos y listas." />
+<meta property="og:url" content="https://www.frate.cl/" />
+<meta property="og:image" content="https://www.frate.cl/assets/og.png" />
+<meta property="og:image:width" content="1200" />
+<meta property="og:image:height" content="630" />
+<meta name="twitter:card" content="summary_large_image" />
+<meta name="twitter:title" content="FRATE · Fraternidad Campus Central" />
+<meta name="twitter:description" content="El campus central del carrete universitario. Entradas, eventos y listas." />
+<meta name="twitter:image" content="https://www.frate.cl/assets/og.png" />
+
   <meta name="description" content="La mejor discoteca urbana de Chile desde 2013. Compra tus tickets directamente. Trap, reggaeton y urbano en Santiago." />
   <meta name="theme-color" content="#0A0A0B" />
-  <link rel="stylesheet" href="frate.css" />
+  <link rel="stylesheet" href="frate.css?v=20260730-scroll" />
   <link rel="stylesheet" href="frate-cart.css" />
-  <link rel="stylesheet" href="frate-popups.css" />
+  <link rel="stylesheet" href="frate-popups.css?v=deco4" />
   <link rel="stylesheet" href="frate-cuenta.css" />
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script src="frate-instituciones.js?v=inst1"></script>
+  <link rel="icon" href="/icon-frate.svg" type="image/svg+xml" />
+  <link rel="apple-touch-icon" href="/icon-frate.svg" />
 </head>
 <body>
 
@@ -32,16 +50,28 @@
 </div>
 <script>
   (function(){
-    var GATE_CODE = 'FRATE2026';
+    // El bloqueo se controla desde el admin (Config → General): sitio_privado + sitio_codigo.
     var gate = document.getElementById('access-gate');
-    if (localStorage.getItem('frate_gate') !== GATE_CODE) {
-      gate.style.display = 'flex';
-      document.body.style.overflow = 'hidden';
-    }
+    var SB='https://ydwlpraoaaijlfssevoh.supabase.co', KEY='sb_publishable_-_7GeDU_h84zf2v--lWQaQ_15ZFxOWt';
+    window._GATE_CODE = 'FRATE2026';
+    // Por defecto PÚBLICO (gate oculto). Si la config dice privado, lo mostramos.
+    try {
+      fetch(SB+'/rest/v1/config_valores?select=clave,valor&clave=in.(sitio_privado,sitio_codigo)', { headers:{ apikey:KEY, Authorization:'Bearer '+KEY } })
+        .then(function(r){ return r.json(); })
+        .then(function(rows){
+          var m={}; (rows||[]).forEach(function(x){ m[x.clave]=x.valor; });
+          window._GATE_CODE = (m.sitio_codigo || 'FRATE2026');
+          var privado = String(m.sitio_privado||'') === 'true';
+          if (privado && localStorage.getItem('frate_gate') !== window._GATE_CODE) {
+            gate.style.display = 'flex'; document.body.style.overflow = 'hidden';
+          }
+        }).catch(function(){});
+    } catch(e){}
     window.checkGate = function() {
       var val = (document.getElementById('gate-input').value || '').trim().toUpperCase();
-      if (val === GATE_CODE) {
-        localStorage.setItem('frate_gate', GATE_CODE);
+      var code = String(window._GATE_CODE||'FRATE2026').toUpperCase();
+      if (val === code) {
+        localStorage.setItem('frate_gate', window._GATE_CODE);
         gate.style.display = 'none';
         document.body.style.overflow = '';
       } else {
@@ -60,6 +90,24 @@
 
   // Referidos: si llega ?ref=username, lo guardamos para el registro
   try { var _r = new URLSearchParams(location.search).get('ref'); if (_r) localStorage.setItem('frate_ref', _r.trim().toLowerCase()); } catch(e) {}
+  // ?crear=correo — viene del botón del correo de la entrada. Abre el registro
+  // con el correo puesto. NO da acceso a nada: igual hay que poner clave y
+  // confirmar el correo, así que un ticket reenviado no sirve de llave.
+  try {
+    var _c = new URLSearchParams(location.search).get('crear');
+    if (_c && _c.includes('@')) {
+      window.addEventListener('DOMContentLoaded', function () {
+        setTimeout(function () {
+          try {
+            if (typeof openAuthModal === 'function') openAuthModal('register');
+            var e = document.getElementById('reg-email');
+            if (e) { e.value = _c.trim().toLowerCase(); e.dispatchEvent(new Event('input', { bubbles: true })); }
+            history.replaceState(null, '', location.pathname);   // limpia la barra
+          } catch (_) {}
+        }, 400);
+      });
+    }
+  } catch(e) {}
   // Grupos: si llega ?grupo=CODE, lo guardamos para unirse
   try { var _g = new URLSearchParams(location.search).get('grupo'); if (_g) localStorage.setItem('frate_grupo', _g.trim().toUpperCase()); } catch(e) {}
 </script>
@@ -169,11 +217,16 @@
             <input type="tel" id="agr-tel" placeholder="+569 xxxx xxxx" value="+569" />
           </div>
           <div>
-            <label>RUT</label>
+            <label id="agr-rut-lbl">RUT <span style="color:#E8363D;">*</span></label>
             <input type="text" id="agr-rut" placeholder="12.345.678-9" maxlength="12"
               oninput="rutFormat(this)" onblur="rutCheck(this)" autocomplete="off" />
+            <label style="display:flex;align-items:center;gap:6px;font-size:0.72rem;color:#999;margin-top:5px;cursor:pointer;font-weight:400;">
+              <input type="checkbox" id="agr-ext" onchange="ageToggleExt()" style="width:auto;" /> Soy extranjer@ (pasaporte / ID)
+            </label>
           </div>
         </div>
+        <label>Sexo <span style="color:#555;font-size:0.65rem;">como en tu cédula · se guarda una sola vez</span> <span style="color:#E8363D;">*</span></label>
+        <select id="agr-sexo" required><option value="">Selecciona</option><option value="F">Mujer</option><option value="M">Hombre</option><option value="X">Prefiero no decirlo</option></select>
         <label>Institución de Estudios</label>
         <select id="agr-inst" onchange="ageCarreras(this)">
           <option value="">Selecciona tu institución</option>
@@ -203,7 +256,7 @@
 
     <p class="age-gate-disclaimer">
       Al ingresar confirmas que eres mayor de 18 años y aceptas nuestros términos.<br/>
-      No conducir bajo los efectos del alcohol · +56 9 2610 4782
+      No conducir bajo los efectos del alcohol · +56 9 8131 1548
     </p>
   </div>
 </div>
@@ -240,6 +293,13 @@
           <a href="#" onclick="event.preventDefault();forgotPassword()" style="font-size:0.75rem;color:#71717a;text-decoration:none;letter-spacing:1px;">¿Olvidaste tu contraseña?</a>
         </div>
         <div class="form-divider">o</div>
+        <!-- Entrar con Google: menos fricción al comprar y, sobre todo, al
+             recuperar la cuenta — la mayoría compra con su gmail. -->
+        <button type="button" id="btn-google" onclick="entrarConGoogle(this)" style="width:100%;display:flex;align-items:center;justify-content:center;gap:10px;background:#fff;color:#1f1f1f;border:0;border-radius:8px;padding:13px;font-weight:700;letter-spacing:.5px;cursor:pointer;font-size:0.9rem;">
+          <svg width="18" height="18" viewBox="0 0 48 48" aria-hidden="true"><path fill="#4285F4" d="M45.1 24.5c0-1.6-.1-2.8-.4-4H24v7.3h12.1c-.2 2-1.6 5-4.5 7l6.9 5.3c4.1-3.8 6.6-9.4 6.6-15.6z"/><path fill="#34A853" d="M24 46c5.9 0 10.9-2 14.5-5.3l-6.9-5.3c-1.9 1.3-4.4 2.2-7.6 2.2-5.8 0-10.7-3.8-12.5-9.1l-7.1 5.5C8 41 15.4 46 24 46z"/><path fill="#FBBC05" d="M11.5 28.5c-.5-1.4-.7-2.9-.7-4.5s.3-3.1.7-4.5l-7.1-5.5C2.9 17 2 20.4 2 24s.9 7 2.4 10z"/><path fill="#EA4335" d="M24 9.9c3.2 0 6 1.1 8.2 3.2l6.1-6.1C34.9 3.5 29.9 1.5 24 1.5 15.4 1.5 8 6.5 4.4 14l7.1 5.5c1.8-5.3 6.7-9.1 12.5-9.1z"/></svg>
+          Continuar con Google
+        </button>
+        <div style="height:10px;"></div>
         <button type="button" class="btn-dorado" onclick="document.querySelector('[data-tab=register]').click()">CREAR CUENTA NUEVA</button>
       </form>
     </div>
@@ -267,9 +327,12 @@
             <input type="email" id="reg-email" placeholder="tu@email.com" required />
           </div>
           <div class="form-group">
-            <label>RUT</label>
+            <label id="reg-rut-lbl">RUT <span style="color:#E8363D;">*</span></label>
             <input type="text" id="reg-rut" placeholder="12.345.678-9" maxlength="12"
               oninput="rutFormat(this)" onblur="rutCheck(this)" autocomplete="off" />
+            <label style="display:flex;align-items:center;gap:6px;font-size:0.72rem;color:#999;margin-top:5px;cursor:pointer;font-weight:400;">
+              <input type="checkbox" id="reg-ext" onchange="regToggleExt()" style="width:auto;" /> Soy extranjer@ (pasaporte / ID)
+            </label>
           </div>
         </div>
         <div class="form-row">
@@ -281,6 +344,10 @@
             <label>Fecha de nacimiento 🎂</label>
             <input type="date" id="reg-nacimiento" style="color-scheme:dark" />
           </div>
+        </div>
+        <div class="form-group">
+          <label>Sexo <span style="color:#777;font-size:0.7rem;">como en tu cédula · se guarda una sola vez</span> <span style="color:#E8363D;">*</span></label>
+          <select id="reg-sexo" required><option value="">Selecciona</option><option value="F">Mujer</option><option value="M">Hombre</option><option value="X">Prefiero no decirlo</option></select>
         </div>
         <div class="form-group">
           <label>Institución de Estudios</label>
@@ -329,6 +396,7 @@
   </a>
   <ul class="nav-links">
     <li><a href="#eventos">Eventos</a></li>
+    <li><a href="#viralidad" style="color:var(--dorado);font-weight:700;">🎁 Gana gratis</a></li>
     <li><a href="#ambientes">Ambientes</a></li>
     <li><a href="#reservas">Reservas</a></li>
     <li><a href="#webeum">WEBEUM</a></li>
@@ -353,7 +421,9 @@
 <!-- Mobile menu -->
 <div id="mobile-menu">
   <button id="mobile-menu-close">✕</button>
+  <a href="#" id="mm-cuenta" onclick="document.getElementById('nav-user-btn').click();return false;" style="color:var(--dorado);font-weight:700;">👤 Mi cuenta</a>
   <a href="#eventos">Eventos</a>
+  <a href="#viralidad" style="color:var(--dorado);">🎁 Gana gratis</a>
   <a href="#ambientes">Ambientes</a>
   <a href="#reservas">Reservas</a>
   <a href="#webeum">WEBEUM</a>
@@ -434,7 +504,7 @@
           </div>
           <div class="form-group">
             <label>RUT</label>
-            <input type="text" id="co-rut" placeholder="12.345.678-9" />
+            <input type="text" id="co-rut" placeholder="12.345.678-9" maxlength="12" oninput="rutFormat(this)" onblur="rutCheck(this)" />
           </div>
         </div>
         <div class="form-row">
@@ -443,25 +513,21 @@
             <input type="email" id="co-email" placeholder="tu@email.com" required />
           </div>
           <div class="form-group">
+            <label>Confirma tu email *</label>
+            <input type="email" id="co-email2" placeholder="Repite tu email (ahí llega el QR)" autocomplete="off" required />
+          </div>
+          <div class="form-group">
             <label>Teléfono *</label>
             <input type="tel" id="co-tel" placeholder="+56 9 xxxx xxxx" required />
           </div>
         </div>
       </div>
 
-      <div class="checkout-section-title">Método de pago</div>
-      <div class="checkout-payment-methods">
-        <button class="pay-method-btn selected" data-method="mercadopago">
-          <span class="pay-method-name">Mercado Pago</span>
-          <span class="pay-method-sub">Tarjetas · Débito · Transferencia · Cuotas</span>
-        </button>
-      </div>
-
       <button class="checkout-confirm-btn" id="checkout-confirm-btn">
         PAGAR CON MERCADO PAGO
       </button>
       <p class="checkout-disclaimer">
-        Serás redirigido a la página segura de Mercado Pago para completar tu pago.<br>
+        <span id="disc-lead">Serás redirigido a la página segura de Mercado Pago para completar tu pago.</span><br>
         Al comprar aceptas los <a href="/terminos.html" target="_blank" style="color:var(--gris);text-decoration:underline;">términos y condiciones</a> ·
         Entrada válida solo para mayores de 18 años · No se aceptan devoluciones · frate.cl
       </p>
@@ -529,6 +595,7 @@
   <div class="section-inner">
     <div class="section-label reveal" data-txt="eventos_label">Esta semana en Frate</div>
     <h2 class="section-title reveal"><span data-txt="eventos_t1">PRÓXIMOS</span><br/><span class="gold" data-txt="eventos_t2">EVENTOS</span></h2>
+    <div id="temporada-banner"></div>
     <div class="eventos-filters reveal">
       <button class="filter-btn active" data-filter="Todos">Todos</button>
       <button class="filter-btn" data-filter="Viernes">Viernes</button>
@@ -541,6 +608,65 @@
               onclick="showToast('Próximamente — calendario completo 📅')">
         VER TODOS LOS EVENTOS
       </button>
+    </div>
+  </div>
+</section>
+
+<!-- ══════════════════════════════════════════════
+     GANA ENTRADAS GRATIS (viralidad)
+════════════════════════════════════════════════ -->
+<style>
+  #viralidad{padding:80px 0;background:var(--negro-2);}
+  #viralidad .viral-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:16px;max-width:940px;margin-top:8px;}
+  @media(max-width:700px){#viralidad .viral-grid{grid-template-columns:1fr;}}
+  #viralidad .viral-card{background:var(--negro-3);border:1px solid #1f1f22;border-radius:12px;padding:26px 24px;transition:border-color .2s,transform .2s;display:flex;flex-direction:column;}
+  #viralidad .viral-card:hover{border-color:var(--rojo);transform:translateY(-3px);}
+  #viralidad .viral-emoji{font-size:2rem;margin-bottom:14px;}
+  #viralidad .viral-card-t{font-family:var(--fuente-display);font-weight:900;font-size:1.4rem;color:#fff;letter-spacing:1px;margin-bottom:8px;line-height:1.1;}
+  #viralidad .viral-card-d{color:var(--gris);font-size:0.9rem;line-height:1.6;margin-bottom:20px;flex:1;}
+  #viralidad .viral-card-d b{color:var(--dorado);font-weight:700;}
+  #viralidad .viral-cta{align-self:flex-start;background:transparent;border:1px solid var(--dorado);color:var(--dorado);font-family:var(--fuente-display);font-weight:700;letter-spacing:2px;text-transform:uppercase;font-size:0.78rem;padding:11px 20px;border-radius:4px;cursor:pointer;transition:background .2s,color .2s;}
+  #viralidad .viral-card:hover .viral-cta{background:var(--dorado);color:var(--negro);}
+  #viralidad .viral-bottom{margin-top:32px;text-align:center;}
+</style>
+<section id="viralidad">
+  <div class="section-inner">
+    <div class="section-label reveal" data-txt="viral_label">Tu carrete te paga</div>
+    <h2 class="section-title reveal"><span data-txt="viral_t1">GANA ENTRADAS</span><br/><span class="gold" data-txt="viral_t2">GRATIS</span></h2>
+    <p class="reveal" data-txt="viral_subtitulo" style="color:var(--gris);max-width:600px;margin-bottom:8px;line-height:1.8;">Mientras más te mueves, más ganas. Vota, invita a tus amig@s, junta puntos y arma tu grupo — todo suma crédito y premios reales.</p>
+    <div class="viral-grid reveal">
+
+      <div class="viral-card">
+        <div class="viral-emoji">🎵</div>
+        <div class="viral-card-t" data-txt="viral_c1_t">Vota tu canción</div>
+        <div class="viral-card-d" data-txt="viral_c1_d">Suma tu tema al <b>Ranking del Pueblo</b> y llévate <b>$1.000 de crédito</b> la primera vez. Suena en la pista.</div>
+        <button class="viral-cta" onclick="document.getElementById('ranking')?.scrollIntoView({behavior:'smooth'})">Votar y ganar →</button>
+      </div>
+
+      <div class="viral-card">
+        <div class="viral-emoji">🤝</div>
+        <div class="viral-card-t" data-txt="viral_c2_t">Trae a tu amig@</div>
+        <div class="viral-card-d" data-txt="viral_c2_d">Comparte tu link. Cuando tu amig@ compra, <b>ganan $1.000 cada uno</b>. Contagia el carrete.</div>
+        <button class="viral-cta" onclick="openCuenta()">Invitar y ganar →</button>
+      </div>
+
+      <div class="viral-card">
+        <div class="viral-emoji">⭐</div>
+        <div class="viral-card-t" data-txt="viral_c3_t">Junta puntos</div>
+        <div class="viral-card-d" data-txt="viral_c3_d">Cada compra te suma puntos. Cánjealos por <b>tragos, paso preferente y entradas gratis</b>.</div>
+        <button class="viral-cta" onclick="openCuenta()">Ver premios →</button>
+      </div>
+
+      <div class="viral-card">
+        <div class="viral-emoji">👥</div>
+        <div class="viral-card-t" data-txt="viral_c4_t">Arma tu grupo</div>
+        <div class="viral-card-d" data-txt="viral_c4_d">Junta a <b>5 amig@s</b> y todos entran con <b>15% de descuento</b>. Mientras más, mejor.</div>
+        <button class="viral-cta" onclick="openGrupoModal()">Armar grupo →</button>
+      </div>
+
+    </div>
+    <div class="viral-bottom reveal">
+      <button class="btn-dorado" style="display:inline-block;max-width:360px;border:none;cursor:pointer;width:100%;padding:16px;" data-txt="viral_cta_final" onclick="openAuthModal('register')">CREAR CUENTA Y EMPEZAR A GANAR</button>
     </div>
   </div>
 </section>
@@ -667,6 +793,12 @@
         <div class="reserva-opcion-card-desc">Convenios con universidades, centros de estudiantes y comunidades organizadas.</div>
         <div class="reserva-opcion-card-arrow">Solicitar →</div>
       </div>
+      <div class="reserva-opcion-card" onclick="openListasPopup()">
+        <div class="reserva-opcion-card-emoji">📋</div>
+        <div class="reserva-opcion-card-nombre">LISTAS GRATUITAS</div>
+        <div class="reserva-opcion-card-desc">Anótate con tu nombre y RUT en las listas abiertas — si quedas, tu QR llega al correo.</div>
+        <div class="reserva-opcion-card-arrow">Ver listas →</div>
+      </div>
       <div class="reserva-opcion-card" onclick="openReservaPopup('despedida')" style="grid-column: 1 / -1;">
         <div style="display:flex;align-items:center;gap:16px;flex-wrap:wrap;">
           <div class="reserva-opcion-card-emoji">💍</div>
@@ -678,7 +810,7 @@
         </div>
       </div>
     </div>
-    <a href="https://wa.me/56926104782?text=Hola%20Frate%2C%20quiero%20hacer%20una%20reserva" target="_blank"
+    <a href="https://wa.me/56981311548?text=Hola%20Frate%2C%20quiero%20hacer%20una%20reserva" target="_blank"
        class="reservas-whatsapp reveal" style="margin-top:32px;max-width:400px">
       <span class="reservas-whatsapp-icon">💬</span>
       <div>
@@ -688,6 +820,269 @@
     </a>
   </div>
 </section>
+
+<!-- ══════════════════════════════════════════════
+     PAQUETES (vitrina pública — se llena desde la tabla `paquetes`)
+════════════════════════════════════════════════ -->
+<section id="paquetes">
+  <div class="section-inner">
+    <div class="section-label reveal">Cumpleaños · VIP · Botellas</div>
+    <h2 class="section-title reveal"><span>NUESTROS</span><br/><span class="gold">PAQUETES</span></h2>
+    <p class="reveal" style="color:var(--gris);font-size:0.95rem;max-width:600px;margin-bottom:26px;line-height:1.8">
+      Elige tu plan y arma tu noche. Puedes <b style="color:#fff">reservarlo al tiro</b> o <b style="color:#fff">consultarnos</b> lo que quieras — te respondemos por WhatsApp.
+    </p>
+    <div id="pq-tabs" class="pq-tabs reveal"></div>
+    <div id="pq-menu-btn" class="reveal" style="margin:-8px 0 22px;"></div>
+    <div id="paquetes-grid-pub" class="reveal pq-grid"></div>
+  </div>
+</section>
+
+<!-- Detalle de paquete (galería + incluye + CTAs) -->
+<div class="frate-popup" id="pq-detail">
+  <div class="popup-box" style="max-width:620px;">
+    <button class="popup-close-btn" onclick="closePqDetail()">✕</button>
+    <div id="pq-detail-body" style="padding:0;"></div>
+  </div>
+</div>
+
+<!-- Menú de botellas (precio normal → cumpleañ@) -->
+<div class="frate-popup" id="menu-botellas">
+  <div class="popup-box" style="max-width:640px;">
+    <button class="popup-close-btn" onclick="closeMenuBotellas()">✕</button>
+    <div id="menu-botellas-body" style="padding:0;"></div>
+  </div>
+</div>
+
+<style>
+  .pq-tabs{display:flex;gap:10px;flex-wrap:wrap;margin-bottom:26px;}
+  .pq-tab{background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.1);color:#cfcfd6;font-family:'Barlow Condensed',sans-serif;font-weight:700;letter-spacing:1.5px;text-transform:uppercase;font-size:.8rem;padding:9px 18px;border-radius:30px;cursor:pointer;transition:all .25s;}
+  .pq-tab:hover{border-color:rgba(212,168,50,.6);color:#fff;}
+  .pq-tab.active{background:var(--rojo,#E8363D);border-color:var(--rojo,#E8363D);color:#fff;}
+  .pq-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(270px,1fr));gap:20px;}
+  .pq-card{background:#121216;border:1px solid rgba(255,255,255,.08);border-radius:16px;overflow:hidden;display:flex;flex-direction:column;transition:transform .3s,border-color .3s,box-shadow .3s;position:relative;}
+  .pq-card:hover{transform:translateY(-4px);border-color:rgba(212,168,50,.45);box-shadow:0 14px 40px rgba(0,0,0,.5);}
+  @keyframes pqPulse{0%,100%{box-shadow:0 0 0 1px rgba(212,168,50,.55),0 10px 34px rgba(212,168,50,.16);}50%{box-shadow:0 0 0 1px rgba(212,168,50,.95),0 12px 46px rgba(212,168,50,.4);}}
+  .pq-card.destacado{border-color:rgba(212,168,50,.65);animation:pqPulse 3.2s ease-in-out infinite;}
+  .pq-card-foto{height:170px;position:relative;background-size:cover;background-position:center;cursor:pointer;}
+  .pq-chip{position:absolute;top:11px;left:11px;background:rgba(0,0,0,.62);color:#D4A832;font-size:.58rem;letter-spacing:1.5px;text-transform:uppercase;padding:4px 10px;border-radius:12px;font-weight:700;}
+  .pq-ribbon{position:absolute;top:11px;right:11px;background:linear-gradient(135deg,#f0c14b,#D4A832);color:#1a1204;font-size:.58rem;letter-spacing:1px;text-transform:uppercase;padding:4px 10px;border-radius:12px;font-weight:800;box-shadow:0 3px 10px rgba(212,168,50,.4);}
+  .pq-body{padding:16px 18px 18px;display:flex;flex-direction:column;flex:1;}
+  .pq-nombre{font-family:'Barlow Condensed',sans-serif;font-weight:800;font-size:1.35rem;color:#fff;line-height:1.1;letter-spacing:.5px;}
+  .pq-precio{color:#D4A832;font-weight:800;font-size:1.05rem;margin:3px 0 10px;}
+  .pq-precio small{color:#8a8a90;font-weight:600;font-size:.72rem;}
+  .pq-chips{display:flex;flex-wrap:wrap;gap:6px;margin:0 0 12px;}
+  .pq-cchip{font-size:.68rem;font-weight:600;color:#d8d8de;background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.1);padding:3px 9px;border-radius:20px;white-space:nowrap;}
+  .pq-nota{font-size:.76rem;color:#9a9aa2;line-height:1.5;background:rgba(255,255,255,.03);border-left:2px solid var(--rojo,#E8363D);padding:8px 12px;border-radius:0 6px 6px 0;margin:0 0 14px;}
+  .pq-incluye{list-style:none;padding:0;margin:0 0 14px;display:flex;flex-direction:column;gap:5px;}
+  .pq-incluye li{font-size:.82rem;color:#b9b9c0;line-height:1.4;display:flex;gap:8px;align-items:flex-start;}
+  .pq-incluye li span{color:#D4A832;flex-shrink:0;}
+  .pq-mas{font-size:.74rem;color:#8a8a90;cursor:pointer;text-decoration:underline;}
+  .pq-ctas{display:flex;gap:8px;margin-top:auto;}
+  .pq-btn{flex:1;text-align:center;border:none;cursor:pointer;font-family:'Barlow Condensed',sans-serif;font-weight:800;letter-spacing:1.5px;text-transform:uppercase;font-size:.82rem;padding:11px 8px;border-radius:8px;transition:filter .2s,transform .15s;}
+  .pq-btn:active{transform:scale(.97);}
+  .pq-btn-primary{background:var(--rojo,#E8363D);color:#fff;}
+  .pq-btn-primary:hover{filter:brightness(1.12);}
+  .pq-btn-ghost{background:transparent;border:1px solid rgba(255,255,255,.18);color:#e5e5ea;}
+  .pq-btn-ghost:hover{border-color:#25D366;color:#25D366;}
+  @media(max-width:520px){ .pq-grid{grid-template-columns:1fr;} }
+  /* Velo de arranque: tapa el load/controles de YouTube con un color a full que se desvanece */
+  .ev-reveal{animation:frateReveal 8s linear forwards;}
+  @keyframes frateReveal{0%{opacity:1;}50%{opacity:1;}100%{opacity:0;}}
+</style>
+<script>
+  // Vitrina de paquetes: tabs por categoría + tarjetas ricas + galería + Reservar/Consultar (Opción C).
+  (function(){
+    var U='https://ydwlpraoaaijlfssevoh.supabase.co', K='sb_publishable_-_7GeDU_h84zf2v--lWQaQ_15ZFxOWt';
+    var CAT={cumple:'Cumpleaños',vip:'Pack VIP',cover:'Cover',botella:'Botellas',combo:'Combo',otro:'Extra'};
+    var ORDEN=['cumple','vip','botella','combo','cover','otro'];
+    function esc(s){ return String(s==null?'':s).replace(/[&<>"]/g,function(c){return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]; }); }
+    function precioTxt(p){ return p.precio ? ('$'+Number(p.precio).toLocaleString('es-CL')) : 'A consultar'; }
+    function fotosDe(p){ var a=[]; if(p.foto_url)a.push(p.foto_url); if(Array.isArray(p.fotos))p.fotos.forEach(function(u){ if(u&&a.indexOf(u)<0)a.push(u); }); return a; }
+    // "incluye" puede venir con saltos de línea, viñetas, ; o comas → lista.
+    function parseInc(s){ if(!s)return []; var t=String(s).trim();
+      var parts = /[\n•·|;]/.test(t) ? t.split(/[\n•·|;]+/) : t.split(/,(?![^(]*\))/);
+      return parts.map(function(x){return x.replace(/^[\s\-–✓✔]+/,'').trim();}).filter(Boolean).slice(0,12); }
+    var DIAS_ABBR={jueves:'Jue',viernes:'Vie',sabado:'Sáb',domingo:'Dom',lunes:'Lun',martes:'Mar',miercoles:'Mié'};
+    // Chips de condiciones a partir de p.condiciones. full=true muestra todo + nota.
+    function _pqChips(p, full){
+      var c=p&&p.condiciones; if(!c||typeof c!=='object') return '';
+      var ch=[];
+      if(c.entrada) ch.push((c.entrada==='vip'?'👑 ':'🎟️ ')+ (c.entrada==='vip'?'VIP':'General'));
+      if(c.personas!=null) ch.push('👥 hasta '+(c.personas + (c.personas>=1?1:0)));
+      if(c.hora_limite) ch.push('⏰ hasta '+esc(c.hora_limite));
+      if(Array.isArray(c.dias)&&c.dias.length) ch.push('📅 '+c.dias.map(function(d){return DIAS_ABBR[d]||d;}).join('·'));
+      if(c.trago_cortesia) ch.push('🍹 Trago cortesía');
+      if(c.pago==='previo') ch.push('💳 Pago previo');
+      if(!full) ch=ch.slice(0,3);
+      var html = ch.length ? '<div class="pq-chips">'+ch.map(function(x){return '<span class="pq-cchip">'+x+'</span>';}).join('')+'</div>' : '';
+      if(full && c.nota) html += '<div class="pq-nota">ℹ️ '+esc(c.nota)+'</div>';
+      return html;
+    }
+    window._PQ = {}; window._pqCat = 'Todos';
+
+    // select=* devuelve las columnas que existan (galería/destacado/condiciones si ya corriste los SQL, o el set básico si no). Nunca falla por columna faltante.
+    fetch(U+'/rest/v1/paquetes?select=*&activo=eq.true&order=orden',{headers:{apikey:K,Authorization:'Bearer '+K}})
+      .then(function(r){ return r.ok?r.json():[]; })
+      .then(function(ps){
+        var sec=document.getElementById('paquetes');
+        if(!ps||!ps.length){ if(sec) sec.style.display='none'; return; }
+        // destacados primero, luego por orden de categoría, luego por `orden`
+        ps.sort(function(a,b){
+          if(!!b.destacado - !!a.destacado) return (!!b.destacado)-(!!a.destacado);
+          var ca=ORDEN.indexOf(a.categoria), cb=ORDEN.indexOf(b.categoria);
+          if(ca<0)ca=99; if(cb<0)cb=99; if(ca!==cb) return ca-cb;
+          return (a.orden||0)-(b.orden||0);
+        });
+        ps.forEach(function(p){ window._PQ[p.id]=p; });
+        window._pqLista = ps;
+        // Tabs: sólo categorías que existen
+        var cats=[]; ORDEN.concat(Object.keys(CAT)).forEach(function(c){ if(cats.indexOf(c)<0 && ps.some(function(p){return p.categoria===c;})) cats.push(c); });
+        ps.forEach(function(p){ if(cats.indexOf(p.categoria)<0) cats.push(p.categoria); });
+        var tabs=document.getElementById('pq-tabs');
+        if(tabs){
+          var html='<button class="pq-tab active" onclick="filtrarPaquetes(this,\'Todos\')">Todos</button>';
+          if(cats.length>1) cats.forEach(function(c){ html+='<button class="pq-tab" onclick="filtrarPaquetes(this,\''+c+'\')">'+esc(CAT[c]||c)+'</button>'; });
+          tabs.innerHTML=html;
+          if(cats.length<=1) tabs.style.display='none';
+        }
+        renderPaquetesPub();
+      }).catch(function(){});
+
+    // ── Menú & Opciones: covers (trago cortesía) + botellas ──
+    window._CAT = {cover_cumple:[],cover_invitado:[],botella:[]};
+    fetch(U+'/rest/v1/catalogo_items?select=*&activo=eq.true&order=orden',{headers:{apikey:K,Authorization:'Bearer '+K}})
+      .then(function(r){ return r.ok?r.json():[]; })
+      .then(function(items){
+        (items||[]).forEach(function(it){ if(window._CAT[it.tipo]) window._CAT[it.tipo].push(it); });
+        renderMenuBtn();
+      }).catch(function(){});
+
+    function renderMenuBtn(){
+      var el=document.getElementById('pq-menu-btn'); if(!el) return;
+      el.innerHTML = (window._CAT.botella && window._CAT.botella.length)
+        ? '<button class="pq-btn pq-btn-ghost" style="flex:0 0 auto;display:inline-flex;gap:8px;padding:10px 18px;width:auto;" onclick="verMenuBotellas()">🍾 Ver menú de botellas</button>'
+        : '';
+    }
+    function _coversHtml(cat){
+      if(cat!=='cumple' && cat!=='despedida') return '';
+      var cc=window._CAT.cover_cumple||[], ci=window._CAT.cover_invitado||[];
+      if(!cc.length && !ci.length) return '';
+      function lista(items){ return '<div style="display:flex;flex-wrap:wrap;gap:6px;margin:6px 0 12px;">'+items.map(function(x){return '<span class="pq-cchip">'+esc(x.nombre)+(x.detalle?' <span style="color:#8a8a90;">('+esc(x.detalle)+')</span>':'')+'</span>';}).join('')+'</div>'; }
+      var h='<div style="border-top:1px solid rgba(255,255,255,.08);margin-top:6px;padding-top:14px;">';
+      h+='<div style="font-size:.68rem;letter-spacing:2px;text-transform:uppercase;color:var(--rojo,#E8363D);margin-bottom:2px;">🍹 Trago de cortesía — elige una opción</div>';
+      if(cc.length){ h+='<div style="color:#c9c9d0;font-size:.8rem;margin-top:8px;font-weight:600;">Para el/la cumpleañ@:</div>'+lista(cc); }
+      if(ci.length){ h+='<div style="color:#c9c9d0;font-size:.8rem;font-weight:600;">Para invitad@s:</div>'+lista(ci); }
+      h+='</div>';
+      return h;
+    }
+    window.verMenuBotellas=function(){
+      var bs=window._CAT.botella||[]; if(!bs.length) return;
+      var rows=bs.map(function(b){
+        var normal=b.precio?('$'+Number(b.precio).toLocaleString('es-CL')):'';
+        var desc=b.precio_desc?('$'+Number(b.precio_desc).toLocaleString('es-CL')):'';
+        var precioHtml = (b.precio && b.precio_desc && b.precio!==b.precio_desc)
+          ? '<span style="color:#8a8a90;text-decoration:line-through;font-size:.78rem;">'+normal+'</span> <span style="color:#D4A832;font-weight:800;">'+desc+'</span>'
+          : '<span style="color:#D4A832;font-weight:800;">'+(desc||normal||'A consultar')+'</span>';
+        return '<div style="display:flex;justify-content:space-between;gap:14px;padding:9px 0;border-bottom:1px solid rgba(255,255,255,.06);align-items:baseline;">'
+          +'<span style="color:#e5e5ea;font-size:.88rem;">'+esc(b.nombre)+(b.detalle?' <span style="color:#8a8a90;font-size:.76rem;">'+esc(b.detalle)+'</span>':'')+'</span>'
+          +'<span style="white-space:nowrap;">'+precioHtml+'</span></div>';
+      }).join('');
+      document.getElementById('menu-botellas-body').innerHTML =
+        '<div style="height:170px;background:url(\'/flyers/menu-botellas.jpg\') center/cover;"></div>'
+        +'<div style="padding:20px 24px 26px;">'
+        +'<div class="pq-nombre" style="font-size:1.7rem;">🍾 Menú de botellas</div>'
+        +'<div style="color:#9a9aa2;font-size:.82rem;margin:2px 0 8px;">Precio normal → <b style="color:#D4A832;">precio cumpleañ@</b>. Todas incluyen 1 bebida 1.5L a elección (salvo las que ya la traen).</div>'
+        +'<div style="margin-top:6px;">'+rows+'</div>'
+        +'<div class="pq-ctas" style="margin-top:18px;"><button class="pq-btn pq-btn-primary" style="padding:13px;" onclick="closeMenuBotellas();openReservaPopup(\'vip\')">👑 Reservar mesa VIP</button><button class="pq-btn pq-btn-ghost" style="padding:13px;" onclick="consultarBotella()">💬 Consultar</button></div>'
+        +'</div>';
+      var pop=document.getElementById('menu-botellas'); if(pop){ pop.classList.add('open'); document.body.style.overflow='hidden'; }
+    };
+    window.closeMenuBotellas=function(){ var p=document.getElementById('menu-botellas'); if(p)p.classList.remove('open'); document.body.style.overflow=''; };
+    window.consultarBotella=function(){ var num=(window.FRATE_CONFIG&&FRATE_CONFIG.whatsapp)||'56981311548'; window.open('https://wa.me/'+num+'?text='+encodeURIComponent('Hola FRATE 👋 Quiero consultar por el menú de botellas / pack de reserva.'),'_blank'); };
+
+    window.renderPaquetesPub=function(){
+      var grid=document.getElementById('paquetes-grid-pub'); if(!grid) return;
+      var ps=(window._pqLista||[]).filter(function(p){ return window._pqCat==='Todos' || p.categoria===window._pqCat; });
+      grid.innerHTML=ps.map(function(p){
+        var fotos=fotosDe(p), foto = fotos.length ? ("background-image:url('"+String(fotos[0]).replace(/'/g,'')+"');") : 'background:linear-gradient(135deg,#1c1c22,#26262e);';
+        var inc=parseInc(p.incluye), incShow=inc.slice(0,4);
+        var incHtml = incShow.length ? '<ul class="pq-incluye">'+incShow.map(function(x){return '<li><span>✓</span> '+esc(x)+'</li>';}).join('')
+            + (inc.length>4?'<li class="pq-mas" onclick="verPaquete('+p.id+')">+ '+(inc.length-4)+' más…</li>':'') +'</ul>'
+          : (p.descripcion?'<div style="font-size:.82rem;color:#b9b9c0;line-height:1.5;margin-bottom:14px;">'+esc(p.descripcion)+'</div>':'<div style="flex:1"></div>');
+        return '<div class="pq-card'+(p.destacado?' destacado':'')+'">'
+          +'<div class="pq-card-foto" style="'+foto+'" onclick="verPaquete('+p.id+')">'
+          +'<span class="pq-chip">'+esc(CAT[p.categoria]||p.categoria)+'</span>'
+          +(p.destacado?'<span class="pq-ribbon">⭐ Destacado</span>':'')
+          +(fotos.length>1?'<span style="position:absolute;bottom:10px;right:10px;background:rgba(0,0,0,.6);color:#eee;font-size:.62rem;padding:3px 9px;border-radius:12px;">📷 '+fotos.length+'</span>':'')
+          +'</div>'
+          +'<div class="pq-body">'
+          +'<div class="pq-nombre">'+esc(p.nombre)+'</div>'
+          +'<div class="pq-precio">'+precioTxt(p)+'</div>'
+          +_pqChips(p,false)
+          +incHtml
+          +'<div class="pq-ctas">'
+          +'<button class="pq-btn pq-btn-primary" onclick="reservarPaquete(\''+p.categoria+'\','+p.id+')">Reservar</button>'
+          +'<button class="pq-btn pq-btn-ghost" onclick="consultarPaquete('+p.id+')">Consultar</button>'
+          +'</div></div></div>';
+      }).join('');
+    };
+
+    window.filtrarPaquetes=function(btn,cat){
+      window._pqCat=cat;
+      var tabs=document.querySelectorAll('#pq-tabs .pq-tab'); tabs.forEach(function(t){t.classList.remove('active');});
+      if(btn)btn.classList.add('active');
+      renderPaquetesPub();
+    };
+
+    window.verPaquete=function(id){
+      var p=window._PQ[id]; if(!p) return;
+      var fotos=fotosDe(p), inc=parseInc(p.incluye);
+      var main = fotos.length ? fotos[0] : '';
+      var thumbs = fotos.length>1 ? '<div id="pqd-thumbs" style="display:flex;gap:8px;margin-top:10px;overflow-x:auto;padding-bottom:4px;">'+fotos.map(function(u,i){return '<img src="'+esc(u)+'" onclick="pqSetMain(\''+esc(u).replace(/'/g,'')+'\',this)" style="width:66px;height:66px;object-fit:cover;border-radius:8px;cursor:pointer;flex-shrink:0;border:2px solid '+(i===0?'#D4A832':'transparent')+';">';}).join('')+'</div>' : '';
+      var incHtml = inc.length ? '<div style="font-size:.68rem;letter-spacing:2px;text-transform:uppercase;color:var(--rojo,#E8363D);margin:2px 0 8px;">Incluye</div><ul class="pq-incluye" style="margin-bottom:16px;">'+inc.map(function(x){return '<li><span>✓</span> '+esc(x)+'</li>';}).join('')+'</ul>' : '';
+      var hero = main ? '<div style="height:260px;background:url(\''+String(main).replace(/'/g,'')+'\') center/cover;position:relative;" id="pqd-hero"><span class="pq-chip">'+esc(CAT[p.categoria]||p.categoria)+'</span>'+(p.destacado?'<span class="pq-ribbon">⭐ Destacado</span>':'')+'</div>'
+        : '<div style="height:120px;background:linear-gradient(135deg,#1c1c22,#26262e);"></div>';
+      document.getElementById('pq-detail-body').innerHTML =
+        hero
+        +'<div style="padding:22px 24px 26px;">'
+        +(thumbs)
+        +'<div class="pq-nombre" style="font-size:1.9rem;margin-top:'+(thumbs?'14px':'2px')+';">'+esc(p.nombre)+'</div>'
+        +'<div class="pq-precio" style="font-size:1.25rem;margin:4px 0 12px;">'+precioTxt(p)+'</div>'
+        +_pqChips(p,true)
+        +(p.descripcion?'<p style="color:#b9b9c0;font-size:.9rem;line-height:1.7;margin:12px 0 16px;">'+esc(p.descripcion)+'</p>':'')
+        +incHtml
+        +_coversHtml(p.categoria)
+        +'<div class="pq-ctas">'
+        +'<button class="pq-btn pq-btn-primary" style="padding:14px;" onclick="reservarPaquete(\''+p.categoria+'\','+p.id+')">👑 Reservar ahora</button>'
+        +'<button class="pq-btn pq-btn-ghost" style="padding:14px;" onclick="consultarPaquete('+p.id+')">💬 Consultar</button>'
+        +'</div></div>';
+      var pop=document.getElementById('pq-detail'); if(pop){ pop.classList.add('open'); document.body.style.overflow='hidden'; }
+    };
+    window.pqSetMain=function(u,el){ var h=document.getElementById('pqd-hero'); if(h)h.style.backgroundImage="url('"+u+"')"; if(el&&el.parentNode){ Array.prototype.forEach.call(el.parentNode.children,function(c){c.style.borderColor='transparent';}); el.style.borderColor='#D4A832'; } };
+    window.closePqDetail=function(){ var pop=document.getElementById('pq-detail'); if(pop)pop.classList.remove('open'); document.body.style.overflow=''; };
+
+    window.reservarPaquete=function(cat,id){
+      var p=window._PQ[id]||{}; var nombre=p.nombre||'';
+      var map={cumple:'cumple',vip:'vip',botella:'vip',combo:'vip',cover:'grupo',otro:'vip'};
+      var tipo=map[cat]||'vip';
+      closePqDetail();
+      if(typeof openReservaPopup==='function'){
+        openReservaPopup(tipo);
+        setTimeout(function(){
+          var ta=document.querySelector('#rp-form textarea[name="mensaje"]');
+          if(ta && !ta.value) ta.value='Me interesa el paquete: '+nombre+(p.precio?(' ('+precioTxt(p)+')'):'');
+          var hid=document.getElementById('rp-tipo-hidden'); if(hid) hid.value='Paquete: '+nombre;
+        },40);
+      } else { consultarPaquete(id); }
+    };
+    window.consultarPaquete=function(id){
+      var p=window._PQ[id]||{};
+      var num=(window.FRATE_CONFIG&&FRATE_CONFIG.whatsapp)||'56981311548';
+      var t='Hola FRATE 👋 Quiero consultar por el paquete: '+(p.nombre||'')+(p.precio?(' ('+precioTxt(p)+')'):'');
+      window.open('https://wa.me/'+num+'?text='+encodeURIComponent(t),'_blank');
+    };
+  })();
+</script>
 
 <!-- ══════════════════════════════════════════════
      GALERÍA
@@ -932,11 +1327,27 @@
     <!-- Hero: imagen/video del evento -->
     <div class="ep-hero" id="ep-hero">
       <div class="ep-hero-bg" id="ep-hero-bg"></div>
+      <!-- La trama del nombre va SOBRE el video, no en vez de él. -->
+      <div class="ep-hero-tex" id="ep-hero-tex"></div>
       <div class="ep-hero-light"></div>
       <div class="ep-hero-content">
         <div class="ep-evento-tag">Próximo evento · frate.cl</div>
         <div class="ep-evento-nombre" id="ep-nombre">NOMBRE EVENTO</div>
+        <div class="ep-hero-hr" id="ep-hero-hr"></div>
       </div>
+      <!-- Fuera de .ep-hero-content a propósito: ese bloque tiene padding
+           y la fecha tiene que llegar a los bordes, no flotar adentro. -->
+      <div id="ep-fecha-col"></div>
+    </div>
+
+    <!-- Saltar de día sin cerrar el modal: flechas a los lados y la tira
+         de días al medio para ir directo a uno lejano.
+         Va acá abajo y no flotando sobre el afiche: ahí la flecha derecha
+         se montaba sobre la columna de la fecha y quedaba pegada a la ✕. -->
+    <div class="ep-diasrow" id="ep-diasrow">
+      <button class="ep-nav" id="ep-prev" aria-label="Día anterior">‹</button>
+      <div class="ep-dias" id="ep-dias"></div>
+      <button class="ep-nav" id="ep-next" aria-label="Día siguiente">›</button>
     </div>
 
     <div class="ep-body">
@@ -976,7 +1387,9 @@
         <div style="font-size:0.8rem;color:var(--dorado);text-align:center;margin-bottom:14px;font-weight:600;" id="ep-ticket-total"></div>
         <div class="ep-personas-title" style="margin-bottom:10px;">Asigna nombre + RUT a cada entrada</div>
         <div id="ep-personas-list"></div>
-        <button class="ep-confirm-btn" id="ep-confirm-tickets">🎟️ AGREGAR AL CARRITO</button>
+        <button class="ep-confirm-btn" id="ep-pagar-ahora" onclick="pagarAhora()" style="background:#22c55e;color:#04210f;">💳 PAGAR AHORA</button>
+        <button class="ep-confirm-btn" id="ep-confirm-tickets" style="background:transparent;border:1px solid #3a3a3c;color:#e4e4e7;margin-top:10px;">🛒 Agregar al carrito</button>
+        <button class="ep-confirm-btn" id="ep-reservar-gratis" onclick="reservarGratis()" style="display:none;background:#22c55e;color:#04210f;">🎁 RESERVAR GRATIS</button>
         <button class="ep-buy-btn secondary" style="width:100%;margin-top:10px;" onclick="openReservaPopup('vip');closeEventPopup()">👑 MESA VIP / RESERVAS</button>
       </div>
     </div>
@@ -1018,8 +1431,41 @@
           </div>
           <div class="form-group">
             <label>N° de personas</label>
-            <input type="number" name="personas" min="1" placeholder="¿Cuántos?" />
+            <input type="number" name="personas" id="rp-personas" min="1" max="60" placeholder="¿Cuántos?" required oninput="renderInvitadosRP()" />
           </div>
+        </div>
+        <div class="form-row">
+          <div class="form-group">
+            <label>RUT del responsable</label>
+            <input type="text" name="rut" id="rp-rut" placeholder="12.345.678-9" maxlength="12" oninput="rutFormat(this)" onblur="rutCheck(this)" />
+          </div>
+          <div class="form-group">
+            <label>Email</label>
+            <input type="email" name="email" placeholder="tu@email.com" />
+          </div>
+        </div>
+        <div class="form-row">
+          <div class="form-group">
+            <label>Zona preferida</label>
+            <select name="zona_preferida"><option value="">Sin preferencia</option><option>VIP</option><option>Cerca de la pista</option><option>Terraza</option></select>
+          </div>
+          <div class="form-group">
+            <label>Presupuesto aprox. ($)</label>
+            <input type="number" name="presupuesto" placeholder="150000" />
+          </div>
+        </div>
+        <div style="display:flex;gap:18px;flex-wrap:wrap;">
+          <label style="display:flex;gap:8px;align-items:center;font-size:0.8rem;color:var(--gris);cursor:pointer;"><input type="checkbox" name="quiere_botellas" /> 🍾 Quiero botellas</label>
+          <label id="rp-deco-wrap" style="display:none;gap:8px;align-items:center;font-size:0.8rem;color:var(--gris);cursor:pointer;"><input type="checkbox" name="quiere_decoracion" /> 🎈 Quiero decoración</label>
+        </div>
+        <div class="form-group" id="rp-nac-wrap" style="display:none;">
+          <label>Fecha de nacimiento del cumpleañero</label>
+          <input type="date" name="fecha_nacimiento" style="color-scheme:dark" />
+        </div>
+        <div id="rp-invitados-wrap">
+          <div style="font-size:0.7rem;letter-spacing:2px;text-transform:uppercase;color:var(--rojo);margin:6px 0 4px;">👥 ¿Quiénes van? — nombre y RUT de cada invitado</div>
+          <p style="font-size:0.68rem;color:#555;margin:0 0 8px;">Por seguridad el ingreso es con carnet. Si aún no tienes algún RUT, déjalo en blanco.</p>
+          <div id="rp-invitados"></div>
         </div>
         <div class="form-group">
           <label>Mensaje adicional</label>
@@ -1034,9 +1480,27 @@
   </div>
 </div>
 
+<!-- LISTAS GRATUITAS (inscripción pública) -->
+<div class="frate-popup" id="listas-popup">
+  <div class="popup-box" style="max-width:540px">
+    <button class="popup-close-btn" onclick="closeListasPopup()">✕</button>
+    <div style="padding:28px;">
+      <div style="font-family:'Barlow Condensed',sans-serif;font-weight:900;font-size:1.8rem;color:var(--blanco);">📋 LISTAS GRATUITAS</div>
+      <p style="color:var(--gris);font-size:0.85rem;margin:6px 0 18px;">Anótate con tu <b>nombre y RUT</b>. Si tu inscripción queda aprobada, tu entrada con QR llega al correo. Ingreso con carnet.</p>
+      <div id="listas-pub-body" style="max-height:56vh;overflow-y:auto;">Cargando listas…</div>
+    </div>
+  </div>
+</div>
+
 <!-- ══════════════════════════════════════════════
      TICKETS POPUP (desde botón hero)
 ════════════════════════════════════════════════ -->
+<div class="frate-popup" id="temporada-popup">
+  <div class="popup-box" style="max-width:560px">
+    <button class="popup-close-btn" onclick="cerrarTemporada()">✕</button>
+    <div id="temporada-popup-body"></div>
+  </div>
+</div>
 <div class="frate-popup" id="tickets-popup">
   <div class="popup-box" style="max-width:640px">
     <button class="popup-close-btn" id="tickets-popup-close">✕</button>
@@ -1104,6 +1568,11 @@
         <!-- RUT y Teléfono -->
         <div class="profile-field"><label>RUT</label><input type="text" id="cp-rut" class="rut-field" placeholder="12.345.678-9" maxlength="12" oninput="rutFormat(this)" onblur="rutCheck(this)" /></div>
         <div class="profile-field"><label>Teléfono</label><input type="tel" id="cp-tel" class="tel-field" placeholder="+569 " /></div>
+        <!-- Sexo: se elige una sola vez; después solo lo corrige un admin -->
+        <div class="profile-field full">
+          <label style="display:flex;justify-content:space-between;">Sexo (como en tu cédula) <span id="cp-sexo-nota" style="color:#555;font-size:0.65rem;font-weight:400;">se guarda una sola vez</span></label>
+          <select id="cp-sexo"><option value="">Sin completar</option><option value="F">Mujer</option><option value="M">Hombre</option><option value="X">Prefiero no decirlo</option></select>
+        </div>
         <!-- Institución y Carrera -->
         <div class="profile-field full">
           <label>Institución de Estudios</label>
@@ -1239,11 +1708,16 @@
 </div>
 
 <script src="frate-data.js"></script>
-<script src="frate-supabase.js"></script>
-<script src="frate-app.js"></script>
-<script src="frate-cart.js"></script>
-<script src="frate-popups.js"></script>
-<script src="frate-cuenta.js"></script>
+<script src="frate-supabase.js?v=sexo20260914"></script>
+<script src="frate-app.js?v=compact20260713"></script>
+<script src="/frate-email.js?v=fe1"></script>
+<script src="/frate-afiche.js?v=af9"></script>
+<script src="frate-cart.js?v=sexo20260914"></script>
+<script src="frate-popups.js?v=errores20260914"></script>
+<script src="frate-cuenta.js?v=sexo20260914"></script>
+<script src="frate-perfil-gate.js?v=pg3"></script>
+<script src="frate-anfitrion.js" defer></script>
+<script src="frate-mix.js" defer></script>
 <script>
 // ── AGE GATE — funciones globales (independientes de frate-app.js) ──
 function ageShowStep(id) {
@@ -1310,6 +1784,35 @@ function rutCheck(inp) {
   inp.style.borderColor = ok ? '#555' : '#E8363D';
   if (!ok) inp.title='RUT inválido — verifica el dígito verificador';
   else inp.title='';
+}
+// ¿RUT falso/sospechoso? (mismo criterio que el candado de la base)
+function rutSospechoso(r) {
+  var c = String(r||'').replace(/[^0-9kK]/g,'').toUpperCase();
+  if (c.length < 8) return true;
+  var dv=c.slice(-1), body=c.slice(0,-1);
+  if (!/^\d{7,8}$/.test(body)) return true;
+  var s=0, m=2;
+  for (var i=body.length-1;i>=0;i--) { s+=parseInt(body[i],10)*m; m=m===7?2:m+1; }
+  var exp=11-(s%11), calc=(exp===11?'0':exp===10?'K':String(exp));
+  if (calc!==dv) return true;                                   // dígito verificador malo
+  if (/^(.)\1+$/.test(body)) return true;                       // todos iguales (111.., 888..)
+  if (['12345678','23456789','1234567','7654321','87654321','98765432'].indexOf(body)>=0) return true;
+  return false;
+}
+// Casilla "soy extranjer@" del registro: cambia RUT → pasaporte
+function regToggleExt() {
+  var ext=(document.getElementById('reg-ext')||{}).checked;
+  var inp=document.getElementById('reg-rut'), lbl=document.getElementById('reg-rut-lbl');
+  if (!inp) return;
+  if (ext) { inp.removeAttribute('maxlength'); inp.placeholder='N° de pasaporte / ID'; inp.style.borderColor=''; inp.title=''; if(lbl) lbl.innerHTML='Pasaporte / ID <span style="color:#E8363D;">*</span>'; }
+  else { inp.setAttribute('maxlength','12'); inp.placeholder='12.345.678-9'; if(lbl) lbl.innerHTML='RUT <span style="color:#E8363D;">*</span>'; }
+}
+function ageToggleExt() {
+  var ext=(document.getElementById('agr-ext')||{}).checked;
+  var inp=document.getElementById('agr-rut'), lbl=document.getElementById('agr-rut-lbl');
+  if (!inp) return;
+  if (ext) { inp.removeAttribute('maxlength'); inp.placeholder='N° de pasaporte / ID'; inp.style.borderColor=''; inp.title=''; if(lbl) lbl.innerHTML='Pasaporte / ID <span style="color:#E8363D;">*</span>'; }
+  else { inp.setAttribute('maxlength','12'); inp.placeholder='12.345.678-9'; if(lbl) lbl.innerHTML='RUT <span style="color:#E8363D;">*</span>'; }
 }
 
 // ── INSTITUCIONES ────────────────────────────────────────────
@@ -1384,7 +1887,13 @@ function ageCarreras(sel) {
 function poblarInstSelect(selId) {
   var sel = document.getElementById(selId);
   if (!sel) return;
-  sel.innerHTML = '<option value="">Selecciona tu institución</option>';
+  // Lista compartida completa (unis + IP + CFT), "NO SOY ESTUDIANTE" primero
+  if (window.FRATE_INSTITUCIONES && window.poblarInstituciones) {
+    window.poblarInstituciones(sel, '');
+    return;
+  }
+  // Fallback (si no cargó el archivo): lista antigua
+  sel.innerHTML = '<option value="NO SOY ESTUDIANTE">NO SOY ESTUDIANTE</option>';
   INST_DATA.forEach(function(inst) {
     var opt = document.createElement('option');
     opt.value = inst.disabled ? '' : inst.g;
@@ -1392,10 +1901,6 @@ function poblarInstSelect(selId) {
     if (inst.disabled) { opt.disabled=true; opt.style.color='#555'; opt.style.fontWeight='bold'; }
     sel.appendChild(opt);
   });
-  var noEst = document.createElement('option');
-  noEst.value = 'NO SOY ESTUDIANTE';
-  noEst.textContent = 'NO SOY ESTUDIANTE';
-  sel.appendChild(noEst);
 }
 document.addEventListener('DOMContentLoaded', function() {
   poblarInstSelect('agr-inst');  // age gate
@@ -1464,6 +1969,9 @@ async function cuentaGuardarPerfil() {
   var rut      = ((document.getElementById('cp-rut')      ||{}).value||'').trim();
   var inst     = ((document.getElementById('cp-inst')     ||{}).value||'');
   var carrera  = ((document.getElementById('cp-carrera')  ||{}).value||'');
+  // El sexo solo se manda si la cuenta todavía no lo tenía (queda fijo).
+  var sexoSel  = ((document.getElementById('cp-sexo')     ||{}).value||'');
+  var sexoNuevo = (!session.sexo && sexoSel) ? sexoSel : '';
   if (btn) { btn.disabled=true; btn.textContent='Guardando...'; }
   try {
     if (typeof sb !== 'undefined' && session.id) {
@@ -1471,12 +1979,19 @@ async function cuentaGuardarPerfil() {
       if (nombres)   updates.nombres   = nombres;
       if (apellidos) updates.apellidos = apellidos;
       if (telefono)  updates.telefono  = telefono;
-      if (rut)       updates.rut       = rut;
+      if (rut && rut !== String(session.rut || '').trim()) updates.rut = rut;   // solo si lo editó (el RUT puede estar fijo)
       if (inst)      updates.universidad= inst;
       if (carrera)   updates.carrera   = carrera;
       if (Object.keys(updates).length) {
         var res = await sb.from('clientes').update(updates).eq('id', session.id);
         if (res.error) throw res.error;
+      }
+      if (sexoNuevo) {
+        // Aparte, para que un problema con el sexo no impida guardar lo demás.
+        // Se relee lo que quedó en la base (si ya tenía, el candado lo conserva).
+        var rs = await sb.from('clientes').update({ sexo: sexoNuevo }).eq('id', session.id).select('sexo');
+        if (rs.error) throw rs.error;
+        if (rs.data && rs.data[0]) session.sexo = rs.data[0].sexo || null;
       }
     }
     if (nombres)   session.nombres   = nombres;
@@ -1486,6 +2001,8 @@ async function cuentaGuardarPerfil() {
     if (inst)      session.universidad= inst;
     if (carrera)   session.carrera   = carrera;
     Storage.set('frate_session', session);
+    try { window.FratePerfil && window.FratePerfil.limpiar(); } catch (_) {}
+    try { if (typeof _pintarSexoCuenta === 'function') _pintarSexoCuenta(session); } catch (_) {}
     if (typeof updateNavUser === 'function') updateNavUser();
     if (typeof showToast === 'function') showToast('✅ Perfil actualizado');
   } catch(err) {
@@ -1497,18 +2014,63 @@ async function cuentaGuardarPerfil() {
 
 // ── Re-mostrar QRs de un pedido pasado (desde Mi Cuenta) ──────
 // Retoma el pago de un pedido pendiente/expirado → genera nuevo link MercadoPago
-async function pagarPedido(pedidoId, btn) {
+// "Pagar ahora" de un pendiente → primero pregunta el medio (Tarjeta/Transferencia)
+function elegirMedioPendiente(pedidoId, btn) {
+  var span = document.createElement('span');
+  span.style.cssText = 'display:inline-flex;gap:6px;flex-wrap:wrap;';
+  span.innerHTML =
+    '<button onclick="pagarPedido('+pedidoId+',this,\'mercadopago\')" style="background:#E8363D;border:none;color:#fff;padding:7px 14px;font-size:0.65rem;letter-spacing:2px;text-transform:uppercase;border-radius:2px;cursor:pointer;font-weight:700;">💳 Tarjeta</button>'
+  + '<button onclick="pagarPedido('+pedidoId+',this,\'khipu\')" style="background:transparent;border:1px solid #3a3a3c;color:#e4e4e7;padding:7px 14px;font-size:0.65rem;letter-spacing:2px;text-transform:uppercase;border-radius:2px;cursor:pointer;">🏦 Transferencia</button>';
+  btn.replaceWith(span);
+}
+
+async function pagarPedido(pedidoId, btn, medio, extra) {
   if (btn) { btn.disabled = true; btn.textContent = 'Generando pago...'; }
   try {
-    var { data, error } = await sb.functions.invoke('reanudar-pago', { body: { pedidoId: pedidoId } });
+    var cuerpo = { pedidoId: pedidoId, medio: medio || 'mercadopago' };
+    if (extra && extra.t) cuerpo.t = extra.t;            // token del link del correo
+    if (extra && extra.email) cuerpo.email = extra.email; // correo confirmado por la persona
+    var { data, error } = await sb.functions.invoke('reanudar-pago', { body: cuerpo });
+    // La orden es de otra persona (o el link viene sin token): pedimos confirmar el correo
+    if (!(extra && extra.email)) {
+      var necesita = (data && data.necesita_verificacion);
+      if (!necesita && error && error.context && typeof error.context.json === 'function') {
+        try { var ctx = await error.context.json(); necesita = ctx && ctx.necesita_verificacion; } catch (_e) {}
+      }
+      if (necesita) {
+        var mail = prompt('Para retomar tu compra, escribe el correo con el que la hiciste:');
+        if (mail && mail.trim()) return pagarPedido(pedidoId, btn, medio, { email: mail.trim() });
+        if (typeof showToast === 'function') showToast('Necesitamos tu correo para continuar.');
+        if (btn) { btn.disabled = false; btn.textContent = '💳 Pagar ahora'; }
+        return;
+      }
+    }
     if (error) throw new Error(error.message || 'No se pudo iniciar el pago.');
     if (data && data.error) throw new Error(data.error);
-    if (!data || !data.initPoint) throw new Error('MercadoPago no devolvió un link de pago.');
+    if (!data || !data.initPoint) throw new Error('No se pudo generar el link de pago.');
     window.location.href = data.initPoint;
   } catch (err) {
     console.error('[FRATE] pagarPedido:', err);
     if (typeof showToast === 'function') showToast('⚠️ ' + (err.message || 'Error al iniciar el pago.'));
-    if (btn) { btn.disabled = false; btn.textContent = '💳 Pagar ahora'; }
+    if (typeof cuentaCargarHistorial === 'function') cuentaCargarHistorial();  // restaura los botones
+    else if (btn) { btn.disabled = false; btn.textContent = '💳 Pagar ahora'; }
+  }
+}
+
+// Borrar un pedido PENDIENTE propio (compra abandonada). No se cobra nada.
+async function cancelarPedido(pedidoId, btn) {
+  if (!confirm('¿Borrar este pedido pendiente? No se cobra nada — es una compra que no completaste.')) return;
+  if (btn) { btn.disabled = true; btn.textContent = 'Borrando...'; }
+  try {
+    var { data, error } = await sb.rpc('cancelar_pedido_pendiente', { p_pedido_id: pedidoId });
+    if (error) throw new Error(error.message || 'No se pudo borrar.');
+    if (data && data.error) throw new Error(data.error);
+    if (typeof showToast === 'function') showToast('🗑️ Pedido borrado');
+    if (typeof cuentaCargarHistorial === 'function') cuentaCargarHistorial();
+  } catch (err) {
+    console.error('[FRATE] cancelarPedido:', err);
+    if (typeof showToast === 'function') showToast('⚠️ ' + (err.message || 'No se pudo borrar.'));
+    if (btn) { btn.disabled = false; btn.textContent = '🗑️ Borrar'; }
   }
 }
 
@@ -1529,7 +2091,7 @@ async function rePrintPedido(pedidoId) {
     // Reconstruir orderData con el mismo formato que usa showTicket()
     var items = (pedido.items_pedido || []).map(function(ip) {
       return {
-        tipo:       ip.producto_tipo === 'ticket' ? (ip.nombre_ticket || 'Ticket') : ip.producto_tipo,
+        tipo:       ip.producto_tipo === 'ticket' ? (_etqPub(ip.nombre_ticket) || 'Ticket') : ip.producto_tipo,
         nombre:     ip.nombre_evento || ip.nombre_ticket || 'Item',
         precio:     ip.precio_unitario,
         cantidad:   ip.cantidad,
@@ -1558,6 +2120,21 @@ async function rePrintPedido(pedidoId) {
   }
 }
 
+// 🎂 Un cobro de servicio (cumpleaños/reserva) NO es una compra de entradas: la orden vive
+//    en pedidos con origen 'crm' y sin ítems, y su plata la resuelve una persona. Acá solo se
+//    muestra con su nombre; borrarla o devolverla está cerrado en la base y en las edges.
+function _esCobroServicio(p, cobro) { return !!(p && p.origen === 'crm') || !!cobro; }
+function _nombreCobro(cobro) {
+  var s = (cobro && cobro.servicio) || '';
+  if (s === 'cumpleanos') return '🎂 Cumpleaños FRATE';
+  if (s === 'reserva')    return '🍾 Reserva FRATE';
+  return '🧾 Pago de servicio';   // etiqueta genérica: el concepto no se pudo leer
+}
+function _escCobro(t) {
+  return String(t == null ? '' : t).replace(/[&<>"]/g, function(c){
+    return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]; });
+}
+
 // ── MI CUENTA: cargar historial desde Supabase ────────────────
 async function cuentaCargarHistorial() {
   var session = Storage.get('frate_session');
@@ -1571,8 +2148,28 @@ async function cuentaCargarHistorial() {
     // Mostrar: pagados (con QRs) y pendientes (con botón "Pagar ahora").
     // Los expirados (no pagados a tiempo) se ocultan del usuario; quedan en el admin.
     pedidos = (pedidos || []).filter(function(p){
-      return ['pagado', 'pendiente'].includes(p.estado);
+      return ['pagado', 'pendiente', 'reembolsado'].includes(p.estado);
     });
+    window._misPedidosCache = pedidos;
+    // Eventos de esas compras (para saber si terminaron → reactivación)
+    var evIdsH = [];
+    pedidos.forEach(function(p){ (p.items_pedido||[]).forEach(function(i){ if (i.evento_id && evIdsH.indexOf(i.evento_id) < 0) evIdsH.push(i.evento_id); }); });
+    var evMapH = {};
+    if (evIdsH.length) {
+      try { var evResH = await sb.from('eventos').select('id,fecha,hora,hora_termino').in('id', evIdsH); (evResH.data||[]).forEach(function(e){ evMapH[e.id] = e; }); } catch(e) {}
+    }
+    var horasReact = 48;
+    try { var cfgR = await sb.from('config_valores').select('valor').eq('clave','reactivacion_horas').maybeSingle(); horasReact = parseInt((cfgR.data||{}).valor) || 48; } catch(e) {}
+    // 🎂 El nombre real de los cobros de servicio. crm_pagos no la puede leer el cliente (RLS
+    //    solo staff): el RPC devuelve solo folio/servicio/concepto de SUS órdenes. Si el SQL
+    //    nuevo todavía no está corrido, esto falla callado y queda la etiqueta genérica.
+    var cobrosMap = {};
+    if (pedidos.length) {
+      try {
+        var rc = await sb.rpc('mis_cobros_servicio');
+        (((rc||{}).data||{}).cobros||[]).forEach(function(c){ cobrosMap[c.pedido_id] = c; });
+      } catch(e) {}
+    }
     if (!pedidos.length) {
       container.innerHTML = '<div style="text-align:center;padding:32px;color:var(--gris);"><div style="font-size:2rem;margin-bottom:8px;">🎟️</div><div>Aún no has comprado tickets</div><div style="font-size:0.75rem;margin-top:8px;"><a href="#tickets" onclick="closeCuenta()" style="color:var(--rojo);text-decoration:none;">Ver próximos eventos →</a></div></div>';
       return;
@@ -1583,40 +2180,332 @@ async function cuentaCargarHistorial() {
       var items = p.items_pedido||[];
       var totalItems = items.reduce(function(s,i){return s+(i.cantidad||0);},0);
       var firstItem = items[0];
+      // 🎂 ¿Cobro de servicio? Lleva su nombre de verdad y no muestra botones de entradas.
+      var cobro   = cobrosMap[p.id];
+      var esCobro = _esCobroServicio(p, cobro);
       // Título del pedido: usa nombre_evento si es ticket, sino nombre_ticket (carta/merch)
-      var tituloPedido = firstItem
-        ? (firstItem.nombre_evento || firstItem.nombre_ticket || ('Pedido #'+p.id))
-        : 'Pedido #'+p.id;
+      var tituloPedido = esCobro ? _nombreCobro(cobro)
+        : (firstItem
+          ? (firstItem.nombre_evento || firstItem.nombre_ticket || ('Pedido #'+p.id))
+          : 'Pedido #'+p.id);
       var fecha = new Date(p.created_at).toLocaleDateString('es-CL',{day:'2-digit',month:'short',year:'numeric'});
       // 'expirado' se muestra como 'pendiente' al usuario (sigue siendo pagable)
-      var estadoColor = pagado ? '#22c55e' : '#f59e0b';
-      var estadoLabel = pagado ? 'pagado' : 'pendiente';
+      var devuelta = p.estado === 'reembolsado';
+      var estadoColor = devuelta ? '#71717a' : (pagado ? '#22c55e' : '#f59e0b');
+      var estadoLabel = devuelta ? 'devuelta' : (pagado ? 'pagado' : 'pendiente');
+      // Chip de la solicitud de devolución (si existe)
+      var devChip = '';
+      if (p.dev_estado === 'pendiente')  devChip = '<span style="font-size:0.62rem;color:#f59e0b;border:1px solid #f59e0b;border-radius:20px;padding:2px 8px;margin-left:6px;">↩ devolución solicitada</span>';
+      if (p.dev_estado === 'rechazada')  devChip = '<span style="font-size:0.62rem;color:#71717a;border:1px solid #444;border-radius:20px;padding:2px 8px;margin-left:6px;" title="'+(p.dev_respuesta||'')+'">↩ devolución rechazada</span>';
       // Estimar nº de QRs total (sumando cantidades de todos los items)
       var nQR = items.reduce(function(s,i){return s+(i.cantidad||0);},0);
       return '<div style="background:var(--negro-3);border:1px solid #1a1a1c;border-radius:4px;padding:16px;margin-bottom:12px;">'
         +'<div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:10px;">'
         +'<div><div style="font-family:var(--fuente-display);font-weight:700;font-size:0.95rem;color:var(--blanco);">'+tituloPedido+'</div>'
-        +'<div style="font-size:0.7rem;color:var(--gris);margin-top:2px;">'+fecha+' · FCC-'+String(p.id).padStart(6,'0')+'</div></div>'
-        +'<span style="font-size:0.6rem;letter-spacing:2px;text-transform:uppercase;padding:3px 8px;border-radius:20px;background:rgba(0,0,0,0.3);border:1px solid '+estadoColor+';color:'+estadoColor+';">'+estadoLabel+'</span>'
+        +'<div style="font-size:0.7rem;color:var(--gris);margin-top:2px;">'+fecha+' · '+((esCobro && cobro && cobro.folio) ? _escCobro(cobro.folio) : ('FCC-'+String(p.id).padStart(6,'0')))+'</div></div>'
+        +'<span style="font-size:0.6rem;letter-spacing:2px;text-transform:uppercase;padding:3px 8px;border-radius:20px;background:rgba(0,0,0,0.3);border:1px solid '+estadoColor+';color:'+estadoColor+';">'+estadoLabel+'</span>'+devChip
         +'</div>'
-        +(items.length ? '<div style="margin-bottom:10px;">'+items.map(function(i){
-          var label = i.nombre_ticket || i.nombre_evento || 'Item';
+        +(esCobro ? ((cobro && cobro.concepto)
+          ? '<div style="font-size:0.78rem;color:var(--gris);padding:6px 0 10px;border-top:1px solid #1a1a1c;">'+_escCobro(cobro.concepto)+'</div>'
+          : '')
+        : items.length ? '<div style="margin-bottom:10px;">'+items.map(function(i){
+          var label = _etqPub(i.nombre_ticket) || i.nombre_evento || 'Item';
           var icono = i.producto_tipo==='carta' ? '🍹' : i.producto_tipo==='merch' ? '🛍️' : '🎟️';
           return '<div style="display:flex;justify-content:space-between;font-size:0.8rem;padding:4px 0;border-top:1px solid #1a1a1c;">'
             +'<span style="color:var(--gris);">'+icono+' '+label+' x'+i.cantidad+'</span>'
             +'<span style="color:var(--blanco);">'+fmt((i.precio_unitario||0)*(i.cantidad||0))+'</span>'
             +'</div>';
         }).join('')+'</div>' : '')
-        +'<div style="display:flex;justify-content:space-between;align-items:center;">'
-        +(pagado
-          ? '<button onclick="rePrintPedido('+p.id+')" style="background:transparent;border:1px solid var(--rojo);color:var(--rojo);padding:6px 12px;font-size:0.65rem;letter-spacing:2px;text-transform:uppercase;border-radius:2px;cursor:pointer;font-weight:700;">🖨️ Ver QRs ('+nQR+')</button>'
-          : '<button onclick="pagarPedido('+p.id+',this)" style="background:#E8363D;border:none;color:#fff;padding:7px 16px;font-size:0.65rem;letter-spacing:2px;text-transform:uppercase;border-radius:2px;cursor:pointer;font-weight:700;">💳 Pagar ahora</button>')
+        +'<div style="display:flex;justify-content:space-between;align-items:center;gap:8px;flex-wrap:wrap;">'
+        +'<div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap;">'
+        +(function(){
+          if (devuelta) return '<span style="font-size:0.7rem;color:var(--gris);">Compra anulada — '+(p.dev_respuesta==='Convertida en crédito FRATE'?'quedó como crédito ♻️':'devuelta')+'</span>';
+          // 🎂 Cobro de servicio: ni 🗑️ Borrar (dejaba el link de MercadoPago vivo y el cobro
+          //    huérfano) ni ↩ devolución (esa plata la ve una persona, y puede ir a medias).
+          //    Tampoco 💳 Pagar: el link lo manda el equipo, reanudar-pago rechaza estos.
+          if (esCobro) return '<span style="font-size:0.7rem;color:var(--gris);">'+(pagado
+            ? 'Pagado. Cualquier cambio lo vemos contigo — escríbenos.'
+            : 'Te mandamos el link de pago por WhatsApp o correo. ¿Dudas? Escríbenos.')+'</span>';
+          if (!pagado) return '<button onclick="elegirMedioPendiente('+p.id+',this)" style="background:#E8363D;border:none;color:#fff;padding:7px 16px;font-size:0.65rem;letter-spacing:2px;text-transform:uppercase;border-radius:2px;cursor:pointer;font-weight:700;">💳 Pagar ahora</button>'
+            +'<button onclick="cancelarPedido('+p.id+',this)" style="background:transparent;border:1px solid #3a3a3c;color:var(--gris);padding:7px 14px;font-size:0.65rem;letter-spacing:2px;text-transform:uppercase;border-radius:2px;cursor:pointer;margin-left:6px;">🗑️ Borrar</button>';
+          // pagado: ¿el evento ya terminó? (lógica nocturna)
+          var finMs = 0;
+          (items||[]).forEach(function(i){
+            var e = evMapH[i.evento_id]; if (!e || !e.fecha) return;
+            var f = dtEvento(e.fecha, e.hora_termino || '05:00').getTime();
+            if (f > finMs) finMs = f;
+          });
+          var terminado = finMs && Date.now() > finMs;
+          var enVentana = terminado && (Date.now() - finMs) <= horasReact * 3600000;
+          var btns = '<button onclick="rePrintPedido('+p.id+')" style="background:transparent;border:1px solid var(--rojo);color:var(--rojo);padding:6px 12px;font-size:0.65rem;letter-spacing:2px;text-transform:uppercase;border-radius:2px;cursor:pointer;font-weight:700;">🖨️ Ver QRs ('+nQR+')</button>';
+          if (!terminado) btns += '<button onclick="abrirEditarAsistentes('+p.id+')" style="background:transparent;border:1px solid #444;color:var(--gris);padding:6px 10px;font-size:0.6rem;letter-spacing:1px;text-transform:uppercase;border-radius:2px;cursor:pointer;" title="Cambiar nombre/RUT de una entrada (regalos)">✏️ Asistentes</button>';
+          if (!p.dev_estado) {
+            if (enVentana)       btns += '<button onclick="solicitarReactivacion('+p.id+',this)" style="background:transparent;border:1px solid #D4A832;color:#D4A832;padding:6px 10px;font-size:0.6rem;letter-spacing:1px;text-transform:uppercase;border-radius:2px;cursor:pointer;font-weight:700;">♻️ Reactivar ticket no usado</button>';
+            else if (!terminado) btns += '<button onclick="abrirModalDevolucion('+p.id+')" style="background:transparent;border:1px solid #444;color:var(--gris);padding:6px 10px;font-size:0.6rem;letter-spacing:1px;text-transform:uppercase;border-radius:2px;cursor:pointer;">↩ Solicitar devolución</button>';
+          }
+          return btns;
+        })()
+        +'</div>'
         +'<span style="font-family:var(--fuente-display);font-weight:900;font-size:1.1rem;color:var(--dorado);">'+fmt(p.total_pagado||p.total)+'</span>'
         +'</div>'
         +'</div>';
     }).join('');
+
+    // ── Mis reservas y cumpleaños (CRM) ──────────────────────
+    try {
+      var { data: misRes } = await sb.from('reservas').select('*')
+        .eq('cliente_id', session.id).in('tipo', ['reserva', 'cumpleanos'])
+        .order('created_at', { ascending: false }).limit(10);
+      if (misRes && misRes.length) {
+        var chipR = function (e) {
+          var c = e === 'confirmada' ? '#22c55e' : e === 'pendiente' ? '#f59e0b' : e === 'rechazada' ? '#f87171' : '#71717a';
+          return '<span style="font-size:0.6rem;letter-spacing:2px;text-transform:uppercase;padding:3px 8px;border-radius:20px;border:1px solid ' + c + ';color:' + c + ';">' + e + '</span>';
+        };
+        container.innerHTML += '<div class="cuenta-section-title" style="margin-top:28px;">Mis reservas</div>' + misRes.map(function (r) {
+          var nInv = Array.isArray(r.invitados) ? r.invitados.length : 0;
+          return '<div style="background:var(--negro-3);border:1px solid #1a1a1c;border-radius:4px;padding:14px;margin-bottom:10px;">'
+            + '<div style="display:flex;justify-content:space-between;align-items:center;gap:8px;flex-wrap:wrap;">'
+            + '<div style="color:#fff;font-size:0.88rem;"><b>' + (r.tipo === 'cumpleanos' ? '🎂 Cumpleaños' : '🍾 Mesa') + '</b> · ' + r.fecha + ' · ' + r.personas + ' persona(s)' + (nInv ? ' · ' + nInv + ' en lista' : '') + '</div>'
+            + chipR(r.estado) + '</div>'
+            + (r.mesa_nombre ? '<div style="font-size:0.75rem;color:#4ade80;margin-top:6px;">✅ Mesa: ' + r.mesa_nombre + (r.mesa_zona ? ' (' + r.mesa_zona + ')' : '') + (r.abono_requerido ? ' · Abono: $' + r.abono_requerido.toLocaleString('es-CL') : '') + '</div>' : '')
+            + (r.nota_cliente ? '<div style="font-size:0.75rem;color:var(--gris);margin-top:4px;">💬 ' + r.nota_cliente + '</div>' : '')
+            + (r.motivo_rechazo ? '<div style="font-size:0.75rem;color:#f87171;margin-top:4px;">' + r.motivo_rechazo + '</div>' : '')
+            + (['pendiente', 'confirmada'].includes(r.estado) ? '<button onclick="cancelarReservaCliente(' + r.id + ',this)" style="margin-top:8px;background:transparent;border:1px solid #444;color:var(--gris);padding:5px 12px;font-size:0.6rem;letter-spacing:1px;text-transform:uppercase;border-radius:2px;cursor:pointer;">Cancelar</button>' : '')
+            + '</div>';
+        }).join('');
+      }
+    } catch (e) { /* reservas aún sin migrar */ }
   } catch(err) {
     container.innerHTML = '<div style="text-align:center;padding:24px;color:var(--gris);font-size:0.8rem;">Error al cargar historial.</div>';
+  }
+}
+
+// ── 🎁 FRATE WRAPPED: tu año en FRATE + imagen para story ────
+async function abrirWrapped() {
+  const session = Storage.get('frate_session');
+  if (!session?.id) { if (typeof openAuthModal === 'function') openAuthModal('login'); return; }
+  try {
+    const [{ data: peds }, { count: nVotos }, { data: cli }] = await Promise.all([
+      sb.from('pedidos').select('total_pagado,total,items_pedido(cantidad,producto_tipo)').eq('cliente_id', session.id).eq('estado', 'pagado'),
+      sb.from('votos').select('*', { count: 'exact', head: true }).eq('cliente_id', session.id),
+      sb.from('clientes').select('puntos,username').eq('id', session.id).maybeSingle(),
+    ]);
+    const compras  = (peds || []).length;
+    const gastado  = (peds || []).reduce((s, p) => s + (p.total_pagado || p.total || 0), 0);
+    const entradas = (peds || []).reduce((s, p) => s + (p.items_pedido || []).filter(i => i.producto_tipo === 'ticket').reduce((a, i) => a + (i.cantidad || 0), 0), 0);
+    const titulo   = entradas >= 6 ? 'LEYENDA DE LA PISTA' : entradas >= 3 ? 'ALMA DEL CARRETE' : entradas >= 1 ? 'DEBUTANTE ESTELAR' : 'OYENTE CURIOSO';
+    const nombre   = ((session.nombres || '') + ' ' + (session.apellidos || '')).trim() || session.nombre || '';
+    window._wrapped = { nombre, usuario: cli?.username ? '@' + cli.username : '', entradas, compras, gastado, votos: nVotos || 0, puntos: cli?.puntos || 0, titulo };
+    mostrarWrapped(window._wrapped);
+  } catch (e) { if (typeof showToast === 'function') showToast('⚠️ No se pudo cargar tu Wrapped'); }
+}
+function mostrarWrapped(w) {
+  document.getElementById('wrapped-overlay')?.remove();
+  const ov = document.createElement('div');
+  ov.id = 'wrapped-overlay';
+  ov.style.cssText = 'position:fixed;inset:0;background:rgba(5,5,6,.93);z-index:10000;display:flex;align-items:center;justify-content:center;padding:20px;overflow-y:auto;';
+  ov.addEventListener('click', e => { if (e.target === ov) ov.remove(); });
+  const stat = (n, l) => `<div style="text-align:center;"><div style="font-family:var(--fuente-display);font-weight:900;font-size:1.55rem;color:var(--dorado);">${n}</div><div style="font-size:0.6rem;letter-spacing:2px;color:var(--gris);text-transform:uppercase;">${l}</div></div>`;
+  ov.innerHTML = `
+    <div style="background:linear-gradient(160deg,#141415,#0a0a0b);border:1px solid #E8363D;border-radius:16px;max-width:360px;width:100%;padding:26px;text-align:center;position:relative;">
+      <button onclick="document.getElementById('wrapped-overlay').remove()" style="position:absolute;top:10px;right:12px;background:none;border:none;color:var(--gris);font-size:18px;cursor:pointer;">✕</button>
+      <div style="font-size:0.65rem;letter-spacing:3px;color:var(--gris);">FRATE WRAPPED ${new Date().getFullYear()}</div>
+      <div style="font-family:var(--fuente-display);font-weight:900;font-size:1.5rem;margin:8px 0 2px;color:#fff;">${w.nombre}</div>
+      <div style="color:var(--gris);font-size:0.75rem;margin-bottom:14px;">${w.usuario}</div>
+      <div style="display:inline-block;background:rgba(232,54,61,.14);border:1px solid #E8363D;color:#E8363D;font-family:var(--fuente-display);font-weight:900;letter-spacing:2px;padding:8px 18px;border-radius:20px;margin-bottom:18px;">${w.titulo}</div>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-bottom:20px;">
+        ${stat(w.entradas, 'entradas')}${stat('$' + w.gastado.toLocaleString('es-CL'), 'en carretes')}
+        ${stat(w.votos, 'canciones votadas')}${stat(w.puntos, 'puntos')}
+      </div>
+      <button onclick="descargarWrapped()" style="width:100%;background:linear-gradient(45deg,#E8363D,#D4A832);border:none;color:#fff;padding:13px;font-family:var(--fuente-display);font-weight:900;letter-spacing:2px;text-transform:uppercase;border-radius:6px;cursor:pointer;">📲 Descargar para mi story</button>
+    </div>`;
+  document.body.appendChild(ov);
+}
+function descargarWrapped() {
+  const w = window._wrapped; if (!w) return;
+  const c = document.createElement('canvas'); c.width = 1080; c.height = 1920;
+  const x = c.getContext('2d');
+  const g = x.createLinearGradient(0, 0, 0, 1920); g.addColorStop(0, '#141415'); g.addColorStop(1, '#0a0a0b');
+  x.fillStyle = g; x.fillRect(0, 0, 1080, 1920);
+  x.strokeStyle = '#E8363D'; x.lineWidth = 10; x.strokeRect(50, 50, 980, 1820);
+  x.textAlign = 'center'; x.fillStyle = '#71717a'; x.font = '600 40px sans-serif';
+  x.fillText('F R A T E   W R A P P E D   ' + new Date().getFullYear(), 540, 260);
+  x.fillStyle = '#ffffff'; x.font = '900 92px sans-serif'; x.fillText(w.nombre.toUpperCase().slice(0, 20), 540, 420);
+  x.fillStyle = '#71717a'; x.font = '400 44px sans-serif'; x.fillText(w.usuario, 540, 490);
+  x.fillStyle = '#E8363D'; x.font = '900 72px sans-serif'; x.fillText(w.titulo, 540, 660);
+  const st = (v, l, y) => {
+    x.fillStyle = '#D4A832'; x.font = '900 110px sans-serif'; x.fillText(String(v), 540, y);
+    x.fillStyle = '#71717a'; x.font = '600 42px sans-serif'; x.fillText(l.toUpperCase(), 540, y + 64);
+  };
+  st(w.entradas, 'entradas', 900);
+  st('$' + w.gastado.toLocaleString('es-CL'), 'invertidos en carrete', 1150);
+  st(w.votos, 'canciones votadas', 1400);
+  st(w.puntos, 'puntos frate', 1650);
+  x.fillStyle = '#E8363D'; x.font = '900 52px sans-serif'; x.fillText('frate.cl 🎧', 540, 1800);
+  const a = document.createElement('a'); a.download = 'frate-wrapped.png'; a.href = c.toDataURL('image/png'); a.click();
+  if (typeof showToast === 'function') showToast('📲 ¡Lista para tu story!');
+}
+
+// ── Ruleta desde Mi cuenta → Promos (el premio lo decide el servidor) ──
+async function girarRuletaCuenta(btn) {
+  if (btn) { btn.disabled = true; btn.textContent = 'GIRANDO...'; }
+  var res = document.getElementById('ruleta-cuenta-result');
+  try {
+    var { data, error } = await sb.rpc('girar_ruleta');
+    if (error) throw error;
+    if (data && data.error === 'sin_giros') { if(res){res.style.color='var(--gris)';res.textContent='No te quedan giros.';} return; }
+    if (data && data.error) throw new Error(data.error);
+    var gano = data.tipo !== 'nada';
+    if (res) {
+      res.style.color = gano ? '#4ade80' : 'var(--gris)';
+      res.textContent = gano ? '🎉 ¡Ganaste ' + data.premio + '!' + (data.tipo==='beneficio' ? ' Muéstralo en la barra 🍹' : ' Ya está en tu cuenta.') : '😅 Sigue participando — la próxima será';
+    }
+    if (typeof showToast === 'function' && gano) showToast('🎡 ¡Ganaste ' + data.premio + '!');
+    setTimeout(function(){ renderPromos(); if (typeof renderPuntosCuenta==='function') renderPuntosCuenta(); }, 2600);
+  } catch (e) {
+    if (res) { res.style.color = '#f87171'; res.textContent = 'No se pudo girar: ' + (e.message || e); }
+    if (btn) { btn.disabled = false; btn.textContent = 'GIRAR AHORA 🎡'; }
+  }
+}
+
+// ══ DEVOLUCIONES & REACTIVACIONES (nada es automático) ════════
+function cerrarOverlayFrate() { var o = document.getElementById('frate-overlay'); if (o) o.remove(); }
+function abrirOverlayFrate(html) {
+  cerrarOverlayFrate();
+  var ov = document.createElement('div');
+  ov.id = 'frate-overlay';
+  ov.style.cssText = 'position:fixed;inset:0;background:rgba(0,0,0,.82);z-index:4000;display:flex;align-items:center;justify-content:center;padding:18px;overflow-y:auto;';
+  ov.innerHTML = '<div style="max-width:430px;width:100%;background:#141415;border:1px solid #2a2a2c;border-radius:12px;padding:24px;max-height:88vh;overflow-y:auto;">' + html + '</div>';
+  ov.addEventListener('click', function(e){ if (e.target === ov) cerrarOverlayFrate(); });
+  document.body.appendChild(ov);
+}
+
+// Modal: el cliente elige CRÉDITO (recomendado) o DINERO (5 días hábiles)
+function abrirModalDevolucion(pedidoId) {
+  abrirOverlayFrate(`
+    <div style="font-family:var(--fuente-display);font-weight:900;font-size:1.15rem;color:#fff;margin-bottom:6px;">↩ No podrás venir</div>
+    <p style="color:#a1a1aa;font-size:0.82rem;line-height:1.6;margin-bottom:16px;">Elige cómo prefieres resolverlo. El equipo FRATE revisa cada solicitud — te avisamos por correo. Tus entradas siguen válidas mientras tanto.</p>
+    <label style="display:block;background:rgba(212,168,50,.08);border:2px solid #D4A832;border-radius:10px;padding:14px;margin-bottom:10px;cursor:pointer;">
+      <input type="radio" name="dev-opcion" value="credito" checked style="accent-color:#D4A832;margin-right:8px;" />
+      <b style="color:#D4A832;">♻️ Crédito FRATE (recomendado)</b>
+      <div style="color:#a1a1aa;font-size:0.76rem;margin-top:4px;line-height:1.5;">El valor de tus entradas queda como crédito en tu cuenta para el evento que quieras. Resolución rápida.</div>
+    </label>
+    <label style="display:block;background:transparent;border:1px solid #333;border-radius:10px;padding:14px;margin-bottom:14px;cursor:pointer;">
+      <input type="radio" name="dev-opcion" value="dinero" style="accent-color:#71717a;margin-right:8px;" />
+      <b style="color:#d4d4d8;">💸 Devolución del dinero</b>
+      <div style="color:#a1a1aa;font-size:0.76rem;margin-top:4px;line-height:1.5;">Si se aprueba, la plata se devuelve a tu medio de pago <b>dentro de 5 días hábiles</b>.</div>
+    </label>
+    <textarea id="dev-motivo-txt" placeholder="Cuéntanos el motivo (ej: no podré ir, emergencia...)" style="width:100%;box-sizing:border-box;background:#0A0A0B;border:1px solid #2a2a2c;color:#fff;padding:12px;border-radius:8px;outline:none;min-height:70px;font-family:inherit;margin-bottom:14px;"></textarea>
+    <div style="display:flex;gap:8px;">
+      <button onclick="cerrarOverlayFrate()" style="flex:1;background:transparent;border:1px solid #333;color:#a1a1aa;padding:12px;border-radius:6px;cursor:pointer;text-transform:uppercase;font-size:0.72rem;letter-spacing:1px;">Cancelar</button>
+      <button id="dev-enviar-btn" onclick="enviarSolicitudDev(${pedidoId})" style="flex:2;background:#E8363D;border:none;color:#fff;padding:12px;border-radius:6px;cursor:pointer;font-weight:900;text-transform:uppercase;font-size:0.72rem;letter-spacing:2px;">Enviar solicitud</button>
+    </div>`);
+}
+async function enviarSolicitudDev(pedidoId) {
+  var opcion = (document.querySelector('input[name="dev-opcion"]:checked') || {}).value || 'credito';
+  var motivo = (document.getElementById('dev-motivo-txt') || {}).value || '';
+  var btn = document.getElementById('dev-enviar-btn');
+  if (btn) { btn.disabled = true; btn.textContent = 'Enviando...'; }
+  try {
+    var { data, error } = await sb.functions.invoke('solicitar-devolucion', {
+      body: { pedidoId: pedidoId, opcion: opcion, motivo: motivo.trim() || 'Sin motivo' }
+    });
+    if (error) throw new Error(error.message || 'No se pudo enviar.');
+    if (data && data.error) throw new Error(data.error);
+    cerrarOverlayFrate();
+    if (typeof showToast === 'function') showToast(opcion === 'credito' ? '♻️ Solicitud enviada — te confirmamos el crédito por correo' : '✅ Solicitud enviada — si se aprueba, la devolución demora hasta 5 días hábiles');
+    cuentaCargarHistorial();
+  } catch (err) {
+    if (typeof showToast === 'function') showToast('⚠️ ' + (err.message || 'Error al enviar.'));
+    if (btn) { btn.disabled = false; btn.textContent = 'Enviar solicitud'; }
+  }
+}
+
+// Reactivación post-evento (ticket no usado → crédito, aprueba el admin)
+async function solicitarReactivacion(pedidoId, btn) {
+  var ok = confirm('♻️ REACTIVAR TICKET NO USADO\n\nTus entradas sin usar de esta compra se convertirán en CRÉDITO FRATE por su valor, para el evento que tú quieras.\n\nEl equipo lo aprueba y te confirmamos por correo. ¿Continuar?');
+  if (!ok) return;
+  if (btn) { btn.disabled = true; btn.textContent = 'Enviando...'; }
+  try {
+    var { data, error } = await sb.functions.invoke('solicitar-devolucion', {
+      body: { pedidoId: pedidoId, opcion: 'credito', motivo: 'Reactivación — ticket no usado' }
+    });
+    if (error) throw new Error(error.message || 'No se pudo enviar.');
+    if (data && data.error) throw new Error(data.error);
+    if (typeof showToast === 'function') showToast('♻️ ¡Listo! Cuando se apruebe, el crédito queda en tu cuenta.');
+    cuentaCargarHistorial();
+  } catch (err) {
+    if (typeof showToast === 'function') showToast('⚠️ ' + (err.message || 'Error.'));
+    if (btn) { btn.disabled = false; btn.textContent = '♻️ Reactivar ticket no usado'; }
+  }
+}
+
+// ── Editar asistentes (tickets nominativos / regalos) ─────────
+async function abrirEditarAsistentes(pedidoId) {
+  var p = (window._misPedidosCache || []).find(function(x){ return x.id === pedidoId; });
+  if (!p) return;
+  // Las entradas de miembro van a nombre del dueño de la cuenta: no se regalan.
+  var ids = (p.items_pedido || []).map(function(i){ return i.tipo_ticket_id; }).filter(Boolean);
+  var deMiembro = {};
+  if (ids.length) {
+    try {
+      var rm = await sb.from('tipos_ticket').select('id').in('id', ids).eq('solo_miembros', true);
+      (rm.data || []).forEach(function(t){ deMiembro[t.id] = true; });
+    } catch (_) {}
+  }
+  var filas = '', saltadas = 0;
+  (p.items_pedido || []).forEach(function(item){
+    if (item.producto_tipo !== 'ticket') return;
+    if (deMiembro[item.tipo_ticket_id]) { saltadas++; return; }
+    var n = item.cantidad || 1;
+    var personas = Array.isArray(item.personas) ? item.personas : [];
+    for (var u = 0; u < n; u++) {
+      var per = personas[u] || {};
+      filas += '<div style="background:#0A0A0B;border:1px solid #2a2a2c;border-radius:8px;padding:12px;margin-bottom:10px;">'
+        + '<div style="font-size:0.62rem;letter-spacing:1px;text-transform:uppercase;color:#71717a;margin-bottom:8px;">🎟️ ' + (_etqPub(item.nombre_ticket) || 'Entrada') + ' #' + (u+1) + '</div>'
+        + '<input data-item="' + item.id + '" data-idx="' + u + '" class="asist-nombre" value="' + String(per.nombre||'').replace(/"/g,'&quot;') + '" placeholder="Nombre y apellido" style="width:100%;box-sizing:border-box;background:#141415;border:1px solid #2a2a2c;color:#fff;padding:10px;border-radius:6px;outline:none;margin-bottom:6px;" />'
+        + '<input data-item="' + item.id + '" data-idx="' + u + '" class="asist-rut" value="' + String(per.rut||'').replace(/"/g,'&quot;') + '" placeholder="RUT (12.345.678-9)" maxlength="12" oninput="rutFormat(this)" onblur="rutCheck(this)" style="width:100%;box-sizing:border-box;background:#141415;border:1px solid #2a2a2c;color:#fff;padding:10px;border-radius:6px;outline:none;" />'
+        + '</div>';
+    }
+  });
+  if (!filas) { if (typeof showToast==='function') showToast(saltadas ? '🔒 Las entradas de miembro van a tu nombre y no se pueden regalar.' : 'Esta compra no tiene entradas editables.'); return; }
+  abrirOverlayFrate(`
+    <div style="font-family:var(--fuente-display);font-weight:900;font-size:1.15rem;color:#fff;margin-bottom:6px;">✏️ Datos de los asistentes</div>
+    <p style="color:#a1a1aa;font-size:0.8rem;line-height:1.6;margin-bottom:14px;">Todas las entradas son nominativas. Si regalaste una, pon aquí el nombre y RUT de quien va a entrar (se puede cambiar mientras la entrada no se use).</p>
+    ${filas}
+    <div style="display:flex;gap:8px;margin-top:4px;">
+      <button onclick="cerrarOverlayFrate()" style="flex:1;background:transparent;border:1px solid #333;color:#a1a1aa;padding:12px;border-radius:6px;cursor:pointer;text-transform:uppercase;font-size:0.72rem;letter-spacing:1px;">Cerrar</button>
+      <button id="asist-save-btn" onclick="guardarAsistentes()" style="flex:2;background:#E8363D;border:none;color:#fff;padding:12px;border-radius:6px;cursor:pointer;font-weight:900;text-transform:uppercase;font-size:0.72rem;letter-spacing:2px;">Guardar cambios</button>
+    </div>`);
+}
+async function guardarAsistentes() {
+  var nombres = [...document.querySelectorAll('.asist-nombre')];
+  var ruts    = [...document.querySelectorAll('.asist-rut')];
+  var btn = document.getElementById('asist-save-btn');
+  // Validación: nombre + RUT válido en cada entrada
+  for (var i = 0; i < nombres.length; i++) {
+    var nom = nombres[i].value.trim(), rut = ruts[i].value.trim();
+    if (!nom || !rut) { if (typeof showToast==='function') showToast('⚠️ Entrada #' + (i+1) + ': nombre y RUT son obligatorios.'); return; }
+    if (typeof validarRut === 'function' && !validarRut(rut)) { if (typeof showToast==='function') showToast('⚠️ Entrada #' + (i+1) + ': RUT inválido.'); ruts[i].style.borderColor = '#ef4444'; return; }
+  }
+  if (btn) { btn.disabled = true; btn.textContent = 'Guardando...'; }
+  try {
+    for (var k = 0; k < nombres.length; k++) {
+      var { data, error } = await sb.rpc('editar_asistente', {
+        p_item_id: parseInt(nombres[k].dataset.item),
+        p_idx:     parseInt(nombres[k].dataset.idx),
+        p_nombre:  nombres[k].value.trim(),
+        p_rut:     ruts[k].value.trim(),
+      });
+      if (error) throw error;
+      if (data && data.error) throw new Error(data.error);
+    }
+    cerrarOverlayFrate();
+    if (typeof showToast === 'function') showToast('✅ Asistentes actualizados');
+    cuentaCargarHistorial();
+  } catch (err) {
+    if (typeof showToast === 'function') showToast('⚠️ ' + (err.message || 'No se pudo guardar.'));
+    if (btn) { btn.disabled = false; btn.textContent = 'Guardar cambios'; }
   }
 }
 
@@ -1630,11 +2519,20 @@ async function ageDoRegister() {
   var rut        = ((document.getElementById('agr-rut')       ||{}).value||'').trim();
   var universidad= ((document.getElementById('agr-inst')      ||{}).value||'');
   var carrera    = ((document.getElementById('agr-carrera')   ||{}).value||'');
+  var ext = !!((document.getElementById('agr-ext')||{}).checked);
   var errEl = document.getElementById('agr-error');
   var btn   = document.getElementById('agr-submit');
   if (errEl) { errEl.textContent=''; errEl.style.display='none'; }
+  var sexo = ((document.getElementById('agr-sexo')||{}).value||'');
+  if (!sexo) { if(errEl){errEl.textContent='Elige tu sexo (como en tu cédula).';errEl.style.display='block';} return; }
   if (!nombres||!username||!email||!pass) {
     if(errEl){errEl.textContent='Nombres, username, email y contraseña son obligatorios.';errEl.style.display='block';} return;
+  }
+  if (ext) {
+    if (rut.replace(/\s/g,'').length < 5) { if(errEl){errEl.textContent='Ingresa tu número de pasaporte o ID.';errEl.style.display='block';} var ae0=document.getElementById('agr-rut'); if(ae0) ae0.style.borderColor='#E8363D'; return; }
+  } else {
+    if (!rut) { if(errEl){errEl.textContent='El RUT es obligatorio. Si eres extranjer@, marca la casilla.';errEl.style.display='block';} var ae1=document.getElementById('agr-rut'); if(ae1) ae1.style.borderColor='#E8363D'; return; }
+    if (rutSospechoso(rut)) { if(errEl){errEl.textContent='Ingresa tu RUT chileno REAL (revisa el número). Si eres extranjer@, marca la casilla.';errEl.style.display='block';} var ae2=document.getElementById('agr-rut'); if(ae2) ae2.style.borderColor='#E8363D'; return; }
   }
   if (pass.length < 6) {
     if(errEl){errEl.textContent='La contraseña debe tener al menos 6 caracteres.';errEl.style.display='block';} return;
@@ -1642,7 +2540,7 @@ async function ageDoRegister() {
   if (btn) { btn.disabled=true; btn.textContent='Creando cuenta...'; }
   try {
     if (typeof sbSignUp === 'function') {
-      await sbSignUp({nombres,apellidos,username,email,password:pass,telefono,rut,universidad,carrera});
+      await sbSignUp({nombres,apellidos,username,email,password:pass,telefono,rut,universidad,carrera,extranjero:ext,sexo});
       try { await sbSignIn(email, pass); } catch(_) {}
     }
     var displayName = username || nombres;
@@ -1713,8 +2611,27 @@ async function modalDoRegister() {
   var errEl = document.getElementById('reg-error');
   var btn   = document.querySelector('#register-form .btn-rojo');
   if (errEl) { errEl.textContent=''; errEl.style.display='none'; }
+  var ext = !!((document.getElementById('reg-ext')||{}).checked);
+  var sexo = ((document.getElementById('reg-sexo')||{}).value||'');
+  if (!sexo) { if(errEl){errEl.textContent='Elige tu sexo (como en tu cédula).';errEl.style.display='block';} return; }
   if (!nombres||!username||!email||!pass) {
     if(errEl){errEl.textContent='Nombres, username, email y contraseña son obligatorios.';errEl.style.display='block';} return;
+  }
+  // RUT real obligatorio (o pasaporte si es extranjer@)
+  if (ext) {
+    if (rut.replace(/\s/g,'').length < 5) {
+      if(errEl){errEl.textContent='Ingresa tu número de pasaporte o ID.';errEl.style.display='block';}
+      var ri0=document.getElementById('reg-rut'); if(ri0) ri0.style.borderColor='#E8363D'; return;
+    }
+  } else {
+    if (!rut) {
+      if(errEl){errEl.textContent='El RUT es obligatorio. Si eres extranjer@, marca la casilla.';errEl.style.display='block';}
+      var ri1=document.getElementById('reg-rut'); if(ri1) ri1.style.borderColor='#E8363D'; return;
+    }
+    if (rutSospechoso(rut)) {
+      if(errEl){errEl.textContent='Ingresa tu RUT chileno REAL (revisa el número y el dígito verificador). Si eres extranjer@, marca la casilla.';errEl.style.display='block';}
+      var ri2=document.getElementById('reg-rut'); if(ri2) ri2.style.borderColor='#E8363D'; return;
+    }
   }
   if (pass !== pass2) {
     if(errEl){errEl.textContent='Las contraseñas no coinciden.';errEl.style.display='block';} return;
@@ -1727,7 +2644,7 @@ async function modalDoRegister() {
     if (typeof sbSignUp === 'function') {
       var fechaNacimiento = ((document.getElementById('reg-nacimiento')||{}).value||'') || null;
       await sbSignUp({ nombres, apellidos, username, email, password:pass,
-                       telefono, rut, universidad:inst, carrera, fechaNacimiento });
+                       telefono, rut, universidad:inst, carrera, fechaNacimiento, extranjero:ext, sexo });
       await sbSignIn(email, pass);
     }
     var displayName = username || nombres;
@@ -1937,21 +2854,279 @@ function openTiendaPopup(prodId) {
 
 // ── ticket-type card styles (injected) ──
 const ttStyles = document.createElement('style');
-ttStyles.textContent = `.ticket-type-card{background:var(--negro-3);border:1px solid #2a2a2c;border-radius:2px;padding:14px 16px;cursor:pointer;transition:all .2s;}.ticket-type-card:hover{border-color:#555;}.ticket-type-card.agotado{opacity:.5;cursor:not-allowed;}`;
+ttStyles.textContent = `.ticket-type-card{background:var(--negro-3);border:1px solid #2a2a2c;border-radius:4px;padding:11px 14px;transition:border-color .2s;}.ticket-type-card:hover{border-color:#555;}.ticket-type-card.agotado{opacity:.5;}@keyframes pulse{0%,100%{opacity:1;}50%{opacity:.45;}}
+.tt-head{display:flex;align-items:center;gap:8px;}
+.tt-title{flex:1;min-width:0;font-family:var(--fuente-display);font-weight:700;font-size:1.05rem;line-height:1.12;}
+.tt-pub{font-family:var(--fuente-cuerpo);font-weight:700;font-size:0.5rem;letter-spacing:.3px;vertical-align:middle;padding:1px 6px;border-radius:20px;white-space:nowrap;}
+.tt-status{flex-shrink:0;font-size:0.52rem;letter-spacing:1.5px;text-transform:uppercase;padding:3px 8px;border-radius:3px;border:1px solid;font-weight:700;white-space:nowrap;}
+.tt-more{display:inline-flex;align-items:center;gap:5px;background:rgba(255,255,255,.05);border:1px solid #3a3a3c;color:#c7c7cd;font-family:var(--fuente-cuerpo);font-size:0.62rem;font-weight:700;letter-spacing:.5px;text-transform:uppercase;padding:6px 10px;border-radius:20px;cursor:pointer;transition:border-color .18s,color .18s;}
+.tt-more:hover{border-color:var(--dorado);color:var(--dorado);}
+.tt-chev{color:inherit;font-size:0.85rem;transition:transform .25s;}
+.ticket-type-card.open .tt-more{border-color:var(--dorado);color:var(--dorado);}
+.ticket-type-card.open .tt-chev{transform:rotate(180deg);}
+.tt-details{display:none;margin:8px 0 0;padding:8px 10px;background:rgba(212,168,50,0.06);border:1px solid rgba(212,168,50,0.2);border-radius:6px;font-size:0.72rem;color:#d4d4d8;}
+.ticket-type-card.open .tt-details{display:block;}
+.tt-foot{display:flex;justify-content:space-between;align-items:center;margin-top:9px;gap:10px;}
+.tt-price{font-family:var(--fuente-display);font-weight:900;font-size:1.5rem;}
+.tt-pocas{font-size:0.7rem;color:#f59e0b;margin-top:7px;font-weight:700;}`;
 document.head.appendChild(ttStyles);
 
+// ── Lógica nocturna FRATE ─────────────────────────────────────
+// Los eventos parten un día (ej. 23:00) y terminan la madrugada
+// siguiente (ej. 05:00). Regla: horas 12:00–23:59 = el día del
+// evento; 00:00–11:59 = la madrugada siguiente.
+function dtEvento(fechaRaw, hora) {
+  try {
+    const [y,m,d] = String(fechaRaw).split('-').map(Number);
+    const [hh,mm] = String(hora||'23:00').split(':').map(Number);
+    const dt = new Date(y, m-1, d, hh||0, mm||0);
+    if ((hh||0) < 12) dt.setDate(dt.getDate()+1);
+    return dt;
+  } catch(e) { return new Date(8640000000000000); }
+}
+// creado | publicado | en_vivo | finalizado
+function estadoEfectivoEvento(ev) {
+  const estado = ev.estado || 'publicado';
+  if (ev.oculto_publico) return 'finalizado';   // 🙈 oculto manual del público (sin cambiar el estado real del evento)
+  if (estado === 'cerrado' || estado === 'postedicion' || ev.archivado) return 'finalizado';   // cerrado manual → fuera del público
+  if (estado === 'creado' || estado === 'planificacion') return 'creado';   // planificación = no público
+  if (!ev.fechaRaw) return estado;
+  const ahora = new Date();
+  if (ahora > dtEvento(ev.fechaRaw, ev.horaTermino || '05:00')) return 'finalizado';
+  if (estado === 'en_vivo') return 'en_vivo';
+  if (ahora >= dtEvento(ev.fechaRaw, ev.hora || '23:00')) return 'en_vivo'; // en vivo automático
+  return 'publicado';
+}
+// ¿El tipo de ticket ya venció? (solo aplica si tiene hora de vencimiento)
+function ticketVencido(ev, tt) {
+  if (!tt.venceHora || !ev.fechaRaw) return false;
+  return new Date() > dtEvento(ev.fechaRaw, tt.venceHora);
+}
+
+// ── Cuenta regresiva de preventa (solo urgencia real: ≤ 48 h) ──
+// Deadline = el vencimiento más próximo entre los tickets activos
+// con stock; si ninguno tiene hora de vencimiento, el inicio del evento.
+// ⏳ ¿este tramo de preventa está en su ventana de venta AHORA?
+// Sin ventana → se vende siempre, como siempre se vendió (los campos son aditivos).
+// venta_desde/venta_hasta son instantes ABSOLUTOS (timestamptz con offset), así que
+// se comparan con new Date() y NUNCA con dtEvento(): la ventana no está anclada a la
+// fecha del evento. Una fecha ilegible se IGNORA en vez de esconder la entrada — ante
+// basura en la base nos comportamos como antes, que es el lado seguro.
+// ⏳ ¿Cuándo abre el próximo tramo que todavía no empieza? null si no hay ninguno.
+// Devuelve sólo la FECHA de apertura, nunca el precio: el dueño pidió explícitamente
+// que la vitrina no anuncie cuándo ni a cuánto sube la preventa.
+function proximaApertura(ev) {
+  const ahora = new Date();
+  let mejor = null;
+  (ev.tiposTicket || []).forEach(t => {
+    if (t.soloWeb === false || t.estado !== 'Activo' || (t.disponible ?? 1) <= 0) return;
+    if (!t.ventaDesde) return;
+    const d = new Date(t.ventaDesde);
+    if (isNaN(+d) || d <= ahora) return;
+    if (!mejor || d < mejor) mejor = d;
+  });
+  return mejor;
+}
+function enVentana(t, ahora) {
+  const n = ahora || new Date();
+  const d = t.ventaDesde ? new Date(t.ventaDesde) : null;
+  const h = t.ventaHasta ? new Date(t.ventaHasta) : null;
+  if (d && !isNaN(+d) && n < d) return false;
+  if (h && !isNaN(+h) && n >= h) return false;
+  return true;
+}
+function proximoDeadline(ev) {
+  const ahora = new Date();
+  let mejor = null;
+  (ev.tiposTicket || []).forEach(tt => {
+    if (tt.estado !== 'Activo' || (tt.disponible || 0) <= 0 || !enVentana(tt, ahora)) return;
+    // Un tramo puede cerrar por su ventana (instante absoluto) o por el vence_hora del
+    // día del evento. Gana el que llegue primero.
+    const cands = [];
+    if (tt.ventaHasta) { const d = new Date(tt.ventaHasta); if (!isNaN(+d)) cands.push(d); }
+    if (tt.venceHora && ev.fechaRaw) cands.push(dtEvento(ev.fechaRaw, tt.venceHora));
+    cands.forEach(dt => { if (dt > ahora && (!mejor || dt < mejor.dt)) mejor = { dt, tipo: 'preventa' }; });
+  });
+  if (!mejor && ev.fechaRaw) {
+    const ini = dtEvento(ev.fechaRaw, ev.hora || '23:00');
+    if (ini > ahora) mejor = { dt: ini, tipo: 'inicio' };
+  }
+  if (!mejor) return null;
+  return ((mejor.dt - ahora) / 36e5) <= 48 ? mejor : null;
+}
+function cuentaChip(ev) {
+  const d = proximoDeadline(ev);
+  if (!d) return '';
+  return `<span class="evento-tag cd-timer" data-dl="${d.dt.getTime()}" data-tipo="${d.tipo}" style="border-color:var(--dorado);color:var(--dorado);font-weight:700;"></span>`;
+}
+function fmtRestante(ms) {
+  const s = Math.max(0, Math.floor(ms / 1000));
+  const d = Math.floor(s / 86400), h = Math.floor((s % 86400) / 3600), m = Math.floor((s % 3600) / 60), ss = s % 60;
+  const pad = n => String(n).padStart(2, '0');
+  return (d > 0 ? d + 'd ' : '') + pad(h) + ':' + pad(m) + ':' + pad(ss);
+}
+setInterval(() => {
+  document.querySelectorAll('.cd-timer').forEach(el => {
+    const ms = parseInt(el.dataset.dl) - Date.now();
+    if (ms <= 0) { el.textContent = el.dataset.tipo === 'preventa' ? '⏳ Preventa cerrada' : '🔴 ¡EN VIVO!'; return; }
+    el.textContent = (el.dataset.tipo === 'preventa' ? '⏳ Preventa termina en ' : '🎶 Empieza en ') + fmtRestante(ms);
+  });
+}, 1000);
+
+// ── Precio mínimo de un evento: SIEMPRE desde los tickets anidados ──
+// (las columnas precio_anticipada/precio_general son legado y ya no se usan)
+function precioMinEvento(ev) {
+  const tt = (ev.tiposTicket || []).filter(t => t.estado === 'Activo' && t.soloWeb !== false && enVentana(t));
+  if (tt.length) return Math.min(...tt.map(t => t.precio));
+  return ev.precio_anticipada || 0; // fallback sólo para eventos viejos sin tickets anidados
+}
+
+// ══ 🎃 TEMPORADA · banner + ventana ═══════════════════════════════════
+// Se arma SOLO desde los eventos marcados como especiales que comparten
+// temporada. NO está escrito para Halloween: en noviembre, con otra
+// temporada, produce su propio banner sin tocar una línea. El nombre sale
+// de brief.produccion.temporada.nombre — donde el ERP lo crea —, no del
+// nombre del evento, que es donde vivía antes.
+window._tempCfg = {};
+// Escape propio: el `esc` de esta página vive dentro de otra función y no es
+// global; el de frate-afiche.js tampoco se exporta. Uno local y se acabó.
+  // 🏷️ Etiqueta para el cliente: PREV 3 MUJER… → MUJER… · PREVENTA 3.
+  // Copia chica de frate-afiche.js (esta página no carga ese módulo).
+  // El nombre REAL del tipo no se toca: lo usan la puerta y el ERP.
+  function _etqPubPub(nombre){ var n=String(nombre==null?'':nombre);
+    var m=n.match(/^\s*PREV(?:ENTA)?\s*(\d+)\s+(.+)$/i);
+    return m ? (m[2].trim()+' · PREVENTA '+m[1]) : n; }
+function _tEsc(x){ return String(x==null?'':x).replace(/[&<>"]/g, function(c){ return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]; }); }
+async function cargarTemporadaCfg(){
+  try{
+    const { data } = await sb.from('config_valores').select('clave,valor')
+      .in('clave', ['temporada_texto','temporada_video','temporada_imagen']);
+    (data||[]).forEach(function(r){ window._tempCfg[r.clave] = r.valor || ''; });
+  }catch(_){}
+}
+function _temporada(){
+  const esp = (typeof FRATE_EVENTOS !== 'undefined' ? FRATE_EVENTOS : []).filter(function(e){ return e.especial; });
+  if (esp.length < 2) return null;                 // una noche suelta no es temporada
+  var nombre = '';
+  esp.forEach(function(e){ if(!nombre){ nombre = ((((e.brief||{}).produccion||{}).temporada||{}).nombre) || ''; } });
+  if (!nombre) return null;
+  const noches = esp.slice().sort(function(a,b){ return String(a.fechaRaw||'').localeCompare(String(b.fechaRaw||'')); });
+  return { nombre: nombre, noches: noches };
+}
+// El título de temporada: Anton, rojo, y el año en blanco debajo. Anton es
+// la misma letra que FRATE ya usa para su marca y sus fechas en /links —
+// no es una tipografía nueva, es la de la casa en el lugar que más pesa.
+function _tempTitulo(nombre, tam){
+  const m = String(nombre||'').match(/^(.*?)\s*(\d{4})$/);
+  const base = 'font-family:\'Anton\',sans-serif;font-size:'+tam+';line-height:.9;letter-spacing:1px;margin-top:6px;text-shadow:0 2px 30px rgba(232,54,61,.45);';
+  if (m) return '<div style="'+base+'color:var(--rojo);">'+_tEsc(m[1].toUpperCase())
+               + '<span style="display:block;color:var(--blanco);">'+_tEsc(m[2])+'</span></div>';
+  return '<div style="'+base+'color:var(--rojo);">'+_tEsc(String(nombre).toUpperCase())+'</div>';
+}
+function _tempFecha(ev){
+  const p = String(ev.fecha||'').split(' ');
+  return p.length >= 3 ? (p[0].slice(0,3)+' '+p[1]).toUpperCase() : (ev.fecha||'');
+}
+function renderTemporadaBanner(){
+  const cont = document.getElementById('temporada-banner'); if (!cont) return;
+  const t = _temporada();
+  if (!t) { cont.innerHTML = ''; return; }
+  const dias = t.noches.map(function(x){ return String(x.fecha||'').split(' ')[1]; }).filter(Boolean);
+  const cuando = dias.length > 1 ? dias.slice(0,-1).join(', ') + ' y ' + dias[dias.length-1] : (dias[0]||'');
+  const mes = String(t.noches[0].fecha||'').split(' ').slice(2).join(' ');
+  const marca = (t.nombre.toUpperCase().replace(/\s+\d{4}$/,'') + ' · ');
+  cont.innerHTML =
+    '<div onclick="abrirTemporada()" style="cursor:pointer;position:relative;overflow:hidden;border:1px solid var(--rojo);border-radius:3px;background:#15090d;padding:20px 22px;margin-bottom:22px;">'
+    + '<div style="position:absolute;inset:0;opacity:.07;color:var(--rojo);font-family:\'Barlow Condensed\',sans-serif;font-weight:900;font-size:2.4rem;line-height:1.15;letter-spacing:2px;pointer-events:none;overflow:hidden;">'
+    + _tEsc(marca.repeat(14)) + '</div>'
+    + '<div style="position:relative;display:flex;gap:16px;align-items:center;flex-wrap:wrap;">'
+    +   '<div style="flex:1;min-width:190px;">'
+    +     '<div style="font-size:0.58rem;letter-spacing:4px;text-transform:uppercase;color:var(--rojo);">Temporada especial</div>'
+    +     _tempTitulo(t.nombre, 'clamp(2.6rem,9vw,4rem)')
+    +     '<div style="font-size:0.82rem;color:var(--gris);margin-top:6px;">' + t.noches.length + ' noches temáticas' + (cuando ? ' · ' + _tEsc(cuando) + (mes ? ' de ' + _tEsc(mes) : '') : '') + '</div>'
+    +   '</div>'
+    +   '<div style="background:var(--rojo);color:#fff;border-radius:2px;padding:12px 22px;font-size:0.72rem;letter-spacing:2px;white-space:nowrap;font-weight:700;">VER LA TEMPORADA →</div>'
+    + '</div></div>';
+}
+function abrirTemporada(){
+  const t = _temporada(); if (!t) return;
+  const cfg = window._tempCfg || {};
+  const body = document.getElementById('temporada-popup-body'); if (!body) return;
+  // El bloque del video sólo existe si hay algo cargado: un recuadro vacío
+  // esperando se ve peor que no tenerlo.
+  const vid = cfg.temporada_video
+    ? '<video src="' + _tEsc(cfg.temporada_video) + '" controls playsinline preload="metadata" style="width:100%;display:block;background:#000;border-bottom:1px solid #1a1a1c;"></video>'
+    : (cfg.temporada_imagen ? '<img src="' + _tEsc(cfg.temporada_imagen) + '" alt="" style="width:100%;display:block;border-bottom:1px solid #1a1a1c;" />' : '');
+  const noches = t.noches.map(function(ev){
+    const min = precioMinEvento(ev);
+    return '<div onclick="cerrarTemporada();openEventPopup(' + ev.id + ')" style="cursor:pointer;border:1px solid #1a1a1c;border-radius:3px;padding:13px 15px;">'
+      + '<div style="display:flex;gap:10px;align-items:baseline;flex-wrap:wrap;">'
+      +   '<span style="font-size:0.6rem;letter-spacing:2px;color:var(--rojo);min-width:52px;">' + _tEsc(_tempFecha(ev)) + '</span>'
+      +   '<span style="flex:1;min-width:120px;color:var(--blanco);font-weight:700;">' + _tEsc(ev.nombre) + '</span>'
+      +   '<span style="font-size:0.78rem;color:var(--gris);">' + (min ? 'desde $' + min.toLocaleString('es-CL') : '') + '</span>'
+      + '</div>'
+      + (ev.descripcion ? '<div style="margin:5px 0 0 62px;font-size:0.78rem;color:var(--gris);font-style:italic;">' + _tEsc(ev.descripcion) + '</div>' : '')
+      + '</div>';
+  }).join('');
+  body.innerHTML =
+      '<div style="background:#15090d;padding:22px 24px 18px;border-bottom:1px solid #1a1a1c;">'
+    +   '<div style="font-size:0.58rem;letter-spacing:4px;text-transform:uppercase;color:var(--rojo);">Temporada especial</div>'
+    +   _tempTitulo(t.nombre, 'clamp(2.3rem,8vw,3.2rem)')
+    + '</div>'
+    + vid
+    + '<div style="padding:18px 20px;">'
+    +   (cfg.temporada_texto ? '<div style="font-size:0.88rem;color:#b8b8bf;line-height:1.65;margin-bottom:16px;">' + _tEsc(cfg.temporada_texto) + '</div>' : '')
+    +   '<div style="display:flex;flex-direction:column;gap:9px;">' + noches + '</div>'
+    + '</div>';
+  const pp = document.getElementById('temporada-popup');
+  if (pp) pp.classList.add('open');
+  document.body.style.overflow = 'hidden';
+}
+function cerrarTemporada(){
+  const pp = document.getElementById('temporada-popup');
+  if (pp) pp.classList.remove('open');
+  document.body.style.overflow = '';
+}
+
 // ── Override renderEventos para incluir selector de tickets ──
+function _ytId(u){ var m=String(u||'').match(/(?:v=|youtu\.be\/|embed\/|shorts\/|live\/|\/v\/)([A-Za-z0-9_-]{11})/); return m?m[1]:''; }
+function _encStyle(enc){ enc=enc||{}; var z=Math.max(100,Math.min(340,+enc.zoom||160)), y=Math.max(-80,Math.min(80,+enc.y||0)); /* min-width grande + 'y' acotado en px: el título/controles de YouTube (más altos y persistentes en el reproductor MÓVIL) quedan recortados fuera de la tarjeta en cualquier teléfono, y el encuadre vertical nunca reduce el margen de recorte por debajo de lo seguro */ return 'position:absolute;top:50%;left:50%;width:'+z+'%;min-width:820px;aspect-ratio:16/9;transform:translate(-50%,calc(-50% + '+(y*0.7)+'px));border:0;pointer-events:none;'; }
+// Fondo del evento = IMAGEN limpia del video (thumbnail de YouTube). SIN iframe, SIN API:
+// carga rápido, se ve IGUAL en celular y escritorio, y NUNCA muestra controles ni título.
+// El encuadre vertical (y) reposiciona la imagen; el zoom deja de aplicar (ya no hay recorte de chrome).
+// Fondo del evento = VIDEO de YouTube que REPRODUCE (autoplay mudo en loop). El encuadre
+// (min-width grande + transform) recorta los controles/título fuera de la tarjeta.
+function _ytBg(id,enc){
+  enc=enc||{}; var st=Math.max(0,parseInt(enc.start)||0);
+  var src='https://www.youtube.com/embed/'+id+'?autoplay=1&mute=1&loop=1&playlist='+id
+    +'&controls=0&showinfo=0&modestbranding=1&rel=0&iv_load_policy=3&playsinline=1&disablekb=1&fs=0&start='+st;
+  return '<iframe src="'+src+'" allow="autoplay; encrypted-media" frameborder="0" loading="lazy" style="'+_encStyle(enc)+'"></iframe>';
+}
+function _ytActivate(){ /* el iframe hace autoplay mudo al cargar; no requiere gesto del usuario */ }
+function _colorLayer(c){ return '<div style="position:absolute;inset:0;z-index:2;pointer-events:none;background:linear-gradient(180deg,rgba(10,10,11,.94),transparent 62px),linear-gradient(0deg,rgba(10,10,11,.72),transparent 48px),rgba(10,10,11,.2);"></div>'+(c?'<div style="position:absolute;inset:0;z-index:2;pointer-events:none;background:'+c+';opacity:.4;"></div>':'')+'<div class="ev-reveal" style="position:absolute;inset:0;z-index:5;pointer-events:none;background:'+(c||'#0a0a0b')+';"></div>'; }
+function filtrarEventos(btn){ document.querySelectorAll('.eventos-filters .filter-btn').forEach(function(b){b.classList.remove('active');}); btn.classList.add('active'); renderEventos(btn.dataset.filter); }
+function renderFiltros(){
+  var cont=document.querySelector('.eventos-filters'); if(!cont || typeof FRATE_EVENTOS==='undefined') return;
+  if(!FRATE_EVENTOS.length){ cont.innerHTML=''; return; }
+  var ORDEN=['Jueves','Viernes','Sábado','Domingo','Lunes','Martes','Miércoles'];
+  var dias=[]; FRATE_EVENTOS.forEach(function(e){ if(e.tipo && dias.indexOf(e.tipo)<0) dias.push(e.tipo); });
+  dias.sort(function(a,b){ return ORDEN.indexOf(a)-ORDEN.indexOf(b); });
+  var hayEsp=FRATE_EVENTOS.some(function(e){return e.especial;});
+  var prev=document.querySelector('.eventos-filters .filter-btn.active'); var active=prev?prev.dataset.filter:'Todos';
+  var botones=['Todos'].concat(dias); if(hayEsp) botones.push('Especiales');
+  if(botones.indexOf(active)<0) active='Todos';
+  cont.innerHTML=botones.map(function(b){ return '<button class="filter-btn'+(b===active?' active':'')+'" data-filter="'+b+'" onclick="filtrarEventos(this)">'+b+'</button>'; }).join('');
+}
 function renderEventos(filter) {
   filter = filter || 'Todos';
+  try { renderTemporadaBanner(); } catch(_) {}
   const grid = document.getElementById('eventos-grid');
   if (!grid || typeof FRATE_EVENTOS === 'undefined') return;
   function formatP(n) { return n ? '$' + n.toLocaleString('es-CL') : ''; }
-  function getPrecioMin(ev) {
-    if (ev.precio_anticipada) return ev.precio_anticipada;
-    const tt = (ev.tiposTicket||[]).filter(t => t.estado==='Activo' && t.soloWeb!==false);
-    return tt.length ? Math.min(...tt.map(t => t.precio)) : 0;
-  }
-  const filtered = filter === 'Todos' ? FRATE_EVENTOS : FRATE_EVENTOS.filter(e => e.tipo === filter);
+  const getPrecioMin = precioMinEvento;
+  const filtered = filter === 'Todos' ? FRATE_EVENTOS
+    : filter === 'Especiales' ? FRATE_EVENTOS.filter(e => e.especial)
+    : FRATE_EVENTOS.filter(e => e.tipo === filter);
   if (!filtered.length) {
     grid.innerHTML = '<div style="color:var(--gris);font-size:0.85rem;letter-spacing:2px;text-transform:uppercase;padding:32px 0;">Sin eventos próximos</div>';
     return;
@@ -1959,7 +3134,7 @@ function renderEventos(filter) {
   // Detecta si TODOS los tipos de ticket de un evento están agotados
   function eventoAgotado(ev) {
     const visibles = (ev.tiposTicket || []).filter(t =>
-      t.soloWeb !== false && t.estado !== 'Oculto' && t.estado !== 'Cerrado');
+      t.soloWeb !== false && t.estado !== 'Oculto' && t.estado !== 'Cerrado' && enVentana(t));
     if (!visibles.length) return false;
     return visibles.every(t => t.disponible === 0 || t.estado === 'Agotado');
   }
@@ -1968,31 +3143,55 @@ function renderEventos(filter) {
     const parts = ev.fecha.split(' ');
     const diaNom = parts[0], diaNum = parts[1], mes = parts.slice(2).join(' ');
     const precioMin = getPrecioMin(ev);
-    const agotado = eventoAgotado(ev);
-    return `
+    // ⏳ Si ahora mismo no hay NADA vendible pero un tramo abre después, la tarjeta no
+    //    puede decir AGOTADO (sería mentira: el martes se vende) ni quedar en blanco
+    //    (formatP(0) devuelve ''). Dice cuándo abre. Para un evento sin tramos esto es
+    //    siempre null, así que nada cambia para lo que ya existe.
+    const _vig = (ev.tiposTicket || []).filter(t =>
+      t.soloWeb !== false && t.estado === 'Activo' && (t.disponible ?? 1) > 0 && enVentana(t));
+    const abre = _vig.length ? null : proximaApertura(ev);
+    const agotado = eventoAgotado(ev) && !abre;
+    return `<div class="evento-card-glow${(ev.brief&&ev.brief.color)?' has-glow':''}"${(ev.brief&&ev.brief.color)?` style="--ev-color:${ev.brief.color}"`:''}>
     <div class="evento-card ${agotado ? 'evento-agotado' : ''}" data-tipo="${ev.tipo}" data-evid="${ev.id}"
-         style="cursor:pointer;opacity:1;transform:none;${agotado ? 'opacity:.7;' : ''}" onclick="openEventPopup(${ev.id})">
+         style="cursor:pointer;opacity:1;transform:none;position:relative;overflow:hidden;${agotado ? 'opacity:.7;' : ''}" onclick="openEventPopup(${ev.id})">
+      ${`<div style="position:absolute;inset:0;z-index:0;pointer-events:none;overflow:hidden;">${
+          (ev.video_youtube && _ytId(ev.video_youtube))
+            ? _ytBg(_ytId(ev.video_youtube), ev.brief && ev.brief.encuadre)
+          : ev.video_url
+            ? `<video src="${ev.video_url}" autoplay muted loop playsinline style="width:100%;height:100%;object-fit:cover;"></video>`
+          : ev.imagen_url
+            ? `<img src="${ev.imagen_url}" alt="" style="width:100%;height:100%;object-fit:cover;" />`
+            // Sin foto ni video: la decoración se dibuja con el nombre. Antes
+            // la tarjeta quedaba lisa y los tres eventos de la semana iguales.
+            : (window.FrateAfiche ? FrateAfiche.textura(ev.nombre, {w:520, h:150, color:FrateAfiche.colorDe(ev.nombre,(ev.brief||{}).portada), op:.2, tam:7}) : '')}
+        ${_colorLayer(ev.brief && ev.brief.color)}<div style="position:absolute;inset:0;z-index:3;background:linear-gradient(90deg,rgba(10,10,11,.94) 0%,rgba(10,10,11,.78) 45%,rgba(10,10,11,.42) 100%);"></div></div>`}
       ${agotado ? `<div style="position:absolute;top:12px;right:12px;background:#52525b;color:#fff;font-size:0.55rem;letter-spacing:2px;padding:4px 10px;border-radius:2px;text-transform:uppercase;font-weight:900;z-index:2;">Agotado</div>` : ''}
-      <div class="evento-fecha-block">
+      <div class="evento-fecha-block" style="position:relative;z-index:1;">
         <div class="evento-dia">${diaNum}</div>
         <div class="evento-mes">${diaNom}</div>
         <div class="evento-mes">${mes}</div>
       </div>
-      <div class="evento-info">
+      <div class="evento-info" style="position:relative;z-index:1;">
         <div class="evento-nombre">${ev.nombre}</div>
         <div class="evento-djs">${ev.djs.join(' · ')}</div>
         <div class="evento-tags">
-          <span class="evento-tag">${ev.ambiente}</span>
+          ${estadoEfectivoEvento(ev)==='en_vivo' ? '<span class="evento-tag" style="border-color:#E8363D;color:#E8363D;font-weight:900;animation:pulse 1.5s infinite;">● EN VIVO</span>' : ''}
           <span class="evento-tag">${ev.hora} hrs</span>
+          ${cuentaChip(ev)}
         </div>
       </div>
-      <div class="evento-precios">
-        <div class="evento-precio-anticipada">${agotado ? 'Estado' : 'Tickets desde'}</div>
-        <div class="evento-precio-valor" style="${agotado ? 'color:#52525b;font-size:1.2rem;' : ''}">${agotado ? 'AGOTADO' : formatP(precioMin)}</div>
+      <div class="evento-precios" style="position:relative;z-index:1;">
+        <div class="evento-precio-anticipada">${abre ? 'Abre' : (agotado || !precioMin) ? 'Estado' : 'Tickets desde'}</div>
+        <div class="evento-precio-valor" style="${(abre || agotado || !precioMin) ? 'color:#52525b;font-size:1.2rem;' : ''}">${
+          abre ? abre.toLocaleDateString('es-CL', { day: 'numeric', month: 'short' }).toUpperCase()
+          : agotado ? 'AGOTADO'
+          : precioMin ? formatP(precioMin)
+          : (estadoEfectivoEvento(ev) === 'en_vivo' ? 'EN PUERTA' : 'CERRADA')}</div>
         <button class="btn-ticket" onclick="event.stopPropagation();openEventPopup(${ev.id})">${agotado ? 'VER DETALLE' : 'VER INFO →'}</button>
       </div>
-    </div>`;
+    </div></div>`;
   }).join('');
+  _ytActivate();
 }
 
 function openTicketsPopup() {
@@ -2015,9 +3214,8 @@ function openTicketsPopup() {
           <span style="font-size:0.6rem;letter-spacing:2px;text-transform:uppercase;padding:3px 8px;border:1px solid #333;color:var(--gris);border-radius:2px;">${ev.ambiente}</span>
         </div>
         <div style="text-align:right;flex-shrink:0;">
-          <div style="font-size:0.6rem;letter-spacing:2px;color:var(--dorado);margin-bottom:4px;">Anticipada</div>
-          <div style="font-family:'Barlow Condensed',sans-serif;font-weight:900;font-size:1.4rem;color:var(--blanco);">$${ev.precio_anticipada.toLocaleString('es-CL')}</div>
-          <div style="font-size:0.65rem;color:#555;margin-top:2px;">General $${ev.precio_general.toLocaleString('es-CL')}</div>
+          <div style="font-size:0.6rem;letter-spacing:2px;color:var(--dorado);margin-bottom:4px;">Tickets desde</div>
+          <div style="font-family:'Barlow Condensed',sans-serif;font-weight:900;font-size:1.4rem;color:var(--blanco);">${precioMinEvento(ev) ? '$'+precioMinEvento(ev).toLocaleString('es-CL') : '—'}</div>
         </div>
       </div>
     `).join('');
@@ -2132,6 +3330,49 @@ async function renderPromos() {
     const { data } = await sb.from('clientes').select('credito').eq('id', session.id).maybeSingle();
     const credito = data?.credito || 0;
     let html = '';
+    // 🎁 Incentivos que le dieron (van primero: es lo que lo trae de vuelta).
+    // Si el interruptor maestro está apagado, la función devuelve vacío.
+    try {
+      const { data: mis } = await sb.rpc('mis_incentivos');
+      (mis?.items || []).forEach(it => {
+        const esc = t => String(t||'').replace(/</g,'&lt;');
+        const valorTxt = it.valor ? '$' + Number(it.valor).toLocaleString('es-CL') : '';
+        const texto = esc(it.texto||'').replace(/\{valor\}/g, valorTxt)
+                        .replace(/\{nombre\}/g, esc(session.nombre||''))
+                        .replace(/\{compras\}/g, '');
+        const vence = it.vence_at ? new Date(it.vence_at).toLocaleDateString('es-CL') : '';
+        html += `
+        <div style="background:linear-gradient(135deg,#1c1508,#12100a);border:1px solid var(--dorado,#E6C860);border-left:4px solid var(--dorado,#E6C860);border-radius:12px;padding:16px 18px;margin-bottom:12px;">
+          <div style="font-weight:800;color:var(--dorado,#E6C860);font-size:1rem;">🎁 ${esc(it.titulo||'Un beneficio para ti')}</div>
+          ${valorTxt ? `<div style="font-size:1.7rem;font-weight:900;margin:6px 0;">${valorTxt}</div>` : ''}
+          <div style="color:var(--gris);font-size:0.88rem;line-height:1.6;">${texto}</div>
+          ${it.mensaje ? `<div style="margin-top:10px;padding:10px 12px;background:rgba(255,255,255,.04);border-radius:8px;font-size:0.85rem;font-style:italic;">"${esc(it.mensaje)}"<div style="font-style:normal;font-size:0.7rem;color:var(--gris);margin-top:4px;">— el equipo FRATE</div></div>` : ''}
+          ${vence ? `<div style="font-size:0.72rem;color:var(--gris);margin-top:8px;">Válido hasta el ${vence}</div>` : ''}
+        </div>`;
+      });
+    } catch (e) { /* sin el SQL todavía → la pestaña sigue igual */ }
+    // 🎡 Giros de ruleta pendientes
+    try {
+      const { data: giros } = await sb.from('giros').select('id').eq('usado', false);
+      if (giros && giros.length) {
+        html += `
+        <div style="background:linear-gradient(90deg,rgba(212,168,50,0.15),var(--negro-3));border:1px solid rgba(212,168,50,0.4);border-radius:8px;padding:20px;margin-bottom:14px;">
+          <div style="font-size:0.7rem;letter-spacing:2px;text-transform:uppercase;color:var(--dorado);margin-bottom:6px;">🎡 Gira y gana</div>
+          <div style="font-size:0.9rem;color:var(--blanco);margin-bottom:12px;">Tienes <b style="color:var(--dorado)">${giros.length} giro${giros.length>1?'s':''}</b> pendiente${giros.length>1?'s':''} de tu compra.</div>
+          <button onclick="window.location.href='/pago-exitoso.html?jugar=1'" style="background:var(--dorado);color:var(--negro);border:none;padding:10px 22px;font-family:var(--fuente-display);font-weight:900;letter-spacing:2px;text-transform:uppercase;border-radius:4px;cursor:pointer;">JUGAR AHORA 🎰</button>
+          <div id="ruleta-cuenta-result" style="margin-top:10px;font-weight:700;font-size:0.9rem;"></div>
+        </div>`;
+      }
+    } catch(e) { /* ruleta aún no activada */ }
+    // 🎁 FRATE Wrapped — tu año de carretes en una story
+    html += `
+      <div style="background:var(--negro-3);border:1px solid #1f1f22;border-radius:8px;padding:18px;margin-bottom:14px;display:flex;justify-content:space-between;align-items:center;gap:12px;flex-wrap:wrap;">
+        <div style="min-width:0;">
+          <div style="font-size:0.7rem;letter-spacing:2px;text-transform:uppercase;color:var(--dorado);margin-bottom:4px;">🎁 FRATE Wrapped</div>
+          <div style="font-size:0.82rem;color:var(--gris);">Tu año de carretes resumido — con imagen lista para tu story.</div>
+        </div>
+        <button onclick="abrirWrapped()" style="flex-shrink:0;background:transparent;border:1px solid var(--dorado);color:var(--dorado);padding:9px 16px;font-family:var(--fuente-display);font-weight:900;letter-spacing:2px;text-transform:uppercase;border-radius:4px;cursor:pointer;">VER MI AÑO</button>
+      </div>`;
     if (credito > 0) {
       html += `
         <div style="background:linear-gradient(90deg,rgba(34,197,94,0.15),var(--negro-3));border:1px solid rgba(34,197,94,0.35);border-radius:8px;padding:20px;margin-bottom:14px;">
@@ -2261,7 +3502,10 @@ async function loadRanking() {
   const wrap = document.getElementById('ranking-list');
   if (!wrap) return;
   try {
-    const { data } = await sb.from('canciones').select('*').order('votos', { ascending: false }).order('id').limit(10);
+    let data;
+    { let r = await sb.from('canciones').select('*').eq('activo', true).order('fijado', { ascending: false }).order('orden', { ascending: true, nullsFirst: false }).order('votos', { ascending: false }).order('id').limit(10);
+      if (r.error) r = await sb.from('canciones').select('*').order('votos', { ascending: false }).order('id').limit(10);  // aún sin columnas del admin
+      data = r.data; }
     if (!data || !data.length) {
       wrap.innerHTML = '<div style="color:var(--gris);padding:24px;text-align:center;">Aún no hay votos. ¡Sé el primero en proponer una canción! 🎵</div>';
       return;
@@ -2377,10 +3621,10 @@ async function aplicarTextos() {
 }
 
 // ── CONFIG SECCIONES: oculta/muestra secciones según config_sitio ──
-async function aplicarConfigSecciones() {
-  try {
-    const config = await sbGetConfigSitio();
-    config.forEach(c => {
+// Aplica una lista de config de secciones al DOM (usada por el
+// snapshot instantáneo Y por la carga fresca desde Supabase)
+function aplicarSeccionesLista(config) {
+  (config || []).forEach(c => {
       // Config especial: pestañas de la cuenta (puntos/promos/membresia)
       if (c.clave === 'cuenta_puntos' || c.clave === 'cuenta_promos' || c.clave === 'cuenta_membresia') {
         const tab = c.clave.replace('cuenta_', '');
@@ -2406,7 +3650,25 @@ async function aplicarConfigSecciones() {
         const target = li || a;
         target.style.display = c.visible ? '' : 'none';
       });
-    });
+  });
+}
+
+// Snapshot instantáneo: aplica la ÚLTIMA config conocida (localStorage)
+// apenas carga la página, sin esperar a Supabase → sin "flash" del menú
+// con secciones ocultas. La carga fresca corrige y actualiza el snapshot.
+function aplicarConfigSeccionesCache() {
+  try {
+    const snap = JSON.parse(localStorage.getItem('frate_cfg_secciones') || 'null');
+    if (Array.isArray(snap) && snap.length) aplicarSeccionesLista(snap);
+  } catch (e) {}
+}
+
+async function aplicarConfigSecciones() {
+  try {
+    const config = await sbGetConfigSitio();
+    aplicarSeccionesLista(config);
+    // Guardar snapshot liviano para la próxima carga
+    try { localStorage.setItem('frate_cfg_secciones', JSON.stringify((config || []).map(c => ({ clave: c.clave, visible: c.visible })))); } catch (e) {}
   } catch (err) {
     console.warn('[FRATE] No se pudo cargar config_sitio:', err?.message || err);
   }
@@ -2417,6 +3679,8 @@ async function loadEventosDesdeSupabase() {
     const DIAS  = ['Domingo','Lunes','Martes','Miércoles','Jueves','Viernes','Sábado'];
     const MESES = ['Enero','Febrero','Marzo','Abril','Mayo','Junio','Julio','Agosto',
                    'Septiembre','Octubre','Noviembre','Diciembre'];
+    // El modo de color y la paleta salen de Configuración General.
+    try{ if(window.FrateAfiche && typeof sb!=='undefined') await FrateAfiche.cargarConfig(sb); }catch(e){}
     const raw = await sbGetEventos();
     console.log('[FRATE] Supabase eventos recibidos:', raw?.length, raw);
     if (!raw || !raw.length) { renderEventos('Todos'); return; }
@@ -2427,8 +3691,8 @@ async function loadEventosDesdeSupabase() {
       const mesNom   = MESES[m - 1];
       const fechaStr = `${diaNom} ${d} ${mesNom}`;
       const dow  = dateObj.getDay(); // 0=Dom … 6=Sáb
-      const tipo = dow === 5 ? 'Viernes' : dow === 6 ? 'Sábado' : 'Especiales';
-      const tiposTicket = (ev.tipos_ticket || []).map(tt => ({
+      const tipo = DIAS[dow];   // día real (Jueves/Viernes/Sábado/…) — el filtro se arma solo
+      const tiposTicket = (ev.tipos_ticket || []).slice().sort((a,b)=>((a.orden??9999)-(b.orden??9999))||((a.id||0)-(b.id||0))).map(tt => ({
         id:           tt.id,
         nombre:       tt.nombre,
         descripcion:  tt.descripcion || '',
@@ -2436,28 +3700,52 @@ async function loadEventosDesdeSupabase() {
         disponible:   tt.disponible,
         estado:       tt.estado || 'Activo',
         soloWeb:      tt.solo_web !== false,
-        maxPorCompra: tt.max_por_compra || 6
+        maxPorCompra: tt.max_por_compra || 6,
+        venceHora:    tt.vence_hora || '',
+        ventaDesde:   tt.venta_desde || null,     // ⏳ tramos de preventa: instantes
+        ventaHasta:   tt.venta_hasta || null,     //    absolutos (timestamptz)
+        instrucciones:  tt.instrucciones || '',
+        horaMaxIngreso: tt.hora_max_ingreso || '',
+        genero:         tt.genero || '',
+        solo_miembros:   !!tt.solo_miembros,     // 🎁 la tarjeta y la ventana avisan «solo miembros»
+        uno_por_persona: !!tt.uno_por_persona
       }));
       return {
         id:                ev.id,
+        slug:              ev.slug || '',
         nombre:            ev.nombre,
         fecha:             fechaStr,
+        fechaRaw:          ev.fecha,
         hora:              ev.hora || '23:00',
+        horaTermino:       ev.hora_termino || '05:00',
+        estado:            ev.estado || 'publicado',
         ambiente:          ev.ambiente || 'Fuego',
         tipo,
         descripcion:       ev.descripcion || '',
         djs:               Array.isArray(ev.djs) ? ev.djs : [],
         imagen_url:        ev.imagen_url || '',
+        video_url:         ev.video_url || '',
+        video_youtube:     ev.video_youtube || '',
+        brief:             ev.brief || null,
+        especial:          !!(ev.brief && ev.brief.especial),
         precio_anticipada: ev.precio_anticipada || 0,
         precio_general:    ev.precio_general || 0,
+        oculto_publico:    ev.oculto_publico || false,
         tiposTicket
       };
-    });
+    })
+    // Fuera los terminados y los borradores; SIEMPRE ordenados por fecha
+    .filter(ev => !['finalizado','creado'].includes(estadoEfectivoEvento(ev)))
+    .sort((a,b) => String(a.fechaRaw).localeCompare(String(b.fechaRaw)));
     // Mutar el array existente en lugar de reasignarlo (const no se puede reasignar)
     FRATE_EVENTOS.splice(0, FRATE_EVENTOS.length, ...mapped);
     // Re-render respetando el filtro activo
-    const activeFilter = document.querySelector('.filter-btn.active')?.dataset.filter || 'Todos';
+    try { await cargarTemporadaCfg(); } catch(_) {}
+    renderFiltros();
+    const activeFilter = document.querySelector('.eventos-filters .filter-btn.active')?.dataset.filter || 'Todos';
     renderEventos(activeFilter);
+    _abrirEventoDesdeURL();
+  try{ _tramitarEntradaGoogle(); }catch(_){}
   } catch (err) {
     console.warn('[FRATE] No se pudo cargar eventos desde Supabase, usando datos locales.', err);
     renderEventos('Todos');
@@ -2465,6 +3753,8 @@ async function loadEventosDesdeSupabase() {
 }
 
 document.addEventListener('DOMContentLoaded', () => {
+  // PRIMERO: aplicar la última config conocida (sin esperar la red)
+  aplicarConfigSeccionesCache();
   // Render inmediato con datos locales (frate-data.js) mientras carga Supabase
   fixEventoAmbientes();
   initCart();
@@ -2474,6 +3764,22 @@ document.addEventListener('DOMContentLoaded', () => {
   prefillFormsFromSession();
   // Carga datos en vivo desde Supabase y reemplaza la lista
   loadEventosDesdeSupabase();
+  // Recuperar carrito desde el correo (?reanudar=ID) → directo al pago
+  try {
+    const _qs = new URLSearchParams(location.search);
+    const rid = _qs.get('reanudar');
+    if (rid) setTimeout(() => pagarPedido(parseInt(rid), null, null, { t: _qs.get('t') || '' }), 700);
+  } catch (e) {}
+  // Analytics propio: 1 ping por visitante cada 30 min (anónimo)
+  try {
+    let vid = localStorage.getItem('frate_vid');
+    if (!vid) { vid = 'v' + Math.random().toString(36).slice(2) + Date.now().toString(36); localStorage.setItem('frate_vid', vid); }
+    const last = parseInt(sessionStorage.getItem('frate_vping') || '0');
+    if (Date.now() - last > 30 * 60 * 1000) {
+      sessionStorage.setItem('frate_vping', String(Date.now()));
+      sb.rpc('registrar_visita', { p_uid: vid, p_pagina: location.pathname }).then(() => {}).catch(() => {});
+    }
+  } catch (e) {}
   aplicarConfigSecciones();
   aplicarTextos();
   aplicarRedes();
@@ -2490,7 +3796,293 @@ document.addEventListener('DOMContentLoaded', () => {
   // ep-confirm-tickets: el listener lo agrega initCuentaModule en frate-cuenta.js
 });
 
+// Deep-link: frate.cl/?e=slug (o ?ev=id) abre directo la compra de ese evento
+// 🔐 ATERRIZAJE DESPUÉS DE GOOGLE.
+//    ⚠️ Esto es indispensable, no un adorno. La ficha de cliente se crea en
+//    el navegador DESPUÉS del signUp normal (frate-supabase.js). Con Google
+//    ese código nunca corre: Supabase crea el usuario de autenticación y
+//    nada más. Sin esto, quien entra con Google queda sin ficha — sin RUT,
+//    sin teléfono, sin nombre — y las entradas son NOMINATIVAS, así que ni
+//    siquiera podría comprar. Además nunca recibiría la bienvenida.
+//
+//    Corre en cada carga: si hay sesión y no hay ficha, la crea con lo que
+//    Google nos dio y pide lo que falta.
+async function _tramitarEntradaGoogle(){
+  try{
+    const { data:{ session } } = await sb.auth.getSession();
+    if(!session || !session.user) return;
+    const u = session.user;
+    // Solo nos metemos si vino por un proveedor externo.
+    const porGoogle = (u.app_metadata?.provider && u.app_metadata.provider !== 'email');
+    if(!porGoogle) return;
+
+    let fr = await sb.from('clientes').select('id,nombres,rut,telefono,sexo').eq('id', u.id).maybeSingle();
+    const conSexo = !(fr.error && /sexo/i.test(fr.error.message||''));
+    if(!conSexo) fr = await sb.from('clientes').select('id,nombres,rut,telefono').eq('id', u.id).maybeSingle();
+    const ficha = fr.data;
+    window._ggPideSexo = conSexo && !(ficha && ficha.sexo);
+    // Cuenta de Google que ya tenía RUT y teléfono: solo le falta el sexo. Se pide
+    // solo eso, y si dice «después» no se le vuelve a abrir en esta visita.
+    window._ggSoloSexo = !!(ficha && ficha.rut && ficha.telefono && window._ggPideSexo);
+    if(window._ggSoloSexo){ try{ if(sessionStorage.getItem('gg_sexo_luego')) return; }catch(_){} }
+    if(ficha && ficha.rut && ficha.telefono && !window._ggPideSexo) return;      // ya está completa
+
+    const meta = u.user_metadata || {};
+    const full = String(meta.full_name || meta.name || '').trim();
+    const nombres   = String(meta.given_name  || full.split(' ')[0] || '').trim();
+    const apellidos = String(meta.family_name || full.split(' ').slice(1).join(' ') || '').trim();
+
+    if(!ficha){
+      // Username tentativo desde el correo; si choca, se guarda sin él y
+      // la persona lo elige después en su cuenta.
+      const base = String(u.email||'').split('@')[0].toLowerCase().replace(/[^a-z0-9._]/g,'').slice(0,20);
+      let r = await sb.from('clientes').insert({ id:u.id, email:u.email||'', nombres, apellidos, username:base });
+      if(r.error) await sb.from('clientes').insert({ id:u.id, email:u.email||'', nombres, apellidos });
+      // La bienvenida, que con Google nunca salía.
+      try{ if(typeof sbSendWelcomeEmail==='function')
+             await sbSendWelcomeEmail({ nombre:nombres, apellidos, username:base, email:u.email }); }catch(_){}
+    }
+    _pedirDatosGoogle(nombres);
+  }catch(e){ console.warn('[FRATE] aterrizaje Google:', e?.message||e); }
+}
+
+// Pide lo que Google NO nos da y sin lo cual no se puede comprar.
+function _pedirDatosGoogle(nombre){
+  if(document.getElementById('gg-datos')) return;
+  const d=document.createElement('div');
+  d.id='gg-datos';
+  d.style.cssText='position:fixed;inset:0;z-index:99999;background:rgba(0,0,0,.86);display:flex;align-items:center;justify-content:center;padding:18px;';
+  d.innerHTML =
+    '<div style="background:#131316;border:1px solid #26262b;border-radius:16px;padding:24px;max-width:400px;width:100%;color:#f4f4f6;font-family:-apple-system,Segoe UI,Roboto,sans-serif;">'
+    + '<div style="font-size:.66rem;letter-spacing:2px;text-transform:uppercase;color:#8a8a92;">Casi listo'+(nombre?', '+nombre.toUpperCase():'')+'</div>'
+    + '<div style="font-family:\'Barlow Condensed\',sans-serif;font-weight:900;font-size:1.9rem;line-height:1;margin:6px 0 10px;text-transform:uppercase;">Nos falta un dato</div>'
+    + '<div style="font-size:.84rem;color:#8a8a92;line-height:1.5;margin-bottom:16px;">'+(window._ggSoloSexo?'Para las entradas de solo mujeres u hombres necesitamos tu sexo, como aparece en tu cédula. Se guarda una sola vez.':'Las entradas van a tu nombre y se revisan en la puerta, así que necesitamos tu RUT y tu teléfono.')+'</div>'
+    + '<input id="gg-rut" placeholder="12.345.678-9" style="width:100%;background:#1b1b20;border:1px solid #26262b;border-radius:9px;padding:13px;color:#f4f4f6;font-size:.95rem;margin-bottom:9px;">'
+    + '<input id="gg-tel" placeholder="+56 9 1234 5678" style="width:100%;background:#1b1b20;border:1px solid #26262b;border-radius:9px;padding:13px;color:#f4f4f6;font-size:.95rem;margin-bottom:9px;">'
+    + '<label style="display:flex;align-items:center;gap:8px;font-size:.78rem;color:#8a8a92;margin-bottom:14px;cursor:pointer;"><input type="checkbox" id="gg-ext" style="width:auto;"> Soy extranjer@ (no tengo RUT chileno)</label>'
+    + (window._ggPideSexo ? '<select id="gg-sexo" style="width:100%;background:#1b1b20;border:1px solid #26262b;border-radius:9px;padding:13px;color:#f4f4f6;font-size:.95rem;margin-bottom:14px;"><option value="">Sexo (como en tu cédula)</option><option value="F">Mujer</option><option value="M">Hombre</option><option value="X">Prefiero no decirlo</option></select>' : '')
+    + '<div id="gg-err" style="font-size:.78rem;color:#E8363D;margin-bottom:10px;"></div>'
+    + '<button id="gg-ok" style="width:100%;background:#E8363D;color:#fff;border:0;border-radius:10px;padding:14px;font-weight:800;letter-spacing:1px;cursor:pointer;text-transform:uppercase;">Guardar y entrar</button>'
+    + '<button id="gg-luego" style="width:100%;background:transparent;color:#8a8a92;border:0;padding:12px;font-size:.78rem;cursor:pointer;margin-top:4px;">Lo hago después</button>'
+    + '</div>';
+  document.body.appendChild(d);
+  // Si ya existe el formateador de RUT del sitio, que también aplique acá.
+  try{ if(window.FrateFormat && FrateFormat.aplicar) FrateFormat.aplicar(d); }catch(_){}
+  if(window._ggSoloSexo){ ['gg-rut','gg-tel'].forEach(id=>{ const e=document.getElementById(id); if(e) e.style.display='none'; }); const x=document.getElementById('gg-ext'); if(x&&x.parentElement) x.parentElement.style.display='none'; }
+  document.getElementById('gg-luego').onclick = ()=>{ if(window._ggSoloSexo){ try{ sessionStorage.setItem('gg_sexo_luego','1'); }catch(_){} } d.remove(); };
+  document.getElementById('gg-ok').onclick = async ()=>{
+    const rut=(document.getElementById('gg-rut').value||'').trim();
+    const tel=(document.getElementById('gg-tel').value||'').trim();
+    const ext=document.getElementById('gg-ext').checked;
+    const err=document.getElementById('gg-err');
+    const soloSexo = !!window._ggSoloSexo;
+    if(!soloSexo && !tel){ err.textContent='Necesitamos tu teléfono.'; return; }
+    if(!soloSexo && !ext && !rut){ err.textContent='Escribe tu RUT, o marca que eres extranjer@.'; return; }
+    const sexoG=((document.getElementById('gg-sexo')||{}).value||'');
+    if(window._ggPideSexo && !sexoG){ err.textContent='Elige tu sexo (como en tu cédula).'; return; }
+    err.textContent='';
+    const b=document.getElementById('gg-ok'); b.disabled=true; b.textContent='Guardando…';
+    try{
+      const { data:{ user } } = await sb.auth.getUser();
+      if(!soloSexo){   // solo falta el sexo: no se reenvían RUT ni teléfono (el RUT puede estar fijo)
+        const { error } = await sb.from('clientes').update({ rut: rut||'', telefono: tel, extranjero: ext }).eq('id', user.id);
+        if(error) throw error;
+      }
+      if(window._ggPideSexo && sexoG){ const r2 = await sb.from('clientes').update({ sexo: sexoG }).eq('id', user.id); if(r2.error) throw r2.error; }
+      d.remove();
+      if(!soloSexo && typeof location!=='undefined') location.reload();
+    }catch(e){
+      b.disabled=false; b.textContent='Guardar y entrar';
+      const t=String(e.message||e);
+      err.textContent = /RUT_FIJO/.test(t) ? 'Tu RUT quedó fijo porque ya reservaste una entrada de miembro. Escríbenos para cambiarlo.'
+        : (t.toLowerCase().includes('rut') ? 'Ese RUT no es válido. Revísalo, o marca que eres extranjer@.' : t);
+    }
+  };
+}
+
+// 🔐 Entrar con Google.
+//    Supabase maneja el ida y vuelta con Google; nosotros solo pedimos el
+//    redirect de vuelta a donde estaba la persona, para que si venía a
+//    medio comprar no la mandemos a la home.
+//
+//    ⚠️ REQUIERE UN PASO FUERA DEL CÓDIGO: activar el proveedor Google en
+//    Supabase → Authentication → Providers, con su Client ID y Secret de
+//    Google Cloud. Mientras no esté, el botón avisa en vez de fallar feo.
+async function entrarConGoogle(btn){
+  const txt = btn ? btn.innerHTML : '';
+  try{
+    if(btn){ btn.disabled=true; btn.style.opacity='.6'; btn.textContent='Abriendo Google…'; }
+    const { error } = await sb.auth.signInWithOAuth({
+      provider: 'google',
+      options: { redirectTo: location.origin + location.pathname + location.search }
+    });
+    if(error) throw error;
+  }catch(e){
+    const msg = String(e.message||e);
+    if(/provider|not enabled|unsupported/i.test(msg)){
+      alert('El acceso con Google todavía no está activado.\n\nSe prende en Supabase → Authentication → Providers → Google.');
+    } else {
+      alert('No se pudo abrir Google: ' + msg);
+    }
+    if(btn){ btn.disabled=false; btn.style.opacity='1'; btn.innerHTML=txt; }
+  }
+}
+
+function _abrirEventoDesdeURL() {
+  try {
+    const p = new URLSearchParams(location.search);
+    const slug = (p.get('e') || p.get('evento') || '').trim().toLowerCase();
+    const evId = p.get('ev');
+    let ev = null;
+    if (slug) ev = FRATE_EVENTOS.find(x => String(x.slug || '').toLowerCase() === slug);
+    if (!ev && slug) ev = FRATE_EVENTOS.find(x => String(x.id) === slug);   // por si viene id en ?e=
+    if (!ev && evId) ev = FRATE_EVENTOS.find(x => String(x.id) === String(evId));
+    if (ev) {
+      const sec = document.getElementById('eventos'); if (sec) sec.scrollIntoView({ block: 'start' });
+      setTimeout(() => { try { openEventPopup(ev.id); } catch (e) {} }, 250);
+    }
+  } catch (e) {}
+}
 // openEventPopup — muestra info + tickets directamente (sin paso intermedio)
+// ── SALTAR DE DÍA SIN CERRAR EL MODAL ──────────────────────────────
+// Antes, para ver otro día había que cerrar el modal, buscar la tarjeta
+// y volver a entrar. Ahora las flechas (y la tira de días, y las teclas
+// ← →, y deslizar en el teléfono) mueven el mismo modal.
+//
+// ⚠️ OJO: openEventPopup() hace `window.ticketTypeQtys = {}`. Eso está
+//    bien — evita que se te mezclen entradas de dos noches en una compra
+//    — pero significa que saltar de día BORRA lo que llevabas elegido.
+//    Por eso se pregunta antes, y solo cuando de verdad hay algo elegido.
+
+// Los días por los que se puede saltar, en el mismo orden y con el mismo
+// filtro que estás viendo en la grilla. FRATE_EVENTOS ya viene ordenado
+// por fecha ascendente desde Supabase.
+function _epLista(evActualId) {
+  if (typeof FRATE_EVENTOS === 'undefined' || !FRATE_EVENTOS.length) return [];
+  const act = document.querySelector('.eventos-filters .filter-btn.active');
+  const f = act ? act.dataset.filter : 'Todos';
+  // Noches que ya pasaron y eventos en planificación quedan fuera: nadie
+  // compra para algo que ya fue. El que tienes abierto entra siempre,
+  // aunque no cumpla — si no, al abrirlo por link quedaría sin flechas.
+  const vivo = e => {
+    if (e.id === evActualId) return true;
+    const s = (typeof estadoEfectivoEvento === 'function') ? estadoEfectivoEvento(e) : 'publicado';
+    return s !== 'finalizado' && s !== 'creado';
+  };
+  let arr = FRATE_EVENTOS.filter(vivo);
+  if (f === 'Especiales')      arr = arr.filter(e => e.especial || e.id === evActualId);
+  else if (f && f !== 'Todos') arr = arr.filter(e => e.tipo === f || e.id === evActualId);
+  return arr;
+}
+
+function _epChip(e) {
+  const D = ['Dom','Lun','Mar','Mié','Jue','Vie','Sáb'];
+  if (e.fechaRaw) {
+    const p = String(e.fechaRaw).split('-').map(Number);
+    const dt = new Date(p[0], p[1] - 1, p[2]);
+    if (!isNaN(dt)) return D[dt.getDay()] + ' ' + p[2];
+  }
+  return e.fecha || e.nombre || '—';
+}
+
+function _epHayElegido() {
+  const q = window.ticketTypeQtys || {};
+  return Object.keys(q).some(k => (q[k] || 0) > 0);
+}
+
+function _epIr(evId) {
+  if (_epHayElegido() &&
+      !confirm('Si cambias de día se borran las entradas que llevas elegidas en esta noche.\n\n¿Cambiar igual?')) return;
+  openEventPopup(evId);
+  // El link de la barra queda apuntando al día que estás viendo, para que
+  // si lo copias y lo mandas, abra ese y no el de antes.
+  try {
+    const ev = FRATE_EVENTOS.find(e => e.id === evId);
+    if (ev && history.replaceState) {
+      const u = new URL(location.href);
+      u.searchParams.delete('ev');
+      u.searchParams.set('e', ev.slug || String(ev.id));
+      history.replaceState(null, '', u);
+    }
+  } catch (e) {}
+}
+
+function _epSalto(dir) {
+  const cur = parseInt(document.getElementById('event-popup')?.dataset.evid);
+  if (!cur) return;
+  const arr = _epLista(cur);
+  const i = arr.findIndex(e => e.id === cur);
+  if (i < 0) return;
+  const n = arr[i + dir];
+  if (n) _epIr(n.id);
+}
+
+function _epPintarNav(ev) {
+  const arr = _epLista(ev.id);
+  const i = arr.findIndex(e => e.id === ev.id);
+  const prev = document.getElementById('ep-prev');
+  const next = document.getElementById('ep-next');
+  // Se apagan en vez de esconderse: si desaparecieran, la flecha que
+  // queda se correría de lugar en cada salto.
+  if (prev) prev.disabled = !(i > 0);
+  if (next) next.disabled = !(i >= 0 && i < arr.length - 1);
+  // Con un solo día no hay a dónde ir: la fila entera se esconde.
+  const fila = document.getElementById('ep-diasrow');
+  if (fila) fila.classList.toggle('off', arr.length < 2);
+  const tira = document.getElementById('ep-dias');
+  if (!tira) return;
+  tira.innerHTML = (arr.length > 1)
+    ? arr.map(e => '<button class="ep-dia' + (e.id === ev.id ? ' on' : '') +
+        '" data-ev="' + e.id + '">' + _epChip(e) + '</button>').join('')
+    : '';
+  // Centrar el día activo a mano. scrollIntoView() acá arrastraba también
+  // la página de atrás.
+  const on = tira.querySelector('.ep-dia.on');
+  if (on) tira.scrollLeft = on.offsetLeft - (tira.clientWidth / 2) + (on.offsetWidth / 2);
+}
+
+document.addEventListener('click', e => {
+  if (e.target.closest('#ep-prev')) { e.preventDefault(); _epSalto(-1); return; }
+  if (e.target.closest('#ep-next')) { e.preventDefault(); _epSalto(1);  return; }
+  const chip = e.target.closest('.ep-dia');
+  if (chip) {
+    const id = parseInt(chip.dataset.ev);
+    const cur = parseInt(document.getElementById('event-popup')?.dataset.evid);
+    if (id && id !== cur) _epIr(id);
+  }
+});
+
+document.addEventListener('keydown', e => {
+  const p = document.getElementById('event-popup');
+  if (!p || !p.classList.contains('open')) return;
+  // Si estás escribiendo el nombre o el RUT de alguien, las flechas son
+  // para moverte por el texto, no para cambiar de noche.
+  const t = e.target;
+  if (t && (t.tagName === 'INPUT' || t.tagName === 'TEXTAREA' || t.tagName === 'SELECT' || t.isContentEditable)) return;
+  if (e.key === 'ArrowLeft')  _epSalto(-1);
+  if (e.key === 'ArrowRight') _epSalto(1);
+});
+
+// Deslizar en el teléfono. Solo cuenta si el gesto es claramente
+// horizontal: si no, cualquier scroll con el dedo cambiaría de día.
+(function () {
+  let x0 = null, y0 = null;
+  document.addEventListener('touchstart', e => {
+    const p = document.getElementById('event-popup');
+    if (!p || !p.classList.contains('open')) { x0 = null; return; }
+    if (e.target.closest('.ep-dias')) { x0 = null; return; }
+    x0 = e.touches[0].clientX; y0 = e.touches[0].clientY;
+  }, { passive: true });
+  document.addEventListener('touchend', e => {
+    if (x0 === null) return;
+    const dx = e.changedTouches[0].clientX - x0;
+    const dy = e.changedTouches[0].clientY - y0;
+    x0 = null;
+    if (Math.abs(dx) < 60 || Math.abs(dx) < Math.abs(dy) * 1.8) return;
+    _epSalto(dx < 0 ? 1 : -1);
+  }, { passive: true });
+})();
+
 function openEventPopup(evId) {
   const ev = FRATE_EVENTOS.find(e => e.id === evId);
   if (!ev) return;
@@ -2498,27 +4090,89 @@ function openEventPopup(evId) {
   if (!popup) return;
 
   // Info básica
-  document.getElementById('ep-nombre').textContent = ev.nombre;
+  // Título estirado + columna de fecha, igual que las otras pantallas.
+  if (window.FrateAfiche) {
+    const nb = document.getElementById('ep-nombre');
+    nb.innerHTML = FrateAfiche.titulo(ev.nombre, {w:420, align:'izq'});
+    nb.style.cssText = 'max-height:118px;overflow:hidden;display:flex;align-items:flex-end;';
+    const svg = nb.querySelector('svg');
+    if (svg) svg.style.maxHeight = '92px';
+    const hr = document.getElementById('ep-hero-hr');
+    if (hr) hr.textContent = ((ev.djs||[]).join(' · ') ? (ev.djs||[]).join(' · ')+' · ' : '')
+      + (ev.hora||'23:00') + ' – ' + (ev.horaTermino||'05:00') + ' HRS';
+    const fc = document.getElementById('ep-fecha-col');
+    // ⚠️ ev.fecha acá ya viene formateada ("Jueves 6 Agosto"); la fecha real
+    // está en fechaRaw. Sin esto fechaHTML no calza el YYYY-MM-DD y devuelve
+    // vacío: la columna no aparecía y el bloque quedaba en blanco.
+    if (fc) fc.innerHTML = FrateAfiche.fechaHTML(
+      { nombre: ev.nombre, fecha: ev.fechaRaw || ev.fecha, hora: ev.hora, brief: ev.brief },
+      { ancho:118, num:56, fondo:'negro' });
+  } else {
+    document.getElementById('ep-nombre').textContent = ev.nombre;
+  }
   document.getElementById('ep-fecha').textContent  = ev.fecha + ' · ' + (ev.hora || '23:00') + ' hrs';
   document.getElementById('ep-djs').textContent    = (ev.djs || []).join(' · ');
-  document.getElementById('ep-ambiente').textContent = ev.ambiente || '';
+  // El ambiente ya no se muestra (el evento es en todo el local); mostramos el horario completo
+  document.getElementById('ep-ambiente').textContent = (ev.hora||'23:00') + ' → ' + (ev.horaTermino||'05:00') + ' h';
 
   // Imagen de fondo del evento
+  // La portada del popup: la MISMA de /e/... y de /links.
   const heroBg = document.getElementById('ep-hero-bg');
+  const heroEl = document.getElementById('ep-hero');
+  // La trama va SIEMPRE, encima de lo que haya. Antes solo se dibujaba
+  // cuando no había video ni foto — y los tres eventos de la semana tienen
+  // video_youtube, así que no aparecía nunca. Con video baja al 55% de su
+  // opacidad para no pelear; sin video va entera.
+  const heroTex = document.getElementById('ep-hero-tex');
+  if (heroTex && window.FrateAfiche) {
+    const hayFondo = !!(ev.video_youtube || ev.video_url || ev.imagen_url);
+    heroTex.style.opacity = hayFondo ? '.55' : '1';
+    heroTex.innerHTML = FrateAfiche.textura(ev.nombre, {
+      w:620, h:230, color:FrateAfiche.colorDe(ev.nombre,(ev.brief||{}).portada),
+      op:.24, tam:8, papel:'transparent'
+    });
+  }
   if (heroBg) {
-    heroBg.style.backgroundImage   = ev.imagen_url ? `url(${ev.imagen_url})` : '';
-    heroBg.style.backgroundSize    = 'cover';
-    heroBg.style.backgroundPosition = 'center';
+    heroBg.style.cssText = '';
+    heroBg.innerHTML = '';
+    if (ev.video_youtube && _ytId(ev.video_youtube)) {
+      heroBg.style.backgroundImage = '';
+      heroBg.style.position = 'relative'; heroBg.style.overflow = 'hidden';
+      heroBg.innerHTML = _ytBg(_ytId(ev.video_youtube), ev.brief && ev.brief.encuadre) + _colorLayer(ev.brief && ev.brief.color);
+      _ytActivate();
+    } else if (ev.video_url) {
+      heroBg.style.backgroundImage = '';
+      heroBg.innerHTML = `<video src="${ev.video_url}" autoplay muted loop playsinline style="width:100%;height:100%;object-fit:cover;"></video>`;
+    } else {
+      heroBg.style.backgroundImage   = ev.imagen_url ? `url(${ev.imagen_url})` : '';
+      heroBg.style.backgroundSize    = 'cover';
+      heroBg.style.backgroundPosition = 'center';
+    }
   }
 
   // "Tickets desde" — menor precio de los tickets activos disponibles
   const ttActivos = (ev.tiposTicket || []).filter(t =>
     t.soloWeb !== false && t.estado !== 'Agotado' && t.estado !== 'Oculto' &&
-    t.estado !== 'Cerrado' && t.estado !== 'Venta solo RRPP' && (t.disponible ?? 1) > 0
+    t.estado !== 'Cerrado' && t.estado !== 'Venta solo RRPP' && (t.disponible ?? 1) > 0 &&
+    enVentana(t)
   );
   const minP = ttActivos.length ? Math.min(...ttActivos.map(t => t.precio)) : 0;
   const desdeEl = document.getElementById('ep-precio-desde');
   if (desdeEl) desdeEl.textContent = minP ? '$' + minP.toLocaleString('es-CL') + '+' : '—';
+
+  // Cuenta regresiva dentro del popup (urgencia ≤ 48 h)
+  let cdEl = document.getElementById('ep-cuenta');
+  if (!cdEl && desdeEl) {
+    cdEl = document.createElement('div');
+    cdEl.id = 'ep-cuenta';
+    cdEl.style.cssText = 'margin-top:8px;font-size:0.82rem;font-weight:700;color:var(--dorado);letter-spacing:1px;';
+    desdeEl.parentElement.appendChild(cdEl);
+  }
+  if (cdEl) {
+    const dl = proximoDeadline(ev);
+    if (dl) { cdEl.classList.add('cd-timer'); cdEl.dataset.dl = dl.dt.getTime(); cdEl.dataset.tipo = dl.tipo; cdEl.style.display = ''; cdEl.textContent = ''; }
+    else { cdEl.style.display = 'none'; cdEl.classList.remove('cd-timer'); }
+  }
 
   // Links
   const igLink = document.getElementById('ep-ig-link');
@@ -2531,13 +4185,40 @@ function openEventPopup(evId) {
 
   popup.dataset.evid = evId;
   window.ticketTypeQtys = {};
+  try { window.FratePerfil && window.FratePerfil.limpiar(); } catch (_) {}
 
   // Renderizar tickets directamente
   if (typeof renderTicketTypes === 'function') renderTicketTypes(ev);
   if (typeof renderPersonalizacionFormsV3 === 'function') renderPersonalizacionFormsV3(0);
+  _epPintarNav(ev);
 
   popup.classList.add('open');
   document.body.style.overflow = 'hidden';
+
+  // Aviso (1 vez por sesión): todas las entradas son nominativas
+  try {
+    if (!sessionStorage.getItem('frate_nominativo_ok')) {
+      sessionStorage.setItem('frate_nominativo_ok', '1');
+      mostrarAvisoNominativo();
+    }
+  } catch(e) {}
+}
+
+// ── Aviso: entradas nominativas ───────────────────────────────
+function mostrarAvisoNominativo() {
+  const ov = document.createElement('div');
+  ov.id = 'aviso-nominativo';
+  ov.style.cssText = 'position:fixed;inset:0;background:rgba(0,0,0,.8);z-index:4000;display:flex;align-items:center;justify-content:center;padding:20px;';
+  ov.innerHTML = `
+    <div style="max-width:400px;width:100%;background:#141415;border:1px solid #D4A832;border-radius:12px;padding:26px;text-align:center;">
+      <div style="font-size:2rem;margin-bottom:10px;">🎫</div>
+      <div style="font-family:var(--fuente-display);font-weight:900;font-size:1.25rem;letter-spacing:1px;color:#fff;margin-bottom:10px;" data-txt="nominativo_titulo">ENTRADAS NOMINATIVAS</div>
+      <p style="color:#a1a1aa;font-size:0.9rem;line-height:1.7;margin-bottom:8px;" data-txt="nominativo_texto">En nuestra casa, cada entrada va con el nombre y RUT de quien la usa — por la seguridad y tranquilidad de todos los que carretean con nosotros.</p>
+      <p style="color:#71717a;font-size:0.78rem;line-height:1.6;margin-bottom:18px;" data-txt="nominativo_regalo">¿Es un regalo? Compra con los datos que tengas y después cámbialos desde Mi cuenta → Mis tickets → ✏️ Asistentes.</p>
+      <button onclick="document.getElementById('aviso-nominativo').remove()" style="background:#E8363D;color:#fff;border:none;padding:13px 34px;font-family:var(--fuente-display);font-weight:900;letter-spacing:2px;text-transform:uppercase;border-radius:4px;cursor:pointer;">Entendido</button>
+    </div>`;
+  ov.addEventListener('click', e => { if (e.target === ov) ov.remove(); });
+  document.body.appendChild(ov);
 }
 
 // showTicketSelector — ya no necesita alternar vistas, sólo re-renderiza si es necesario

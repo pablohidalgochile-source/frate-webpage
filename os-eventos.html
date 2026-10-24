@@ -1,0 +1,155 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>FRATE WEB (TICKETERA) · OS 13 RECETAS: EVENTOS Y CUMPLEAÑOS</title>
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🎂</text></svg>">
+<link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@600;800;900&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="/os-manual.css">
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+</head>
+<body>
+<div id="bar"></div>
+<div class="wrap">
+
+  <div class="hero">
+    <div class="eyebrow">Manual 13 · recetas</div>
+    <h1>Eventos y<br><em>cumpleaños</em></h1>
+    <p class="sub">Lo que se arma antes de que exista la noche. Incluye el flujo completo de un cumpleaños, que es el mejor negocio del local.</p>
+    <div class="meta"><span>Producción · Comunidad</span><span>·</span><span>4 recetas</span></div>
+  </div>
+
+  <!-- A11 -->
+  <section>
+    <div class="receta">
+      <div class="rcab"><span class="cod">A11</span><h3>Crear un evento y sus entradas</h3><span class="quien">Producción · Admin</span></div>
+      <div class="rbody">
+        <div class="cuando"><b>Cuándo:</b> lunes o martes, cuando ya está definida la fiesta de la semana y hay que abrir la venta.</div>
+
+        <div class="paso"><span class="n">1</span><div class="c"><div class="t">Menú → 🎵 Eventos → ＋ Evento</div>
+          <div class="d">Los datos que importan:</div>
+          <div class="pant">
+            <div class="barra">Nuevo evento</div>
+            <div class="campo"><label>Nombre</label><div class="inp">BESUCONA</div></div>
+            <div class="campo"><label>Fecha</label><div class="inp">2026-07-25</div></div>
+            <div class="campo"><label>Hora inicio / término</label><div class="inp">23:00 → 05:00</div></div>
+            <div class="campo"><label>Aforo</label><div class="inp">450</div></div>
+            <div class="campo"><label>🔗 Link directo</label><div class="inp">frate.cl/e/ <b style="color:var(--rojo)">besucona</b></div></div>
+            <div class="campo"><label>Estado</label><div class="inp">Creado (borrador)</div></div>
+          </div></div></div>
+
+        <div class="paso"><span class="n">2</span><div class="c"><div class="t">Crea los tipos de entrada</div>
+          <div class="d">Para cada uno: nombre, precio, cuántos hay, hasta qué hora sirve y las condiciones que lee el cliente.</div>
+          <div class="pant">
+            <div class="barra">Tipo de ticket</div>
+            <div class="campo"><label>Nombre</label><div class="inp">Pre-Venta PRO MUJER</div></div>
+            <div class="campo"><label>Precio</label><div class="inp">$9.000</div></div>
+            <div class="campo"><label>Disponibles</label><div class="inp">60</div></div>
+            <div class="campo"><label>⏰ Hora máxima de ingreso</label><div class="inp">02:30</div></div>
+            <div class="campo"><label>📧 Instrucciones / condiciones</label><div class="inp ph">Ingreso hasta las 02:30 · no transferible</div></div>
+          </div></div></div>
+
+        <div class="paso"><span class="n">3</span><div class="c"><div class="t">Usa la biblioteca</div>
+          <div class="d">📚 <b>Cargar desde biblioteca</b> trae un tipo ya configurado de otra semana. Y con <b>💾 A biblioteca</b> guardas el que acabas de armar para reutilizarlo.</div></div></div>
+
+        <div class="paso"><span class="n">4</span><div class="c"><div class="t">Cuando esté listo, pásalo a Publicado</div>
+          <div class="d">Ahí recién sale a la venta en frate.cl y en el link directo. Mientras esté en <b>Creado</b>, nadie lo ve.</div></div></div>
+
+        <div class="ok"><b>Cómo saber que salió bien:</b> abre <b>frate.cl/e/besucona</b> en el celular. Si ves la portada, la fecha y las entradas con su precio, está andando. Ese es el link que va al flyer.</div>
+        <div class="oro"><b>La hora máxima de ingreso ordena la noche.</b> Sale en el correo del cliente <b>y</b> en la pantalla del portero. Sin ella, todos pueden entrar hasta las 5.</div>
+        <div class="no"><b>El aforo no es decorativo:</b> es el número contra el que se mide la ocupación en vivo. Si lo dejas vacío, la barra de aforo no aparece esa noche.</div>
+      </div>
+    </div>
+  </section>
+
+  <!-- A12 -->
+  <section>
+    <div class="receta">
+      <div class="rcab"><span class="cod">A12</span><h3>Un cumpleaños, de punta a punta</h3><span class="quien">Comunidad</span></div>
+      <div class="rbody">
+        <div class="cuando"><b>Cuándo:</b> alguien llena el formulario de cumpleaños. <b>Es la receta que más plata deja</b>: los invitados de cumpleaños llegan en un 91%, el mejor rendimiento de todas las listas.</div>
+
+        <div class="paso"><span class="n">1</span><div class="c"><div class="t">Llega la solicitud</div>
+          <div class="d">Comunidad → <b>📋 Formularios</b>. Entra como <b>Nuevo</b>. Ahí está quién es, cuándo quiere celebrar, cuántos invitados y su contacto.</div></div></div>
+
+        <div class="paso"><span class="n">2</span><div class="c"><div class="t">Mira quién es antes de responder</div>
+          <div class="d">En la ficha, el panel <b>360°</b> te dice si ya vino antes, cuánto ha gastado y si es frecuente. <b>No es lo mismo responderle a alguien que viene hace un año que a alguien nuevo.</b></div></div></div>
+
+        <div class="paso"><span class="n">3</span><div class="c"><div class="t">Contáctala desde la misma ficha</div>
+          <div class="d"><b>📲 Enviar por WhatsApp</b> sale por el número de FRATE y queda en el historial del equipo. También hay <b>✉️ correo</b> y <b>🤖 Redactar con IA</b> para el borrador.</div>
+          <span class="bt">📲 Enviar por WhatsApp</span> <span class="bt g">🤖 Redactar con IA</span></div></div>
+
+        <div class="paso"><span class="n">4</span><div class="c"><div class="t">Anota lo que acordaron</div>
+          <div class="d">En <b>Gestión</b>: el monto, si pagó o abonó, cuántas personas y quién es el responsable. <b>Esto es lo que después aparece en el calendario del mes.</b></div></div></div>
+
+        <div class="paso"><span class="n">5</span><div class="c"><div class="t">Crea su lista de invitados</div>
+          <div class="d">Desde la misma ficha, botón para <b>crear la lista para la puerta</b>. Se la pasas al cumpleañer@ para que la llene, o la llenas tú con lo que te mande.</div></div></div>
+
+        <div class="paso"><span class="n">6</span><div class="c"><div class="t">Asígnale su zona</div>
+          <div class="d">Comunidad → <b>🗺️ Disposición</b> → elige el día → le asignas su mesa o VIP. Queda dibujado en el mapa de esa noche.</div></div></div>
+
+        <div class="paso"><span class="n">7</span><div class="c"><div class="t">El día del evento: emite y avisa</div>
+          <div class="d">Emites su lista (receta <b>A1</b>) y le mandas la hoja del día a la puerta desde <b>🖨️ Hoja</b> de la Disposición.</div></div></div>
+
+        <div class="paso"><span class="n">8</span><div class="c"><div class="t">Al otro día, cierra el círculo</div>
+          <div class="d">Marca la solicitud como <b>realizado</b> y mira cuántos de sus invitados llegaron. Esa gente ahora está en tu CRM con <b>"vino por"</b> su nombre.</div></div></div>
+
+        <div class="ok"><b>El valor escondido:</b> un cumpleaños no son 20 entradas gratis — son <b>20 personas nuevas en el CRM</b> que ya conocen el local. A esas se les puede ofrecer preventa del próximo evento. Es el público más fácil de convertir en cliente que paga.</div>
+        <div class="no"><b>El error que ya nos costó:</b> dejar una solicitud en <b>"no realizado"</b> sin volver a contactar. Pasó de verdad: una clienta pidió celebrar acá, nadie cerró el trato, y esa misma noche <b>vino igual… de invitada del cumpleaños de otra</b>. Perdimos 20 personas y una celebración.</div>
+        <div class="oro"><b>Revisa periódicamente las solicitudes en "no realizado".</b> No son basura: es gente que <b>ya levantó la mano</b>. Un mensaje bastaría: <i>"vimos que querías celebrar acá, ¿lo armamos para el próximo mes?"</i></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- A13 -->
+  <section>
+    <div class="receta">
+      <div class="rcab"><span class="cod">A13</span><h3>Asignar zonas del mapa</h3><span class="quien">Producción</span></div>
+      <div class="rbody">
+        <div class="cuando"><b>Cuándo:</b> antes del evento, para saber qué mesa o VIP le toca a cada reserva y cumpleaños.</div>
+        <div class="paso"><span class="n">1</span><div class="c"><div class="t">Comunidad → 🗺️ Disposición → 🗓️ Ocupación por día</div>
+          <div class="d">Elige el día. A la derecha aparecen todos los cumples y reservas de esa fecha.</div></div></div>
+        <div class="paso"><span class="n">2</span><div class="c"><div class="t">A cada uno, elige su zona</div>
+          <div class="d">Desplegable en cada fila. Al asignar, <b>el mapa se pinta en rojo</b> en las zonas ocupadas.</div></div></div>
+        <div class="paso"><span class="n">3</span><div class="c"><div class="t">Manda la información</div>
+          <div class="d"><b>📋 Copiar</b> arma el resumen listo para pegar en el grupo de WhatsApp. <b>🖨️ Hoja</b> abre una hoja imprimible para la puerta, ordenada por zona y con los contactos.</div>
+          <span class="bt g">📋 Copiar</span> <span class="bt g">🖨️ Hoja</span></div></div>
+        <div class="ok"><b>Arriba se ve el resumen del día:</b> zonas ocupadas, cuántas personas y cuánta plata hay comprometida esa noche.</div>
+        <div class="oro"><b>Si el mapa no está dibujado</b>, se arma con <b>✏️ Editor visual</b>: arrastras las mesas, les pones nombre y capacidad, y guardas. Ya no hace falta pegar código.</div>
+      </div>
+    </div>
+  </section>
+
+  <!-- A14 -->
+  <section>
+    <div class="receta">
+      <div class="rcab"><span class="cod">A14</span><h3>Registrar a alguien en la puerta</h3><span class="quien">Puerta</span></div>
+      <div class="rbody">
+        <div class="cuando"><b>Cuándo:</b> llega un VIP, un artista, prensa o un conocido que no está en ninguna lista. <b>Igual hay que registrarlo.</b></div>
+        <div class="paso"><span class="n">1</span><div class="c"><div class="t">En el validador, pestaña ➕ Nuevo</div>
+          <div class="d">Está junto a Escanear, Por RUT y Escaneados.</div></div></div>
+        <div class="paso"><span class="n">2</span><div class="c"><div class="t">Llena lo mínimo</div>
+          <div class="d">Nombre es lo único obligatorio. RUT, teléfono, Instagram y motivo (VIP, Artista, Prensa, Staff…) ayudan al CRM.</div>
+          <div class="pant">
+            <div class="barra">➕ Nuevo ingreso</div>
+            <div class="campo"><label>Nombre *</label><div class="inp ph">Nombre y apellido</div></div>
+            <div class="campo"><label>RUT (opcional)</label><div class="inp ph">12.345.678-9</div></div>
+            <div class="campo"><label>Motivo</label><div class="inp">VIP</div></div>
+            <span class="bt v">✅ REGISTRAR INGRESO</span>
+          </div></div></div>
+        <div class="paso"><span class="n">3</span><div class="c"><div class="t">Si tiene cédula, escanéala</div>
+          <div class="d">Botón <b>📷 Escanear</b>: lee el código del carnet y rellena RUT y nombre solo.</div></div></div>
+        <div class="ok"><b>Qué pasa por dentro:</b> se le crea una cortesía de $0 ya marcada como ingresada, <b>cuenta en el aforo</b>, y la persona queda en el CRM con origen "puerta". Aparece en el desglose como <b>🚪 Ingreso · VIP</b>.</div>
+        <div class="no"><b>Nunca dejar entrar sin registrar.</b> Si entra gente que no queda en el sistema, el aforo miente — y el aforo es seguridad, no contabilidad. Toma 15 segundos.</div>
+      </div>
+    </div>
+  </section>
+
+  <div class="pie">FRATE OS · Manual 13 · <a href="/os-entradas">← Entradas y plata</a> · <a href="/os-datos">Siguiente: calidad de datos →</a></div>
+</div>
+
+<script src="/os-guard.js"></script>
+<script>document.getElementById('bar').innerHTML = osBarra('13'); osProteger();</script>
+</body>
+</html>

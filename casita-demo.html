@@ -1,0 +1,55 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+<title>FRATE · Nos vemos</title>
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Anton&family=Barlow+Condensed:wght@600;800;900&family=Inter:wght@600;800&display=swap" rel="stylesheet">
+<style>
+  *{ box-sizing:border-box; margin:0; padding:0; }
+  html,body{ height:100%; background:#000; overflow:hidden; font-family:'Inter',system-ui,sans-serif; }
+  #screen{ position:fixed; inset:0; display:flex; align-items:center; justify-content:center; }
+  /* El marco tiene el MISMO ratio que el flyer → el texto se ancla al flyer, no a la pantalla */
+  #frame{ position:relative; aspect-ratio:1176/1764; height:100dvh; max-width:100vw; }
+  #frame > img{ width:100%; height:100%; object-fit:cover; display:block; }
+  .ov{ position:absolute; left:50%; top:40%; transform:translate(-50%,-50%); width:84%; text-align:center; }
+  .tit1{ font-family:'Barlow Condensed',sans-serif; font-weight:900; letter-spacing:.06em; font-size:6cqw; line-height:1; color:#fff; text-transform:uppercase; text-shadow:0 2px 12px rgba(0,0,0,.9); }
+  .tit2{ font-family:'Barlow Condensed',sans-serif; font-weight:800; letter-spacing:.1em; font-size:4.4cqw; color:#fff; text-transform:uppercase; margin:.6cqh 0 1.6cqh; text-shadow:0 2px 10px rgba(0,0,0,.85); }
+  .tit2 b{ color:#E8363D; }
+  .franja{ background:rgba(0,0,0,.5); border-top:2px solid #E8363D; border-bottom:2px solid #E8363D; padding:1.6cqh .6cqw 2cqh; }
+  .nombre{ font-family:'Anton',sans-serif; letter-spacing:.02em; line-height:.96; font-size:9cqw; color:#fff; text-transform:uppercase; text-shadow:0 3px 20px rgba(232,54,61,.55); }
+  .fecha{ font-family:'Barlow Condensed',sans-serif; font-weight:800; letter-spacing:.14em; font-size:4cqw; color:#E8363D; text-transform:uppercase; margin-top:.7cqh; }
+  #frame{ container-type:size; }
+  #bar{ position:fixed; left:0; right:0; bottom:0; padding:14px 16px calc(14px + env(safe-area-inset-bottom)); display:flex; gap:10px; justify-content:center; background:linear-gradient(180deg,transparent,rgba(0,0,0,.85)); z-index:5; }
+  .btn{ font-weight:800; font-size:.86rem; border:0; border-radius:12px; padding:13px 18px; cursor:pointer; }
+  .btn.rec{ background:#E8363D; color:#fff; } .btn.sh{ background:rgba(255,255,255,.12); color:#fff; border:1px solid rgba(255,255,255,.3); }
+  #hint{ position:fixed; top:10px; left:0; right:0; text-align:center; color:rgba(255,255,255,.5); font-size:.7rem; letter-spacing:1px; z-index:5; }
+</style>
+</head>
+<body>
+<div id="hint">MOCKUP · fondo = 1 frame de tu video (el final llevará el video animado)</div>
+<div id="screen">
+  <div id="frame">
+    <img src="/casita-bg.jpg" alt="" />
+    <div class="ov">
+      <div class="tit1">YA COMPRÉ MI ENTRADA</div>
+      <div class="tit2">NOS VEMOS EN <b>CASITA</b></div>
+      <div class="franja">
+        <div class="nombre" id="nombre">PABLO ANDRES</div>
+        <div class="fecha" id="fecha">MIÉRCOLES 15 JULIO · 23:00</div>
+      </div>
+    </div>
+  </div>
+</div>
+<div id="bar">
+  <button class="btn rec">📹 Descargar video</button>
+  <button class="btn sh">📲 Compartir</button>
+</div>
+<script>
+  const p=new URLSearchParams(location.search);
+  if(p.get('n')) document.getElementById('nombre').textContent=p.get('n').toUpperCase();
+  if(p.get('f')) document.getElementById('fecha').textContent=p.get('f').toUpperCase();
+</script>
+</body>
+</html>

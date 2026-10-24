@@ -1,0 +1,138 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>FRATE WEB (TICKETERA) · OS 14 CALIDAD DE DATOS</title>
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🔍</text></svg>">
+<link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@600;800;900&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="/os-manual.css">
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+</head>
+<body>
+<div id="bar"></div>
+<div class="wrap">
+
+  <div class="hero">
+    <div class="eyebrow">Manual 14 · calidad de datos</div>
+    <h1>Números que<br><em>mienten</em></h1>
+    <p class="sub">Hay tres cifras del sistema que no significan lo que parecen. Este capítulo explica cuáles son, por qué pasan y qué número mirar en su lugar. Si vas a tomar una decisión con un dato, empieza por acá.</p>
+    <div class="meta"><span>Administración · Comunidad</span><span>·</span><span>7 min</span></div>
+  </div>
+
+  <section>
+    <div class="stag">La idea de fondo</div>
+    <h2>Un dato roto es peor que no tener el dato</h2>
+    <p class="lead">Cuando no tienes un número, preguntas. Cuando tienes un número equivocado, decides con él. Eso es lo caro.</p>
+    <p>El sistema guarda muchísimo, y casi todo está bien. Pero hay <b>tres contadores</b> que se llenan con una lógica que no es la que uno supone al leer su nombre. Nadie los programó mal a propósito: se armaron cuando el sistema era más chico y la realidad los pasó por encima.</p>
+    <div class="oro"><b>La regla:</b> antes de usar un número para decidir algo (regalar una cortesía, subir a alguien a frecuente, medir a una embajadora), pregúntate <b>qué cuenta exactamente ese número</b>. Este manual responde eso para los tres que más se usan.</div>
+  </section>
+
+  <!-- ═══ 1 ═══ -->
+  <section>
+    <div class="stag">Problema 1</div>
+    <h2>“Visitas” no cuenta visitas</h2>
+
+    <p>En la ficha de una persona ves <b>Visitas: 9</b>. Se lee como “vino nueve veces”. No es eso.</p>
+
+    <div class="peligro"><b>Lo que cuenta de verdad:</b> cuántos <b>QR se escanearon en la puerta a nombre de la persona que compró la orden</b>. No cuántas noches vino esa persona.</div>
+
+    <h3 style="margin-top:26px">Por qué se infla</h3>
+    <p>El contador sube cada vez que se escanea un QR, y le carga esa visita <b>al comprador de la orden</b>, no a quien realmente pasó por la puerta. Entonces:</p>
+
+    <table class="tabla">
+      <tr><th>Lo que pasó de verdad</th><th>Lo que anota el sistema</th></tr>
+      <tr><td><b>Camila compra 4 entradas</b> para ella y tres amigas. Entran las cuatro.</td><td><b>Camila: +4 visitas.</b> Sus amigas: 0. Camila vino <b>una</b> vez.</td></tr>
+      <tr><td>Una persona quedó <b>dos veces en la misma lista</b> (duplicada). Le llegan 2 QR y usa los dos al entrar.</td><td><b>+2 visitas</b> por una sola entrada.</td></tr>
+      <tr><td>Alguien está en <b>tres listas distintas</b> de la misma noche.</td><td><b>+3 visitas</b> en una sola noche.</td></tr>
+    </table>
+
+    <div class="no"><b>Casos reales encontrados en la base:</b> una ficha con <b>9 visitas</b> y <b>una sola</b> entrada verificada. Otra con <b>19 visitas registradas el mismo día</b>. Nadie entró 19 veces esa noche.</div>
+
+    <h3 style="margin-top:26px">Qué mirar en su lugar</h3>
+    <table class="tabla">
+      <tr><th>Si quieres saber…</th><th>Mira</th></tr>
+      <tr><td><b>Cuántas noches vino</b> una persona</td><td>El <b>historial</b> de su ficha 360°: cuenta <b>eventos distintos</b>, no la línea “Visitas”.</td></tr>
+      <tr><td>Si es <b>frecuente</b> de verdad</td><td>Eventos distintos en los últimos 2 o 3 meses. Un comprador de grupo no es un frecuente.</td></tr>
+      <tr><td>Cuánta gente entró <b>anoche</b></td><td>El <b>tablero de la noche</b> (Eventos → 📊 Resumen). Ese sí cuenta QR únicos por categoría.</td></tr>
+    </table>
+
+    <div class="bien"><b>Lo que sí está bien:</b> el conteo de la puerta. Un QR solo se puede quemar una vez — el tablero de la noche y el aforo en vivo son confiables. El problema es solo el contador acumulado de la ficha.</div>
+  </section>
+
+  <!-- ═══ 2 ═══ -->
+  <section>
+    <div class="stag">Problema 2</div>
+    <h2>Duplicados en listas: cupos regalados</h2>
+
+    <p>Cuando una persona queda dos veces en la misma lista, el sistema emite <b>dos QR</b>. Los dos son válidos. Los dos ocupan cupo.</p>
+
+    <div class="pant">
+      <div class="barra">Caso real · una noche cualquiera</div>
+      <div class="fila"><span class="sem" style="background:var(--verde)"></span><span style="flex:1">Misma persona · QR #1 quemado</span><span style="color:var(--gris2);font-size:.68rem">00:27</span></div>
+      <div class="fila"><span class="sem" style="background:var(--oro)"></span><span style="flex:1">Misma persona · QR #2 quemado</span><span style="color:var(--oro);font-size:.68rem">00:28 · un minuto después</span></div>
+    </div>
+
+    <p style="margin-top:16px">Un minuto de diferencia. No es alguien colándose: es la misma persona pasando dos QR que el sistema le mandó. El daño no es de seguridad, es de <b>plata y de medición</b>:</p>
+
+    <div class="kpis">
+      <div class="kpi r"><b>−1</b><span>cupo que nadie usó</span></div>
+      <div class="kpi o"><b>+1</b><span>visita falsa en su ficha</span></div>
+      <div class="kpi o"><b>↑</b><span>“entraron” inflado esa noche</span></div>
+    </div>
+
+    <div class="oro"><b>Dónde se ataja:</b> en el <b>semáforo de revisión</b>, antes de emitir. Las duplicadas salen marcadas en amarillo. Se deja una sola y listo. Ver <a href="/os-listas">Manual 11 · Listas y cortesías</a>.</div>
+    <div class="peligro"><b>Después de emitir no hay vuelta atrás.</b> Los dos QR ya están en el teléfono de esa persona. Por eso el paso de revisión nunca se salta.</div>
+  </section>
+
+  <!-- ═══ 3 ═══ -->
+  <section>
+    <div class="stag">Problema 3</div>
+    <h2>La misma persona, varias fichas</h2>
+
+    <p>Una persona se anota en una lista con <b>Cami Rojas</b>, compra una entrada como <b>Camila Rojas Díaz</b> y llena un formulario de cumpleaños con otro correo. Si en alguna de esas tres no puso RUT, el sistema no puede saber que son la misma y quedan <b>tres fichas</b>.</p>
+
+    <table class="tabla">
+      <tr><th>Con qué amarra</th><th>Qué tan seguro</th></tr>
+      <tr><td><b>RUT</b></td><td><b>Seguro.</b> Es el hilo principal. Se valida el dígito verificador.</td></tr>
+      <tr><td><b>Correo</b></td><td>Bueno, si está bien escrito. Por eso el checkout revisa el dominio y pide confirmar el correo.</td></tr>
+      <tr><td><b>Nombre</b></td><td><b>Débil.</b> Se escribe distinto cada vez. Solo se usa cuando no hay nada más.</td></tr>
+    </table>
+
+    <div class="bien"><b>Ya resuelto en parte:</b> los formularios y las reservas tienen anti-duplicado, los RUT se normalizan al importar (<b>🧹 Normalizar</b> en la lista) y el checkout verifica que el correo exista de verdad antes de dejar pagar.</div>
+    <div class="oro"><b>Lo que ayuda más, y es gratis:</b> <b>pedir el RUT siempre</b>. Una lista con RUT completo se limpia sola. Una lista solo con nombres genera fichas nuevas cada semana.</div>
+  </section>
+
+  <!-- ═══ Cierre ═══ -->
+  <section>
+    <div class="stag">Cierre</div>
+    <h2>Qué creer y qué no</h2>
+
+    <table class="tabla">
+      <tr><th>Dato</th><th>¿Se puede decidir con él?</th></tr>
+      <tr><td><b>Entraron / emitidas por categoría</b> (tablero de la noche)</td><td style="color:var(--verde)"><b>Sí.</b> Cuenta QR únicos, separando preventa, cortesía y puerta.</td></tr>
+      <tr><td><b>Recaudación</b> de una noche</td><td style="color:var(--verde)"><b>Sí.</b> Los precios los pone el servidor y los pagos se re-verifican contra MercadoPago.</td></tr>
+      <tr><td><b>Aforo en vivo</b></td><td style="color:var(--verde)"><b>Sí.</b> Es el conteo de la puerta en tiempo real.</td></tr>
+      <tr><td><b>Rendimiento de una lista</b> (emitidas vs llegaron)</td><td style="color:var(--oro)"><b>Casi.</b> Réstale los duplicados que no sacaste antes de emitir.</td></tr>
+      <tr><td><b>“Visitas”</b> de una ficha</td><td style="color:var(--rojo)"><b>No solo.</b> Ábrele el historial y cuenta eventos distintos.</td></tr>
+      <tr><td><b>Cantidad total de personas</b> en la base</td><td style="color:var(--oro)"><b>Es un techo.</b> Las fichas repetidas todavía existen; el número real es algo menor.</td></tr>
+    </table>
+
+    <div class="bien"><b>La frase para la reunión:</b> el sistema es confiable para <b>la noche</b> — cuánto entró, cuánta gente pasó, cuánto se recaudó. Lo que todavía se está afinando es <b>la historia acumulada de cada persona</b>. Para eso, mira el historial, no el contador.</div>
+
+    <h3 style="margin-top:26px">Lo que falta arreglar (y se sabe)</h3>
+    <ul>
+      <li><b>Cargar la visita a quien entra, no a quien compró.</b> Requiere que cada entrada lleve el nombre de su titular, no solo el del comprador.</li>
+      <li><b>Recalcular las visitas históricas</b> una vez arreglado lo anterior, contando eventos distintos.</li>
+      <li><b>Fusionar fichas repetidas</b> con una herramienta de “estas dos son la misma persona”.</li>
+    </ul>
+    <div class="no"><b>Mientras tanto:</b> ninguna de estas tres cosas afecta la plata ni la puerta. Afectan el CRM. Se puede operar perfecto sabiendo esto.</div>
+  </section>
+
+  <div class="pie">FRATE OS · Manual 14 · <a href="/os-eventos">← Recetas: eventos</a> · <a href="/os-accesos">Siguiente: quién entra dónde →</a></div>
+</div>
+
+<script src="/os-guard.js"></script>
+<script>document.getElementById('bar').innerHTML = osBarra('14'); osProteger();</script>
+</body>
+</html>

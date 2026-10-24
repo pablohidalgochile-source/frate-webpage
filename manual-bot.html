@@ -1,0 +1,87 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>FRATE WEB (TICKETERA) · MINI-MANUAL DEL BOT</title>
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;500;600;700;800;900&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet" />
+<style>
+  :root{--page:#08080a;--ink:#f0ede8;--dim:#a7a4ad;--faint:#6f6c76;--card:#131317;--card2:#191920;--line:rgba(255,255,255,.10);--line2:rgba(255,255,255,.16);--frate:#ff3b3b;--fluor:#3dff88;--gold:#f0c84a;--mono:'DM Mono',ui-monospace,monospace}
+  *{box-sizing:border-box}
+  body{margin:0;background:var(--page);color:var(--ink);font-family:'Outfit',system-ui,sans-serif;line-height:1.6;-webkit-font-smoothing:antialiased}
+  a{color:var(--fluor)}
+  main{max-width:720px;margin:0 auto;padding:34px clamp(20px,5vw,44px) 80px}
+  .brand{display:flex;align-items:center;gap:11px;margin-bottom:20px}
+  .disc{width:38px;height:38px;border-radius:99px;position:relative;background:repeating-radial-gradient(circle at 50% 50%,#191919 0 1px,#0b0b0b 1px 3px)}
+  .disc::after{content:"";position:absolute;inset:36%;border-radius:99px;background:radial-gradient(circle at 38% 32%,#ff8a8a,var(--frate) 60%,#8a1020);box-shadow:0 0 0 2px var(--page)}
+  .brand b{font-weight:800} .brand small{display:block;color:var(--faint);font-size:11px}
+  .ey{font-family:var(--mono);font-size:11px;letter-spacing:.2em;text-transform:uppercase;color:var(--frate)}
+  h1{font-size:clamp(26px,5vw,34px);font-weight:900;letter-spacing:-.02em;margin:6px 0 6px}
+  .lead{color:var(--dim);margin:0 0 8px;max-width:60ch}
+  h2{font-size:19px;font-weight:800;margin:34px 0 6px;padding-top:10px;border-top:1px solid var(--line)}
+  h2 .e{margin-right:6px}
+  h3{font-size:15px;margin:18px 0 2px;color:#fff}
+  p{margin:8px 0} ul,ol{margin:8px 0;padding-left:22px} li{margin:5px 0}
+  code{font-family:var(--mono);font-size:.86em;background:rgba(255,255,255,.07);padding:1px 6px;border-radius:5px;color:var(--gold)}
+  .step{counter-reset:s;list-style:none;padding-left:0}
+  .step>li{counter-increment:s;position:relative;padding:4px 0 4px 38px;margin:6px 0}
+  .step>li::before{content:counter(s);position:absolute;left:0;top:2px;width:25px;height:25px;border-radius:99px;background:var(--frate);color:#fff;font-weight:800;font-size:13px;display:flex;align-items:center;justify-content:center}
+  .box{border:1px solid var(--line2);border-radius:12px;padding:13px 15px;margin:15px 0;background:var(--card)}
+  .box.tip{border-left:3px solid var(--fluor)} .box.warn{border-left:3px solid var(--gold)}
+  .box .t{font-weight:800;font-size:13px;margin-bottom:2px} .box.tip .t{color:var(--fluor)} .box.warn .t{color:var(--gold)}
+  .box p{margin:2px 0;font-size:13.5px;color:var(--dim)}
+  table{width:100%;border-collapse:collapse;margin:12px 0;font-size:13.5px;display:block;overflow-x:auto}
+  th,td{border:1px solid var(--line);padding:7px 10px;text-align:left;vertical-align:top} th{background:var(--card2);color:#fff;white-space:nowrap}
+  .foot{margin-top:36px;padding-top:16px;border-top:1px solid var(--line);color:var(--faint);font-size:12.5px}
+  @media print{body{background:#fff;color:#111}code,.box,th{background:#f2f2f2}}
+</style>
+</head>
+<body>
+<main>
+  <div class="brand"><div class="disc"></div><div><b>FRATE</b><small>Mini-manual · El Anfitrión 🎧</small></div></div>
+  <div class="ey">Chatbot de la web</div>
+  <h1>Cómo funciona (y se administra) el Bot</h1>
+  <p class="lead">El <b>Anfitrión</b> es el disco 🎧 que aparece en la web. Vende, orienta y, cuando hace falta, te pasa la conversación a ti. Todo lo que dice es <b>configurable</b>.</p>
+
+  <h2><span class="e">🧠</span>Cómo decide qué responder</h2>
+  <p>El bot trabaja con una tabla de <b>respuestas</b>. Cada respuesta tiene:</p>
+  <table>
+    <tr><th>Campo</th><th>Qué es</th></tr>
+    <tr><td><b>Disparadores</b></td><td>Palabras clave separadas por coma (ej. <code>cumpleaños,cumple,celebrar</code>). Si el cliente escribe alguna, se activa.</td></tr>
+    <tr><td><b>Texto</b></td><td>Lo que responde el bot.</td></tr>
+    <tr><td><b>Responde solo</b></td><td>Si está activo, el bot contesta automático sin que intervengas.</td></tr>
+    <tr><td><b>Tras responder</b></td><td><code>nada</code> = solo responde · <code>escalar</code> = responde y te pasa la conversación a un humano.</td></tr>
+  </table>
+
+  <h3>Agregar o editar una respuesta</h3>
+  <ol class="step">
+    <li>En el panel, abre el administrador de <b>Respuestas del Anfitrión</b>.</li>
+    <li>Escribe los <b>disparadores</b> (piensa cómo lo escribiría un cliente: con y sin tilde, singular/plural).</li>
+    <li>Redacta el <b>texto</b>. Puedes pegar un <b>link</b>: en el chat sale <b>clicable</b> solo.</li>
+    <li>Elige <b>responde solo</b> y si <b>escala</b> o no. Guarda.</li>
+  </ol>
+  <div class="box tip"><div class="t">💡 Tildes y mayúsculas no importan</div><p>El bot compara sin distinguir mayúsculas ni acentos: "CUMPLEAÑOS" y "cumpleanos" activan lo mismo.</p></div>
+
+  <h2><span class="e">🔗</span>Derivar a los formularios</h2>
+  <p>Ya vienen cargadas respuestas que mandan el link correcto según la intención:</p>
+  <table>
+    <tr><th>Si el cliente dice…</th><th>El bot manda…</th></tr>
+    <tr><td>cumpleaños, cumple, celebrar</td><td><code>frate.cl/formcumple</code></td></tr>
+    <tr><td>reservar, mesa, vip, botella</td><td><code>frate.cl/formreserva</code></td></tr>
+    <tr><td>cliente frecuente, beneficios, socio</td><td><code>frate.cl/formfrecuente</code></td></tr>
+    <tr><td>convenio, marca, embajador, rrpp</td><td><code>frate.cl/frat-friends</code></td></tr>
+  </table>
+  <p>El link sale <b>subrayado y clicable</b> — el cliente lo toca y se abre el formulario. Puedes editar estos textos cuando quieras.</p>
+
+  <h2><span class="e">🙋</span>Cuando pasa a un humano (handoff)</h2>
+  <p>Si el cliente pide "hablar con una persona" (o una respuesta tiene <code>escalar</code>), el bot avisa "te paso con el equipo" y <b>la conversación cae en Comunidad → Chats</b>. Desde ahí le respondes tú y el cliente lo ve en el mismo chat.</p>
+  <div class="box warn"><div class="t">↻ Conversación trabada</div><p>Si un chat quedó "esperando a una persona" y el bot ya no responde, el cliente puede tocar <b>↻</b> (arriba a la izquierda del chat) para empezar de cero. Al recargar la página también arranca limpio.</p></div>
+
+  <h2><span class="e">💿</span>El vinilo (personalización)</h2>
+  <p>El disco del bot (texto/logo del centro) y la música de fondo se cambian desde <b>Configuración</b>. No afecta cómo responde, solo cómo se ve/suena.</p>
+
+  <div class="foot">FRATE · El Anfitrión se irá afinando. ¿Gestión general? Mira el <a href="/manual-comunidad">Manual de Comunidad</a>.</div>
+</main>
+</body>
+</html>

@@ -28,6 +28,8 @@ a{color:var(--rojo)}
   text-decoration:none;padding:5px 9px;border-radius:7px;border:1px solid transparent}
 .navman a:hover{color:var(--txt);border-color:var(--bor2)}
 .navman a.on{background:var(--rojo);color:#fff}
+.navman .pend{color:var(--gris2);opacity:.45;cursor:default;white-space:nowrap}
+
 @media print{.topbar{display:none}}
 
 /* ── portada ── */
@@ -163,6 +165,17 @@ strong{color:var(--txt)}
 .paso .c{flex:1;min-width:0}
 .paso .t{font-weight:800;font-size:.92rem}
 .paso .d{font-size:.83rem;color:var(--gris);margin-top:3px}
+/* ── COLISIÓN: `.paso` se define dos veces ────────────────────────────────
+   Una para la TIRA de flujo (tarjetas en fila, número grande arriba) y otra
+   para los PASOS de receta (fila con número en círculo). La segunda gana por
+   ir después, así que la tira perdía su padding y se aplastaba.
+   No se tocan las reglas originales —hay recetas fuera de .rbody que dependen
+   de ellas—: se le devuelve a la tira lo suyo con un selector más específico.
+   ──────────────────────────────────────────────────────────────────────── */
+.flujo .paso{display:block;padding:14px 12px;gap:0}
+.flujo .paso .n{display:block;flex:none;height:auto;background:none;border-radius:0;
+  color:var(--rojo);font-size:1.5rem;place-items:normal}
+
 .pant{background:var(--neg);border:1px solid var(--bor2);border-radius:11px;padding:13px;margin-top:10px}
 .pant .barra{font-size:.6rem;letter-spacing:1.5px;text-transform:uppercase;color:var(--gris2);border-bottom:1px solid var(--bor);padding-bottom:7px;margin-bottom:10px}
 .campo{margin-bottom:8px}

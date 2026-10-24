@@ -1,0 +1,130 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>FRATE WEB (TICKETERA) · MINI-MANUAL DE PUERTA</title>
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;500;600;700;800;900&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet" />
+<style>
+  :root{--page:#08080a;--ink:#f0ede8;--dim:#a7a4ad;--faint:#6f6c76;--card:#131317;--card2:#191920;--line:rgba(255,255,255,.10);--line2:rgba(255,255,255,.16);--frate:#ff3b3b;--verde:#3dff88;--gold:#f0c84a;--rojo:#ff5a63;--mono:'DM Mono',ui-monospace,monospace}
+  *{box-sizing:border-box}
+  body{margin:0;background:var(--page);color:var(--ink);font-family:'Outfit',system-ui,sans-serif;line-height:1.6;-webkit-font-smoothing:antialiased}
+  a{color:var(--verde)}
+  main{max-width:720px;margin:0 auto;padding:34px clamp(20px,5vw,44px) 80px}
+  .brand{display:flex;align-items:center;gap:11px;margin-bottom:20px}
+  .disc{width:38px;height:38px;border-radius:99px;position:relative;background:repeating-radial-gradient(circle at 50% 50%,#191919 0 1px,#0b0b0b 1px 3px)}
+  .disc::after{content:"";position:absolute;inset:36%;border-radius:99px;background:radial-gradient(circle at 38% 32%,#ff8fbb,var(--frate) 60%,#8a1020);box-shadow:0 0 0 2px var(--page)}
+  .brand b{font-weight:800} .brand small{display:block;color:var(--faint);font-size:11px}
+  .ey{font-family:var(--mono);font-size:11px;letter-spacing:.2em;text-transform:uppercase;color:var(--frate)}
+  h1{font-size:clamp(26px,5vw,34px);font-weight:900;letter-spacing:-.02em;margin:6px 0 6px}
+  .lead{color:var(--dim);margin:0 0 8px;max-width:60ch}
+  h2{font-size:19px;font-weight:800;margin:32px 0 6px;padding-top:10px;border-top:1px solid var(--line)}
+  h2 .e{margin-right:6px}
+  p{margin:8px 0} ul,ol{margin:8px 0;padding-left:22px} li{margin:5px 0}
+  code{font-family:var(--mono);font-size:.86em;background:rgba(255,255,255,.07);padding:1px 6px;border-radius:5px;color:var(--gold)}
+  .step{counter-reset:s;list-style:none;padding-left:0}
+  .step>li{counter-increment:s;position:relative;padding:4px 0 4px 38px;margin:7px 0}
+  .step>li::before{content:counter(s);position:absolute;left:0;top:2px;width:25px;height:25px;border-radius:99px;background:var(--frate);color:#fff;font-weight:800;font-size:13px;display:flex;align-items:center;justify-content:center}
+  .res{border-radius:13px;padding:14px 16px;margin:12px 0;border:1px solid var(--line2)}
+  .res .h{font-weight:900;font-size:17px;letter-spacing:.5px}
+  .res p{margin:4px 0;font-size:14px;color:var(--dim)}
+  .res.ok{border-color:rgba(61,255,136,.5);background:rgba(61,255,136,.06)} .res.ok .h{color:var(--verde)}
+  .res.dup{border-color:rgba(240,200,74,.5);background:rgba(240,200,74,.06)} .res.dup .h{color:var(--gold)}
+  .res.bad{border-color:rgba(255,90,99,.5);background:rgba(255,90,99,.06)} .res.bad .h{color:var(--rojo)}
+  .box{border:1px solid var(--line2);border-radius:12px;padding:13px 15px;margin:15px 0;background:var(--card);border-left:3px solid var(--verde)}
+  .box .t{font-weight:800;font-size:13px;margin-bottom:2px;color:var(--verde)} .box p{margin:2px 0;font-size:13.5px;color:var(--dim)}
+  .box.warn{border-left-color:var(--gold)} .box.warn .t{color:var(--gold)}
+  .foot{margin-top:36px;padding-top:16px;border-top:1px solid var(--line);color:var(--faint);font-size:12.5px}
+  @media print{body{background:#fff;color:#111}code,.box{background:#f2f2f2}}
+</style>
+</head>
+<body>
+<!--OFICIO-OS-->
+<div style="background:#0d1a12;border-bottom:3px solid #4ade80;padding:14px 20px;font:400 15px/1.5 system-ui;color:#f2f2f4;text-align:center"><b style="color:#4ade80">🧭 Manual de oficio — vigente</b><br><span style="color:#c9c9cf">Este explica <b>el criterio en la puerta</b>. Para entender cómo funciona el sistema por dentro, el libro de FRATE OS lo cuenta al día.</span><br><a href="/os-noche" style="display:inline-block;margin-top:8px;background:#4ade80;color:#08130a;font:800 14px system-ui;padding:9px 18px;border-radius:9px;text-decoration:none">Ver en el libro →</a></div>
+
+<main>
+  <div class="brand"><div class="disc"></div><div><b>FRATE</b><small>Mini-manual · Puerta</small></div></div>
+  <div class="ey">Validador de entradas</div>
+  <h1>Guía del portero / validador</h1>
+  <p class="lead">Tu trabajo: escanear el QR de cada persona, cotejar con su carnet y dejar entrar solo a quien corresponde. En segundos. Acá está todo.</p>
+
+  <h2><span class="e">🔑</span>Entrar y elegir el evento</h2>
+  <ol class="step">
+    <li>Abre <code>frate.cl/validacion</code> en el dispositivo e inicia sesión con tu correo y clave (solo cuentas <b>portero</b> o <b>admin</b>). El correo va en <b>minúsculas</b>.</li>
+    <li>Elige el <b>evento de esta noche</b>. ⚠️ Muy importante: si eliges mal el evento, los QR van a salir como "otro evento".</li>
+  </ol>
+  <div class="box"><div class="t">📲 Instálala como app (recomendado)</div><p>Toca <b>"📲 Instalar como app"</b> para tenerla en la pantalla de inicio: abre al toque y anda más rápido. En iPhone: Compartir ⬆️ → "Agregar a inicio". En Firefox (Sunmi): menú ⋮ → "Instalar".</p></div>
+
+  <h2><span class="e">🔀</span>Modo de escaneo: Cámara o Láser</h2>
+  <p>Arriba en <b>Escanear</b> eliges cómo lees, según tu equipo:</p>
+  <ul>
+    <li><b>📷 Cámara</b> — iPhone / Android. Toca <b>▶ Iniciar escáner</b> y apunta al QR. Si está oscuro, usa <b>🔦 Linterna</b>.</li>
+    <li><b>📟 Láser Sunmi</b> — si estás en una Sunmi con lector láser. En la Sunmi la cámara y el láser <b>no funcionan juntos</b>: elige láser. Dispara al QR y <b>valida solo</b> (no aprietes nada). Requiere que el láser del Sunmi esté en <b>modo teclado</b> (app "ScanSetting").</li>
+  </ul>
+  <p>Si no lee, escribe el código <code>FCC-…</code> a mano y toca <b>Validar manual</b>.</p>
+  <div class="box"><div class="t">⚡ Con láser: automático, sin apretar</div><p>El láser muestra a la persona <b>al instante</b> y se limpia solo para el siguiente. No necesitas tocar SIGUIENTE. (Con cámara sí aparece <b>➡️ SIGUIENTE</b> para limpiar y seguir.)</p></div>
+
+  <h2><span class="e">🪪</span>Carnet: ticket con láser, cédula con cámara</h2>
+  <ul>
+    <li><b>Ticket (QR del celular)</b> → con el <b>láser</b> (o cámara). Valida la entrada.</li>
+    <li><b>Cédula / carnet</b> (código de barras del reverso) → mejor con la <b>cámara</b>, en <b>➕ Nuevo</b> o <b>Por RUT</b>. La app <b>detecta que es cédula</b>, saca el <b>RUN solo</b> y busca sus entradas de este evento. Valida el dígito verificador (no confunde un número con un RUT).</li>
+  </ul>
+  <div class="box warn"><div class="t">🪪 Modo diagnóstico (temporal)</div><p>Por ahora, al leer una cédula la app muestra el <b>texto crudo</b> con un botón <b>"Copiar"</b>. Es para afinar la lectura del nombre — si te lo piden, copia ese texto y pásalo al admin.</p></div>
+
+  <h2><span class="e">🚦</span>Qué significa cada resultado</h2>
+  <div class="res ok"><div class="h">✅ VÁLIDO — cotejar carnet</div><p>Entrada real y pagada, de este evento. Verás el <b>nombre y RUT en grande</b>: compáralos con el carnet. Si calza, toca <b>CONFIRMAR INGRESO</b>.</p></div>
+  <div class="res dup"><div class="h">⚠️ YA ESCANEADO</div><p>Ese QR ya entró antes (te dice a qué hora). <b>No dejes pasar de nuevo</b> — puede ser un pantallazo reenviado.</p></div>
+  <div class="res bad"><div class="h">⛔ OTRO EVENTO</div><p>La entrada es de <b>otra fecha/fiesta</b>, no de la de hoy. <b>Por defecto no se ingresa.</b> Pero si el cliente <b>se equivocó de fecha al comprar</b>, aparece el botón <b>"INGRESAR IGUAL (otro día)"</b>: al tocarlo te pide confirmar y recién ahí lo deja pasar. Queda <b>registrado como ingreso forzado</b> para que el admin lo vea.</p></div>
+  <div class="res bad"><div class="h">⛔ RECHAZADO</div><p>El código no vale: no existe, o la cortesía quedó <b>sin emitir</b> (borrador). El cartel te dice el motivo. Deriva a la persona con el equipo.</p></div>
+
+  <div class="box"><div class="t">👆 Confirmar ingreso = quemar</div><p>Al tocar <b>CONFIRMAR INGRESO</b>, ese QR queda <b>usado para siempre</b>. Por eso, si alguien lo intenta de nuevo, sale "YA ESCANEADO". Confirma <b>solo</b> cuando la persona realmente entra.</p></div>
+
+  <h2><span class="e">⭐</span>Condiciones (beneficios con reglas)</h2>
+  <p>Algunas entradas tienen condiciones y te las muestra:</p>
+  <ul>
+    <li><b>🕐 Hasta cierta hora</b> — si llegó tarde, sale <b>"fuera de horario"</b> y pierde el beneficio. Tú decides si igual la dejas (botón "ingresar igual").</li>
+    <li><b>🔒 No transferible</b> — el RUT del QR <b>debe calzar</b> con el carnet.</li>
+    <li><b>🚪 Zona</b> (VIP, etc.) — indica por dónde va.</li>
+  </ul>
+
+  <h2><span class="e">🔎</span>Si no encuentra el QR: buscar por RUT</h2>
+  <p>Si alguien no tiene el QR a mano, usa <b>buscar por RUT</b>: muestra sus entradas <b>de este evento</b>. Desde ahí puedes validar igual.</p>
+
+  <h2><span class="e">➕</span>Cliente nuevo / VIP (sin lista)</h2>
+  <p>Para artistas, VIP o conocidos que <b>no están en ninguna lista</b>, usa la pestaña <b>➕ Nuevo</b>:</p>
+  <ol class="step">
+    <li>Escanea su cédula con la <b>cámara</b> (o escribe el nombre a mano).</li>
+    <li>Completa lo que falte (nombre obligatorio; RUT/teléfono/IG opcionales) y elige el <b>motivo</b> (Staff, Artista, VIP…).</li>
+    <li>Toca <b>Registrar ingreso</b>. Queda <b>ingresado</b>, <b>cuenta en el aforo</b> y se guarda en el CRM. No necesita correo.</li>
+  </ol>
+
+  <h2><span class="e">🚫</span>Incidencias (no entró / problema)</h2>
+  <p>Si una persona ya escaneada <b>no entra</b> (ebriedad, se arrepintió), márcala como <b>incidencia / posible devolución</b>: queda registrada para que el admin la revise. Si no se quemó el QR, la devolución la pide el cliente desde su cuenta.</p>
+
+  <h2><span class="e">📶</span>Sin internet (validación offline)</h2>
+  <p>El propio validador web funciona <b>sin internet</b>. Antes de que empiece la fila, con señal:</p>
+  <ol class="step">
+    <li>Toca <b>⬇️ Descargar</b> — baja todas las entradas del evento al dispositivo.</li>
+    <li>Si se cae la señal, <b>sigue validando igual</b> (dice "📴 Sin internet"). Quema local.</li>
+    <li>Al volver el internet, <b>sincroniza solo</b> (o toca 🔄 Sincronizar). El primero que quemó gana si hay conflicto.</li>
+  </ol>
+  <div class="box warn"><div class="t">Ojo</div><p>Si <b>no descargaste</b> antes y se cae el internet, un QR desconocido saldrá "RECHAZADO (offline)". Por eso: <b>descarga siempre al empezar la noche.</b></p></div>
+
+  <h2><span class="e">🔴</span>Puerta en vivo (para el admin)</h2>
+  <p>En un monitor: <code>frate.cl/vivo</code> (con cuenta admin/portero) muestra en grande <b>cuántos entraron</b>, el aforo, el <b>desglose por lista</b> (llegaron/total) y el <b>feed en vivo</b> (el último arriba). Ideal para la oficina o la puerta.</p>
+
+  <h2><span class="e">🛟</span>Problemas rápidos</h2>
+  <ul>
+    <li><b>La cámara no abre</b> → permite el acceso a la cámara en el navegador y recarga.</li>
+    <li><b>El láser no valida</b> (Sunmi) → activa el modo <b>📟 Láser</b> arriba, y en la app "ScanSetting" del Sunmi deja el láser en <b>modo teclado</b>.</li>
+    <li><b>No lee el QR</b> → limpia el lente, acércate, usa 🔦, o escribe el <code>FCC-…</code> a mano.</li>
+    <li><b>Todo sale RECHAZADO</b> → probablemente el <b>evento elegido está mal</b> o cerraste sesión. Revisa arriba.</li>
+    <li><b>RECHAZADO (offline)</b> → no descargaste las entradas. Con señal, toca <b>⬇️ Descargar</b>.</li>
+    <li><b>Quedó pegada una versión vieja</b> → ciérrala y reábrela una vez (se actualiza sola).</li>
+  </ul>
+
+  <div class="foot">FRATE · Puerta. Cualquier caso raro, foto del cartel + avisa al admin. Gestión general: <a href="/manual-comunidad">Manual de Comunidad</a>.</div>
+</main>
+</body>
+</html>

@@ -1,0 +1,160 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>FRATE WEB (TICKETERA) · OS FLYER 07 FRATE ID</title>
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🔐</text></svg>">
+<link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@600;800;900&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="/os-manual.css">
+<link rel="stylesheet" href="/os-flyer.css">
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<style>
+  .puertas{display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-top:16px}
+  @media(max-width:560px){.puertas{grid-template-columns:1fr}}
+  .puerta{background:var(--neg2);border:1px solid var(--bor);border-radius:14px;padding:18px 20px;position:relative;overflow:hidden}
+  .puerta .ic{font-size:1.7rem}
+  .puerta h4{font-family:var(--disp);font-weight:800;font-size:1.2rem;text-transform:uppercase;margin:8px 0 3px}
+  .puerta .q{font-size:.66rem;letter-spacing:1.4px;text-transform:uppercase;color:var(--gris2);margin-bottom:10px}
+  .puerta p{font-size:.85rem;color:var(--gris)}
+  .puerta.pp{border-left:4px solid var(--acc)}
+  .puerta.pr{border-left:4px solid var(--oro)}
+  .firma{display:flex;gap:10px;flex-wrap:wrap;align-items:center;margin-top:14px}
+  .firma button{background:var(--neg);border:1px solid var(--bor2);color:var(--txt);font-family:var(--disp);font-weight:800;
+    letter-spacing:1px;text-transform:uppercase;font-size:.78rem;padding:9px 16px;border-radius:9px;cursor:pointer}
+  .firma button.on{background:var(--acc);color:#08080a;border-color:var(--acc)}
+  .firmaOut{font-family:ui-monospace,Menlo,monospace;font-size:1.05rem;color:var(--txt);background:var(--neg);
+    border:1px dashed var(--bor2);border-radius:10px;padding:12px 16px;margin-top:12px}
+  .firmaOut b{color:var(--mor)}
+</style>
+</head>
+<body>
+<div id="bar"></div>
+<div class="wrap">
+
+  <div class="hero">
+    <div class="eyebrow">FLYER · Manual 07</div>
+    <h1>Quién<br><em>entra</em></h1>
+    <p class="sub">FLYER dejó de ser «cualquiera con la contraseña ve todo». Ahora cada persona entra con su cuenta, con su rol, y lo que hace queda firmado con su nombre. Este es el primer paso de FRATE ID: un solo login para los cuatro sistemas.</p>
+    <div class="meta"><span>Para administración</span><span>·</span><span>7 minutos</span><span>·</span><span>Cambio del 28 de julio</span></div>
+  </div>
+
+  <section>
+    <div class="stag">Capítulo 1</div>
+    <h2>El problema que cerramos</h2>
+    <p class="lead">Hasta ahora, en FLYER <b>estar logueado era tener acceso a todo</b>. Una sola cuenta, y quien la tuviera veía y tocaba cada evento, cada campaña, cada dato.</p>
+    <p style="color:var(--gris)">Eso trae dos problemas que ya conocemos del ERP: <b>nadie sabe quién hizo qué</b>, y <b>no se puede dar acceso parcial</b> (que alguien entre a ayudar con el diseño sin ver todo lo demás). FRATE ID lo ordena.</p>
+    <div class="oro"><b>Regla de oro.</b> Entrar ya no es un sí o un no a secas: es <strong>quién eres tú</strong>. FLYER comparte el mismo login que la Web —la misma cuenta abre las dos— porque viven en la misma base. Entrar a una es entrar con la misma identidad.</div>
+  </section>
+
+  <section>
+    <div class="stag">Capítulo 2</div>
+    <h2>Las dos puertas</h2>
+    <p class="lead">Todo sistema de FRATE se abre de exactamente dos formas. La decisión del dueño: cada uno con su login, y además una llave de respaldo compartida.</p>
+    <div class="puertas">
+      <div class="puerta pp">
+        <div class="ic">🚪</div><h4>Puerta principal</h4><div class="q">Con tu ficha</div>
+        <p>Entras con <b>tu correo y tu contraseña</b>. El sistema sabe quién eres, tu rol decide qué ves, y <b>todo lo que hagas queda firmado con tu nombre</b>. Es la puerta de siempre.</p>
+      </div>
+      <div class="puerta pr">
+        <div class="ic">🔑</div><h4>Puerta de respaldo</h4><div class="q">La llave compartida</div>
+        <p>Una cuenta que sabe el equipo, para cuando alguien pierde su clave un sábado a las 3 AM. Entra igual, <b>pero lo que hace se firma «llave compartida»</b>, no con una persona. La pantalla lo avisa de frente.</p>
+      </div>
+    </div>
+    <div class="peligro"><b>Por qué la llave no se elimina.</b> Un sistema que puede dejarte afuera en medio de la noche es peor que uno con una llave imperfecta. La llave existe para no quedar bloqueado nunca. No se prohíbe: se <b>desincentiva</b> mostrando que no firma con tu nombre.</div>
+  </section>
+
+  <section>
+    <div class="stag">Capítulo 3</div>
+    <h2>Los roles</h2>
+    <p class="lead">Cada persona del equipo tiene una ficha en una tabla compartida —<span class="num">frate_staff</span>— con su rol en FLYER y si es superadmin. Vive en la misma base que la Web.</p>
+    <div class="tw"><table class="tabla">
+      <thead><tr><th>Campo</th><th>Qué decide</th></tr></thead>
+      <tbody>
+        <tr><td><b>rol_flyer</b></td><td>Que la persona puede entrar a FLYER. Sin rol y sin ser superadmin, ve la pantalla de «sin acceso».</td></tr>
+        <tr><td><b>es_superadmin</b></td><td>Acceso total, y cuenta para los cuatro sistemas. Es el candado maestro de FRATE ID.</td></tr>
+        <tr><td><b>es_llave_compartida</b></td><td>Marca la cuenta de respaldo. Su sesión firma «llave compartida» y muestra el aviso.</td></tr>
+        <tr><td><b>rut · correo</b></td><td>El hilo que amarra a la persona en los cuatro sistemas. Una persona, una ficha.</td></tr>
+      </tbody>
+    </table></div>
+    <div class="oro"><b>Nadie se degrada ni se borra a sí mismo.</b> El último superadmin no se puede quitar su propio acceso ni borrar su ficha: hace falta otro con el mismo nivel. Así nadie se deja afuera del sistema por error.</div>
+  </section>
+
+  <section>
+    <div class="stag">Capítulo 4 · Tócalo</div>
+    <h2>Quién firma</h2>
+    <p class="lead">Desde ahora, cada evento que guardas queda con la marca de quién lo guardó. Si entraste por tu ficha, tu nombre; si entraste por la llave, «llave compartida». Cámbialo y míralo.</p>
+    <div class="demo">
+      <div class="dl">Demo en vivo · elige la puerta</div>
+      <div class="firma">
+        <button id="bFicha" class="on">🚪 Entré con mi ficha (Pablo)</button>
+        <button id="bLlave">🔑 Entré con la llave compartida</button>
+      </div>
+      <div class="firmaOut" id="out">Guardaste el evento «SOLTER@S» — firmado por <b id="who">Pablo</b></div>
+    </div>
+    <div class="bien"><b>Bien resuelto.</b> La firma no es un rol («admin») ni un sistema («flyer»): es <strong>la persona</strong>. Si entró por la llave, se firma «llave compartida» — que es la verdad, y por eso incomoda un poco. Esa incomodidad es la que empuja a usar tu propia cuenta.</div>
+  </section>
+
+  <section>
+    <div class="stag">Capítulo 5</div>
+    <h2>La red que no te deja afuera</h2>
+    <p class="lead">Un candado nuevo en algo en vivo da miedo: ¿y si me bloquea a mí? Por eso el gate está hecho al revés — <b>ante la duda, te deja entrar</b>.</p>
+    <ul>
+      <li>Si la tabla de roles todavía no existe, o hay un error al leerla → <b>degrada</b>: FLYER funciona como antes, nadie queda afuera.</li>
+      <li>Solo bloquea cuando puede <b>confirmar</b> que la tabla está y que esa persona no tiene rol. Recién ahí aparece «sin acceso».</li>
+      <li>El rol se revalida contra la base <b>en cada carga</b>, no contra lo que quedó guardado en el navegador. Si te dan de baja, tu sesión deja de valer sola.</li>
+    </ul>
+    <div class="oro"><b>Regla de oro.</b> Primero identidad en cada casa, después la puerta común. FLYER ya sabe quién entra; el siguiente paso de FRATE ID es que una sola cuenta abra los cuatro sistemas.</div>
+  </section>
+
+  <section>
+    <div class="stag">Capítulo 6</div>
+    <h2>Lo que todavía no hace</h2>
+    <ul>
+      <li><b>No recorta por módulo aún.</b> Hoy el rol decide <b>entrar o no entrar</b>; todavía no limita «este rol ve solo Studio». Ese recorte fino viene después.</li>
+      <li><b>La llave de respaldo es opcional.</b> Existe en el código; se enciende cuando se crea la cuenta compartida y se marca en la ficha. Mientras no se cree, FLYER funciona solo con las cuentas personales.</li>
+      <li><b>El login único todavía no está.</b> FLYER y la Web ya comparten cuenta; el ERP y el POS viven en otra base. Unir los cuatro es el paso grande que sigue.</li>
+    </ul>
+    <div class="peligro"><b>Nunca escribas ni pidas contraseñas por chat o en el repo.</b> Las claves las maneja el login (van cifradas). Un rol se asigna en la base, nunca pegando una clave en un archivo.</div>
+  </section>
+
+  <section>
+    <div class="stag">La serie completa</div>
+    <h2>Manual de FLYER</h2>
+    <div class="serie">
+      <a class="mn" href="/os-flyer"><span class="num2">00</span><div><h4>El mapa</h4><p>Los cuatro cerebros y de qué es dueño FLYER.</p></div></a>
+      <a class="mn" href="/os-flyer-evento"><span class="num2">01</span><div><h4>Un evento</h4><p>De una fecha y una canción a una campaña completa.</p></div></a>
+      <a class="mn" href="/os-flyer-diseno"><span class="num2">02</span><div><h4>Un flyer</h4><p>Studio: de los datos a la gráfica final.</p></div></a>
+      <a class="mn" href="/os-flyer-reel"><span class="num2">03</span><div><h4>Un reel</h4><p>El mini-estudio de video: de un evento a un MP4.</p></div></a>
+      <a class="mn" href="/os-flyer-brief"><span class="num2">04</span><div><h4>El brief</h4><p>El documento que despierta a los otros tres sistemas.</p></div></a>
+      <a class="mn" href="/os-flyer-mesa"><span class="num2">05</span><div><h4>La mesa</h4><p>El flujo guiado: evento, diseño, video y descarga.</p></div></a>
+      <a class="mn" href="/os-flyer-reglas"><span class="num2">06</span><div><h4>Reglas de oro</h4><p>Lo que FLYER hace, lo que nunca hace y por qué.</p></div></a>
+      <a class="mn" href="/os-flyer-id"><span class="num2">07</span><div><h4>FRATE ID</h4><p>Quién entra: las dos puertas, los roles y la firma.</p><span class="tag">Estás aquí</span></div></a>
+      <a class="mn" href="/os-flyer-nube"><span class="num2">08</span><div><h4>La nube</h4><p>El reel se cocina afuera: subir, renderizar, esperar el MP4.</p></div></a>
+      <a class="mn" href="/os-flyer-export"><span class="num2">09</span><div><h4>La exportación</h4><p>El paquete del evento: flyer, reel y caption.</p></div></a>
+    </div>
+  </section>
+
+  <div class="pie">
+    <p><b>FRATE OS · Manual de FLYER 07.</b> <a href="/os-flyer-reglas">← Reglas de oro</a> · Siguiente: <a href="/os-flyer-nube">08 · La nube →</a></p>
+  </div>
+
+</div>
+
+<script src="/os-guard.js"></script>
+<script>
+  document.getElementById('bar').innerHTML = osBarra('07','fly');
+  osProteger();
+
+  (function(){
+    var bF=document.getElementById('bFicha'), bL=document.getElementById('bLlave'), who=document.getElementById('who');
+    function set(ficha){
+      bF.classList.toggle('on',ficha); bL.classList.toggle('on',!ficha);
+      who.textContent = ficha ? 'Pablo' : 'llave compartida';
+    }
+    bF.addEventListener('click',function(){set(true)});
+    bL.addEventListener('click',function(){set(false)});
+  })();
+</script>
+</body>
+</html>

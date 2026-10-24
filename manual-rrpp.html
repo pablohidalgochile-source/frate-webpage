@@ -1,0 +1,331 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>FRATE WEB (TICKETERA) · MANUAL RRPP / ANFITRIÓN</title>
+<meta name="theme-color" content="#0A0A0B" />
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@500;700;900&family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet" />
+<link rel="icon" href="/icon-frate.svg" type="image/svg+xml" />
+<style>
+  :root{
+    --negro:#0A0A0B; --negro2:#141416; --negro3:#1b1b1e; --borde:#2a2a2e;
+    --rojo:#FF3B3B; --dorado:#D4A832; --dorado2:#f0c75a; --verde:#22c55e; --azul:#3b82f6; --morado:#a78bfa; --gris:#9a9aa2; --txt:#f2f0ec;
+    --disp:'Barlow Condensed',sans-serif; --body:'Inter',-apple-system,sans-serif;
+  }
+  *{box-sizing:border-box;}
+  html{scroll-behavior:smooth;}
+  body{margin:0;background:var(--negro);color:var(--txt);font-family:var(--body);line-height:1.6;-webkit-font-smoothing:antialiased;}
+  a{color:var(--dorado);text-decoration:none;}
+  .wrap{max-width:820px;margin:0 auto;padding:0 22px 80px;}
+  .cover{position:relative;padding:72px 22px 54px;text-align:center;background:
+     radial-gradient(680px 340px at 50% -8%, rgba(212,168,50,.14), transparent 60%),
+     radial-gradient(520px 300px at 50% 120%, rgba(232,54,61,.10), transparent 60%);
+     border-bottom:1px solid var(--borde);overflow:hidden;}
+  .cover .kicker{font-family:var(--disp);letter-spacing:9px;font-weight:700;color:var(--dorado);font-size:.92rem;}
+  .cover h1{font-family:var(--disp);font-weight:900;font-size:clamp(2.7rem,9vw,4.6rem);line-height:.95;margin:10px 0 6px;letter-spacing:1px;text-transform:uppercase;}
+  .cover h1 span{color:var(--rojo);}
+  .cover .sub{color:var(--gris);font-size:1.02rem;max-width:520px;margin:8px auto 0;}
+  .cover .meta{margin-top:22px;font-size:.74rem;letter-spacing:2px;text-transform:uppercase;color:#6a6a72;}
+  .hair{height:2px;width:120px;margin:26px auto 0;background:linear-gradient(90deg,transparent,var(--dorado),transparent);}
+  .toc{background:var(--negro2);border:1px solid var(--borde);border-radius:16px;padding:20px 22px;margin:34px 0;}
+  .toc h3{font-family:var(--disp);letter-spacing:2px;text-transform:uppercase;color:var(--gris);font-size:.82rem;margin:0 0 12px;font-weight:700;}
+  .toc ol{margin:0;padding-left:0;list-style:none;counter-reset:t;}
+  .toc li{counter-increment:t;padding:7px 0;border-bottom:1px dashed #26262b;display:flex;gap:12px;align-items:baseline;}
+  .toc li:last-child{border-bottom:none;}
+  .toc li::before{content:counter(t,decimal-leading-zero);font-family:var(--disp);font-weight:700;color:var(--dorado);font-size:.9rem;min-width:26px;}
+  .toc a{color:var(--txt);font-weight:500;}
+  .toc a:hover{color:var(--dorado);}
+  section{margin:52px 0;scroll-margin-top:20px;}
+  .snum{display:inline-flex;align-items:center;justify-content:center;width:40px;height:40px;border-radius:50%;
+    border:1.5px solid var(--dorado);color:var(--dorado);font-family:var(--disp);font-weight:900;font-size:1.25rem;flex-shrink:0;}
+  .shead{display:flex;gap:14px;align-items:center;margin-bottom:6px;}
+  .shead h2{font-family:var(--disp);font-weight:900;font-size:2rem;letter-spacing:.5px;text-transform:uppercase;margin:0;line-height:1;}
+  .slead{color:var(--gris);margin:0 0 18px 54px;font-size:.98rem;}
+  @media(max-width:520px){ .slead{margin-left:0;} }
+  .card{background:var(--negro2);border:1px solid var(--borde);border-radius:16px;padding:22px 24px;margin:16px 0;}
+  .card h4{font-family:var(--disp);font-weight:700;letter-spacing:1px;text-transform:uppercase;color:var(--dorado);font-size:1.05rem;margin:0 0 10px;}
+  .steps{counter-reset:s;margin:0;padding:0;list-style:none;}
+  .steps li{counter-increment:s;position:relative;padding:12px 0 12px 46px;border-bottom:1px solid #212127;}
+  .steps li:last-child{border-bottom:none;}
+  .steps li::before{content:counter(s);position:absolute;left:0;top:11px;width:30px;height:30px;border-radius:9px;
+    background:rgba(212,168,50,.12);color:var(--dorado);font-family:var(--disp);font-weight:900;font-size:1rem;
+    display:flex;align-items:center;justify-content:center;}
+  .steps b{color:#fff;}
+  .ui{display:inline-flex;align-items:center;gap:5px;background:var(--negro3);border:1px solid #34343a;border-radius:8px;
+    padding:2px 9px;font-size:.86rem;font-weight:600;color:#fff;white-space:nowrap;line-height:1.7;}
+  .ui.gold{border-color:rgba(212,168,50,.5);color:var(--dorado2);}
+  .ui.red{border-color:rgba(232,54,61,.5);color:#ff8085;}
+  .ui.green{border-color:rgba(34,197,94,.5);color:#7ee2a0;}
+  .ui.blue{border-color:rgba(59,130,246,.5);color:#89bbff;}
+  .path{color:var(--gris);font-size:.88rem;}
+  .path .ui{margin:0 1px;}
+  .callout{border-radius:14px;padding:14px 18px;margin:16px 0;font-size:.93rem;border:1px solid;}
+  .tip{background:rgba(34,197,94,.07);border-color:rgba(34,197,94,.3);}
+  .tip b{color:var(--verde);}
+  .warn{background:rgba(232,54,61,.07);border-color:rgba(232,54,61,.32);}
+  .warn b{color:#ff8b8f;}
+  .info{background:rgba(59,130,246,.07);border-color:rgba(59,130,246,.32);}
+  .info b{color:#89bbff;}
+  .callout .em{font-family:var(--disp);font-weight:700;letter-spacing:1px;text-transform:uppercase;display:block;margin-bottom:3px;font-size:.9rem;}
+  .semaf{display:flex;gap:10px;flex-wrap:wrap;margin-top:6px;}
+  .semaf div{flex:1;min-width:150px;background:var(--negro3);border:1px solid var(--borde);border-radius:12px;padding:12px 14px;font-size:.86rem;}
+  .semaf .d{font-size:1.1rem;}
+  .pipe{display:flex;gap:8px;flex-wrap:wrap;margin:12px 0 4px;}
+  .pipe span{background:var(--negro3);border:1px solid var(--borde);border-radius:20px;padding:5px 12px;font-size:.82rem;font-weight:600;white-space:nowrap;}
+  .pipe .arw{border:none;background:none;color:var(--gris);padding:5px 0;align-self:center;}
+  .qa{margin:14px 0;border-left:3px solid var(--dorado);padding:2px 0 2px 16px;}
+  .qa .q{font-weight:700;color:#fff;margin-bottom:3px;}
+  .qa .a{color:var(--gris);font-size:.92rem;}
+  .qa .a b{color:var(--txt);}
+  .foot{margin-top:60px;padding-top:26px;border-top:1px solid var(--borde);text-align:center;color:var(--gris);font-size:.85rem;}
+  .btn-print{position:fixed;right:16px;bottom:16px;background:var(--dorado);color:#1a1400;border:none;border-radius:30px;
+    padding:11px 18px;font-weight:700;font-family:var(--body);cursor:pointer;box-shadow:0 8px 26px rgba(0,0,0,.5);z-index:20;}
+  @media print{
+    body{background:#fff;color:#111;} .btn-print{display:none;} .cover{background:none;border-color:#ccc;}
+    .cover h1 span{color:#c0202a;} .card,.toc{background:#fafafa;border-color:#ddd;} .ui{background:#eee;border-color:#ccc;color:#111;}
+    a{color:#111;} .snum,.shead h2,.card h4,.toc li::before,.steps li::before{color:#111!important;border-color:#999;}
+    .slead,.path,.gris,.foot,.qa .a{color:#444;} section{page-break-inside:avoid;} .pipe span,.semaf div{background:#f0f0f0;border-color:#ccc;}
+  }
+</style>
+</head>
+<body>
+<!--OFICIO-OS-->
+<div style="background:#0d1a12;border-bottom:3px solid #4ade80;padding:14px 20px;font:400 15px/1.5 system-ui;color:#f2f2f4;text-align:center"><b style="color:#4ade80">🧭 Manual de oficio — vigente</b><br><span style="color:#c9c9cf">Este explica <b>cómo se arma y se mide una lista</b>. Para entender cómo funciona el sistema por dentro, el libro de FRATE OS lo cuenta al día.</span><br><a href="/os-listas" style="display:inline-block;margin-top:8px;background:#4ade80;color:#08130a;font:800 14px system-ui;padding:9px 18px;border-radius:9px;text-decoration:none">Ver en el libro →</a></div>
+
+
+<div class="cover">
+  <div class="kicker">FRATERNIDAD CAMPUS CENTRAL</div>
+  <h1>Manual <span>RRPP</span><br>&amp; Anfitrión</h1>
+  <div class="sub">Tu portal, tus listas y tus invitados — de principio a fin. Cómo anotar gente, revisar, corregir errores y sacar los QR sin enredos.</div>
+  <div class="hair"></div>
+  <div class="meta">Guía operativa · frate.cl/admin</div>
+</div>
+
+<div class="wrap">
+
+  <div class="toc">
+    <h3>Contenido</h3>
+    <ol>
+      <li><a href="#s1">Entrar a tu portal</a></li>
+      <li><a href="#s2">El flujo completo, de principio a fin</a></li>
+      <li><a href="#sest">Los estados de tu lista (aprobada, cerrada…)</a></li>
+      <li><a href="#s3">Cómo se anotan tus invitados</a></li>
+      <li><a href="#s4">Errores del invitado y cómo se arreglan</a></li>
+      <li><a href="#s5">Cómo revisas y corriges tú</a></li>
+      <li><a href="#s6">Sacar y reenviar los QR</a></li>
+      <li><a href="#s7">Cupos, género, hora y condiciones</a></li>
+      <li><a href="#s8">Respuestas listas para tus invitados</a></li>
+      <li><a href="#s9">Checklist de cada noche</a></li>
+    </ol>
+  </div>
+
+  <section id="s1">
+    <div class="shead"><span class="snum">1</span><h2>Entrar a tu portal</h2></div>
+    <p class="slead">Tu cuenta de RRPP / Anfitrión es la misma de frate.cl. Entras con tu correo y clave.</p>
+    <div class="card">
+      <h4>Cómo entrar</h4>
+      <ul class="steps">
+        <li>Abre <a href="https://www.frate.cl/admin">www.frate.cl/admin</a> en tu teléfono o computador.</li>
+        <li>Escribe tu <b>correo</b> y tu <b>clave</b> de frate.cl. Si no tienes clave o la olvidaste, pídele al equipo que te mande el <span class="ui gold">🔑</span> correo para crearla.</li>
+        <li>Entras directo a <span class="ui">👥 Comunidad</span>. Ese es tu espacio.</li>
+      </ul>
+      <div class="callout info"><span class="em">Qué ves tú</span>Solo tu módulo <b>Comunidad</b>, con las pestañas <span class="ui blue">📩 Solicitudes Web</span> <span class="ui gold">🔗 FRATE LINK</span> <span class="ui gold">🎁 Cortesías</span> <span class="ui">🏷️ Códigos &amp; RRPP</span>. En FRATE LINK y Cortesías aparecen <b>solo TUS listas</b> (las que tienes a tu nombre), no las de otros.</div>
+    </div>
+  </section>
+
+  <section id="s2">
+    <div class="shead"><span class="snum">2</span><h2>El flujo completo, de principio a fin</h2></div>
+    <p class="slead">Así viaja una lista desde que la creas hasta que tu invitado entra por la puerta.</p>
+    <div class="pipe">
+      <span>1· Tienes tu link</span><span class="arw">→</span>
+      <span>2· Tus invitados se anotan solos</span><span class="arw">→</span>
+      <span>3· Tú revisas</span><span class="arw">→</span>
+      <span>4· Apruebas / rechazas</span><span class="arw">→</span>
+      <span>5· Sale el QR a su correo</span><span class="arw">→</span>
+      <span>6· Entra por la puerta</span>
+    </div>
+    <div class="card">
+      <ul class="steps">
+        <li><b>Tu link (FRATE LINK).</b> El equipo te crea una lista a tu nombre y te da un link tipo <span class="ui gold">frate.cl/lista/COTTY-JUE</span> y un <b>QR</b>. Ese link es el que repartes.</li>
+        <li><b>Tus invitados se anotan solos.</b> Abren el link, llenan sus datos (nombre, correo, RUT…) y quedan como <span class="ui gold">pendientes</span> en tu lista.</li>
+        <li><b>Tú revisas.</b> En <span class="ui">🔗 FRATE LINK</span> abres tu lista y aprietas <span class="ui blue">🔍 REVISAR LISTA</span>. Ves a cada persona, sus datos y si hay algo raro.</li>
+        <li><b>Apruebas o rechazas.</b> A quien esté bien, lo apruebas. A quien no corresponda, lo rechazas.</li>
+        <li><b>Sale el QR.</b> Al aprobar, a cada invitado le llega su <b>QR por correo</b> automáticamente.</li>
+        <li><b>Entra por la puerta.</b> En la puerta escanean su QR. Válido según las condiciones de tu lista (día, hora, género).</li>
+      </ul>
+    </div>
+    <div class="callout tip"><span class="em">La regla de oro</span><b>Nada se envía sin que tú lo revises.</b> Los invitados quedan pendientes hasta que tú apruebas. Así controlas quién entra con tu cortesía.</div>
+  </section>
+
+  <section id="sest">
+    <div class="shead"><span class="snum">3</span><h2>Los estados de tu lista</h2></div>
+    <p class="slead">El cartelito de color de tu lista dice si <b>entra más gente</b> o no. Ojo: es distinto del botón <span class="ui blue">Revisar (N)</span>, que cuenta a quién le falta el QR.</p>
+
+    <div class="callout info"><span class="em">Son dos cosas distintas</span><b>El estado de la lista</b> (aprobada / cerrada) = ¿se puede anotar más gente?  ·  <b>Revisar (N)</b> = ¿a cuántos les falta que les mandes el QR? Una lista puede estar <b>cerrada y con QR pendientes</b> al mismo tiempo (cerraste la puerta, pero todavía repartes las entradas).</div>
+
+    <div class="card">
+      <h4>Los 4 estados</h4>
+      <div class="semaf">
+        <div><span class="d">🟢</span> <b>Aprobada</b><br>Activa. La gente se anota, tu link funciona y puedes enviar los QR. Es lo normal mientras juntas gente.</div>
+        <div><span class="d">⚪</span> <b>Cerrada</b><br>La cortaste tú (o se llenó). Nadie más entra y el link muestra <span class="ui">🔒 LISTA CERRADA</span>. <b>Igual envías los QR</b> a los que ya están.</div>
+        <div><span class="d">🟠</span> <b>Pendiente</b><br>Creada pero aún no activa: espera el visto bueno del equipo. El link todavía no funciona.</div>
+        <div><span class="d">🔴</span> <b>Rechazada</b><br>Descartada. El link no sirve. Se puede reabrir si fue un error.</div>
+      </div>
+    </div>
+
+    <div class="card">
+      <h4>Cómo cerrar tu lista (cortar inscripciones)</h4>
+      <ul class="steps">
+        <li>Abre tu lista en <span class="ui gold">🔗 FRATE LINK</span> → <span class="ui">👁️ Ver</span>.</li>
+        <li>Toca <span class="ui gold">🔒 CERRAR LISTA — cortar inscripciones</span>.</li>
+        <li>Desde ese momento <b>nadie más se anota</b> y el link dice “LISTA CERRADA”. Los inscritos <b>no se borran</b>.</li>
+        <li>Ahora manda los QR tranquil@. ¿Te apuraste? <span class="ui">🔓 Reabrir</span> la vuelve a activar.</li>
+      </ul>
+    </div>
+
+    <div class="callout tip"><span class="em">Cuándo cerrar</span>Cierra <b>recién cuando ya no quieras más gente</b> (por ejemplo, justo antes de empezar a mandar los QR). Mientras esté <b>aprobada</b>, sigue entrando gente aunque ya le hayas mandado el QR a algunos.</div>
+  </section>
+
+  <section id="s3">
+    <div class="shead"><span class="snum">4</span><h2>Cómo se anotan tus invitados</h2></div>
+    <p class="slead">Explícales esto y no te preguntan más. Es en el celular, en 1 minuto.</p>
+    <div class="card">
+      <ul class="steps">
+        <li>Abren <b>tu link</b> (o escanean tu QR).</li>
+        <li>Ven la portada con tu bienvenida y las condiciones (ej: "solo mujeres, válido jueves, hasta las 00:00").</li>
+        <li>Llenan: <b>Nombre completo · Correo · RUT · Fecha de nacimiento · Instagram · Universidad · Teléfono</b> (según lo que pida tu lista).</li>
+        <li>Aprietan <b>Anotarme</b> y listo: quedan inscritos, <b>esperando tu aprobación</b>.</li>
+      </ul>
+      <div class="callout info"><span class="em">Todo se ordena solo</span>El RUT se formatea con puntos y guion, el Instagram le pone el <b>@</b>, el correo se ordena. Si el RUT está mal, <b>no lo deja avanzar</b> hasta arreglarlo (ver la sección 4).</div>
+    </div>
+  </section>
+
+  <section id="s4">
+    <div class="shead"><span class="snum">5</span><h2>Errores del invitado y cómo se arreglan</h2></div>
+    <p class="slead">Lo que más pasa al anotarse — y qué hacer en cada caso.</p>
+
+    <div class="card">
+      <h4>RUT mal escrito</h4>
+      <p>El formulario <b>valida el RUT</b> (dígito verificador). Si está malo, se pone <span class="ui red">rojo</span> y no deja anotarse hasta corregirlo.</p>
+      <ul class="steps">
+        <li>Que lo escriba <b>con guion</b> (ej: 20.006.691-K). Los puntos se ponen solos.</li>
+        <li>Si es <b>extranjero/a</b> y no tiene RUT chileno, que marque la casilla <span class="ui">Soy extranjer@</span> y ponga su <b>pasaporte o documento</b>.</li>
+      </ul>
+    </div>
+
+    <div class="card">
+      <h4>Correo mal escrito</h4>
+      <p>Si pone mal el correo, <b>el QR le llega a un correo que no existe</b>. Que lo revise bien, sin espacios. Si igual quedó mal, tú lo corriges después (sección 5) y le reenvías el QR.</p>
+    </div>
+
+    <div class="card">
+      <h4>Se anotó dos veces / duplicados</h4>
+      <p>Si alguien se anota más de una vez, no pasa nada grave: tú lo ves y limpias. En tu lista tienes el botón <span class="ui">🔍 Duplicados</span> que te marca los RUT repetidos del evento para que borres los sobrantes.</p>
+    </div>
+
+    <div class="card">
+      <h4>"Me equivoqué en un dato"</h4>
+      <p>Dos caminos: <b>(a)</b> que se anote de nuevo con los datos correctos (y tú borras el anterior), o <b>(b)</b> tú le editas el dato directo en la lista con el lápiz <span class="ui gold">✏️</span>. La opción (b) es más rápida.</p>
+    </div>
+
+    <div class="callout warn"><span class="em">Cupos llenos</span>Si tu lista tiene tope de cupos y se llena, el formulario avisa que ya no hay espacio. Si necesitas más cupos, pídele al equipo que los suba.</div>
+  </section>
+
+  <section id="s5">
+    <div class="shead"><span class="snum">6</span><h2>Cómo revisas y corriges tú</h2></div>
+    <p class="slead">Todo se hace desde tu lista, en <span class="ui">🔗 FRATE LINK</span> (o <span class="ui">🎁 Cortesías</span>).</p>
+    <div class="card">
+      <h4>Abrir tu lista</h4>
+      <p class="path">Panel → <span class="ui">👥 Comunidad</span> → <span class="ui gold">🔗 FRATE LINK</span> → tocas tu lista → se abre con tus inscritos.</p>
+    </div>
+    <div class="card">
+      <h4>Las herramientas de la lista</h4>
+      <div class="semaf">
+        <div><span class="d">🔍</span> <b>REVISAR LISTA</b><br>Va persona por persona: apruebas ✅ o rechazas 🚫. Ahí salen los QR.</div>
+        <div><span class="d">✏️</span> <b>Editar inscrito</b><br>El lápiz al lado de cada persona: corriges nombre, RUT o correo.</div>
+        <div><span class="d">🧹</span> <b>Normalizar</b><br>Arregla todos los RUT y pasa los nombres a MAYÚSCULAS de un tirón.</div>
+        <div><span class="d">🔍</span> <b>Duplicados</b><br>Te muestra los repetidos para que los borres.</div>
+        <div><span class="d">🗑️</span> <b>Borrar</b><br>Elimina a alguien que no corresponde.</div>
+        <div><span class="d">📋</span> <b>Link / QR</b><br>Copias tu link o muestras el QR para seguir repartiendo.</div>
+      </div>
+    </div>
+    <div class="card">
+      <h4>El semáforo de datos</h4>
+      <p>Cada inscrito trae una etiqueta según qué tan completos vienen sus datos:</p>
+      <div class="semaf">
+        <div><b style="color:var(--verde)">completa</b><br>Tiene RUT y correo. Listo para aprobar.</div>
+        <div><b style="color:var(--dorado)">parcial</b><br>Le falta el RUT o el correo. Complétalo antes de aprobar.</div>
+        <div><b style="color:#ff8b8f">mínima</b><br>Casi sin datos. Pídeselos o rechaza.</div>
+      </div>
+      <div class="callout tip"><span class="em">Truco</span>Aprieta <span class="ui">🧹 Normalizar</span> antes de revisar: te deja todos los RUT y nombres ordenados de una, y revisar se hace volando.</div>
+    </div>
+  </section>
+
+  <section id="s6">
+    <div class="shead"><span class="snum">7</span><h2>Sacar y reenviar los QR</h2></div>
+    <p class="slead">El QR es la entrada. Le llega al correo de cada invitado cuando lo apruebas.</p>
+    <div class="card">
+      <ul class="steps">
+        <li><b>Al aprobar</b> en <span class="ui blue">🔍 REVISAR LISTA</span>, a cada persona aprobada le llega su <b>QR por correo</b> al toque.</li>
+        <li>Si la lista ya la revisaste y quieres emitir todo junto, usa <span class="ui green">📤 ENVIAR YA</span>.</li>
+        <li>¿Alguien dice que no le llegó? Primero que revise <b>spam / no deseado</b>. Si igual no está, usa <span class="ui gold">📧 Reenviar correos con el QR a todos</span> (o corrige su correo con ✏️ y reenvía).</li>
+      </ul>
+      <div class="callout warn"><span class="em">Correo malo = QR perdido</span>Si el invitado puso mal su correo, el QR se va al vacío. Corrígele el correo con <span class="ui gold">✏️</span> y luego <b>reenvía</b>. El QR viejo no sirve; el nuevo sí.</div>
+    </div>
+  </section>
+
+  <section id="s7">
+    <div class="shead"><span class="snum">8</span><h2>Cupos, género, hora y condiciones</h2></div>
+    <p class="slead">Lo que ve el invitado en la portada y lo que valida la puerta.</p>
+    <div class="card">
+      <div class="semaf">
+        <div><b>👥 Cupos</b><br>El máximo de tu lista. En 0 = sin tope.</div>
+        <div><b>♀︎/♂︎ Género</b><br>Si tu lista es "solo mujeres" u "hombres", se valida según el sexo de la cédula en la puerta.</div>
+        <div><b>🕐 Hora de llegada</b><br>Hasta qué hora es válido el QR (ej: hasta las 00:00). Después de esa hora ya no sirve.</div>
+        <div><b>📝 Condiciones</b><br>El texto que ve el invitado: día válido, si es gratis, si es transferible, etc.</div>
+      </div>
+      <div class="callout info"><span class="em">Ojo con la hora</span>Los eventos parten un día pero corren de noche (23:00 → 05:00). "Hasta 00:00" significa que tu invitado tiene que <b>llegar antes de esa hora</b>.</div>
+    </div>
+  </section>
+
+  <section id="s8">
+    <div class="shead"><span class="snum">9</span><h2>Respuestas listas para tus invitados</h2></div>
+    <p class="slead">Copia y pega. Guion para las dudas más típicas.</p>
+    <div class="card">
+      <div class="qa"><div class="q">"¿Cómo me anoto?"</div><div class="a">Abre este link 👉 <b>[tu link]</b>, llena tus datos y aprieta Anotarme. Quedas en mi lista, yo te confirmo y te llega tu QR al correo. 🎟️</div></div>
+      <div class="qa"><div class="q">"Me sale error en el RUT"</div><div class="a">Escríbelo <b>con guion</b> (los puntos se ponen solos). Si eres <b>extranjer@</b>, marca la casilla "Soy extranjer@" y pon tu pasaporte o documento.</div></div>
+      <div class="qa"><div class="q">"No me llegó el QR"</div><div class="a">Revisa tu carpeta de <b>spam / correo no deseado</b>. Si no está, avísame tu correo bien escrito y te lo reenvío. 🙌</div></div>
+      <div class="qa"><div class="q">"Puse mal mi correo / un dato"</div><div class="a">Tranqui, dime el dato correcto y yo te lo arreglo, o vuelve a anotarte con los datos buenos.</div></div>
+      <div class="qa"><div class="q">"¿Hasta qué hora vale?"</div><div class="a">Tu QR es válido <b>hasta la hora que dice la lista</b> (llega antes de esa hora). Después ya no entra con cortesía.</div></div>
+      <div class="qa"><div class="q">"¿Es gratis? ¿Puedo pasárselo a otra persona?"</div><div class="a">Según las condiciones de la lista (aparecen en la portada del link). Por lo general es <b>personal y no transferible</b>.</div></div>
+    </div>
+  </section>
+
+  <section id="s9">
+    <div class="shead"><span class="snum">10</span><h2>Checklist de cada noche</h2></div>
+    <div class="card">
+      <ul class="steps">
+        <li>Reparte tu <b>link / QR</b> con anticipación.</li>
+        <li>Un rato antes: entra a <span class="ui">🔗 FRATE LINK</span>, aprieta <span class="ui">🧹 Normalizar</span> y revisa <span class="ui">🔍 Duplicados</span>.</li>
+        <li>Abre <span class="ui blue">🔍 REVISAR LISTA</span> y aprueba/rechaza a cada uno.</li>
+        <li>Confirma que a todos les llegó el QR (reenvía a los que falten).</li>
+        <li>Cierra la inscripción si ya no quieres más gente.</li>
+        <li>En la puerta, tus invitados entran con su QR. 🎉</li>
+      </ul>
+      <div class="callout tip"><span class="em">Cualquier duda</span>Escríbele al equipo por WhatsApp: <b>+56 9 8131 1548</b>. Estamos para ayudarte a llenar tu lista.</div>
+    </div>
+  </section>
+
+  <div class="foot">
+    FRATE · Fraternidad Campus Central — Manual RRPP / Anfitrión<br>
+    <a href="https://www.frate.cl">frate.cl</a> · Tu panel: <a href="https://www.frate.cl/admin">frate.cl/admin</a>
+  </div>
+
+</div>
+
+<button class="btn-print" onclick="window.print()">🖨️ Guardar / Imprimir</button>
+</body>
+</html>

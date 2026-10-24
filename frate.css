@@ -2,7 +2,7 @@
    FRATERNIDAD CAMPUS CENTRAL — CSS
    ============================================================ */
 
-@import url('https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@400;700;900&family=Inter:wght@300;400;500;600&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Anton&family=Barlow+Condensed:wght@400;700;900&family=Inter:wght@300;400;500;600&display=swap');
 
 :root {
   --rojo: #E8363D;
@@ -181,8 +181,20 @@ body::before {
   position: fixed; inset: 0;
   background: rgba(0,0,0,0.85);
   z-index: 9000;
-  display: flex; align-items: center; justify-content: center;
+  /* ⚠️ Antes: `align-items:center` SIN overflow. Cuando el formulario es más
+     alto que la pantalla —el de registro lo es en cualquier teléfono— el
+     centrado lo desborda por arriba Y por abajo, y como el overlay es
+     `position:fixed` sin scroll, esa parte queda FÍSICAMENTE INALCANZABLE.
+     La gente no podía llegar al campo de contraseña ni al botón de crear
+     cuenta. `flex-start` + `margin:auto` en la caja: centra cuando cabe,
+     y deja hacer scroll cuando no. */
+  display: flex; align-items: flex-start; justify-content: center;
+  overflow-y: auto;
+  -webkit-overflow-scrolling: touch;
+  overscroll-behavior: contain;
   padding: 24px;
+  /* En iOS la barra del navegador tapa el borde inferior: se le da aire. */
+  padding-bottom: calc(24px + env(safe-area-inset-bottom, 0px) + 40px);
   opacity: 0; pointer-events: none;
   transition: opacity var(--transicion);
 }
@@ -194,6 +206,8 @@ body::before {
   padding: 40px;
   border-radius: var(--radius);
   position: relative;
+  margin: auto;          /* centrado si cabe; si no, fluye y se puede scrollear */
+  flex-shrink: 0;        /* que no lo aplaste el flex y corte el contenido */
 }
 .modal-close {
   position: absolute; top: 16px; right: 20px;
@@ -602,6 +616,27 @@ section { padding: 100px 0; }
   border: 1px solid #333; color: var(--gris);
   border-radius: var(--radius);
 }
+/* ── Borde glow animado (color del evento) + tarjeta más presente ── */
+@property --ev-ang { syntax: '<angle>'; initial-value: 0deg; inherits: false; }
+@keyframes ev-glow-rot { to { --ev-ang: 360deg; } }
+.evento-card-glow { position: relative; border-radius: var(--radius); }
+.evento-card-glow.has-glow { padding: 2px; }
+.evento-card-glow.has-glow::before {
+  content: ''; position: absolute; inset: 0; border-radius: inherit; padding: 2px; z-index: 0;
+  background: conic-gradient(from var(--ev-ang), transparent 0 50%, var(--ev-color, #E8363D) 70%, #fff 80%, var(--ev-color, #E8363D) 90%, transparent 100%);
+  -webkit-mask: linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0);
+  -webkit-mask-composite: xor; mask-composite: exclude;
+  animation: ev-glow-rot 3.4s linear infinite;
+  filter: drop-shadow(0 0 7px var(--ev-color, #E8363D)) drop-shadow(0 0 3px var(--ev-color, #E8363D));
+  pointer-events: none;
+}
+.evento-card-glow .evento-card { border-radius: calc(var(--radius) - 1px); }
+/* Más alta + fecha/título más grandes (se sobreescriben a lo de arriba) */
+.evento-card { padding: 32px 26px; min-height: 168px; }
+.evento-nombre { font-size: clamp(1.7rem, 5vw, 2.5rem); margin-bottom: 8px; }
+.evento-dia { font-size: clamp(2.6rem, 7vw, 3.5rem); }
+.evento-mes { font-size: 0.78rem; color: #cfcfd6; font-weight: 700; }
+.evento-fecha-block { background: #0b0b0d; border: 1px solid rgba(255,255,255,.12); padding: 16px 12px; position: relative; z-index: 2; }
 .evento-precios { text-align: right; flex-shrink: 0; }
 .evento-precio-anticipada {
   font-size: 0.65rem; letter-spacing: 2px;
@@ -974,8 +1009,10 @@ section { padding: 100px 0; }
 }
 @media (max-width: 480px) {
   .galeria-grid { columns: 1; }
-  .evento-card { grid-template-columns: 1fr; }
-  .evento-fecha-block { display: none; }
+  .evento-card { grid-template-columns: 62px 1fr; gap: 14px; padding: 20px 15px; min-height: 128px; }
+  .evento-fecha-block { display: block; padding: 10px 6px; }
+  .evento-dia { font-size: 2.3rem; }
+  .evento-mes { font-size: 0.62rem; letter-spacing: 1px; }
   .stats-grid { grid-template-columns: 1fr; }
 }
 

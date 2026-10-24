@@ -1,0 +1,255 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>FRATE WEB (TICKETERA) · OS 00 EL MAPA DEL SISTEMA</title>
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🧠</text></svg>">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@600;800;900&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="/os-manual.css">
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+</head>
+<body>
+<div id="bar"></div>
+
+<div class="wrap">
+
+  <!-- ══ PORTADA ══ -->
+  <div class="hero">
+    <div class="eyebrow">Fraternidad Campus Central</div>
+    <h1>FRATE <em>OS</em><br>El mapa<br>del sistema</h1>
+    <p class="sub">Cómo funcionan los cuatro cerebros que mueven Fraternidad: de dónde sale cada dato, por dónde pasa la plata, y quién hace qué en cada paso de la noche.</p>
+    <div class="meta"><span>Manual 00</span><span>·</span><span>Equipo de administración</span><span>·</span><span>Lee esto primero</span></div>
+  </div>
+
+  <!-- ══ CÓMO LEER ══ -->
+  <section>
+    <div class="stag">Antes de empezar</div>
+    <h2>Cómo usar este manual</h2>
+    <p class="lead">Esto no es una lista de botones. Es la <b>lógica</b> del sistema: si la entiendes, cualquier pantalla se explica sola.</p>
+    <ul>
+      <li><b>Manual 00 (este):</b> el panorama completo. Con esto ya puedes conversar del sistema con cualquiera.</li>
+      <li><b>Manuales 01 al 04:</b> los tres viajes (una entrada, la plata, una persona) y la noche de evento.</li>
+      <li><b>Manual 05:</b> recorrido por el panel, pantalla por pantalla.</li>
+      <li><b>Manual 06:</b> las reglas que no se rompen.</li>
+    </ul>
+    <div class="oro"><b>Consejo:</b> léelo en orden la primera vez. Después se usa como diccionario — buscas el capítulo que necesitas y listo.</div>
+  </section>
+
+  <!-- ══ LOS 4 CEREBROS ══ -->
+  <section>
+    <div class="stag">Capítulo 1</div>
+    <h2>Los cuatro cerebros</h2>
+    <p class="lead">Fraternidad no corre en un solo programa. Son cuatro sistemas, cada uno dueño de una parte de la verdad. Ninguno hace todo, y eso es a propósito.</p>
+
+    <div class="cerebros">
+      <div class="cer fly"><div class="ic">🎨</div><h4>Flyer</h4><div class="rol">Nace el evento</div><p>Diseño y difusión. De acá salen el nombre, la fecha y la gráfica que usan todos los demás.</p></div>
+      <div class="cer web"><span class="yo">este manual</span><div class="ic">🌐</div><h4>Web</h4><div class="rol">Vende y registra</div><p>Entradas, cortesías, reservas, cumpleaños, CRM de clientes y la puerta. <b>Fabrica el QR.</b></p></div>
+      <div class="cer pos"><div class="ic">💵</div><h4>POS</h4><div class="rol">Cobra adentro</div><p>Barra y caja durante la noche. Lo que se consume dentro del local.</p></div>
+      <div class="cer erp"><div class="ic">🧠</div><h4>ERP</h4><div class="rol">Consolida</div><p>Personal, finanzas y la ficha maestra de cada persona. Recibe de todos.</p></div>
+    </div>
+
+    <h3>De qué es dueño cada uno</h3>
+    <p>Esta es la tabla más importante del manual. <b>Dueño</b> significa: si hay una diferencia, manda ese sistema.</p>
+    <div class="tw"><table class="tabla">
+      <thead><tr><th>Dato</th><th>Dueño</th><th>Quién lo lee</th><th>Por qué</th></tr></thead>
+      <tbody>
+        <tr><td><b>Nombre y fecha del evento</b></td><td class="s-fly"><b>Flyer</b></td><td>Web, POS, ERP</td><td>Si el flyer dice otra cosa que la web, la gente reclama con razón.</td></tr>
+        <tr><td><b>Precio de la entrada</b></td><td class="s-web"><b>Web</b></td><td>ERP</td><td>El precio vive en el servidor. Nadie puede cambiarlo desde el navegador.</td></tr>
+        <tr><td><b>El QR / la entrada</b></td><td class="s-web"><b>Web</b></td><td>Puerta, ERP</td><td>La web es la única que emite entradas válidas. Nadie más fabrica QR.</td></tr>
+        <tr><td><b>Quién entró y a qué hora</b></td><td class="s-web"><b>Web (puerta)</b></td><td>ERP</td><td>El check-in es la verdad de la asistencia.</td></tr>
+        <tr><td><b>Consumo en barra</b></td><td class="s-pos"><b>POS</b></td><td>ERP</td><td>La web no sabe qué tomó cada persona adentro.</td></tr>
+        <tr><td><b>Ficha maestra de la persona</b></td><td class="s-erp"><b>ERP</b></td><td>Todos</td><td>Junta compras + asistencia + consumo y arma el puntaje de cliente.</td></tr>
+        <tr><td><b>Personal y sueldos</b></td><td class="s-erp"><b>ERP</b></td><td>—</td><td>Nunca sale del ERP.</td></tr>
+      </tbody>
+    </table></div>
+
+    <div class="oro"><b>Regla de la identidad única:</b> una persona es <b>una sola ficha</b>. Si compra por la web, entra por la puerta y consume en la barra, es el mismo ser humano en los cuatro sistemas. Por eso insistimos tanto con el <b>RUT y el correo</b>: son el hilo que amarra todo. Un correo mal escrito rompe la cadena.</div>
+  </section>
+
+  <!-- ══ CÓMO SE HABLAN ══ -->
+  <section>
+    <div class="stag">Capítulo 2</div>
+    <h2>Cómo se hablan</h2>
+    <p class="lead">Los sistemas no comparten una base de datos. Se mandan mensajes. Entender esto explica por qué a veces un dato "tarda" en aparecer en otro lado.</p>
+
+    <div class="flujo">
+      <div class="paso"><div class="n">→</div><h4>Web avisa al ERP</h4><p>Cada venta y cada check-in se empujan al ERP <b>al instante</b>.</p><span class="sys s-web">Web</span></div>
+      <div class="paso"><div class="n">→</div><h4>POS avisa al ERP</h4><p>El consumo de la noche se consolida en la ficha.</p><span class="sys s-pos">POS</span></div>
+      <div class="paso"><div class="n">←</div><h4>ERP responde</h4><p>¿Es VIP? ¿Es frecuente? ¿Está vetado? La web pregunta antes de aprobar listas.</p><span class="sys s-erp">ERP</span></div>
+      <div class="paso"><div class="n">◆</div><h4>Nadie escribe en la casa ajena</h4><p>Cada sistema escribe solo en lo suyo y avisa. Nunca mete mano directo.</p><span class="sys">Regla</span></div>
+    </div>
+
+    <div class="oro"><b>Por qué así:</b> si un sistema se cae, los otros siguen funcionando. La puerta sigue escaneando aunque el ERP esté apagado; el mensaje queda en cola y se entrega cuando vuelve. <b>Nunca se pierde un check-in por un problema de otro sistema.</b></div>
+  </section>
+
+  <!-- ══ LOS 3 VIAJES ══ -->
+  <section>
+    <div class="stag">Capítulo 3</div>
+    <h2>Los tres viajes</h2>
+    <p class="lead">Todo lo que hace el sistema se puede contar como tres recorridos. Si entiendes estos tres, entiendes Fraternidad.</p>
+
+    <h3>🎟️ El viaje de una entrada</h3>
+    <div class="flujo">
+      <div class="paso"><div class="n">1</div><h4>Ve el flyer</h4><p>Instagram o el link de la bio.</p><span class="sys s-fly">Flyer</span></div>
+      <div class="paso"><div class="n">2</div><h4>Elige</h4><p>Se le <b>reserva el cupo 15 min</b>.</p><span class="sys s-web">Web</span></div>
+      <div class="paso"><div class="n">3</div><h4>Paga</h4><p>MercadoPago o transferencia.</p><span class="sys s-web">Web</span></div>
+      <div class="paso"><div class="n">4</div><h4>Recibe su QR</h4><p>Uno por asistente, con su nombre.</p><span class="sys s-web">Web</span></div>
+      <div class="paso"><div class="n">5</div><h4>Entra</h4><p>Se escanea y se quema.</p><span class="sys s-web">Puerta</span></div>
+      <div class="paso"><div class="n">6</div><h4>Consume</h4><p>Barra y caja.</p><span class="sys s-pos">POS</span></div>
+      <div class="paso"><div class="n">7</div><h4>Queda su historia</h4><p>Visitas, gasto, puntaje.</p><span class="sys s-erp">ERP</span></div>
+    </div>
+    <div class="peligro"><b>Lo que nunca debe pasar:</b> cobrarle a alguien y que no tenga entrada. Por eso el cupo se toma en el paso <b>2</b> y no en el 3: si no alcanza, se le avisa <b>antes</b> de pagar. → detalle en el <a href="/os-entrada">manual 01</a>.</div>
+
+    <h3>💰 El viaje del dinero</h3>
+    <div class="flujo">
+      <div class="paso"><div class="n">1</div><h4>Precio</h4><p>Lo pone el servidor, no el navegador.</p><span class="sys s-web">Web</span></div>
+      <div class="paso"><div class="n">2</div><h4>Cobro</h4><p>+4% de servicio. MercadoPago o Khipu.</p><span class="sys s-web">Web</span></div>
+      <div class="paso"><div class="n">3</div><h4>Confirmación</h4><p>Se verifica <b>contra el banco</b>, no contra el aviso.</p><span class="sys s-web">Web</span></div>
+      <div class="paso"><div class="n">4</div><h4>Devolución</h4><p>Con 10% de retención. La aprueba una persona.</p><span class="sys s-web">Web</span></div>
+      <div class="paso"><div class="n">5</div><h4>Nota de crédito</h4><p>Una por devolución, con su IVA.</p><span class="sys s-web">Web</span></div>
+      <div class="paso"><div class="n">6</div><h4>Cuadratura</h4><p>Todo llega al ERP para el cierre.</p><span class="sys s-erp">ERP</span></div>
+    </div>
+    <div class="oro"><b>Regla:</b> ningún monto viene del navegador del cliente. Ni el precio, ni el descuento, ni el crédito. Todo se recalcula en el servidor. → detalle en el <a href="/os-dinero">manual 02</a>.</div>
+
+    <h3>👤 El viaje de una persona</h3>
+    <div class="flujo">
+      <div class="paso"><div class="n">1</div><h4>Aparece</h4><p>Compra, formulario, lista o puerta.</p><span class="sys s-web">Web</span></div>
+      <div class="paso"><div class="n">2</div><h4>Se une su ficha</h4><p>Por RUT, y si no por correo.</p><span class="sys s-web">CRM</span></div>
+      <div class="paso"><div class="n">3</div><h4>Se enriquece</h4><p>Visitas, gasto, cumpleaños, IG.</p><span class="sys s-web">CRM</span></div>
+      <div class="paso"><div class="n">4</div><h4>Se clasifica</h4><p>Nueva · frecuente · VIP · vetada.</p><span class="sys s-erp">ERP</span></div>
+      <div class="paso"><div class="n">5</div><h4>Se le habla</h4><p>WhatsApp, correo, cortesías.</p><span class="sys s-web">Web</span></div>
+    </div>
+    <div class="oro">→ detalle en el <a href="/os-persona">manual 03</a>.</div>
+  </section>
+
+  <!-- ══ NÚMEROS REALES ══ -->
+  <section>
+    <div class="stag">Capítulo 4</div>
+    <h2>Un evento real, número por número</h2>
+    <p class="lead">Miércoles 23 de julio · <b>A MI ME GUSTA</b>. Así se lee una noche en el sistema.</p>
+
+    <div class="kpis">
+      <div class="kpi v"><b>366</b><span>Personas adentro</span></div>
+      <div class="kpi"><b>614</b><span>Entradas emitidas</span></div>
+      <div class="kpi o"><b>60%</b><span>De lo emitido llegó</span></div>
+      <div class="kpi a"><b>23:00</b><span>→ 05:00 h</span></div>
+    </div>
+
+    <h3>Lo importante: no todas las entradas son iguales</h3>
+    <p>El error más común es mezclar. Una cortesía y una preventa <b>no se miden igual</b>: una es plata, la otra es marketing.</p>
+    <div class="tw"><table class="tabla">
+      <thead><tr><th>Tipo</th><th>Llegaron</th><th>Emitidas</th><th>%</th><th>Qué significa</th></tr></thead>
+      <tbody>
+        <tr><td><b>💰 Preventa</b> (pagaron)</td><td class="num"><b>110</b></td><td class="num">116</td><td class="num" style="color:var(--verde)"><b>95%</b></td><td>Casi todos los que pagan, llegan. <b>La plata no falla.</b></td></tr>
+        <tr><td><b>🎁 Cortesía</b> (gratis)</td><td class="num"><b>244</b></td><td class="num">486</td><td class="num" style="color:var(--oro)"><b>50%</b></td><td>La mitad de los invitados no aparece. Normal, pero hay que emitir pensando en eso.</td></tr>
+        <tr><td><b>🚪 Puerta</b> (VIP en el momento)</td><td class="num"><b>12</b></td><td class="num">12</td><td class="num" style="color:var(--verde)"><b>100%</b></td><td>Se registran al entrar, así que siempre calzan.</td></tr>
+      </tbody>
+    </table></div>
+    <div class="bien"><b>Cómo leerlo bien:</b> 110 + 244 + 12 = <b>366</b>, y 116 + 486 + 12 = <b>614</b>. Los números cuadran. Si alguna vez ves un porcentaje sobre 100%, están mezclando cortesías con ventas — avisa.</div>
+
+    <h3>Rendimiento por lista</h3>
+    <p>Cada lista cuenta una historia. Estas son las de esa noche:</p>
+    <div class="tw"><table class="tabla">
+      <thead><tr><th>Lista</th><th>Llegaron</th><th>Emitidas</th><th>%</th><th>Lectura</th></tr></thead>
+      <tbody>
+        <tr><td>Pre-Venta GRAL. Mujer</td><td class="num">29</td><td class="num">30</td><td class="num" style="color:var(--verde)">97%</td><td>Excelente</td></tr>
+        <tr><td>Pre-Venta PRO Mujer</td><td class="num">37</td><td class="num">39</td><td class="num" style="color:var(--verde)">95%</td><td>Excelente</td></tr>
+        <tr><td>Cumpleaños Invitad@</td><td class="num">27</td><td class="num">29</td><td class="num" style="color:var(--verde)">93%</td><td>Los cumpleaños llenan</td></tr>
+        <tr><td>Pre-Venta PRO Hombre Univ.</td><td class="num">25</td><td class="num">27</td><td class="num" style="color:var(--verde)">93%</td><td>Excelente</td></tr>
+        <tr><td>Lista VIP Fuego</td><td class="num">38</td><td class="num">53</td><td class="num" style="color:var(--oro)">72%</td><td>Bien para ser cortesía</td></tr>
+        <tr><td>Cortesía Hombre (Embajadora)</td><td class="num">74</td><td class="num">150</td><td class="num" style="color:var(--oro)">49%</td><td>La mitad. Revisar cupos</td></tr>
+        <tr><td>Cortesía Mujer (Embajadora)</td><td class="num">72</td><td class="num">150</td><td class="num" style="color:var(--oro)">48%</td><td>La mitad</td></tr>
+        <tr><td>Cortesía Mujer (FRATE)</td><td class="num">30</td><td class="num">101</td><td class="num" style="color:var(--rojo)">30%</td><td>⚠️ Baja. ¿Se emitió de más?</td></tr>
+      </tbody>
+    </table></div>
+    <div class="oro"><b>Para qué sirve esto:</b> la próxima vez sabes cuántas cortesías emitir para llenar. Si quieres 100 personas de una lista que rinde 50%, emites 200. <b>Eso es planificar con datos, no con corazonada.</b></div>
+  </section>
+
+  <!-- ══ LA SEMANA ══ -->
+  <section>
+    <div class="stag">Capítulo 5</div>
+    <h2>Una semana en Fraternidad</h2>
+    <p class="lead">Cuándo se usa cada parte del sistema. Este es el ritmo real del trabajo.</p>
+    <div class="tw"><table class="tabla">
+      <thead><tr><th>Cuándo</th><th>Qué pasa</th><th>Dónde</th></tr></thead>
+      <tbody>
+        <tr><td><b>Lunes–Martes</b></td><td>Se define el evento, se diseña el flyer, se crean los tipos de ticket y se abre la venta.</td><td class="s-fly">Flyer</td></tr>
+        <tr><td><b>Martes–Jueves</b></td><td>Preventa online. Llegan solicitudes de cumpleaños y reservas. Las embajadoras arman sus listas.</td><td class="s-web">Web</td></tr>
+        <tr><td><b>Jueves (día)</b></td><td><b>Revisión humana de listas</b> y emisión de cortesías. Se arma la disposición de zonas del local.</td><td class="s-web">Web</td></tr>
+        <tr><td><b>Jueves 23:00 → 05:00</b></td><td>Puerta escaneando, aforo en vivo, barra cobrando.</td><td class="s-web">Puerta</td></tr>
+        <tr><td><b>Viernes</b></td><td>Cierre: cuántos llegaron por lista, cuánto se recaudó, devoluciones e incidencias.</td><td class="s-erp">ERP</td></tr>
+      </tbody>
+    </table></div>
+    <div class="oro"><b>Ojo con el horario:</b> el evento del jueves <b>termina el viernes de madrugada</b>, pero para el sistema sigue siendo "el jueves". Todo lo que pasa antes de las 06:00 cuenta para la noche anterior. Por eso a las 2 de la mañana el panel sigue mostrando el evento del día anterior — <b>no es un error, es a propósito</b>.</div>
+  </section>
+
+  <!-- ══ SI ALGO FALLA ══ -->
+  <section>
+    <div class="stag">Capítulo 6</div>
+    <h2>Si algo falla</h2>
+    <p class="lead">El sistema está hecho para que un problema no arrastre a los demás. Esto es lo que pasa en cada caso.</p>
+    <div class="tw"><table class="tabla">
+      <thead><tr><th>Si pasa esto…</th><th>El sistema hace…</th><th>Tú haces…</th></tr></thead>
+      <tbody>
+        <tr><td><b>Se cae internet en la puerta</b></td><td>El validador sigue funcionando con la lista descargada y guarda las entradas.</td><td>Escanear normal. Al volver la señal, apretar <b>Sincronizar</b>.</td></tr>
+        <tr><td><b>Alguien pagó y no había cupo</b></td><td>Marca la orden y avisa por WhatsApp al instante.</td><td>Botón <b>➕ Dar cupo</b>: le emite la entrada y le manda el QR.</td></tr>
+        <tr><td><b>Un QR ya fue escaneado</b></td><td>Lo rechaza. No se puede usar dos veces.</td><td>Revisar el nombre. Si hay duda, registrar incidencia.</td></tr>
+        <tr><td><b>El correo del cliente rebota</b></td><td>Queda registrado en el panel.</td><td>Contactarlo por WhatsApp y corregir el correo.</td></tr>
+        <tr><td><b>El ERP está caído</b></td><td>La web sigue vendiendo y escaneando. Los avisos quedan en cola.</td><td>Nada. Se entregan solos cuando vuelve.</td></tr>
+      </tbody>
+    </table></div>
+    <div class="peligro"><b>Lo único que nunca se hace:</b> dejar entrar a alguien "por si acaso" sin registrarlo. Si entra una persona, tiene que quedar en el sistema — si no, el aforo miente y el cierre no cuadra. Para eso existe <b>➕ Nuevo</b> en la puerta.</div>
+  </section>
+
+  <!-- ══ SERIE ══ -->
+  <section>
+    <div class="stag">La serie completa</div>
+    <h2>Los siete manuales</h2>
+    <p class="lead">Cada uno se lee en 10 minutos y se puede proyectar.</p>
+    <div class="serie">
+      <a class="mn" href="/os"><div class="num2">00</div><div><h4>El mapa</h4><p>Los 4 cerebros, quién es dueño de qué y cómo se hablan.</p><span class="tag">Estás aquí</span></div></a>
+      <a class="mn" href="/os-entrada"><div class="num2">01</div><div><h4>La entrada</h4><p>Del flyer a la puerta. Cupos, QR, cortesías, cambios de día.</p><span class="tag">Para todos</span></div></a>
+      <a class="mn" href="/os-dinero"><div class="num2">02</div><div><h4>El dinero</h4><p>Precio, pago, conciliación, devolución, nota de crédito e IVA.</p><span class="tag">Administración</span></div></a>
+      <a class="mn" href="/os-persona"><div class="num2">03</div><div><h4>La persona</h4><p>Del formulario a la ficha 360°, crédito, frecuentes y vetos.</p><span class="tag">Comunidad · RRPP</span></div></a>
+      <a class="mn" href="/os-noche"><div class="num2">04</div><div><h4>La noche</h4><p>Listas, validador, sin internet, aforo en vivo y cierre.</p><span class="tag">Puerta · Producción</span></div></a>
+      <a class="mn" href="/os-panel"><div class="num2">05</div><div><h4>El panel</h4><p>Recorrido por cada sección: para qué sirve y cuándo se usa.</p><span class="tag">Administración</span></div></a>
+      <a class="mn" href="/os-reglas"><div class="num2">06</div><div><h4>Reglas de oro</h4><p>Qué nunca hacer, datos personales y quién puede qué.</p><span class="tag">Obligatorio</span></div></a>
+    </div>
+  </section>
+
+  <!-- ══ GLOSARIO ══ -->
+  <section>
+    <div class="stag">Anexo</div>
+    <h2>Diccionario</h2>
+    <p class="lead">Las palabras que vas a escuchar en las reuniones.</p>
+    <div class="tw"><table class="tabla">
+      <tbody>
+        <tr><td><b>Cortesía</b></td><td>Entrada gratis. Vale lo mismo en la puerta que una pagada, pero <b>no es venta</b>.</td></tr>
+        <tr><td><b>Preventa</b></td><td>Entrada pagada por adelantado en la web.</td></tr>
+        <tr><td><b>Lista</b></td><td>Grupo de invitados de una embajadora o del local. Se revisa a mano antes de emitir.</td></tr>
+        <tr><td><b>Emitir</b></td><td>Convertir a la gente de una lista en entradas reales con QR, y mandarles el correo.</td></tr>
+        <tr><td><b>Quemar un QR</b></td><td>Marcarlo como usado al escanearlo. No se puede repetir.</td></tr>
+        <tr><td><b>Aforo</b></td><td>Cuánta gente hay adentro ahora mismo.</td></tr>
+        <tr><td><b>Nota de crédito</b></td><td>Documento que anula una venta ante el SII cuando se devuelve plata.</td></tr>
+        <tr><td><b>Ficha 360°</b></td><td>Todo lo que sabemos de una persona en una sola pantalla.</td></tr>
+        <tr><td><b>Ticket abierto</b></td><td>Entrada sin día fijo: sirve para cualquier fecha hasta que se asigna.</td></tr>
+        <tr><td><b>Veto</b></td><td>Persona que no puede entrar. Se marca en rojo antes de aprobar la lista.</td></tr>
+      </tbody>
+    </table></div>
+  </section>
+
+  <div class="pie">
+    FRATE OS · Manual 00 · Fraternidad Campus Central<br>
+    Documento interno. Se actualiza cuando cambia el sistema. · <a href="/admin">Volver al panel</a>
+  </div>
+</div>
+
+<script src="/os-guard.js"></script>
+<script>
+  document.getElementById('bar').innerHTML = osBarra('00');
+  osProteger();
+</script>
+</body>
+</html>

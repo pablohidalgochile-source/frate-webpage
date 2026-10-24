@@ -1,0 +1,191 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>FRATE WEB (TICKETERA) · OS 12 RECETAS: ENTRADAS Y PLATA</title>
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🛠️</text></svg>">
+<link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@600;800;900&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="/os-manual.css">
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+</head>
+<body>
+<div id="bar"></div>
+<div class="wrap">
+
+  <div class="hero">
+    <div class="eyebrow">Manual 12 · recetas</div>
+    <h1>Entradas<br>y <em>plata</em></h1>
+    <p class="sub">Los casos que llegan por WhatsApp todos los días, resueltos paso a paso. Para consultar en el momento, desde el celular.</p>
+    <div class="meta"><span>Administración · Comunidad</span><span>·</span><span>5 recetas</span></div>
+  </div>
+
+  <section>
+    <div class="stag">Antes de empezar</div>
+    <h2>Cómo encontrar la orden</h2>
+    <p class="lead">Todas las recetas parten igual: hay que llegar a la orden de esa persona.</p>
+    <div class="paso"><span class="n">1</span><div class="c"><div class="t">Usa el buscador de arriba del panel</div>
+      <div class="d">Escribe el <b>nombre</b>, el <b>correo</b>, el <b>RUT</b> o el <b>N° de orden</b> (FCC-003455). Busca en personas, cortesías, listas y órdenes a la vez.</div></div></div>
+    <div class="paso"><span class="n">2</span><div class="c"><div class="t">O entra por Órdenes</div>
+      <div class="d">Menú → 📦 Órdenes. Arriba están los filtros; el buscador de esa pantalla filtra por ID, nombre o email.</div></div></div>
+    <div class="oro"><b>Truco:</b> si el cliente te manda una captura del correo, ahí sale el <b>N° de orden</b> (FCC-XXXXXX). Es la forma más rápida de llegar.</div>
+  </section>
+
+  <!-- ═══ A6 ═══ -->
+  <section>
+    <div class="receta">
+      <div class="rcab"><span class="cod">A6</span><h3>Cambiar una entrada de día</h3><span class="quien">Administración</span></div>
+      <div class="rbody">
+        <div class="cuando"><b>Cuándo:</b> el cliente compró para el jueves pero quiere ir el sábado. O se equivocó de fecha al comprar.</div>
+
+        <div class="paso"><span class="n">1</span><div class="c"><div class="t">Abre la orden y aprieta 🔄 Cambiar día</div>
+          <div class="d">Se abre una ventana con el título <b>🔄 Cambiar de día · FCC-00XXXX</b>.</div></div></div>
+
+        <div class="paso"><span class="n">2</span><div class="c"><div class="t">Marca qué entradas se mueven</div>
+          <div class="d">Si compró 4 y solo se cambian 2, marcas esas dos. Las <b>ya usadas o devueltas no se pueden mover</b> y aparecen bloqueadas.</div>
+          <div class="pant">
+            <div class="barra">¿Qué entradas cambian de día? (4)</div>
+            <div class="fila"><span class="sem" style="background:var(--verde)"></span><span style="flex:1">Pre-Venta PRO Mujer · Catalina M.</span><span style="color:var(--verde);font-size:.7rem">✓ marcada</span></div>
+            <div class="fila"><span class="sem" style="background:var(--verde)"></span><span style="flex:1">Pre-Venta PRO Mujer · Sofía D.</span><span style="color:var(--verde);font-size:.7rem">✓ marcada</span></div>
+            <div class="fila" style="opacity:.5"><span class="sem" style="background:var(--gris2)"></span><span style="flex:1">Pre-Venta PRO Hombre · Diego C.</span><span style="font-size:.7rem">ya ingresó</span></div>
+          </div></div></div>
+
+        <div class="paso"><span class="n">3</span><div class="c"><div class="t">Elige el nuevo evento</div>
+          <div class="d">En <b>Nuevo evento / día</b> eliges la fecha. O marcas <b>🎟️ Ticket abierto</b> si todavía no sabe cuándo irá (ver receta A7).</div></div></div>
+
+        <div class="paso"><span class="n">4</span><div class="c"><div class="t">Confirma</div>
+          <div class="d">El QR viejo <b>se anula</b> y se emite uno nuevo para la fecha nueva. Al cliente le llega su QR nuevo por correo.</div>
+          <span class="bt">🔄 Cambiar de día</span></div></div>
+
+        <div class="ok"><b>Cómo saber que salió bien:</b> en la orden las entradas movidas quedan marcadas <b>🔄 cambió de día</b>, y aparece una entrada nueva de $0 para la fecha nueva. En la puerta, el QR viejo dice "CAMBIÓ DE DÍA — no válida acá" (en rojo) y el nuevo autoriza normal.</div>
+        <div class="no"><b>Importante:</b> la <b>plata se queda en el evento original</b> — no se traspasa. El cambio de día toma un cupo del evento nuevo, así que si está agotado, no se puede. Y no cuenta como inasistencia del cliente.</div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ═══ A7 ═══ -->
+  <section>
+    <div class="receta">
+      <div class="rcab"><span class="cod">A7</span><h3>Ticket abierto (sin fecha)</h3><span class="quien">Administración</span></div>
+      <div class="rbody">
+        <div class="cuando"><b>Cuándo:</b> el cliente no puede ir y no sabe cuándo irá. En vez de devolverle la plata, se le deja una entrada "flotando".</div>
+        <div class="paso"><span class="n">1</span><div class="c"><div class="t">En la ventana de cambiar día, marca 🎟️ Ticket abierto</div>
+          <div class="d">En vez de elegir una fecha nueva.</div></div></div>
+        <div class="paso"><span class="n">2</span><div class="c"><div class="t">Se le emite un QR sin fecha</div>
+          <div class="d">Ese QR <b>sirve cualquier día</b>. No toma cupo de ningún evento hasta que se asigne.</div></div></div>
+        <div class="paso"><span class="n">3</span><div class="c"><div class="t">Cuando elija su día</div>
+          <div class="d">Órdenes → filtro <b>🎟️ Abiertos</b> → abres la orden → <b>📅 Asignar a evento</b>. Ahí toma el cupo.</div>
+          <span class="bt g">📅 Asignar a evento</span></div></div>
+        <div class="ok"><b>Doble ventaja:</b> el cliente puede llegar con ese QR cualquier noche <b>y</b> se le puede asignar formalmente cuando avise. Las dos cosas funcionan.</div>
+        <div class="oro"><b>Ofrécelo antes que la devolución.</b> No sale plata del local y el cliente queda contento. Es la mejor salida para "no puedo ir".</div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ═══ A8 ═══ -->
+  <section>
+    <div class="receta">
+      <div class="rcab"><span class="cod">A8</span><h3>Devolver una entrada</h3><span class="quien">Solo admin</span></div>
+      <div class="rbody">
+        <div class="cuando"><b>Cuándo:</b> el cliente pide su plata de vuelta y no acepta crédito ni cambio de día. <b>Ofrece siempre esas dos primero</b> — no cuestan plata.</div>
+
+        <div class="paso"><span class="n">1</span><div class="c"><div class="t">Abre la orden y aprieta 💸 Devolver</div>
+          <div class="d">Se abre <b>↩️ Devolver pago</b> con los números de esa compra: cuánto se cobró, cuánto se llevó MercadoPago y cuánto IVA se recupera.</div></div></div>
+
+        <div class="paso"><span class="n">2</span><div class="c"><div class="t">Si son varias entradas, marca cuáles</div>
+          <div class="d">Aparece el checklist. <b>Marca solo las que pidió.</b> Si no marcas ninguna, se devuelve la orden completa y las demás entradas mueren.</div>
+          <div class="pant">
+            <div class="barra">🎫 Devolver entradas específicas (4)</div>
+            <div class="fila"><span class="sem" style="background:var(--rojo)"></span><span style="flex:1">Pre-Venta PRO Mujer · Catalina M.</span><span style="color:var(--oro);font-size:.72rem">$9.000</span><span style="color:var(--verde);font-size:.66rem">válida</span></div>
+            <div class="fila" style="opacity:.55"><span class="sem" style="background:var(--gris2)"></span><span style="flex:1">Pre-Venta PRO Mujer · Sofía D.</span><span style="color:var(--gris2);font-size:.72rem">$9.000</span><span style="font-size:.66rem">usada</span></div>
+          </div></div></div>
+
+        <div class="paso"><span class="n">3</span><div class="c"><div class="t">Revisa el monto</div>
+          <div class="d">Se aplica la <b>retención del 10%</b>. El campo se puede ajustar, pero por defecto está bien.</div></div></div>
+
+        <div class="paso"><span class="n">4</span><div class="c"><div class="t">Elige cómo</div>
+          <div class="d"><b>⚡ Devolver por MercadoPago</b> — la plata vuelve sola al medio del cliente.<br>
+            <b>✍️ Marcar como devuelto (manual)</b> — si le transferiste tú aparte.</div>
+          <span class="bt">⚡ Devolver por MercadoPago</span> <span class="bt g">✍️ Marcar como devuelto</span></div></div>
+
+        <div class="ok"><b>Cómo saber que salió bien:</b> las entradas devueltas quedan con badge naranjo <b>DEVUELTA</b>, en la puerta dicen "❌ Entrada DEVUELTA — no válida", y se genera la <b>nota de crédito</b> con su IVA (Órdenes → 🧾 Notas de crédito). El cupo vuelve a la venta.</div>
+        <div class="no"><b>Nunca:</b> devolver una entrada <b>ya usada</b> (la persona entró, consumió el servicio), ni <b>eliminar</b> la orden en vez de devolverla — eso borra la plata de la contabilidad y descuadra el mes.</div>
+        <div class="oro"><b>La alternativa que casi siempre conviene:</b> <b>🎟️ Crédito FRATE</b> — el valor completo, <b>sin retención</b>, queda a su favor para la próxima. No sale plata del local y el cliente vuelve.</div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ═══ A9 ═══ -->
+  <section>
+    <div class="receta">
+      <div class="rcab"><span class="cod">A9</span><h3>"Pagó y no había cupo"</h3><span class="quien">Urgente · mismo día</span></div>
+      <div class="rbody">
+        <div class="cuando"><b>Cuándo:</b> aparece el banner rojo <b>"🚨 N PERSONAS PAGARON Y NO TIENEN ENTRADA"</b>, o te llega el WhatsApp de aviso. Hay alguien que pagó y se quedó sin nada.</div>
+
+        <div class="paso"><span class="n">1</span><div class="c"><div class="t">Aprieta el banner del Resumen</div>
+          <div class="d">Te lleva directo a Órdenes con el filtro <b>⚠️ Reembolsar</b>.</div></div></div>
+
+        <div class="paso"><span class="n">2</span><div class="c"><div class="t">Aprieta ➕ Dar cupo</div>
+          <div class="d">Está en la fila, en verde. Te muestra cuántos cupos se van a abrir y de qué tipo.</div>
+          <span class="bt v">➕ Dar cupo</span></div></div>
+
+        <div class="paso"><span class="n">3</span><div class="c"><div class="t">Confirma</div>
+          <div class="d">Un clic hace las tres cosas: <b>amplía el cupo</b>, <b>marca la orden pagada</b> y <b>le manda su QR al correo</b>.</div></div></div>
+
+        <div class="ok"><b>Cómo saber que salió bien:</b> la orden pasa a <b>pagado</b>, desaparece del filtro ⚠️ Reembolsar, y el cliente recibe su entrada. Además queda contada como venta real (antes era plata cobrada que no figuraba en ninguna parte).</div>
+        <div class="oro"><b>Cuándo NO dar cupo:</b> si el local de verdad no aguanta una persona más. En ese caso se devuelve la plata (receta A8) y se le explica. Pero la primera opción siempre es darle su entrada — ya pagó.</div>
+        <div class="no"><b>No lo dejes para mañana.</b> Es alguien que pagó y va a llegar a la puerta pensando que tiene entrada.</div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ═══ A10 ═══ -->
+  <section>
+    <div class="receta">
+      <div class="rcab"><span class="cod">A10</span><h3>"No me llegó el QR"</h3><span class="quien">Todos</span></div>
+      <div class="rbody">
+        <div class="cuando"><b>Cuándo:</b> el cliente dice que pagó y no recibió nada. Es el reclamo más común y casi siempre es el correo.</div>
+
+        <div class="paso"><span class="n">1</span><div class="c"><div class="t">Busca su orden y confirma que está pagada</div>
+          <div class="d">Si dice <b>pendiente</b>, no pagó (o el pago no se confirmó). Si dice <b>pagado</b>, sigue al paso 2.</div></div></div>
+
+        <div class="paso"><span class="n">2</span><div class="c"><div class="t">Mira el correo que puso</div>
+          <div class="d">Sale bajo su nombre en la orden. <b>Léelo en voz alta con el cliente</b> — ahí aparece el 90% de los errores (una letra cambiada, .con en vez de .com).</div></div></div>
+
+        <div class="paso"><span class="n">3</span><div class="c"><div class="t">Revisa si rebotó</div>
+          <div class="d">Menú → <b>↩️ Devol. &amp; React.</b> → sección <b>📧 Correos que rebotaron</b>. Si está ahí, el correo no existe o lo rechazó el servidor.</div></div></div>
+
+        <div class="paso"><span class="n">4</span><div class="c"><div class="t">Corrige y reenvía</div>
+          <div class="d">Botón <b>✏️</b> en la orden para arreglar el correo → después <b>📧</b> para reenviar el comprobante con los QR.</div>
+          <span class="bt g">✏️ Editar</span> <span class="bt o">📧 Reenviar</span></div></div>
+
+        <div class="ok"><b>Cómo saber que salió bien:</b> el cliente confirma que le llegó. Si el correo era correcto desde el principio, pídele que <b>revise spam</b> — ahí está la otra mitad de los casos.</div>
+        <div class="oro"><b>Si igual no llega:</b> desde la orden puedes mostrarle el QR en pantalla y él le saca una foto. Con eso entra igual. El QR es el QR, no importa por dónde le llegue.</div>
+      </div>
+    </div>
+  </section>
+
+  <section>
+    <div class="stag">Resumen</div>
+    <h2>Qué usar en cada caso</h2>
+    <div class="tw"><table class="tabla">
+      <thead><tr><th>El cliente dice…</th><th>Receta</th><th>¿Sale plata?</th></tr></thead>
+      <tbody>
+        <tr><td>"Me equivoqué de fecha"</td><td><b>A6</b> · cambiar de día</td><td style="color:var(--verde)">No</td></tr>
+        <tr><td>"No puedo ir, no sé cuándo iré"</td><td><b>A7</b> · ticket abierto</td><td style="color:var(--verde)">No</td></tr>
+        <tr><td>"No puedo ir, pero volveré"</td><td><b>A8</b> · crédito FRATE</td><td style="color:var(--verde)">No</td></tr>
+        <tr><td>"Quiero mi plata de vuelta"</td><td><b>A8</b> · devolución (10% retención)</td><td style="color:var(--rojo)">Sí</td></tr>
+        <tr><td>"Pagué y no tengo entrada"</td><td><b>A9</b> · dar cupo</td><td style="color:var(--verde)">No</td></tr>
+        <tr><td>"No me llegó nada"</td><td><b>A10</b> · corregir correo y reenviar</td><td style="color:var(--verde)">No</td></tr>
+      </tbody>
+    </table></div>
+    <div class="bien"><b>Mira la última columna:</b> de seis casos, en cinco <b>no sale plata del local</b>. Antes de devolver, revisa si alguna de las otras cinco resuelve el problema.</div>
+  </section>
+
+  <div class="pie">FRATE OS · Manual 12 · <a href="/os-listas">← Listas y cortesías</a> · <a href="/os-eventos">Siguiente: eventos y cumpleaños →</a></div>
+</div>
+
+<script src="/os-guard.js"></script>
+<script>document.getElementById('bar').innerHTML = osBarra('12'); osProteger();</script>
+</body>
+</html>

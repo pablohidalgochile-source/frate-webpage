@@ -1,0 +1,155 @@
+/* ============================================================
+   THE FRATE TIMES — portada de diario nocturno
+   Papel prensa, editorial B/N + un acento (sello rosa).
+   Base 1080×1620 (2:3). Autoescala por ancho.
+   ============================================================ */
+@import url('https://fonts.googleapis.com/css2?family=UnifrakturCook:wght@700&family=Playfair+Display:ital,wght@0,700;0,900;1,700;1,900&family=Oswald:wght@300;400;500;600;700&family=PT+Serif:ital,wght@0,400;0,700;1,400&display=swap');
+
+:root {
+  --paper:   #efe9db;   /* papel prensa */
+  --paper-2: #e6dfce;
+  --ink:     #171310;   /* tinta */
+  --ink-2:   #3a332c;
+  --muted:   #6b6459;
+  --stamp:   #ff2d78;   /* @kind color — acento sello */
+  --rule:    #171310;
+}
+
+* { box-sizing: border-box; margin: 0; padding: 0; }
+html, body { height: 100%; }
+
+.ft-stage { position: relative; width: 100%; display: flex; justify-content: center; align-items: flex-start;
+  background: #14110e; overflow: hidden; }
+.ft-canvas { width: 1080px; height: 1620px; position: relative; transform-origin: top center; flex: none;
+  background: var(--paper); color: var(--ink); overflow: hidden;
+  box-shadow: 0 40px 120px rgba(0,0,0,.7);
+  font-family: 'PT Serif', Georgia, serif; }
+
+/* textura de papel + envejecido en bordes */
+.ft-canvas::before { content: ""; position: absolute; inset: 0; z-index: 1; pointer-events: none; mix-blend-mode: multiply; opacity: .5;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='140' height='140'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='2'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.4'/%3E%3C/svg%3E"); }
+.ft-canvas::after { content: ""; position: absolute; inset: 0; z-index: 2; pointer-events: none;
+  background: radial-gradient(120% 90% at 50% 40%, transparent 62%, rgba(60,45,30,.16) 100%); }
+
+.ft-pad { position: absolute; inset: 46px; z-index: 3; display: flex; flex-direction: column; }
+
+/* ---- Folio superior ---- */
+.ft-folio { display: flex; justify-content: space-between; align-items: center;
+  font-family: 'Oswald', sans-serif; font-weight: 500; font-size: 15px; letter-spacing: .14em;
+  text-transform: uppercase; color: var(--ink-2); padding-bottom: 8px; }
+.ft-folio .c { text-align: center; }
+
+/* ---- Masthead ---- */
+.ft-rule { border-top: 2px solid var(--rule); }
+.ft-rule.thin { border-top-width: 1px; }
+.ft-rule.dbl { border-top: 3px double var(--rule); }
+.ft-mast { text-align: center; padding: 12px 0 8px; }
+.ft-mast h1 { font-family: 'UnifrakturCook', 'Playfair Display', serif; font-weight: 700; font-size: 118px;
+  line-height: .9; letter-spacing: .01em; }
+.ft-dateline { display: flex; justify-content: space-between; align-items: center;
+  font-family: 'Oswald', sans-serif; font-weight: 400; font-size: 13px; letter-spacing: .06em;
+  text-transform: uppercase; color: var(--ink-2); padding: 7px 2px; white-space: nowrap; gap: 14px; }
+.ft-dateline > span { flex: 1; }
+.ft-dateline > span:first-child { text-align: left; }
+.ft-dateline > span:last-child { text-align: right; }
+.ft-dateline b { font-weight: 600; }
+.ft-dateline .mid { font-style: italic; font-family: 'PT Serif', serif; text-transform: none; letter-spacing: 0; font-size: 15px; }
+
+/* ---- Última hora ---- */
+.ft-breaking { background: var(--ink); color: var(--paper); display: flex; align-items: center; gap: 14px;
+  padding: 8px 16px; margin-top: 10px; }
+.ft-breaking .tag { background: var(--stamp); color: #fff; font-family: 'Oswald', sans-serif; font-weight: 700;
+  font-size: 15px; letter-spacing: .16em; padding: 4px 12px; text-transform: uppercase; white-space: nowrap; }
+.ft-breaking .txt { font-family: 'Oswald', sans-serif; font-weight: 300; font-size: 17px; letter-spacing: .04em;
+  text-transform: uppercase; }
+
+/* ---- Titular ---- */
+.ft-head { text-align: center; padding: 18px 0 8px; }
+.ft-head h2 { font-family: 'Playfair Display', serif; font-weight: 900; font-size: 106px; line-height: .9;
+  letter-spacing: -.01em; }
+.ft-head h2 em { font-style: italic; }
+.ft-deck { font-family: 'PT Serif', serif; font-style: italic; font-size: 24px; color: var(--ink-2);
+  margin-top: 12px; line-height: 1.3; }
+.ft-byline { font-family: 'Oswald', sans-serif; font-size: 13px; letter-spacing: .12em; text-transform: uppercase;
+  color: var(--muted); margin-top: 10px; padding: 8px 0; border-top: 1px solid var(--rule); border-bottom: 1px solid var(--rule); }
+
+/* ---- Cuerpo: foto + columnas ---- */
+.ft-body { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 18px; padding-top: 14px; }
+
+/* Secundarias: EN ESTA EDICIÓN */
+.ft-briefs { border-top: 2px solid var(--rule); margin-top: 14px; padding-top: 10px; }
+.ft-briefs .lbl { font-family: 'Oswald', sans-serif; font-weight: 700; font-size: 13px; letter-spacing: .14em;
+  text-transform: uppercase; text-align: center; color: var(--ink); margin-bottom: 10px; }
+.ft-briefs .cols { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 18px; }
+.ft-brief { border-left: 1px solid var(--rule); padding-left: 12px; }
+.ft-brief:first-child { border-left: 0; padding-left: 0; }
+.ft-brief .k { font-family: 'Oswald', sans-serif; font-weight: 700; font-size: 11px; letter-spacing: .12em;
+  text-transform: uppercase; color: var(--stamp); margin-bottom: 4px; }
+.ft-brief h4 { font-family: 'Playfair Display', serif; font-weight: 700; font-size: 19px; line-height: 1.02; margin-bottom: 5px; color: var(--ink); }
+.ft-brief p { font-family: 'PT Serif', serif; font-size: 13px; line-height: 1.4; color: var(--ink-2); text-align: justify; }
+.ft-col { font-size: 14.5px; line-height: 1.5; text-align: justify; color: var(--ink-2); }
+.ft-col p { margin-bottom: 9px; }
+.ft-col p:first-child::first-letter { font-family: 'Playfair Display', serif; font-weight: 900; font-size: 62px;
+  float: left; line-height: .72; padding: 6px 8px 0 0; color: var(--ink); }
+.ft-photo { grid-column: span 2; position: relative; }
+.ft-photo image-slot { display: block; width: 100%; height: 430px; background: #d9d2c2;
+  filter: grayscale(1) contrast(1.15); }
+.ft-photo .halftone { position: absolute; inset: 0; pointer-events: none; mix-blend-mode: multiply; opacity: .35;
+  background-image: radial-gradient(var(--ink) 26%, transparent 27%); background-size: 5px 5px; }
+.ft-photo .cap { font-family: 'Oswald', sans-serif; font-size: 12px; letter-spacing: .04em; text-transform: uppercase;
+  color: var(--muted); margin-top: 6px; border-bottom: 1px solid var(--rule); padding-bottom: 8px; }
+.ft-photo .cap b { color: var(--ink); }
+.ft-kicker { font-family: 'Oswald', sans-serif; font-weight: 700; font-size: 13px; letter-spacing: .14em;
+  text-transform: uppercase; color: var(--stamp); margin-bottom: 4px; }
+.ft-subhead { font-family: 'Playfair Display', serif; font-weight: 700; font-size: 21px; line-height: 1.05;
+  margin: 4px 0 8px; color: var(--ink); }
+
+/* pull quote */
+.ft-quote { border-top: 3px double var(--rule); border-bottom: 3px double var(--rule); padding: 12px 0; margin: 10px 0;
+  font-family: 'Playfair Display', serif; font-style: italic; font-weight: 700; font-size: 26px; line-height: 1.15;
+  text-align: center; color: var(--ink); }
+
+/* ---- Clasificado / concurso ---- */
+.ft-classified { border: 2px solid var(--rule); padding: 12px 14px; margin-top: 8px; }
+.ft-classified h3 { font-family: 'Oswald', sans-serif; font-weight: 700; font-size: 15px; letter-spacing: .12em;
+  text-transform: uppercase; text-align: center; border-bottom: 1px solid var(--rule); padding-bottom: 6px; margin-bottom: 8px; }
+.ft-classified p { font-family: 'PT Serif', serif; font-size: 14px; line-height: 1.4; text-align: center; }
+.ft-classified .win { font-family: 'Oswald', sans-serif; font-weight: 600; font-size: 13px; letter-spacing: .04em;
+  text-transform: uppercase; text-align: center; margin-top: 6px; }
+.ft-classified .win span { color: var(--stamp); }
+
+/* ---- Footer ---- */
+.ft-foot { border-top: 2px solid var(--rule); margin-top: auto; padding-top: 10px;
+  display: grid; grid-template-columns: 1fr auto 1fr; align-items: center; gap: 16px; }
+.ft-foot .l { font-family: 'Oswald', sans-serif; font-size: 12px; letter-spacing: .1em; text-transform: uppercase; color: var(--muted); line-height: 1.5; }
+.ft-foot .l b { color: var(--ink); }
+.ft-foot .brand { text-align: center; }
+.ft-foot .brand .fr { font-family: 'Playfair Display', serif; font-weight: 900; font-size: 40px; letter-spacing: .02em; }
+.ft-foot .brand .sub { font-family: 'Oswald', sans-serif; font-size: 11px; letter-spacing: .4em; text-transform: uppercase; color: var(--muted); padding-left: .4em; }
+.ft-barcode { display: flex; gap: 1.5px; height: 40px; justify-content: flex-end; align-items: stretch; }
+.ft-barcode i { background: var(--ink); display: block; }
+.ft-foot .price { text-align: right; font-family: 'Oswald', sans-serif; }
+
+/* ---- Sello de goma rotado ---- */
+.ft-stamp { position: absolute; z-index: 6; right: 76px; top: 706px; width: 188px; height: 188px;
+  border: 4px solid var(--stamp); border-radius: 50%; display: grid; place-items: center; text-align: center;
+  transform: rotate(-14deg); opacity: .88; mix-blend-mode: multiply; }
+.ft-stamp::before { content: ""; position: absolute; inset: 9px; border: 1.5px solid var(--stamp); border-radius: 50%; }
+.ft-stamp .in { color: var(--stamp); font-family: 'Oswald', sans-serif; font-weight: 700; letter-spacing: .1em; text-transform: uppercase; }
+.ft-stamp .in .big { display: block; font-size: 34px; line-height: .95; }
+.ft-stamp .in .sm { display: block; font-size: 12px; letter-spacing: .18em; margin-top: 4px; }
+.ft-stamp .in .date { display: block; font-size: 15px; margin-top: 6px; border-top: 1px solid var(--stamp); padding-top: 4px; }
+
+/* ---- Tweaks (compartido con el sistema) ---- */
+#tweaks { position: fixed; top: 16px; right: 16px; width: 232px; background: #14110e; color: #efe9db;
+  border: 1px solid #2c2620; border-radius: 12px; padding: 14px; font-family: 'Oswald', sans-serif; z-index: 999; display: none; }
+#tweaks.on { display: block; }
+#tweaks h3 { font-size: 13px; letter-spacing: .1em; text-transform: uppercase; margin-bottom: 12px; display: flex; justify-content: space-between; }
+#tweaks h3 button { background: none; border: 0; color: #8a8378; font-size: 18px; cursor: pointer; }
+.tw-group { margin-bottom: 14px; }
+.tw-group > label { display: block; font-size: 11px; letter-spacing: .08em; text-transform: uppercase; color: #8a8378; margin-bottom: 7px; }
+.tw-swatches { display: flex; flex-wrap: wrap; gap: 8px; }
+.tw-sw { width: 26px; height: 26px; border-radius: 6px; cursor: pointer; border: 2px solid transparent; }
+.tw-sw.sel { border-color: #fff; }
+.tw-regen { width: 100%; padding: 10px; border: 1px solid var(--stamp); background: transparent; color: #efe9db;
+  border-radius: 8px; font-family: 'Oswald', sans-serif; font-weight: 600; font-size: 12px; letter-spacing: .08em; cursor: pointer; text-transform: uppercase; }

@@ -38,13 +38,62 @@
 
 /* ── EVENT POPUP ── */
 .ep-hero {
-  height: 200px;
+  /* min-height y no height: con height fijo, un título de dos líneas se
+     salía por arriba y se comía la bajada «PRÓXIMO EVENTO».
+     Y sin padding: la columna de fecha tiene que llegar al borde. El
+     padding se lo puse a .ep-hero-content. */
+  min-height: 186px;
   background: var(--negro);
   position: relative;
   overflow: hidden;
-  display: flex; align-items: flex-end;
-  padding: 24px;
+  display: flex; align-items: stretch;
+  padding: 0;
 }
+/* ── Saltar de día sin cerrar el modal ──────────────────────────
+   Las flechas van SOBRE el afiche, centradas en alto. z-index alto
+   porque la columna de fecha y la trama del nombre las tapaban. */
+.ep-diasrow {
+  display: flex; align-items: center; gap: 8px; padding: 9px 10px;
+  background: #0d0d0d; border-bottom: 1px solid #262626;
+}
+.ep-diasrow.off { display: none; }
+.ep-nav {
+  flex: 0 0 auto;
+  width: 34px; height: 34px; border-radius: 50%;
+  background: #1a1a1a; border: 1px solid #2e2e2e;
+  color: #fff; font-size: 1.35rem; line-height: 1;
+  display: flex; align-items: center; justify-content: center;
+  cursor: pointer; padding: 0 0 3px 0;
+  transition: background .15s, opacity .15s;
+}
+.ep-nav:hover { background: var(--rojo, #e2413f); border-color: transparent; }
+/* Sin vecino hacia ese lado: se apaga pero no se saca, para que las
+   flechas no bailen de posición al moverse entre días. */
+.ep-nav[disabled] { opacity: .22; cursor: default; pointer-events: none; }
+.ep-dias {
+  flex: 1 1 auto; min-width: 0;
+  display: flex; gap: 6px; justify-content: center;
+  overflow-x: auto; scrollbar-width: none;
+}
+.ep-dias::-webkit-scrollbar { display: none; }
+.ep-dia {
+  flex: 0 0 auto; padding: 5px 11px; border-radius: 20px;
+  background: #1a1a1a; border: 1px solid #262626; color: #c9c9c9;
+  font-size: .68rem; letter-spacing: .5px; cursor: pointer;
+  white-space: nowrap; text-transform: uppercase;
+}
+.ep-dia:hover { border-color: var(--rojo, #e2413f); color: #fff; }
+.ep-dia.on { background: var(--rojo, #e2413f); border-color: transparent; color: #fff; }
+@media (max-width: 560px) {
+  .ep-nav { width: 30px; height: 30px; font-size: 1.2rem; }
+  .ep-dias { justify-content: flex-start; }
+  .ep-dia { padding: 5px 9px; font-size: .64rem; }
+}
+/* La trama del nombre, sobre el video y bajo el contenido. */
+.ep-hero-tex { position: absolute; inset: 0; pointer-events: none; }
+#ep-fecha-col { flex: none; align-self: stretch; position: relative; z-index: 2; display: flex; }
+#ep-fecha-col > div { border-radius: 0 !important; height: 100%; }
+.ep-hero-hr { font-size: .62rem; letter-spacing: 2px; color: #c9c9d1; font-weight: 700; }
 .ep-hero-bg {
   position: absolute; inset: 0;
   background: repeating-linear-gradient(
@@ -57,7 +106,15 @@
   background: radial-gradient(circle at 30% 50%, rgba(232,54,61,0.25) 0%, transparent 60%),
               radial-gradient(circle at 70% 30%, rgba(212,168,50,0.15) 0%, transparent 50%);
 }
-.ep-hero-content { position: relative; z-index: 1; }
+.ep-hero-content {
+  position: relative; z-index: 2; flex: 1; min-width: 0;
+  display: flex; flex-direction: column; justify-content: space-between;
+  padding: 16px 14px 15px 20px;
+}
+/* Cuando la portada es la decoración generada, el resplandor rojo/dorado
+   de .ep-hero-light la tapaba entera. Con foto o video sí se queda. */
+.ep-hero.deco .ep-hero-light { display: none; }
+.ep-hero.deco .ep-hero-bg { background: none; }
 .ep-evento-tag {
   font-size: 0.6rem; letter-spacing: 3px; text-transform: uppercase;
   color: var(--rojo); margin-bottom: 8px;
@@ -66,6 +123,10 @@
   font-family: var(--fuente-display);
   font-weight: 900; font-size: 2rem;
   color: var(--blanco); line-height: 1;
+  /* Tope duro: el SVG del título crece con el ancho y sin esto se comía
+     la bajada de arriba. */
+  max-height: 92px; overflow: hidden;
+  display: flex; align-items: center; margin: 6px 0;
 }
 .ep-body { padding: 24px 28px; }
 .ep-meta-row {

@@ -1,0 +1,398 @@
+<title>FRATE OS · Manual del POS</title>
+<style>
+  :root{
+    --bg:#08080a; --surface:#0f0f12; --surface2:#141418; --border:#232329;
+    --text:#f2f2f4; --soft:#8b8b95;
+    --v:#a78bfa; --v2:#8b5cf6; --vsoft:rgba(167,139,250,.14);
+    --red:#E8363D; --gold:#E6C860; --green:#4ade80; --blue:#60a5fa; --flyer:#c4b5fd;
+    --title:'Barlow Condensed','Oswald','Arial Narrow',system-ui,sans-serif;
+    --body:'Inter',system-ui,-apple-system,sans-serif;
+  }
+  *{box-sizing:border-box}
+  .wrap{background:var(--bg);color:var(--text);font-family:var(--body);line-height:1.6;margin:0;overflow-x:hidden}
+  .pad{padding:clamp(20px,5vw,60px)}
+  .mx{max-width:1000px;margin:0 auto}
+  h1,h2,h3,.tt{font-family:var(--title);text-transform:uppercase;font-weight:800;letter-spacing:.01em;line-height:.98;margin:0}
+  .eyebrow{font-family:var(--title);text-transform:uppercase;font-weight:700;letter-spacing:.22em;font-size:13px;color:var(--v)}
+  .soft{color:var(--soft)}
+  .num{font-family:var(--title);font-weight:900;font-size:clamp(70px,17vw,170px);line-height:.8;color:var(--v2);letter-spacing:-.01em}
+  .h1{font-size:clamp(42px,10vw,100px)}
+  .h2{font-size:clamp(32px,6.5vw,62px)}
+  .h3{font-size:clamp(24px,5vw,40px)}
+  .card{background:var(--surface);border:1px solid var(--border);border-radius:14px}
+  .grid{display:grid;gap:14px}
+  .g3{grid-template-columns:repeat(auto-fit,minmax(210px,1fr))}
+  .g2{grid-template-columns:repeat(auto-fit,minmax(260px,1fr))}
+  .pill{display:inline-block;font-family:var(--title);text-transform:uppercase;font-weight:700;font-size:12px;letter-spacing:.1em;padding:4px 10px;border-radius:999px}
+  .p-pos{background:var(--vsoft);color:var(--v)} .p-web{background:rgba(232,54,61,.15);color:var(--red)}
+  .p-erp{background:rgba(96,165,250,.15);color:var(--blue)} .p-fly{background:rgba(196,181,253,.15);color:var(--flyer)}
+  .aviso{border-radius:12px;border:1px solid var(--border);border-left-width:5px;padding:16px 20px;background:var(--surface)}
+  .aviso .lbl{font-family:var(--title);text-transform:uppercase;font-weight:800;letter-spacing:.06em;font-size:15px}
+  .oro{border-left-color:var(--gold)} .oro .lbl{color:var(--gold)}
+  .peligro{border-left-color:var(--red)} .peligro .lbl{color:var(--red)}
+  .bien{border-left-color:var(--green)} .bien .lbl{color:var(--green)}
+  table{width:100%;border-collapse:collapse;font-size:15px}
+  th,td{text-align:left;padding:11px 14px;border-bottom:1px solid var(--border);vertical-align:top}
+  th{font-family:var(--title);text-transform:uppercase;letter-spacing:.06em;font-size:13px;color:var(--soft);font-weight:700}
+  .tabnum{font-variant-numeric:tabular-nums}
+  .flow{display:flex;flex-wrap:wrap;gap:10px}
+  .step{flex:1;min-width:140px;padding:13px 15px;border-radius:12px;background:var(--surface2);border:1px solid var(--border)}
+  .step .sys{font-family:var(--title);text-transform:uppercase;font-weight:800;font-size:12px;letter-spacing:.1em}
+  .demo{background:linear-gradient(180deg,#121016,#0c0b10);border:1px solid var(--border);border-radius:16px}
+  .row{display:flex;justify-content:space-between;align-items:center;gap:16px;flex-wrap:wrap}
+  .money{font-family:var(--title);font-weight:800;font-variant-numeric:tabular-nums;font-size:clamp(26px,6vw,40px)}
+  input[type=range]{width:100%;accent-color:var(--v)}
+  .field label{font-size:13px;color:var(--soft);display:block;margin-bottom:4px}
+  .val{font-family:var(--title);font-weight:800;font-variant-numeric:tabular-nums}
+  .btn{font-family:var(--title);text-transform:uppercase;font-weight:800;letter-spacing:.04em;font-size:15px;
+    padding:12px 20px;border-radius:12px;border:1px solid var(--v);background:var(--vsoft);color:var(--v);cursor:pointer}
+  .btn:active{transform:scale(.98)}
+  .divider{height:1px;background:var(--border)}
+  .stat{background:var(--surface);border:1px solid var(--border);border-radius:14px;padding:16px 18px}
+  .stat .big{font-family:var(--title);font-weight:800;font-variant-numeric:tabular-nums;font-size:clamp(26px,5vw,38px)}
+  section{scroll-margin-top:64px}
+  a{color:var(--v);text-decoration:none}
+  /* NAV */
+  .nav{position:sticky;top:0;z-index:20;background:rgba(8,8,10,.86);backdrop-filter:blur(10px);border-bottom:1px solid var(--border)}
+  .nav .in{display:flex;gap:6px;overflow-x:auto;padding:10px clamp(14px,4vw,40px);align-items:center}
+  .nav a{font-family:var(--title);text-transform:uppercase;font-weight:700;letter-spacing:.06em;font-size:13px;
+    color:var(--soft);padding:6px 11px;border-radius:8px;border:1px solid transparent;white-space:nowrap;flex:none}
+  .nav a:hover{color:var(--text);border-color:var(--border)}
+  .nav .brand{color:var(--v);font-weight:800;letter-spacing:.14em;margin-right:6px;flex:none}
+</style>
+
+<div class="wrap">
+  <nav class="nav"><div class="in">
+    <span class="brand">FRATE OS · POS</span>
+    <a href="#m00">00 Mapa</a><a href="#m01">01 Turno</a><a href="#m02">02 Venta</a>
+    <a href="#m03">03 Dinero</a><a href="#m04">04 Puerta y barra</a><a href="#m05">05 Catálogo</a><a href="#m06">06 Reglas</a>
+  </div></nav>
+
+  <!-- ══════════ 00 · EL MAPA ══════════ -->
+  <section id="m00" class="pad mx" style="min-height:74vh;display:flex;flex-direction:column;justify-content:center;gap:20px">
+    <div class="eyebrow">Frate OS · Manual del POS</div>
+    <div class="row" style="align-items:flex-end;gap:clamp(16px,4vw,40px)">
+      <div class="num">00</div>
+      <div><h1 class="h1">El mapa</h1>
+        <p style="font-size:clamp(18px,3.5vw,26px);margin:12px 0 0;max-width:640px" class="soft">Cómo el POS <span style="color:var(--text)">cobra la noche</span> y con quién habla el resto del sistema.</p></div>
+    </div>
+    <div class="grid g3" style="max-width:760px">
+      <div class="card pad" style="padding:15px 18px"><div class="eyebrow">Qué explica</div><div style="margin-top:5px">El lugar del POS entre los 4 cerebros y qué datos manda.</div></div>
+      <div class="card pad" style="padding:15px 18px"><div class="eyebrow">Para quién</div><div style="margin-top:5px">Todo el equipo. No necesitas ser técnico.</div></div>
+      <div class="card pad" style="padding:15px 18px"><div class="eyebrow">Lectura</div><div style="margin-top:5px">6 minutos. Se proyecta en la reunión.</div></div>
+    </div>
+  </section>
+  <div class="divider"></div>
+
+  <section class="pad mx grid" style="gap:22px">
+    <div><div class="eyebrow">Capítulo 1</div><h2 class="h2" style="margin-top:6px">Los cuatro cerebros</h2></div>
+    <p class="soft" style="max-width:680px;font-size:18px;margin:0">Cada sistema es dueño de una parte de la verdad. <span style="color:var(--text)">Tú eres el POS.</span></p>
+    <div class="grid g3">
+      <div class="card pad" style="padding:18px 20px"><span class="pill p-fly">Flyer</span><div class="tt" style="font-size:22px;margin-top:10px">Nace el evento</div><div class="soft" style="font-size:14px;margin-top:5px">Nombre, fecha y gráfica</div></div>
+      <div class="card pad" style="padding:18px 20px"><span class="pill p-web">Web</span><div class="tt" style="font-size:22px;margin-top:10px">Vende y registra</div><div class="soft" style="font-size:14px;margin-top:5px">Entradas, QR, check-in, clientes</div></div>
+      <div class="card pad" style="padding:18px 20px;border-color:var(--v);box-shadow:inset 0 0 0 1px var(--v)"><span class="pill p-pos">POS · tú</span><div class="tt" style="font-size:22px;margin-top:10px">Cobra adentro</div><div class="soft" style="font-size:14px;margin-top:5px">Barra y caja durante la noche</div></div>
+      <div class="card pad" style="padding:18px 20px"><span class="pill p-erp">ERP</span><div class="tt" style="font-size:22px;margin-top:10px">Consolida</div><div class="soft" style="font-size:14px;margin-top:5px">Personal, finanzas, ficha maestra</div></div>
+    </div>
+  </section>
+  <div class="divider"></div>
+
+  <section class="pad mx grid" style="gap:20px">
+    <div><div class="eyebrow">Capítulo 2</div><h2 class="h2" style="margin-top:6px">De qué eres dueño</h2></div>
+    <p class="soft" style="max-width:680px;font-size:18px;margin:0">Ser dueño significa: si hay una diferencia entre sistemas, <span style="color:var(--text)">manda el POS</span>.</p>
+    <div class="card" style="overflow-x:auto"><table>
+      <tr><th>Dato</th><th>Qué es</th><th>Quién manda</th></tr>
+      <tr><td>Consumo en barra</td><td>Cada trago y producto que se vende adentro</td><td><span class="pill p-pos">POS</span></td></tr>
+      <tr><td>La caja del turno</td><td>Fondo, cotejo de billetes, cierre y cuadre</td><td><span class="pill p-pos">POS</span></td></tr>
+      <tr><td>Entrada y cover</td><td>Vender y <b>canjear (quemar)</b> el QR</td><td><span class="pill p-pos">POS</span> <span class="pill p-web">Web</span> <span class="soft" style="font-size:12px">compartido</span></td></tr>
+      <tr><td>El catálogo</td><td>Precios y productos de la noche</td><td class="soft">Del Flyer/ERP</td></tr>
+      <tr><td>El cliente y su ficha</td><td>Quién compró, su historial (CRM)</td><td class="soft">Manda la Web</td></tr>
+    </table></div>
+    <div class="aviso oro"><div class="lbl">🟡 Regla de oro · la entrada es compartida</div><div style="margin-top:6px"><b>Web y POS venden y queman la misma entrada</b>, y cada uno lee el QR del otro. Un QR es un token con <b>namespace compartido</b>: quemar es idempotente <b>cruzado</b> — doble scan (en cualquiera) = un solo ingreso. El <b>ERP concilia</b> y registra el primer quemado (regla R35).</div></div>
+  </section>
+  <div class="divider"></div>
+
+  <section class="pad mx grid" style="gap:18px">
+    <div><div class="eyebrow">Capítulo 3</div><h2 class="h2" style="margin-top:6px">Con quién hablas</h2></div>
+    <div class="flow">
+      <div class="step"><div class="sys" style="color:var(--flyer)">🟣 Flyer · 🔵 ERP</div><div style="margin-top:6px">te mandan el <b>evento y el catálogo</b></div></div>
+      <div class="step"><div class="sys" style="color:var(--red)">🔴 Web</div><div style="margin-top:6px">te manda las <b>entradas con cover</b> para imprimir/quemar</div></div>
+      <div class="step" style="background:var(--vsoft);border-color:var(--v)"><div class="sys" style="color:var(--v)">🟣 POS · tú</div><div style="margin-top:6px">cobras la noche y <b>cierras la caja</b></div></div>
+      <div class="step"><div class="sys" style="color:var(--blue)">🔵 ERP</div><div style="margin-top:6px">le mandas <b>ventas y cierres</b> para consolidar</div></div>
+    </div>
+    <div class="aviso bien"><div class="lbl">🟢 La identidad única</div><div style="margin-top:6px">Una persona es <b>una sola ficha</b> en los cuatro sistemas. El <b>RUT y el correo</b> son el hilo que amarra todo. El POS no inventa clientes: usa el que trae la Web.</div></div>
+  </section>
+  <div class="divider"></div>
+
+  <section class="pad mx grid" style="gap:16px">
+    <div><div class="eyebrow">Capítulo 4</div><h2 class="h2" style="margin-top:6px">Qué pasa si algo se cae</h2></div>
+    <div class="grid g2">
+      <div class="aviso bien"><div class="lbl">🟢 Se cae el internet</div><div style="margin-top:6px">El POS <b>sigue vendiendo</b>: guarda cada venta en la máquina y sincroniza al reconectar. La barra no se detiene.</div></div>
+      <div class="aviso oro"><div class="lbl">🟡 Se cae la Web</div><div style="margin-top:6px">No puedes leer entradas nuevas de la Web, pero <b>cobras consumo igual</b>. Los covers ya importados siguen funcionando.</div></div>
+      <div class="aviso peligro"><div class="lbl">🔴 Se cae el POS</div><div style="margin-top:6px">Se pierde el cobro de barra de esa máquina. Por eso: <b>varias máquinas</b>, cada una con su caja, y respaldo offline en cada una.</div></div>
+      <div class="aviso oro"><div class="lbl">🟡 Se cae el ERP</div><div style="margin-top:6px">Vendes y cierras normal; la <b>consolidación</b> (finanzas, conciliación de QR) se pone al día cuando vuelve.</div></div>
+    </div>
+  </section>
+  <div class="divider"></div>
+
+  <!-- ══════════ 01 · EL TURNO ══════════ -->
+  <section id="m01" class="pad mx" style="min-height:60vh;display:flex;flex-direction:column;justify-content:center;gap:18px">
+    <div class="eyebrow">Manual · el viaje de una caja</div>
+    <div class="row" style="align-items:flex-end;gap:clamp(16px,4vw,40px)">
+      <div class="num">01</div>
+      <div><h2 class="h1">El turno</h2><p class="soft" style="font-size:clamp(18px,3.2vw,24px);margin:12px 0 0;max-width:620px">Desde que un cajero recibe su sencillo hasta que la caja <span style="color:var(--text)">cuadra en cero</span>.</p></div>
+    </div>
+    <div class="flow" style="margin-top:8px">
+      <div class="step"><div class="sys" style="color:var(--v)">1 · Abrir</div><div style="margin-top:5px">Cuenta el sencillo (cotejo) e ingresa su PIN</div></div>
+      <div class="step"><div class="sys" style="color:var(--v)">2 · Vender</div><div style="margin-top:5px">Cobra toda la noche</div></div>
+      <div class="step"><div class="sys" style="color:var(--v)">3 · Corte X</div><div style="margin-top:5px">Lee el turno sin cerrar (opcional)</div></div>
+      <div class="step"><div class="sys" style="color:var(--v)">4 · Cerrar</div><div style="margin-top:5px">Cuenta el cajón y cuadra</div></div>
+    </div>
+  </section>
+  <div class="divider"></div>
+
+  <section class="pad mx grid" style="gap:18px">
+    <div><div class="eyebrow">Capítulo 1</div><h3 class="h3" style="margin-top:6px">El cotejo: contar el sencillo, no adivinarlo</h3></div>
+    <p class="soft" style="max-width:680px;font-size:17px;margin:0">Abrir la caja no es escribir "$90.000". Es <b style="color:var(--text)">contar los billetes</b>: cuántos de $10.000, de $5.000, de $1.000. El POS suma solo y ese es el fondo. Así, si alguien anota mal, se ve al tiro.</p>
+    <div class="card" style="overflow-x:auto"><table>
+      <tr><th>Caja (BESUCONA)</th><th>Cotejo</th><th>Fondo</th></tr>
+      <tr><td>Puerta 1</td><td class="tabnum">2×$10.000 · 4×$5.000 · 50×$1.000</td><td class="tabnum">$90.000</td></tr>
+      <tr><td>Puerta 2</td><td class="tabnum">3×$10.000 · 4×$5.000 · 50×$1.000</td><td class="tabnum">$100.000</td></tr>
+      <tr><td>Caja Schop</td><td class="tabnum">2×$10.000 · 4×$5.000 · 50×$1.000 · 10×$500 · 20×$100</td><td class="tabnum">$97.000</td></tr>
+    </table></div>
+    <div class="aviso peligro"><div class="lbl">🔴 Nunca abras dos veces la misma caja</div><div style="margin-top:6px">Si una caja se cierra y se vuelve a abrir, las ventas quedan colgando de la sesión vieja. El cierre puede mostrar una <b>diferencia falsa gigante</b>. Una caja, una apertura por turno.</div></div>
+  </section>
+  <div class="divider"></div>
+
+  <section class="pad mx grid" style="gap:16px">
+    <div><div class="eyebrow">Demo · se toca</div><h3 class="h3" style="margin-top:6px">El cuadre en 10 segundos</h3></div>
+    <p class="soft" style="max-width:640px;margin:0;font-size:16px">Mueve el sencillo y las ventas en efectivo. El POS calcula cuánto <b style="color:var(--text)">debe</b> haber en el cajón. Cuenta la plata y mira la diferencia.</p>
+    <p style="max-width:640px;margin:0;font-size:14px;color:var(--v)">↳ Caso real · <b>BESUCONA</b>: Puerta 1 abrió con $90.000, vendió $97.000 en efectivo y cerró en $187.000. Calzó en $0.</p>
+    <div class="demo pad grid" style="gap:18px">
+      <div class="row" style="gap:24px">
+        <div class="field" style="flex:1;min-width:210px"><label>Fondo inicial · <span class="val" id="fL">$90.000</span></label><input type="range" id="fondo" min="0" max="200000" step="10000" value="90000"></div>
+        <div class="field" style="flex:1;min-width:210px"><label>Ventas en efectivo · <span class="val" id="vL">$97.000</span></label><input type="range" id="ventas" min="0" max="400000" step="1000" value="97000"></div>
+      </div>
+      <div class="row card pad" style="padding:16px 20px">
+        <div><div class="soft" style="font-size:13px">Debe haber en el cajón</div><div class="money" id="esperado" style="color:var(--gold)">$187.000</div></div>
+        <div class="field" style="min-width:180px"><label>¿Cuánto contaste?</label><input type="range" id="contado" min="0" max="600000" step="1000" value="187000"><div class="val" id="cL" style="font-size:19px;margin-top:4px">$187.000</div></div>
+      </div>
+      <div class="row" style="justify-content:center"><div style="text-align:center"><div class="soft" style="font-size:13px">Diferencia</div><div class="money" id="dif" style="color:var(--green);font-size:clamp(34px,8vw,54px)">$0</div><div id="difMsg" class="tt" style="color:var(--green);font-size:18px">Cuadra perfecto</div></div></div>
+    </div>
+    <div class="aviso oro"><div class="lbl">🟡 Regla de oro</div><div style="margin-top:6px">Efectivo esperado = <b>fondo inicial + ventas en efectivo</b>. Nunca solo el fondo. La tarjeta cuadra aparte, contra el voucher del datáfono.</div></div>
+  </section>
+  <div class="divider"></div>
+
+  <!-- ══════════ 02 · LA VENTA ══════════ -->
+  <section id="m02" class="pad mx" style="min-height:60vh;display:flex;flex-direction:column;justify-content:center;gap:18px">
+    <div class="eyebrow">Manual · el viaje de una venta</div>
+    <div class="row" style="align-items:flex-end;gap:clamp(16px,4vw,40px)">
+      <div class="num">02</div>
+      <div><h2 class="h1">La venta</h2><p class="soft" style="font-size:clamp(18px,3.2vw,24px);margin:12px 0 0;max-width:620px">De tocar un producto a entregar el <span style="color:var(--text)">comprobante</span>, en segundos y sin errores caros.</p></div>
+    </div>
+    <div class="flow" style="margin-top:8px">
+      <div class="step"><div class="sys" style="color:var(--v)">Producto</div><div style="margin-top:5px">Toca lo que pide el cliente</div></div>
+      <div class="step"><div class="sys" style="color:var(--v)">Carrito</div><div style="margin-top:5px">Se juntan los ítems y el total</div></div>
+      <div class="step"><div class="sys" style="color:var(--v)">Pago</div><div style="margin-top:5px">Efectivo, tarjeta, mixto o cortesía</div></div>
+      <div class="step"><div class="sys" style="color:var(--v)">Comprobante</div><div style="margin-top:5px">Ticket con QR, sin trampa</div></div>
+    </div>
+  </section>
+  <div class="divider"></div>
+
+  <section class="pad mx grid" style="gap:18px">
+    <div><div class="eyebrow">Capítulo 1</div><h3 class="h3" style="margin-top:6px">Cómo se paga</h3></div>
+    <div class="card" style="overflow-x:auto"><table>
+      <tr><th>Método</th><th>Qué hace el POS</th><th>Dónde se cuadra</th></tr>
+      <tr><td>Efectivo</td><td>Registra el monto; calcula el vuelto</td><td>Cotejo del cajón, al cierre</td></tr>
+      <tr><td>Tarjeta (Point)</td><td>Cobra en la máquina Mercado Pago y espera el OK</td><td>Voucher del datáfono</td></tr>
+      <tr><td>Mixto</td><td>Parte efectivo + parte tarjeta en una sola venta</td><td>Cada parte por su lado</td></tr>
+      <tr><td>Cortesía</td><td>Venta $0 con motivo; igual emite ticket QR</td><td>No suma plata; queda auditada</td></tr>
+    </table></div>
+    <div class="aviso peligro"><div class="lbl">🔴 La tarjeta se cobra ANTES de registrar</div><div style="margin-top:6px">El Point cobra y después el POS guarda la venta. Si algo falla en el medio, el POS <b>reintenta con el mismo folio</b> y el servidor lo junta en una sola venta — nunca cobra dos veces ni pierde el cobro.</div></div>
+  </section>
+  <div class="divider"></div>
+
+  <section class="pad mx grid" style="gap:16px">
+    <div><div class="eyebrow">Capítulo 2</div><h3 class="h3" style="margin-top:6px">La noche de BESUCONA, en plata</h3></div>
+    <div class="grid g3">
+      <div class="stat"><div class="soft" style="font-size:13px">Ventas</div><div class="big" style="color:var(--v)">267</div></div>
+      <div class="stat"><div class="soft" style="font-size:13px">Total cobrado</div><div class="big" style="color:var(--v)">$4.378.000</div></div>
+      <div class="stat"><div class="soft" style="font-size:13px">Tarjeta</div><div class="big">$3.533.000</div><div class="soft" style="font-size:12px">81% de la noche</div></div>
+    </div>
+    <div class="card" style="overflow-x:auto"><table>
+      <tr><th>Método</th><th>Monto</th><th>Operaciones</th></tr>
+      <tr><td>Débito</td><td class="tabnum">$2.727.500</td><td class="tabnum">171</td></tr>
+      <tr><td>Crédito</td><td class="tabnum">$805.500</td><td class="tabnum">45</td></tr>
+      <tr><td>Efectivo</td><td class="tabnum">$845.000</td><td class="tabnum">53</td></tr>
+    </table></div>
+    <div class="aviso bien"><div class="lbl">🟢 Bien resuelto · la venta no se cae</div><div style="margin-top:6px">Sin internet, el POS guarda la venta y la sincroniza al volver. El doble-toque en "Confirmar" no genera doble venta: hay un candado por folio.</div></div>
+  </section>
+  <div class="divider"></div>
+
+  <!-- ══════════ 03 · EL DINERO ══════════ -->
+  <section id="m03" class="pad mx" style="min-height:60vh;display:flex;flex-direction:column;justify-content:center;gap:18px">
+    <div class="eyebrow">Manual · el viaje del efectivo y la tarjeta</div>
+    <div class="row" style="align-items:flex-end;gap:clamp(16px,4vw,40px)">
+      <div class="num">03</div>
+      <div><h2 class="h1">El dinero</h2><p class="soft" style="font-size:clamp(18px,3.2vw,24px);margin:12px 0 0;max-width:620px">Por qué el cajón <span style="color:var(--text)">calza o no calza</span>, y cómo saberlo sin pelear.</p></div>
+    </div>
+  </section>
+  <div class="divider"></div>
+
+  <section class="pad mx grid" style="gap:18px">
+    <div><div class="eyebrow">Capítulo 1</div><h3 class="h3" style="margin-top:6px">Esperado vs contado</h3></div>
+    <div class="grid g2">
+      <div class="card pad"><div class="tt" style="color:var(--v);font-size:20px">Efectivo</div><p class="soft" style="margin:8px 0 0">Esperado = <b style="color:var(--text)">fondo + ventas en efectivo</b>. Se cuenta el cajón billete a billete y se compara. La diferencia es plata real: falta o sobra.</p></div>
+      <div class="card pad"><div class="tt" style="color:var(--v);font-size:20px">Tarjeta</div><p class="soft" style="margin:8px 0 0">Se cuadra contra el <b style="color:var(--text)">voucher del datáfono</b>. Con Point integrado, el total de tarjeta del POS ya es el del Point: se autocompleta.</p></div>
+    </div>
+    <div class="card" style="overflow-x:auto"><table>
+      <tr><th>Caja (BESUCONA)</th><th>Esperado</th><th>Contado</th><th>Diferencia</th></tr>
+      <tr><td>Puerta 1</td><td class="tabnum">$187.000</td><td class="tabnum">$187.000</td><td class="tabnum" style="color:var(--green)">$0</td></tr>
+      <tr><td>Puerta 2</td><td class="tabnum">$240.000</td><td class="tabnum">$241.000</td><td class="tabnum" style="color:var(--gold)">+$1.000</td></tr>
+      <tr><td>Caja Schop</td><td class="tabnum">$211.000</td><td class="tabnum">$201.000</td><td class="tabnum" style="color:var(--red)">−$10.000</td></tr>
+    </table></div>
+    <div class="aviso oro"><div class="lbl">🟡 La propina de tarjeta va aparte</div><div style="margin-top:6px">La propina que se paga con tarjeta no infla las ventas: se muestra como <b>línea separada</b> en el cierre, para que el cuadre de la venta sea limpio.</div></div>
+  </section>
+  <div class="divider"></div>
+
+  <section class="pad mx grid" style="gap:16px">
+    <div><div class="eyebrow">Capítulo 2</div><h3 class="h3" style="margin-top:6px">Cuando hay diferencia</h3></div>
+    <div class="grid g3">
+      <div class="aviso bien" style="border-left-color:var(--green)"><div class="lbl" style="color:var(--green)">$0 · cuadra</div><div style="margin-top:6px">La caja cierra sola, sin observación.</div></div>
+      <div class="aviso oro"><div class="lbl">Sobra / falta poco</div><div style="margin-top:6px">Pide una <b>observación</b> obligatoria y queda marcada para revisar.</div></div>
+      <div class="aviso peligro"><div class="lbl">Falta plata real</div><div style="margin-top:6px">Como el −$10.000 de Schop: no es bug, es un faltante que <b>alguien tiene que responder</b>.</div></div>
+    </div>
+  </section>
+  <div class="divider"></div>
+
+  <!-- ══════════ 04 · LA PUERTA Y LA BARRA ══════════ -->
+  <section id="m04" class="pad mx" style="min-height:60vh;display:flex;flex-direction:column;justify-content:center;gap:18px">
+    <div class="eyebrow">Manual · el viaje de una entrada y un cover</div>
+    <div class="row" style="align-items:flex-end;gap:clamp(16px,4vw,40px)">
+      <div class="num">04</div>
+      <div><h2 class="h1">Puerta y barra</h2><p class="soft" style="font-size:clamp(18px,3.2vw,24px);margin:12px 0 0;max-width:620px">Validar un QR, distinguir entrada de cover, y <span style="color:var(--text)">no dejar entrar dos veces con el mismo</span>.</p></div>
+    </div>
+  </section>
+  <div class="divider"></div>
+
+  <section class="pad mx grid" style="gap:18px">
+    <div><div class="eyebrow">Capítulo 1</div><h3 class="h3" style="margin-top:6px">Entrada en la puerta, cover en la barra</h3></div>
+    <div class="grid g2">
+      <div class="card pad"><span class="pill p-pos">Puerta</span><p class="soft" style="margin:10px 0 0">Valida solo <b style="color:var(--text)">entradas</b>. Si escaneas un cover, lo rechaza sin quemarlo: "esto es un cover, canjéalo en la barra".</p></div>
+      <div class="card pad"><span class="pill p-pos">Barra</span><p class="soft" style="margin:10px 0 0">Valida solo <b style="color:var(--text)">covers</b>. Cada cover se quema una vez; el segundo intento avisa que ya se usó.</p></div>
+    </div>
+    <div class="aviso oro"><div class="lbl">🟡 Web y POS: la misma entrada, sin pisarse (R35)</div><div style="margin-top:6px">Un QR es un token de <b>namespace compartido</b>. Ambos venden y ambos queman, y cada uno lee el código del otro. Quemar es <b>idempotente cruzado</b>: el ERP concilia y <b>gana el primer quemado</b>. Los covers que vende la Web entran al POS para leerse igual que los propios.</div></div>
+  </section>
+  <div class="divider"></div>
+
+  <section class="pad mx grid" style="gap:16px">
+    <div><div class="eyebrow">Demo · se toca</div><h3 class="h3" style="margin-top:6px">Un QR = un ingreso</h3></div>
+    <p class="soft" style="max-width:640px;margin:0;font-size:16px">Aprieta "Escanear" las veces que quieras. El primero entra; del segundo en adelante, no. Da igual si el scan viene del POS o de la Web.</p>
+    <div class="demo pad grid" style="gap:16px">
+      <div class="row" style="justify-content:center;gap:14px;flex-wrap:wrap">
+        <button class="btn" id="scanPos">📷 Escanear en POS</button>
+        <button class="btn" id="scanWeb" style="border-color:var(--red);background:rgba(232,54,61,.12);color:var(--red)">📷 Escanear en Web</button>
+        <button class="btn" id="scanReset" style="border-color:var(--border);background:transparent;color:var(--soft)">Reiniciar</button>
+      </div>
+      <div class="row card pad" style="padding:16px 20px;justify-content:center">
+        <div style="text-align:center"><div class="soft" style="font-size:13px">QR &nbsp;FRATE-CV-9F3A</div><div class="money" id="qrState" style="color:var(--soft)">Sin escanear</div><div id="qrWho" class="soft" style="font-size:13px;margin-top:2px">&nbsp;</div></div>
+      </div>
+      <div id="qrLog" class="soft" style="font-size:13px;text-align:center;min-height:20px"></div>
+    </div>
+  </section>
+  <div class="divider"></div>
+
+  <!-- ══════════ 05 · EL CATÁLOGO ══════════ -->
+  <section id="m05" class="pad mx" style="min-height:60vh;display:flex;flex-direction:column;justify-content:center;gap:18px">
+    <div class="eyebrow">Manual · el viaje de un producto</div>
+    <div class="row" style="align-items:flex-end;gap:clamp(16px,4vw,40px)">
+      <div class="num">05</div>
+      <div><h2 class="h1">El catálogo</h2><p class="soft" style="font-size:clamp(18px,3.2vw,24px);margin:12px 0 0;max-width:620px">De un producto suelto a la <span style="color:var(--text)">carta de la noche</span>, con combos, promos e inventario.</p></div>
+    </div>
+  </section>
+  <div class="divider"></div>
+
+  <section class="pad mx grid" style="gap:18px">
+    <div><div class="eyebrow">Capítulo 1</div><h3 class="h3" style="margin-top:6px">Producto → carta → inventario</h3></div>
+    <div class="flow">
+      <div class="step"><div class="sys" style="color:var(--v)">Producto</div><div style="margin-top:5px">El ítem base (una cerveza)</div></div>
+      <div class="step"><div class="sys" style="color:var(--v)">Combo</div><div style="margin-top:5px">2×1, packs, precio con cover</div></div>
+      <div class="step"><div class="sys" style="color:var(--v)">Promo</div><div style="margin-top:5px">Con hora de inicio y de expiración</div></div>
+      <div class="step"><div class="sys" style="color:var(--blue)">🔵 Inventario</div><div style="margin-top:5px">Se mapea al stock del ERP</div></div>
+    </div>
+    <div class="aviso oro"><div class="lbl">🟡 La promo expira sola</div><div style="margin-top:6px">Una promo con hora de fin <b>desaparece del POS</b> cuando expira. Nadie tiene que acordarse de sacarla a mitad de la noche.</div></div>
+    <div class="aviso bien"><div class="lbl">🟢 El stock baja en el cierre, no en la venta</div><div style="margin-top:6px">El inventario se ajusta en el <b>cierre o por lote</b>, nunca trago a trago. Poner esa resta dentro de la venta ya tumbó cobros con tarjeta una vez: por eso va aparte.</div></div>
+  </section>
+  <div class="divider"></div>
+
+  <!-- ══════════ 06 · REGLAS DE ORO ══════════ -->
+  <section id="m06" class="pad mx" style="min-height:60vh;display:flex;flex-direction:column;justify-content:center;gap:18px">
+    <div class="eyebrow">Manual · lo que nunca se olvida</div>
+    <div class="row" style="align-items:flex-end;gap:clamp(16px,4vw,40px)">
+      <div class="num">06</div>
+      <div><h2 class="h1">Reglas de oro</h2><p class="soft" style="font-size:clamp(18px,3.2vw,24px);margin:12px 0 0;max-width:620px">Lo que nunca se hace, lo que está bien resuelto, y lo que el POS <span style="color:var(--text)">todavía no hace</span>.</p></div>
+    </div>
+  </section>
+  <div class="divider"></div>
+
+  <section class="pad mx grid" style="gap:14px">
+    <div><div class="eyebrow">Nunca</div><h3 class="h3" style="margin-top:6px">Lo que no se hace jamás</h3></div>
+    <div class="aviso peligro"><div class="lbl">🔴 No desplegar en vivo</div><div style="margin-top:6px">Nada de subir una versión nueva <b>mientras se vende</b>. Las máquinas quedan a medias. Se sube entre eventos.</div></div>
+    <div class="aviso peligro"><div class="lbl">🔴 No meter el stock ni la sincronización dentro de la venta</div><div style="margin-top:6px">Todo lo pesado (bajar inventario, empujar al ERP) va en el cierre o por lote. En el camino de la venta, solo cobrar.</div></div>
+    <div class="aviso peligro"><div class="lbl">🔴 No reabrir una caja para "arreglarla"</div><div style="margin-top:6px">Reabrir crea una segunda sesión y descuadra el cierre. Si hay que corregir, se corrige el cotejo, no se reabre.</div></div>
+  </section>
+  <div class="divider"></div>
+
+  <section class="pad mx grid" style="gap:14px">
+    <div><div class="eyebrow">Bien resuelto</div><h3 class="h3" style="margin-top:6px">Lo que sí está firme</h3></div>
+    <div class="grid g2">
+      <div class="aviso bien"><div class="lbl">🟢 Vende sin internet</div><div style="margin-top:6px">Cada venta se guarda y sincroniza al reconectar.</div></div>
+      <div class="aviso bien"><div class="lbl">🟢 Un QR = un ingreso</div><div style="margin-top:6px">Idempotencia cruzada con la Web. Doble scan, un solo ingreso.</div></div>
+      <div class="aviso bien"><div class="lbl">🟢 El cotejo billete a billete</div><div style="margin-top:6px">El fondo se cuenta, no se adivina. El cierre cuadra de verdad.</div></div>
+      <div class="aviso bien"><div class="lbl">🟢 La tarjeta no se cobra dos veces</div><div style="margin-top:6px">Reintento con el mismo folio; el servidor lo junta en una venta.</div></div>
+    </div>
+  </section>
+  <div class="divider"></div>
+
+  <section class="pad mx grid" style="gap:14px">
+    <div><div class="eyebrow">Honestidad</div><h3 class="h3" style="margin-top:6px">Lo que el POS NO hace (todavía)</h3></div>
+    <ul class="soft" style="font-size:17px;margin:0;padding-left:20px;display:flex;flex-direction:column;gap:8px">
+      <li>No emite boleta con validez SII: imprime un comprobante propio con QR, no un timbre fiscal.</li>
+      <li>No descuenta stock en tiempo real durante la venta: el inventario se ajusta en el cierre.</li>
+      <li>No maneja mesas ni cuentas por mesa: es venta directa de barra y puerta.</li>
+    </ul>
+    <div class="row pad" style="padding:24px 0 8px"><div class="eyebrow">Frate OS · Manual del POS · fin de la serie</div><a href="#m00" style="font-family:var(--title);text-transform:uppercase;font-weight:800">↑ Volver al mapa</a></div>
+  </section>
+
+</div>
+
+<script>
+  const $=id=>document.getElementById(id);
+  const clp=n=>'$'+Math.round(n).toLocaleString('es-CL');
+  const f=$('fondo'),v=$('ventas'),c=$('contado');
+  function upd(){
+    const fondo=+f.value,ventas=+v.value,esp=fondo+ventas,cont=+c.value,dif=cont-esp;
+    $('fL').textContent=clp(fondo);$('vL').textContent=clp(ventas);$('cL').textContent=clp(cont);$('esperado').textContent=clp(esp);
+    const d=$('dif'),m=$('difMsg');
+    d.textContent=(dif>0?'+':'')+clp(dif);
+    const col=dif===0?'#4ade80':(dif<0?'#E8363D':'#E6C860');
+    d.style.color=col;m.style.color=col;m.textContent=dif===0?'Cuadra perfecto':(dif<0?'Falta plata':'Sobra plata');
+  }
+  [f,v,c].forEach(e=>e.addEventListener('input',upd));upd();
+
+  let burned=null;
+  const st=document.getElementById('qrState'),who=document.getElementById('qrWho'),log=document.getElementById('qrLog');
+  function scan(sistema){
+    if(!burned){
+      burned=sistema;
+      st.textContent='ACEPTADO';st.style.color='#4ade80';
+      who.textContent='Quemado por '+sistema+' · '+new Date().toLocaleTimeString('es-CL',{hour:'2-digit',minute:'2-digit',second:'2-digit'});
+      log.innerHTML='<span style="color:#4ade80">✓ Primer scan: entra.</span>';
+    }else{
+      st.textContent='YA UTILIZADO';st.style.color='#E6C860';
+      log.innerHTML='<span style="color:#E6C860">✕ Ya lo quemó '+burned+'. Un QR = un ingreso, no importa desde dónde se escanee.</span>';
+    }
+  }
+  document.getElementById('scanPos').onclick=()=>scan('POS');
+  document.getElementById('scanWeb').onclick=()=>scan('Web');
+  document.getElementById('scanReset').onclick=()=>{burned=null;st.textContent='Sin escanear';st.style.color='#8b8b95';who.textContent=' ';log.textContent='';};
+</script>

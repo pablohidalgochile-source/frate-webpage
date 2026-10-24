@@ -1,0 +1,1867 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, user-scalable=no" />
+  <title>FRATE WEB (TICKETERA) · VALIDACIÓN DE PUERTA</title>
+  <link rel="manifest" href="/validacion.webmanifest" />
+  <meta name="theme-color" content="#0A0A0B" />
+  <meta name="apple-mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+  <script src="https://unpkg.com/html5-qrcode@2.3.8/html5-qrcode.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script src="/frate-pulseras.js"></script>
+  <style>
+    :root { --negro:#0A0A0B; --negro2:#141415; --borde:#2a2a2c; --rojo:#E8363D; --dorado:#D4A832; --verde:#22c55e; --gris:#71717a; }
+    * { box-sizing:border-box; -webkit-tap-highlight-color:transparent; }
+    body { margin:0; background:var(--negro); color:#fff; font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif; min-height:100vh; }
+    .wrap { max-width:480px; margin:0 auto; padding:18px 16px 40px; }
+    h1 { font-size:1.15rem; letter-spacing:2px; margin:0; }
+    .sub { color:var(--gris); font-size:0.75rem; margin-top:2px; }
+    .card { background:var(--negro2); border:1px solid var(--borde); border-radius:12px; padding:16px; margin-top:14px; }
+    input, select { width:100%; background:var(--negro); border:1px solid var(--borde); color:#fff; padding:13px; border-radius:8px; font-size:1rem; outline:none; }
+    .btn { display:block; width:100%; border:none; border-radius:8px; padding:14px; font-weight:800; font-size:0.95rem; letter-spacing:1px; text-transform:uppercase; cursor:pointer; margin-top:10px; }
+    .btn-rojo { background:var(--rojo); color:#fff; }
+    .btn-verde { background:var(--verde); color:#04150a; }
+    .btn-ghost { background:transparent; border:1px solid var(--borde); color:var(--gris); }
+    .btn-amarillo { background:transparent; border:1px solid var(--dorado); color:var(--dorado); }
+    .hidden { display:none !important; }
+    .badge-vivo { display:inline-block; background:rgba(232,54,61,.15); border:1px solid var(--rojo); color:var(--rojo); font-size:0.62rem; letter-spacing:2px; padding:3px 9px; border-radius:20px; font-weight:900; animation:pulse 1.5s infinite; }
+    @keyframes pulse { 0%,100%{opacity:1;} 50%{opacity:.45;} }
+    #qr-reader { border-radius:12px; overflow:hidden; }
+    .contador { display:flex; gap:8px; margin-top:12px; }
+    .contador div { flex:1; text-align:center; background:var(--negro2); border:1px solid var(--borde); border-radius:8px; padding:8px 4px; }
+    .contador b { display:block; font-size:1.25rem; }
+    .accbar { display:grid; grid-template-columns:repeat(4,1fr); gap:8px; margin-top:14px; }
+    .acc { display:flex; flex-direction:column; align-items:center; gap:3px; background:var(--negro2); border:1px solid var(--borde); color:var(--gris); border-radius:10px; padding:10px 4px; font-size:0.66rem; letter-spacing:1px; text-transform:uppercase; font-weight:700; cursor:pointer; }
+    .acc span { font-size:1.25rem; letter-spacing:0; }
+    /* Modo de escaneo: en Sunmi la cámara y el láser son EXCLUYENTES. */
+    .modo-btn { flex:1; padding:9px 4px; border-radius:9px; border:1px solid var(--borde); background:var(--negro2); color:var(--gris); font-weight:700; font-size:0.74rem; letter-spacing:.5px; cursor:pointer; }
+    .modo-btn.on { border-color:var(--verde); color:#fff; box-shadow:0 0 0 1px var(--verde) inset; }
+    .laser-hint { display:none; text-align:center; padding:14px; color:var(--gris); font-size:0.9rem; line-height:1.5; }
+    /* En modo láser SOLO se oculta la cámara de ESCANEAR (tickets). Nuevo y Por RUT conservan cámara (cédula). */
+    body.modo-laser #btn-scan, body.modo-laser #qr-reader { display:none !important; }
+    /* ⚠️ NO esconder acá el botón de cámara de la cédula. Se intentó el 20-ago
+       creyendo que el láser leía el carnet, y es falso: el láser lee el CÓDIGO DE
+       BARRAS (PDF417), que no trae los datos. El QR del carnet —el cuadrado— es el
+       único que sirve, y en la puerta solo lo lee la cámara. Esconder el botón dejó
+       al portero sin ninguna forma de registrar. La cámara sí libera el láser al
+       cerrarse (ver capStopScan). */
+    body.modo-laser .laser-hint { display:block; }
+    .acc.active { border-color:var(--rojo); color:#fff; background:rgba(232,54,61,.08); }
+    .res-ok { background:rgba(34,197,94,.1); border:1px solid rgba(34,197,94,.4); }
+    .res-dup { background:rgba(245,158,11,.1); border:1px solid rgba(245,158,11,.4); }
+    .res-bad { background:rgba(232,54,61,.1); border:1px solid rgba(232,54,61,.4); }
+  </style>
+  <link rel="icon" href="/icon-frate.svg" type="image/svg+xml" />
+  <link rel="apple-touch-icon" href="/icon-frate.svg" />
+<script src="/frate-cedula.js?v=ced1"></script>
+</head>
+<body>
+<div class="wrap">
+  <div style="display:flex;justify-content:space-between;align-items:center;">
+    <div><h1>FRATE · PUERTA</h1><div class="sub" id="quien">Validación de tickets</div></div>
+    <a href="/manual-puerta" target="_blank" rel="noopener" class="btn-ghost" style="width:auto;padding:8px 12px;border-radius:8px;background:transparent;border:1px solid var(--borde);color:var(--gris);cursor:pointer;text-decoration:none;margin-right:6px;">📚 Cómo funciona</a>
+    <button class="btn-ghost" style="width:auto;padding:8px 12px;border-radius:8px;background:transparent;border:1px solid var(--borde);color:var(--gris);cursor:pointer;" onclick="salir()" id="btn-salir" hidden>Salir</button>
+  </div>
+
+  <!-- LOGIN -->
+  <div id="v-login" class="card">
+    <div style="font-weight:700;margin-bottom:10px;">Ingreso equipo de puerta</div>
+    <input id="l-email" type="email" placeholder="Correo" autocomplete="username" inputmode="email" autocapitalize="none" autocorrect="off" spellcheck="false" style="margin-bottom:8px;text-transform:lowercase;" />
+    <input id="l-pass" type="password" placeholder="Contraseña" autocomplete="current-password" onkeydown="if(event.key==='Enter')login()" />
+    <button class="btn btn-rojo" id="l-btn" onclick="login()">ENTRAR</button>
+    <button class="btn btn-verde" id="btn-instalar" onclick="instalarApp()" style="display:none;">📲 INSTALAR COMO APP</button>
+    <div id="l-error" style="color:var(--rojo);font-size:0.8rem;margin-top:8px;min-height:16px;"></div>
+    <div style="text-align:center;margin-top:6px;"><a href="#" onclick="event.preventDefault();olvidoClave()" style="font-size:0.74rem;color:var(--gris);text-decoration:none;">🔑 ¿Olvidaste tu clave?</a></div>
+    <div class="sub" style="margin-top:8px;">Solo cuentas con rol Admin o Portero/Validador.</div>
+  </div>
+
+  <!-- SIN EVENTO EN VIVO -->
+  <div id="v-gate" class="card hidden" style="text-align:center;padding:34px 16px;">
+    <div style="font-size:2.2rem;">🌙</div>
+    <div style="font-weight:800;margin:8px 0 4px;">No hay eventos en vivo</div>
+    <div class="sub">La validación se activa cuando un evento está EN VIVO (automático a la hora de inicio, o con el botón en el admin).</div>
+    <button class="btn btn-ghost" onclick="cargarEventos()">↻ Revisar de nuevo</button>
+  </div>
+
+  <!-- SCANNER -->
+  <div id="v-scan" class="hidden">
+    <div class="card" style="padding:12px 16px;">
+      <div style="display:flex;justify-content:space-between;align-items:center;gap:10px;">
+        <div><span class="badge-vivo">● EN VIVO</span> <b id="ev-nombre" style="font-size:0.92rem;"></b><div class="sub" id="ev-horario"></div></div>
+      </div>
+      <select id="ev-sel" class="hidden" style="margin-top:10px;" onchange="elegirEvento(this.value)"></select>
+    </div>
+
+    <!-- Barra de acciones -->
+    <div class="accbar">
+      <button class="acc active" id="acc-escanear" onclick="verVista('escanear')"><span>📷</span>Escanear</button>
+      <button class="acc" id="acc-rut" onclick="verVista('rut')"><span>🪪</span>Por RUT</button>
+      <button class="acc" id="acc-nuevo" onclick="verVista('nuevo')"><span>➕</span>Nuevo</button>
+      <button class="acc" id="acc-registro" onclick="verVista('registro')"><span>🪪</span>Registro</button>
+      <button class="acc" id="acc-lista" onclick="verVista('lista')"><span>📋</span>Escaneados</button>
+      <button class="acc" id="acc-incidencia" onclick="verVista('incidencia')"><span>🚫</span>Incidencia</button>
+      <button class="acc" id="acc-pulseras" onclick="verVista('pulseras')"><span>🎟️</span>Pulseras</button>
+    </div>
+
+    <!-- VISTA: ESCANEAR -->
+    <div id="vista-escanear">
+      <div class="card" id="modo-bar" style="padding:10px 12px;margin-bottom:10px;">
+        <div style="font-weight:700;font-size:0.82rem;">📟 ¿Estás en una Sunmi?</div>
+        <div class="sub" id="modo-sub" style="font-size:0.72rem;margin:2px 0 8px;">Modo cámara — para iPhone / Android</div>
+        <div style="display:flex;gap:8px;">
+          <button class="modo-btn" id="modo-cam" onclick="setScanMode('camara')">📷 Cámara</button>
+          <button class="modo-btn" id="modo-las" onclick="setScanMode('laser')">📟 Láser Sunmi</button>
+        </div>
+      </div>
+      <div class="card" id="offline-bar" style="padding:10px 12px;margin-bottom:10px;">
+        <div style="display:flex;align-items:center;justify-content:space-between;gap:8px;flex-wrap:wrap;">
+          <div id="off-estado" style="font-size:0.78rem;font-weight:600;">Cargando…</div>
+          <div style="display:flex;gap:6px;">
+            <button class="btn-ghost" style="width:auto;padding:6px 10px;border-radius:8px;background:transparent;border:1px solid var(--borde);color:var(--gris);cursor:pointer;font-size:0.72rem;" onclick="snapDescargar()">⬇️ Descargar</button>
+            <button class="btn-ghost" id="off-sync-btn" style="width:auto;padding:6px 10px;border-radius:8px;background:transparent;border:1px solid var(--borde);color:var(--gris);cursor:pointer;font-size:0.72rem;display:none;" onclick="snapSync()">🔄 Sincronizar</button>
+          </div>
+        </div>
+      </div>
+      <div class="card">
+        <div id="qr-reader"></div>
+        <button class="btn btn-verde" id="btn-scan" onclick="toggleScanner()">▶ INICIAR ESCÁNER</button>
+        <div class="laser-hint">📟 Apunta el <b>láser</b> al QR y dispara — <b>valida solo</b>, no aprietes nada.<br><span style="font-size:0.72rem;color:var(--gris);">(la cámara queda apagada · el láser del Sunmi en modo teclado)</span></div>
+        <input id="qr-manual" placeholder="…o escribe el código FCC- a mano" style="margin-top:10px;" onkeydown="if(event.key==='Enter')checkManual()" />
+        <button class="btn btn-ghost" onclick="checkManual()">VALIDAR MANUAL</button>
+      </div>
+      <div id="resultado"></div>
+    </div>
+
+    <!-- VISTA: BUSCAR POR RUT (gente sin celular) -->
+    <div id="vista-rut" class="hidden">
+      <div class="card">
+        <div style="font-weight:700;margin-bottom:4px;">🪪 Validar por RUT</div>
+        <div class="sub" style="margin-bottom:10px;">Para quien no trae el celular: escanea su cédula con la cámara (o escribe el RUT), coteja su carnet y confirma el ingreso.</div>
+        <button class="btn btn-verde" id="rut-scan-btn" onclick="rutToggleScan()" style="margin-bottom:10px;">📷 Escanear cédula (cámara)</button>
+        <div id="rut-reader" style="display:none;margin-bottom:10px;"></div>
+        <input id="rut-input" placeholder="12.345.678-9" oninput="_rutLaser()" onkeydown="if(event.key==='Enter')buscarPorRUT()" />
+        <button class="btn btn-rojo" onclick="buscarPorRUT()">BUSCAR TICKET</button>
+      </div>
+      <div id="rut-result"></div>
+    </div>
+
+    <!-- VISTA: CLIENTE NUEVO (VIP/artista/conocido sin lista) -->
+    <div id="vista-nuevo" class="hidden">
+      <div class="card">
+        <div style="font-weight:700;margin-bottom:4px;">➕ Cliente nuevo · ingreso VIP</div>
+        <div class="sub" style="margin-bottom:10px;">Para artistas, VIP o conocidos que no están en ninguna lista. Se registra su ingreso, cuenta en el aforo y queda en el CRM.</div>
+        <button class="btn btn-verde" id="cap-scan-btn" onclick="capToggleScan()" style="margin-bottom:10px;">📷 Escanear cédula (cámara) para autocompletar</button>
+        <div id="cap-reader" style="display:none;margin-bottom:10px;"></div>
+        <input id="cap-nombre" placeholder="Nombre y apellido *" autocomplete="off" style="margin-bottom:8px;text-transform:uppercase;" />
+        <div style="display:flex;gap:8px;margin-bottom:8px;"><input id="cap-rut" placeholder="RUT (opcional)" style="flex:1;" /><input id="cap-tel" placeholder="Teléfono" inputmode="tel" style="flex:1;" /></div>
+        <input id="cap-ig" placeholder="@instagram (opcional)" autocomplete="off" style="margin-bottom:8px;" />
+        <select id="cap-motivo" style="margin-bottom:8px;width:100%;background:#151517;border:1px solid var(--borde);color:#fff;padding:12px;border-radius:10px;">
+          <option value="VIP">VIP</option><option value="Artista">Artista / DJ</option><option value="Invitado">Invitad@</option><option value="Conocido">Conocid@</option><option value="Prensa">Prensa</option><option value="Staff">Staff</option><option value="Otro">Otro</option>
+        </select>
+        <div style="font-size:0.72rem;color:var(--dorado);letter-spacing:1px;text-transform:uppercase;margin:10px 0 4px;">¿Qué entrada le estás autorizando? *</div>
+        <select id="cap-tipo" style="margin-bottom:12px;width:100%;background:#151517;border:1px solid var(--dorado);color:#fff;padding:12px;border-radius:10px;">
+          <option value="">— elige la entrada —</option>
+        </select>
+        <button class="btn btn-rojo" id="cap-btn" onclick="solicitarIngreso()">🙋 PEDIR AUTORIZACIÓN</button>
+        <div class="sub" style="margin-top:8px;text-align:center;">Un admin la aprueba desde el panel. <b>La persona no entra hasta que se apruebe.</b></div>
+      </div>
+      <div id="cap-result"></div>
+    </div>
+
+    <!-- VISTA: REGISTRO POR CARNET — entrada general
+         Se escanea uno tras otro. El lector queda encendido y no hay que
+         escribir nada: la ley obliga a verificar nombre, edad y RUT, y de
+         paso quedan en el CRM (si el interruptor está encendido). -->
+    <div id="vista-registro" class="hidden">
+      <div class="card" style="text-align:center;">
+        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px;">
+          <span style="font-size:0.72rem;color:#888;letter-spacing:1px;">ENTRADA GENERAL</span>
+          <span id="reg-guardado" style="font-size:0.64rem;color:#666;"></span>
+        </div>
+        <div id="reg-panel">
+          <div style="font-size:2.6rem;margin-bottom:6px;">🪪</div>
+          <div style="font-size:1.05rem;font-weight:800;color:#fff;">Escanea el carnet</div>
+          <div class="sub" style="margin-top:6px;">Uno tras otro. No hay que tocar nada entremedio.</div>
+        </div>
+        <input id="reg-laser" inputmode="none" autocomplete="off" oninput="_regLaser()"
+          style="position:absolute;left:-9999px;width:1px;height:1px;opacity:0;" />
+        <div style="display:flex;gap:8px;margin-top:14px;">
+          <div style="flex:1;background:#151517;border:1px solid var(--borde);border-radius:10px;padding:9px;">
+            <div style="font-size:0.62rem;color:#888;letter-spacing:1px;">VAN ESTA NOCHE</div>
+            <div id="reg-cuenta" style="font-size:1.5rem;font-weight:900;color:var(--verde);">0</div>
+          </div>
+          <div style="flex:1;background:#151517;border:1px solid var(--borde);border-radius:10px;padding:9px;">
+            <div style="font-size:0.62rem;color:#888;letter-spacing:1px;">RECHAZADOS</div>
+            <div id="reg-rech" style="font-size:1.5rem;font-weight:900;color:var(--rojo);">0</div>
+          </div>
+        </div>
+        <button class="btn btn-ghost" style="margin-top:10px;width:100%;font-size:0.78rem;" onclick="_regManual()">⌨️ Escribir a mano</button>
+      </div>
+    </div>
+
+    <!-- VISTA: ESCANEADOS (la lista de la noche) -->
+    <div id="vista-lista" class="hidden">
+      <div class="card">
+        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px;">
+          <div style="font-weight:700;" id="lista-titulo">📋 Escaneados esta noche · <span id="lista-count" style="color:var(--verde)">0</span></div>
+          <button class="btn-ghost" style="width:auto;padding:7px 12px;border-radius:8px;background:transparent;border:1px solid var(--borde);color:var(--gris);cursor:pointer;" onclick="cargarEscaneados()">↻</button>
+        </div>
+        <div style="display:flex;gap:6px;margin-bottom:10px;">
+          <button id="esc-m-in" class="modo-btn on" onclick="setEscMode('entraron')">✅ Entraron</button>
+          <button id="esc-m-all" class="modo-btn" onclick="setEscMode('todos')">📋 Toda la lista</button>
+        </div>
+        <div id="esc-resumen" style="display:none;font-size:0.82rem;margin-bottom:8px;text-align:center;"></div>
+        <input id="lista-buscar" placeholder="🔍 Buscar nombre o RUT…" oninput="filtrarEscaneados(this.value)" style="margin-bottom:10px;" />
+        <div id="lista-body"></div>
+      </div>
+    </div>
+
+    <!-- VISTA: INCIDENCIA (separada del flujo normal, a propósito) -->
+    <div id="vista-incidencia" class="hidden">
+      <div class="card">
+        <div style="font-weight:700;margin-bottom:4px;">🚫 Marcar "no entró"</div>
+        <div class="sub" style="margin-bottom:10px;">Solo para tickets <b>ya escaneados</b> cuya persona finalmente no entró (ej: estado de ebriedad). El admin revisa y decide la devolución — nada es automático.</div>
+        <input id="inc-input" placeholder="RUT o código FCC-…" onkeydown="if(event.key==='Enter')buscarIncidencia()" />
+        <button class="btn btn-amarillo" onclick="buscarIncidencia()">BUSCAR TICKET QUEMADO</button>
+      </div>
+      <div id="inc-result"></div>
+    </div>
+
+    <div id="vista-pulseras" class="hidden">
+      <div id="pulseras-panel"><div style="color:var(--gris);text-align:center;padding:18px;">Cargando pulseras…</div></div>
+    </div>
+
+    <div class="contador">
+      <div><b id="c-ok" style="color:var(--verde)">0</b><span class="sub">autorizados</span></div>
+      <div><b id="c-dup" style="color:var(--dorado)">0</b><span class="sub">duplicados</span></div>
+      <div><b id="c-bad" style="color:var(--rojo)">0</b><span class="sub">rechazados</span></div>
+    </div>
+  </div>
+</div>
+
+<script>
+const sb = window.supabase.createClient(
+  'https://ydwlpraoaaijlfssevoh.supabase.co',
+  'sb_publishable_-_7GeDU_h84zf2v--lWQaQ_15ZFxOWt'
+);
+let rol = null, eventosVivo = [], eventoSel = null, scanner = null, escaneando = false, pausado = false;
+const $ = id => document.getElementById(id);
+
+// ── Lógica nocturna (12:00–23:59 = día del evento; 00:00–11:59 = madrugada siguiente)
+function dtEvento(fecha, hora) {
+  const [y,m,d] = String(fecha).split('-').map(Number);
+  const [hh,mm] = String(hora||'23:00').split(':').map(Number);
+  const dt = new Date(y, m-1, d, hh||0, mm||0);
+  if ((hh||0) < 12) dt.setDate(dt.getDate()+1);
+  return dt;
+}
+function estaEnVivo(ev) {
+  const estado = ev.estado || (ev.activo ? 'publicado' : 'creado');
+  if (estado === 'en_vivo') return true;   // el admin activó la puerta → SIEMPRE se ve, sin importar la hora_termino
+  if (['creado','cerrado','planificacion','postedicion'].includes(estado)) return false;
+  if (!ev.fecha) return false;
+  const ahora = new Date();
+  if (ahora > dtEvento(ev.fecha, ev.hora_termino || '05:00')) return false; // publicado que ya terminó
+  return ahora >= dtEvento(ev.fecha, ev.hora || '23:00'); // publicado → auto en-vivo dentro de su ventana
+}
+
+// ── Sesión / rol ──
+async function init() {
+  const { data } = await sb.auth.getSession();
+  if (data?.session) await entrar(data.session.user.id);
+}
+async function login() {
+  const email = $('l-email').value.trim().toLowerCase(), pass = $('l-pass').value;
+  if (!email || !pass) { $('l-error').textContent = 'Ingresa correo y contraseña.'; return; }
+  $('l-btn').disabled = true; $('l-btn').textContent = 'VERIFICANDO...';
+  try {
+    const { data, error } = await sb.auth.signInWithPassword({ email, password: pass });
+    if (error) throw error;
+    await entrar(data.user.id);
+  } catch(e) { $('l-error').textContent = e.message || 'Error de acceso.'; }
+  finally { $('l-btn').disabled = false; $('l-btn').textContent = 'ENTRAR'; }
+}
+async function entrar(uid) {
+  const { data: perfil } = await sb.from('clientes').select('rol, username, nombres').eq('id', uid).maybeSingle();
+  if (!perfil || !['admin','portero'].includes(perfil.rol)) {
+    $('l-error').textContent = 'Esta cuenta no tiene permiso de puerta. Pide acceso al administrador.';
+    await sb.auth.signOut(); return;
+  }
+  rol = perfil.rol;
+  $('quien').textContent = (perfil.username ? '@'+perfil.username : perfil.nombres || '') + ' · ' + (rol === 'admin' ? 'Admin' : 'Portero/Validador');
+  $('v-login').classList.add('hidden');
+  $('btn-salir').hidden = false;
+  cargarEventos();
+}
+async function salir() { try { if (escaneando) await scanner.stop(); } catch(e){}; await sb.auth.signOut(); location.reload(); }
+async function olvidoClave() {
+  const email = prompt('Te enviaremos un correo para restablecer tu clave.\n\nTu email:', $('l-email').value.trim());
+  if (!email || !email.includes('@')) return;
+  try {
+    const { error } = await sb.auth.resetPasswordForEmail(email.trim(), { redirectTo: 'https://www.frate.cl/reset.html' });
+    if (error) throw error;
+    $('l-error').style.color = 'var(--verde)';
+    $('l-error').textContent = '📧 Correo enviado a ' + email + ' — revisa tu bandeja (y spam).';
+  } catch(e) { $('l-error').style.color = 'var(--rojo)'; $('l-error').textContent = e.message || 'No se pudo enviar.'; }
+}
+
+// ── Eventos EN VIVO ──
+async function cargarEventos() {
+  const { data: evs } = await sb.from('eventos').select('*').eq('archivado', false);
+  eventosVivo = (evs||[]).filter(estaEnVivo);
+  if (!eventosVivo.length) {
+    $('v-gate').classList.remove('hidden'); $('v-scan').classList.add('hidden');
+    return;
+  }
+  $('v-gate').classList.add('hidden'); $('v-scan').classList.remove('hidden');
+  eventoSel = eventosVivo[0];
+  pintarEvento();
+  // Cortes de validez por tipo de ticket + PIN de admin (para bloquear fuera de horario)
+  try {
+    const evIds = eventosVivo.map(e=>e.id);
+    // 🎁 solo_miembros viene en la misma consulta. Si la columna no existe o la consulta
+    // falla, se repite sin ella (no se pierden los cortes ni el público) y _ttMiembros
+    // queda en null: _esMiembro decide en modo seguro.
+    let { data: tts, error: _ttErr } = await sb.from('tipos_ticket').select('nombre,hora_max_ingreso,evento_id,genero,solo_miembros').in('evento_id', evIds);
+    if (_ttErr) ({ data: tts } = await sb.from('tipos_ticket').select('nombre,hora_max_ingreso,evento_id,genero').in('evento_id', evIds));
+    window._ttMiembros = _ttErr ? null : {}; if (!_ttErr) (tts||[]).forEach(t=>{ const k=String(t.nombre||'').trim().toUpperCase(); if(k) window._ttMiembros[k] = window._ttMiembros[k]===true || t.solo_miembros===true; });
+    window._ttCortes = {}; (tts||[]).forEach(t=>{ if(t.hora_max_ingreso) window._ttCortes[String(t.nombre||'').trim().toUpperCase()] = t.hora_max_ingreso; });
+    window._ttGenero = {}; (tts||[]).forEach(t=>{ const g=String(t.genero||'').trim().toUpperCase(); if(g) window._ttGenero[String(t.nombre||'').trim().toUpperCase()] = g; });
+    const { data: cf } = await sb.from('config_valores').select('clave,valor').in('clave',['admin_pin','flex_minutos']);
+    const _cm = new Map((cf||[]).map(x=>[x.clave,x.valor]));
+    window._adminPin = String(_cm.get('admin_pin')||'').trim();
+    try{ capCargarTipos(); }catch(_){}
+    window._flexMin = parseInt(_cm.get('flex_minutos')||'0')||0;   // minutos de gracia tras la hora de corte antes de pedir PIN
+  } catch(_) { window._ttCortes = window._ttCortes||{}; }
+  if (eventosVivo.length > 1) {
+    const sel = $('ev-sel');
+    sel.classList.remove('hidden');
+    sel.innerHTML = eventosVivo.map(e=>`<option value="${e.id}">${e.nombre}</option>`).join('');
+  }
+}
+function elegirEvento(id) { eventoSel = eventosVivo.find(e=>String(e.id)===String(id)) || eventoSel; pintarEvento(); capCargarTipos(); }
+function pintarEvento() {
+  $('ev-nombre').textContent = eventoSel.nombre;
+  $('ev-horario').textContent = (eventoSel.hora||'23:00') + ' → ' + (eventoSel.hora_termino||'05:00') + ' h';
+  try { snapRenderEstado(); } catch(e) {}
+}
+setInterval(cargarEventos, 60000); // re-chequear cada minuto (auto en vivo / término)
+
+// ── Scanner ──
+// Usa el detector NATIVO del navegador cuando existe (mucho mejor para
+// leer QRs desde la pantalla de otro celular) + mira grande + linterna.
+let torchOn = false;
+async function toggleScanner() {
+  if (escaneando) {
+    try { await scanner.stop(); } catch(e){}
+    escaneando = false; torchOn = false;
+    $('btn-scan').textContent = '▶ INICIAR ESCÁNER';
+    const bt = $('btn-torch'); if (bt) bt.remove();
+    const zr = $('zoom-row'); if (zr) zr.remove();
+    return;
+  }
+  scanner = new Html5Qrcode('qr-reader', { experimentalFeatures: { useBarCodeDetectorIfSupported: true }, verbose: false, formatsToSupport: (window.Html5QrcodeSupportedFormats ? [Html5QrcodeSupportedFormats.QR_CODE, Html5QrcodeSupportedFormats.PDF_417] : undefined) });
+  try {
+    await scanner.start(
+      { facingMode: 'environment' },
+      {
+        fps: 12,
+        aspectRatio: 1.0,
+        // Mira = 75% del visor (cuadrada) — más área, mejor lectura
+        qrbox: (w, h) => { const s = Math.max(200, Math.floor(Math.min(w, h) * 0.75)); return { width: s, height: s }; },
+      },
+      onScan
+    );
+    escaneando = true; $('btn-scan').textContent = '⏹ DETENER';
+    // Linterna (si el equipo la soporta — clave en la puerta de noche)
+    try {
+      const caps = scanner.getRunningTrackCapabilities ? scanner.getRunningTrackCapabilities() : null;
+      if (caps && caps.torch) {
+        const bt = document.createElement('button');
+        bt.id = 'btn-torch'; bt.className = 'btn btn-ghost'; bt.textContent = '🔦 Linterna';
+        bt.onclick = async () => {
+          torchOn = !torchOn;
+          try { await scanner.applyVideoConstraints({ advanced: [{ torch: torchOn }] }); bt.textContent = torchOn ? '🔦 Apagar linterna' : '🔦 Linterna'; } catch(e) {}
+        };
+        $('btn-scan').after(bt);
+      }
+    } catch(e) {}
+    // Zoom del lente (clave para leer un QR chico o de lejos)
+    try {
+      const caps = scanner.getRunningTrackCapabilities ? scanner.getRunningTrackCapabilities() : null;
+      if (caps && caps.zoom && (caps.zoom.max||1) > (caps.zoom.min||1)) {
+        const row = document.createElement('div');
+        row.id = 'zoom-row'; row.style.cssText = 'display:flex;align-items:center;gap:10px;margin-top:10px;';
+        row.innerHTML = '<span style="font-size:0.82rem;color:var(--gris);white-space:nowrap;">🔍 Zoom</span><input type="range" id="zoom-sl" min="'+(caps.zoom.min||1)+'" max="'+caps.zoom.max+'" step="'+(caps.zoom.step||0.1)+'" value="'+(caps.zoom.min||1)+'" style="flex:1;accent-color:var(--verde);"><span id="zoom-v" style="font-size:0.82rem;color:var(--verde);width:38px;text-align:right;">1x</span>';
+        $('btn-scan').after(row);
+        $('zoom-sl').oninput = async function(){ $('zoom-v').textContent=(+this.value).toFixed(1)+'x'; try{ await scanner.applyVideoConstraints({ advanced:[{ zoom: parseFloat(this.value) }] }); }catch(e){} };
+      }
+    } catch(e) {}
+  } catch(e) { alert('No se pudo iniciar la cámara. Permite el acceso.'); }
+}
+// Normaliza lo leído: extrae el código FCC-… aunque venga con basura alrededor
+function normalizarQR(texto) {
+  const s = String(texto).trim();
+  // ⚠️ La regex vieja era `FCC-[A-Za-z0-9_-]+` y como las letras y el guion
+  //    están dentro del grupo, el "FCC" de un SEGUNDO código también calzaba:
+  //    si por lo que sea llegaban dos pegados, devolvía los dos como uno solo
+  //    y la puerta rechazaba una entrada buena. El lookahead corta en el
+  //    siguiente "FCC-", así que siempre sale UN código.
+  const m = s.match(/FCC-(?:(?!FCC-)[A-Za-z0-9_-])+/i);
+  // El match en la base es EXACTO (case-sensitive), así que NO forzamos mayúsculas:
+  // si el QR trae el token con minúsculas (ej: 22-vip-0), hay que respetarlo.
+  return m ? m[0] : s;
+}
+// ── RUT: dígito verificador (módulo 11) + formato + toast ──
+function rutLimpio(r){ return String(r||'').replace(/[.\s]/g,'').replace(/-/g,'').toUpperCase(); }
+function rutValido(r){ const c=rutLimpio(r); if(!/^\d{7,8}[0-9K]$/.test(c)) return false; const cuerpo=c.slice(0,-1), dv=c.slice(-1);
+  let suma=0, mul=2; for(let i=cuerpo.length-1;i>=0;i--){ suma+=parseInt(cuerpo[i],10)*mul; mul=mul===7?2:mul+1; }
+  const res=11-(suma%11); const dvCalc=res===11?'0':res===10?'K':String(res); return dvCalc===dv; }
+function fmtRut(r){ const c=rutLimpio(r); if(c.length<2) return r; const cuerpo=c.slice(0,-1), dv=c.slice(-1);
+  return cuerpo.replace(/\B(?=(\d{3})+(?!\d))/g,'.')+'-'+dv; }
+function vToast(msg){ let t=$('v-toast'); if(!t){ t=document.createElement('div'); t.id='v-toast';
+    t.style.cssText='position:fixed;left:50%;bottom:24px;transform:translateX(-50%);background:#18181b;border:1px solid var(--dorado);color:#fff;padding:10px 16px;border-radius:10px;font-size:0.9rem;font-weight:700;z-index:99999;box-shadow:0 8px 30px rgba(0,0,0,.6);opacity:0;transition:opacity .2s;max-width:90vw;text-align:center;'; document.body.appendChild(t); }
+  t.textContent=msg; requestAnimationFrame(()=>{ t.style.opacity='1'; }); clearTimeout(window._vtT); window._vtT=setTimeout(()=>{ t.style.opacity='0'; }, 2600); }
+
+// ── CÉDULA: detección + extracción de RUN + modo diagnóstico ──
+// La cédula NO es un ticket FCC: trae el RUN (y a veces nombre) dentro de una
+// tira grande. La detectamos y extraemos SOLO el RUN; el texto crudo se muestra
+// para afinar el parser del nombre según el formato real del lector.
+function esCedula(s){ s=String(s||''); if(/FCC-/i.test(s)) return false; if(/RUN\s*=/i.test(s)) return true;
+  const c=s.match(/\d{1,2}\.?\d{3}\.?\d{3}-?[0-9kK]/gi)||[]; return c.some(x=>rutValido(x)); }
+function _extraerRun(s){ s=String(s||''); const m=s.match(/RUN\s*=\s*([0-9.\-]+[0-9kK])/i);
+  if(m&&rutValido(m[1])) return rutLimpio(m[1]);
+  const c=s.match(/\d{1,2}\.?\d{3}\.?\d{3}-?[0-9kK]/gi)||[]; const v=c.find(x=>rutValido(x)); return v?rutLimpio(v):null; }
+// Nombre de la cédula chilena: viene en el parámetro name= codificado en LATIN-1
+// (ej: PABLO%20ANDR%C9S%20%20HIDALGO%20NAVARRO → "PABLO ANDRÉS HIDALGO NAVARRO").
+// decodeURIComponent falla con %C9 (no es UTF-8), así que decodificamos byte a byte como Latin-1.
+function _extraerNombreCedula(s){
+  s=String(s||''); const m=s.match(/[?&]name=([^&]+)/i); if(!m) return null;
+  let v=m[1].replace(/\+/g,' ');
+  v=v.replace(/%([0-9A-Fa-f]{2})/g,(_,h)=>String.fromCharCode(parseInt(h,16)));  // Latin-1
+  v=v.replace(/\s+/g,' ').trim();
+  return v || null;
+}
+function _copiarCed(){ const t=window._cedRaw||''; if(!t){ vToast('Nada que copiar'); return; }
+  const fb=()=>{ try{ const ta=document.createElement('textarea'); ta.value=t; ta.style.position='fixed'; ta.style.left='-9999px'; document.body.appendChild(ta); ta.focus(); ta.select(); document.execCommand('copy'); ta.remove(); vToast('📋 Texto copiado'); }catch(e){ vToast('Mantén presionado el texto para copiar'); } };
+  if(navigator.clipboard&&navigator.clipboard.writeText){ navigator.clipboard.writeText(t).then(()=>vToast('📋 Texto copiado')).catch(fb); } else fb(); }
+function _cedOk(outId, run, nombre, showBuscar){
+  const out=$(outId); if(!out) return;
+  out.innerHTML=`<div class="card res-ok" style="text-align:left;border:1px solid var(--verde);">
+    <div style="font-weight:800;color:var(--verde);font-size:1.05rem;">🪪 Cédula leída</div>
+    ${nombre?`<div style="margin-top:8px;font-size:1.25rem;font-weight:900;color:#fff;line-height:1.15;">${String(nombre).replace(/</g,'&lt;').toUpperCase()}</div>`:''}
+    <div style="margin-top:2px;font-size:1.05rem;color:var(--dorado);font-weight:800;letter-spacing:1px;">${run?fmtRut(run):'sin RUN'}</div>
+    <div class="sub" style="margin-top:8px;">${outId==='cap-result'?'Datos cargados — completa lo que falte y toca Registrar.':'Buscando sus entradas de este evento…'}</div>
+    ${showBuscar&&run?`<button class="btn btn-ghost" style="margin-top:10px;width:100%;" onclick="buscarPorRUT()">🔎 Buscar de nuevo</button>`:''}
+    <button class="btn btn-ghost" style="margin-top:8px;width:100%;font-size:0.72rem;" onclick="_verCrudoCed()">ver dato crudo</button>
+  </div>`;
+}
+function _verCrudoCed(){ try{ alert(window._cedRaw||'(sin dato)'); }catch(e){} }
+// Maneja una cédula leída (láser o cámara), sin importar la vista.
+function procesarCedula(texto){
+  const s=String(texto||''); window._cedRaw=s;
+  const run=_extraerRun(s);
+  const nom=_extraerNombreCedula(s) || (s.match(/FN[^:]*:(.+)/i)||[])[1] || null;
+  try{ if(navigator.vibrate) navigator.vibrate([30,30,30]); }catch(e){}
+  const active=document.querySelector('.acc.active'); let id=active?active.id:'';
+  if(id==='acc-nuevo'){
+    if(run) $('cap-rut').value=fmtRut(run);
+    if(nom) $('cap-nombre').value=String(nom).trim().toUpperCase();
+    const mIg=s.match(/instagram\.com\/([A-Za-z0-9._]+)/i); if(mIg) $('cap-ig').value='@'+mIg[1].replace(/^@/,'');
+    const mTel=s.match(/tel:([+\d\s]+)/i)||s.match(/TEL[^:]*:([+\d\s]{7,})/i); if(mTel) $('cap-tel').value=mTel[1].trim();
+    _cedOk('cap-result', run, nom, false);
+  } else {
+    // Tarjeta esperando confirmar la cédula: leerla no saca al portero de la tarjeta.
+    if(id==='acc-escanear' && window._armado){ vToast('🪪 Cédula leída: '+(run?fmtRut(run):'sin RUN')+' — compárala con la tarjeta'); return; }
+    if(id!=='acc-rut'){ verVista('rut'); }
+    if(run) $('rut-input').value=fmtRut(run);
+    _cedOk('rut-result', run, nom, true);
+    if(run) buscarPorRUT();
+  }
+}
+
+function onScan(texto) {
+  if (pausado) return;
+  pausado = true;
+  try { if (navigator.vibrate) navigator.vibrate(80); } catch(e) {}
+  const s = String(texto || '');
+  // 🪪 ¿Cédula chilena? → extrae RUN + modo diagnóstico (no la valida como ticket)
+  if (esCedula(s)) { procesarCedula(s); setTimeout(()=>{ pausado = false; }, 1200); return; }
+  if (!/FCC-/i.test(s)) {
+    // No es FCC ni cédula legible → aviso claro (evita quedar en "verificando" con basura)
+    if (!/^[A-Za-z0-9\-]{6,}$/.test(s.trim())) {
+      const o=$('resultado'); if(o) o.innerHTML='<div class="card res-bad" style="text-align:center;"><b style="color:var(--rojo)">🪪 No se pudo leer</b><div class="sub" style="margin-top:6px;">Si es una cédula, enfoca bien el código de barras del reverso. Si es una entrada, usa el QR del correo.</div>'+_BTN_SIG+'</div>';
+      setTimeout(()=>{ pausado=false; }, 1800);
+      return;
+    }
+    // No es FCC ni cédula legible → aviso claro (evita quedar en "verificando" con basura)
+    if (!/^[A-Za-z0-9\-]{6,}$/.test(s.trim())) {
+      const o=$('resultado'); if(o) o.innerHTML='<div class="card res-bad" style="text-align:center;"><b style="color:var(--rojo)">🪪 No se pudo leer</b><div class="sub" style="margin-top:6px;">Si es una cédula, enfoca bien el código de barras del reverso. Si es una entrada, usa el QR del correo.</div>'+_BTN_SIG+'</div>';
+      setTimeout(()=>{ pausado=false; }, 1800);
+      return;
+    }
+  }
+  checkQR(normalizarQR(texto));
+  setTimeout(()=>{ pausado = false; }, 2600);
+}
+function siguiente(){
+  pausado = false;   // reanuda el escaneo de inmediato (sin esperar)
+  window._armado = null;
+  const o = $('resultado'); if (o) o.innerHTML = '<div class="card" style="color:var(--gris);text-align:center;padding:22px;">📸 Listo — escanea la siguiente entrada</div>';
+  const r = $('rut-result'); if (r) r.innerHTML = '';       // limpia también el flujo POR RUT (ahí quedaba pegado el "AUTORIZADO")
+  const ri = $('rut-input'); if (ri) ri.value = '';         // deja el campo listo para el próximo RUT
+  const m = $('qr-manual'); if (m) { m.value = ''; }
+}
+function checkManual() { const v = $('qr-manual').value.trim(); if (v) checkQR(normalizarQR(v)); }
+
+// ── Condiciones del QR (snapshot): muestra y hace cumplir horario/transferible ──
+function renderCondiciones(cond) {
+  if (!cond || typeof cond !== 'object') return { html: '', alerta: false };
+  let alerta = false; const motivos = [], chips = [];
+  if (cond.hora_max_llegada && eventoSel && eventoSel.fecha) {
+    const flex = (window._flexMin||0)*60000;
+    const corte = new Date(dtEvento(eventoSel.fecha, cond.hora_max_llegada).getTime() + flex);   // + gracia configurable
+    if (new Date() > corte) { alerta = true; motivos.push('Fuera de horario (máx ' + cond.hora_max_llegada + (window._flexMin?' +'+window._flexMin+'min':'') + ')'); }
+    else chips.push('🕐 Hasta ' + cond.hora_max_llegada + (window._flexMin?' (+'+window._flexMin+'min)':''));
+  }
+  if (cond.valido_hasta) { const vh = new Date(cond.valido_hasta); if (!isNaN(vh) && new Date() > vh) { alerta = true; motivos.push('Entrada vencida'); } }
+  if (cond.transferible === false) chips.push('🔒 No transferible — el RUT debe calzar');
+  if (cond.zona && cond.zona !== 'general') chips.push('🚪 ' + String(cond.zona).toUpperCase());
+  if (cond.restricciones) chips.push('⭐ ' + cond.restricciones);
+  // Público del ticket → banner grande para que el portero lo contraste con la cédula
+  const _gi = ({F:{t:'👩 SOLO MUJERES',c:'#E8363D'},M:{t:'👨 SOLO HOMBRES',c:'#3b82f6'},U:{t:'🎓 SOLO UNIVERSITARIOS',c:'#D4A832'}})[cond.genero||''];
+  const generoHtml = _gi ? `<div style="margin-top:10px;padding:10px;border-radius:10px;background:${_gi.c}22;border:2px solid ${_gi.c};color:#fff;font-weight:900;font-size:1.1rem;letter-spacing:1px;">${_gi.t}<div style="font-weight:600;font-size:0.72rem;letter-spacing:0;opacity:.85;margin-top:2px;">Verifica con la cédula</div></div>` : '';
+  const alertaHtml = alerta ? `<div style="margin-top:10px;padding:8px;border-radius:8px;background:rgba(232,54,61,.15);color:var(--rojo);font-weight:800;">⛔ ${motivos.join(' · ')} — beneficio perdido</div>` : '';
+  const chipsHtml = chips.length ? `<div class="sub" style="margin-top:8px;display:flex;gap:6px;flex-wrap:wrap;justify-content:center;">${chips.map(c=>`<span style="background:rgba(255,255,255,.06);padding:2px 8px;border-radius:10px;">${c}</span>`).join('')}</div>` : '';
+  const textoHtml = cond.texto ? `<div class="sub" style="margin-top:6px;font-style:italic;">${cond.texto}</div>` : '';
+  return { html: generoHtml + alertaHtml + chipsHtml + textoHtml, alerta };
+}
+// Público de la entrada (F/M/U/''). Si la entrada trae condiciones con la clave
+// genero, manda esa (vacía = mixto, explícito). Solo si no la trae (compras
+// antiguas, cortesías de lista) se busca por el nombre del tipo de ticket.
+// 🏷️ SÓLO para pintar: PREV 3 MUJER… → MUJER… · PREVENTA 3, igual que lo ve el
+// cliente en su correo. El nombre REAL es el que sigue decidiendo (género, hora
+// de corte, miembros): esas funciones leen r.nombre_ticket crudo, no esta.
+function _etq(nombre){ var x=String(nombre==null?'':nombre);
+  var m=x.match(/^\s*PREV(?:ENTA)?\s*(\d+)\s+(.+)$/i);
+  return m ? (m[2].trim()+' · PREVENTA '+m[1]) : x; }
+function _generoDe(r){
+  const ok = g => ['F','M','U'].includes(g);
+  const c = r && r.condiciones;
+  if (c && typeof c === 'object' && Object.prototype.hasOwnProperty.call(c,'genero')) { const g0 = String(c.genero||'').trim().toUpperCase(); return ok(g0) ? g0 : ''; }
+  const g1 = (window._ttGenero||{})[String((r&&r.nombre_ticket)||'').trim().toUpperCase()];
+  return ok(g1) ? g1 : '';
+}
+const _GEN_CED = { F:'MUJER', M:'HOMBRE' };
+// Sexo a confirmar con la cédula: F/M directo; una universitaria (U) con HOMBRE
+// o MUJER en el nombre del ticket también lo exige («CORTESIA HOMBRE UNIVERSITARIO»).
+function _sexoCed(r){
+  const g = _generoDe(r);
+  if (g === 'F' || g === 'M') return g;
+  if (g === 'U') {
+    const n = String((r && (r.nombre_ticket || (r.condiciones && r.condiciones.titulo))) || '').toUpperCase();
+    const h = /HOMBRE/.test(n), m = /MUJER/.test(n);
+    return h && !m ? 'M' : (m && !h ? 'F' : '');
+  }
+  return '';
+}
+// 🎁 ¿Es cortesía de miembros (tipos_ticket.solo_miembros)? Solo esas piden la
+// cédula en dos toques; las demás de mujer/hombre van en verde y un toque.
+// La entrada no trae el dato: se busca por el nombre del tipo en _ttMiembros
+// (o en la descarga offline, clave tm). Sin mapa, modo seguro: precio 0 con
+// MIEMBRO en el nombre = miembro, y si no se sabe nada, quedan los dos toques
+// (mejor lento que dejar pasar).
+function _esMiembro(r){
+  const k = String((r && r.nombre_ticket) || '').trim().toUpperCase();
+  let tm = window._ttMiembros;
+  if (!tm || typeof tm !== 'object') { const s = _snapGet(); tm = (s && s.tm && typeof s.tm === 'object') ? s.tm : null; }
+  if (tm && k && Object.prototype.hasOwnProperty.call(tm, k)) return tm[k] === true;
+  const n = String((r && (r.nombre_ticket || (r.condiciones && r.condiciones.titulo))) || '').toUpperCase();
+  const p = r && r.precio_unitario;
+  const pSabe = p !== undefined && p !== null && p !== '' && !isNaN(Number(p));
+  if (/MIEMBRO/.test(n)) return !pSabe || Number(p) === 0;
+  if (tm) return false;     // el mapa cargó y ese nombre no es de miembros
+  return !pSabe;            // sin mapa: si pagó, no es de miembros; si no se sabe, dos toques
+}
+// Dos toques en la misma página (sin confirm() del navegador): el primero
+// cambia el botón a «Sí, la cédula dice MUJER — INGRESAR»; recién el segundo
+// quema. Se ignora un segundo toque muy seguido (Enter del láser, doble tap).
+// El primer toque se recuerda POR ENTRADA (window._armado), no en el botón:
+// con la cámara encendida la tarjeta se vuelve a pintar cada pocos segundos y
+// un estado guardado en el botón se perdía.
+function _dosToques(btn, sexoTxt, code, accion){
+  const t = Date.now(), a = window._armado;
+  if (!a || a.qr !== code || t - a.t > 60000) {
+    window._armado = { qr: code, t };
+    btn.textContent = '✅ Sí, la cédula dice ' + sexoTxt + ' — INGRESAR';
+    btn.style.background = 'var(--dorado)'; btn.style.color = '#1a1a1a';
+    try { btn.blur(); } catch(_) {}
+    return;
+  }
+  if (t - a.t < 600) return;
+  window._armado = null;
+  accion();
+}
+// Corte de validez de un ticket → Date. "02:00" = absoluto · "-60" = 60 min antes del cierre.
+function _corteTicket(spec){
+  if(!spec || !eventoSel || !eventoSel.fecha) return null;
+  spec = String(spec).trim();
+  const flex = (window._flexMin||0)*60000;   // gracia configurable antes de pedir PIN
+  if(spec.charAt(0)==='-'){ const mins=parseInt(spec.slice(1))||0; const fin=dtEvento(eventoSel.fecha, eventoSel.hora_termino||'05:00'); return new Date(fin.getTime()-mins*60000+flex); }
+  return new Date(dtEvento(eventoSel.fecha, spec).getTime()+flex);
+}
+// ══ Autorizar un ingreso fuera de horario · DOS PUERTAS ══════════════
+// 1. El admin entra con SU cuenta  → la autorización queda FIRMADA con su nombre.
+// 2. El PIN del equipo sigue ahí   → firma «llave compartida», que es la verdad.
+//
+// El PIN no se elimina a propósito: si un sábado a las 3 AM nadie recuerda su
+// clave, o no hay señal, la puerta tiene que abrir igual. Se desincentiva
+// mostrando que no firma, no prohibiéndolo.
+//
+// REGLA DE ORO DE ESTE BLOQUE: registrar NUNCA puede impedir que alguien entre.
+// Todo el guardado va en try/catch y la puerta abre igual si falla.
+// ══ DESHACER · el portero se equivocó y lo ve al segundo ═══════════════
+// Sin pedirle permiso a nadie: está parado ahí mirando. Solo su propio
+// escaneo y solo recién hecho — lo de anoche lo desvalida un admin.
+let _deshTimer = null;
+function _deshacerCuenta() {
+  if (_deshTimer) clearInterval(_deshTimer);
+  let seg = 120;
+  const pinta = () => {
+    const b = document.getElementById('btn-deshacer'), t = document.getElementById('deshacer-t');
+    if (!b) { clearInterval(_deshTimer); _deshTimer = null; return; }
+    if (seg <= 0) { b.remove(); clearInterval(_deshTimer); _deshTimer = null; return; }
+    if (t) t.textContent = '(' + Math.floor(seg/60) + ':' + String(seg%60).padStart(2,'0') + ')';
+    seg--;
+  };
+  pinta(); _deshTimer = setInterval(pinta, 1000);
+}
+async function deshacerIngreso(code) {
+  if (!confirm('¿Deshacer este ingreso?\n\nLa entrada vuelve a quedar válida y esta persona NO cuenta como que entró.')) return;
+  const b = document.getElementById('btn-deshacer'); if (b) { b.disabled = true; b.textContent = 'Deshaciendo…'; }
+  try {
+    const { data: r, error } = await sb.rpc('puerta_deshacer', { p_qr: normalizarQR(code) });
+    if (error) throw error;
+    if (!r || r.ok === false) throw new Error((r && r.error) || 'No se pudo');
+    try { snapUnmarkUsed && snapUnmarkUsed(normalizarQR(code)); } catch(_) {}
+    beep(false);
+    $('resultado').innerHTML = '<div class="card" style="text-align:center;border-color:var(--dorado);">'
+      + '<div style="color:var(--dorado);font-size:1.15rem;font-weight:900;">↩️ INGRESO DESHECHO</div>'
+      + '<div class="sub" style="margin-top:6px;">La entrada volvió a quedar válida. Puede escanearla de nuevo.</div>'
+      + '<button class="btn btn-verde" style="margin-top:12px;width:100%;" onclick="siguiente()">➡️ SIGUIENTE</button></div>';
+  } catch (e) {
+    const m = String(e.message || e);
+    alert(/does not exist|function/i.test(m) ? 'Falta correr frate-puerta-deshacer.sql' : m);
+    if (b) { b.disabled = false; b.textContent = '↩️ Deshacer — me equivoqué'; }
+  }
+}
+
+// ══ RECHAZO · no entra, y la entrada NO se quema ══════════════════════
+// Antes esto se perdía: se apretaba "no ingresa" y no quedaba nada. El motivo
+// es lo que después justifica una devolución o un veto.
+// ⚠️ Los tres primeros son CAUSA IMPUTABLE a la persona: si el motivo es
+//    uno de esos, NO corresponde devolución y el admin lo ve en rojo.
+const _MOTIVOS_RECH = [
+  ['ebriedad', '🍺 Estado de ebriedad'],
+  ['menor',    '🔞 Menor de edad'],
+  ['carnet',   '🪪 El carnet no coincide'],
+  ['vetado',   '🚫 Vetado'],
+  ['fecha',    '📅 Se equivocó de fecha'],
+  ['se_fue',   '🤷 Se fue / no quiso entrar'],
+  ['otro',     '✏️ Otro'],
+];
+function noIngresa(code, nombre, outId) {
+  const esc = t => String(t||'').replace(/</g,'&lt;');
+  const ov = document.createElement('div'); ov.id = 'rech-ov';
+  ov.style.cssText = 'position:fixed;inset:0;background:rgba(0,0,0,.9);z-index:99999;display:flex;align-items:flex-end;justify-content:center;overflow:auto;';
+  ov.onclick = e => { if (e.target === ov) ov.remove(); };
+  ov.innerHTML = '<div style="background:var(--negro2);border:1px solid var(--borde);border-top:3px solid var(--rojo);border-radius:16px 16px 0 0;width:100%;max-width:460px;padding:18px;">'
+    + '<div style="font-weight:900;font-size:1.15rem;">¿Por qué no ingresa?</div>'
+    + (nombre ? '<div class="sub" style="margin-top:2px;">' + esc(nombre) + '</div>' : '')
+    + '<div class="sub" style="margin-top:8px;color:var(--dorado);">La entrada NO se quema: queda válida.</div>'
+    + _MOTIVOS_RECH.map(([k,t]) =>
+        '<button class="btn" style="width:100%;margin-top:8px;background:#1e1e20;color:#fff;text-align:left;text-transform:none;letter-spacing:0;font-weight:600;"'
+        + ' onclick="_rechEnviar(\'' + String(code).replace(/'/g,'') + '\',\'' + k + '\',\'' + esc(nombre).replace(/'/g,'') + '\',\'' + String(outId||'') + '\')">' + t + '</button>').join('')
+    + '<button class="btn" style="width:100%;margin-top:14px;background:transparent;border:1px solid var(--borde);color:var(--gris);" onclick="document.getElementById(\'rech-ov\').remove()">Cancelar</button>'
+    + '</div>';
+  document.body.appendChild(ov);
+}
+async function _rechEnviar(code, motivo, nombre, outId) {
+  let nota = null;
+  if (motivo === 'otro') { nota = prompt('¿Qué pasó?', ''); if (nota === null) return; }
+  const ov = document.getElementById('rech-ov'); if (ov) ov.remove();
+  try {
+    await sb.rpc('puerta_rechazar', {
+      p_qr: code ? normalizarQR(code) : null, p_motivo: motivo,
+      p_nombre: nombre || null, p_evento_id: (eventoSel && eventoSel.id) || null,
+      p_nota: nota || null });
+  } catch (_) { /* sin el SQL todavía: igual pasa al siguiente */ }
+  siguiente();
+}
+
+// ══ ZONA · a dónde va esta persona ═════════════════════════════════════
+// Sin esto, elegir "VIP Fuego" al crear el pase sería un campo bonito que no
+// cambia nada: el portero tiene que verlo en grande para saber a dónde mandarlo.
+async function pintarZona(qr){
+  const box = document.getElementById('zona-box'); if(!box) return;
+  try{
+    const { data: r } = await sb.rpc('zona_de_qr', { p_qr: qr });
+    const z = r && r.ok && r.zona;
+    if(!z) return;
+    const esc = t => String(t||'').replace(/</g,'&lt;');
+    box.innerHTML = '<div style="margin:10px 0;padding:12px;border-radius:12px;border:2px solid '+(z.color||'#8b8b95')
+      + ';background:rgba(255,255,255,.03);">'
+      + '<div style="font-size:1.5rem;line-height:1;">'+(z.emoji||'🎟️')+'</div>'
+      + '<div style="font-weight:900;font-size:1.25rem;color:'+(z.color||'#fff')+';letter-spacing:1px;margin-top:2px;">'
+      + esc(z.nombre).toUpperCase()+'</div>'
+      + (z.asigna_al_llegar ? '<div class="sub" style="margin-top:4px;color:var(--dorado);">Asígnale el lugar al entrar</div>' : '')
+      + '</div>';
+    // Cuánta gente hay en esa zona ahora, para que sepa si queda espacio.
+    try{
+      const { data: a } = await sb.rpc('zonas_aforo', { p_evento_id: (eventoSel && eventoSel.id) || null });
+      const zz = ((a && a.zonas) || []).find(x => x.id === z.id);
+      if(zz && zz.aforo){
+        const lleno = zz.dentro >= zz.aforo;
+        box.firstChild.innerHTML += '<div class="sub" style="margin-top:6px;color:'+(lleno?'var(--rojo)':'var(--gris)')+';">'
+          + zz.dentro + ' de ' + zz.aforo + ' adentro' + (lleno ? ' · LLENO — confirma con un admin antes de dejarlo pasar' : '') + '</div>';
+      }
+    }catch(_){}
+  }catch(_){ /* sin las zonas todavía: la puerta sigue igual */ }
+}
+
+function _authCerrar(){ const o=document.getElementById('auth-ov'); if(o) o.remove(); }
+
+async function _authRegistrar(code, nombre, via, quien, uid){
+  try{
+    await sb.from('puerta_autorizaciones').insert({
+      qr_id: code || null,
+      evento_id: (eventoSel && eventoSel.id) || null,
+      nombre_invitado: nombre || null,
+      motivo: 'fuera_de_horario',
+      via: via, autorizado_por: quien, autorizado_por_id: uid || null
+    });
+  }catch(_){ /* tabla aún sin crear u offline → se autoriza igual */ }
+}
+
+// Verifica al admin SIN tocar la sesión del portero: cliente aparte, sin
+// persistencia y con signOut local (el global le cerraría la sesión al admin
+// en todos sus dispositivos).
+async function _authVerificarAdmin(email, clave){
+  const aux = window.supabase.createClient(
+    'https://ydwlpraoaaijlfssevoh.supabase.co',
+    'sb_publishable_-_7GeDU_h84zf2v--lWQaQ_15ZFxOWt',
+    { auth: { persistSession:false, autoRefreshToken:false, detectSessionInUrl:false, storageKey:'frate-auth-puerta' } }
+  );
+  try{
+    const { data, error } = await aux.auth.signInWithPassword({ email: email, password: clave });
+    if(error || !data || !data.user) return { ok:false, msg:'Correo o clave incorrectos.' };
+    const { data: perfil } = await aux.from('clientes').select('rol,nombres,apellidos,username').eq('id', data.user.id).maybeSingle();
+    const r = perfil && perfil.rol;
+    if(r !== 'admin') return { ok:false, msg:'Esa cuenta no es admin.' };
+    const quien = (perfil.username ? '@'+perfil.username
+                 : ((perfil.nombres||'')+' '+(perfil.apellidos||'')).trim()) || email;
+    return { ok:true, quien: quien, uid: data.user.id };
+  }catch(e){
+    return { ok:false, msg: _esErrorRed(e) ? 'Sin señal para verificar. Usa el PIN del equipo.' : 'No se pudo verificar.' };
+  }finally{
+    try{ await aux.auth.signOut({ scope:'local' }); }catch(_){}
+  }
+}
+
+async function _authConFicha(code, nombre){
+  const em = (document.getElementById('auth-email').value||'').trim().toLowerCase();
+  const cl = document.getElementById('auth-clave').value||'';
+  const err = document.getElementById('auth-err');
+  const btn = document.getElementById('auth-btn-f');
+  if(!em || !cl){ err.textContent='Pon el correo y la clave.'; return; }
+  btn.disabled=true; btn.textContent='Verificando…'; err.textContent='';
+  const v = await _authVerificarAdmin(em, cl);
+  btn.disabled=false; btn.textContent='✅ AUTORIZAR Y FIRMAR';
+  if(!v.ok){ err.textContent=v.msg; return; }
+  _authCerrar();
+  await _authRegistrar(code, nombre, 'ficha', v.quien, v.uid);
+  quemarQR(code, nombre, null, false);
+}
+
+async function _authConLlave(code, nombre){
+  const pin=(window._adminPin||'').trim();
+  const err=document.getElementById('auth-err');
+  if(pin){
+    const e=(document.getElementById('auth-pin').value||'').trim();
+    if(e!==pin){ err.textContent='PIN incorrecto. No se autoriza.'; return; }
+  } else if(!confirm('No hay PIN configurado. ¿Autorizar el ingreso fuera de horario igual?')) return;
+  _authCerrar();
+  await _authRegistrar(code, nombre, 'llave', 'llave compartida', null);
+  quemarQR(code, nombre, null, false);
+}
+
+function autorizarFueraHorario(code, nombre){
+  _authCerrar();
+  const pin=(window._adminPin||'').trim();
+  const esc=s=>String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+  window._authArgs = { code: code, nombre: nombre };
+  const inp='width:100%;box-sizing:border-box;background:var(--negro);border:1px solid var(--borde);border-radius:9px;padding:12px;color:#fff;font-size:16px;font-family:inherit;margin-top:6px;';
+  const ov=document.createElement('div'); ov.id='auth-ov';
+  ov.style.cssText='position:fixed;inset:0;background:rgba(0,0,0,.9);z-index:99999;display:flex;align-items:flex-end;justify-content:center;overflow:auto;';
+  ov.onclick=(e)=>{ if(e.target===ov) _authCerrar(); };
+  ov.innerHTML='<div style="background:var(--negro2);border:1px solid var(--borde);border-top:3px solid var(--dorado);border-radius:16px 16px 0 0;width:100%;max-width:460px;max-height:94vh;overflow:auto;padding:18px;">'
+   +'<div style="display:flex;justify-content:space-between;align-items:flex-start;gap:8px;">'
+     +'<div><div style="font-weight:900;font-size:1.15rem;">🕐 Fuera de horario</div>'
+     +(nombre?'<div class="sub" style="margin-top:2px;">'+esc(nombre)+'</div>':'')+'</div>'
+     +'<button onclick="_authCerrar()" style="background:none;border:0;color:var(--gris);font-size:1.5rem;cursor:pointer;line-height:1;">✕</button></div>'
+
+   +'<div style="margin-top:16px;padding:14px;border:1px solid var(--borde);border-left:3px solid var(--verde);border-radius:10px;">'
+     +'<div style="font-weight:800;color:var(--verde);font-size:.92rem;">Con tu cuenta de admin</div>'
+     +'<div class="sub" style="margin-top:3px;">Queda registrado que lo autorizaste tú.</div>'
+     +'<input id="auth-email" type="email" inputmode="email" autocomplete="username" placeholder="correo del admin" style="'+inp+'">'
+     +'<input id="auth-clave" type="password" autocomplete="current-password" placeholder="clave" style="'+inp+'">'
+     +'<button id="auth-btn-f" class="btn btn-verde" style="width:100%;margin-top:10px;font-weight:800;font-size:1rem;" '
+       +'onclick="_authConFicha(window._authArgs.code, window._authArgs.nombre)">✅ AUTORIZAR Y FIRMAR</button>'
+   +'</div>'
+
+   +'<div style="margin-top:12px;padding:14px;border:1px solid var(--borde);border-left:3px solid var(--dorado);border-radius:10px;opacity:.9;">'
+     +'<div style="font-weight:800;color:var(--dorado);font-size:.92rem;">O con el PIN del equipo</div>'
+     +'<div class="sub" style="margin-top:3px;">Este PIN lo sabe todo el equipo, así que <b>no queda registro de quién autorizó</b>. Úsalo solo si no tienes tu clave o no hay señal.</div>'
+     +(pin?'<input id="auth-pin" type="tel" inputmode="numeric" autocomplete="off" placeholder="PIN" style="'+inp+'">':'')
+     +'<button class="btn" style="width:100%;margin-top:10px;background:#2a2a2e;color:#fff;font-weight:700;" '
+       +'onclick="_authConLlave(window._authArgs.code, window._authArgs.nombre)">Autorizar sin firma</button>'
+   +'</div>'
+
+   +'<div id="auth-err" style="color:var(--rojo);font-size:.88rem;margin-top:10px;text-align:center;min-height:1.1em;"></div>'
+   +'<button class="btn" style="width:100%;margin-top:6px;background:transparent;border:1px solid var(--borde);color:var(--gris);" onclick="_authCerrar()">Cancelar</button>'
+   +'</div>';
+  document.body.appendChild(ov);
+  setTimeout(()=>{ const e=document.getElementById('auth-email'); if(e) e.focus(); }, 60);
+}
+
+// 🎂🍾 Modal de grupo (reserva / cumpleaños): todo el grupo + ficha + contador
+function mostrarGrupoModal(g){
+  if(document.getElementById('grupo-ov')) document.getElementById('grupo-ov').remove();
+  const emo = g.tipo==='birthday'?'🎂':'🍾', ins = Array.isArray(g.inscritos)?g.inscritos:[], ent = ins.filter(x=>x.entered).length, f = g.ficha||{};
+  let fichaHtml='', parts=[];
+  if(g.tipo==='birthday'){
+    if(f.cumpleaniero) fichaHtml='<div style="color:var(--dorado);font-weight:700;">🎂 Cumpleañer@: '+f.cumpleaniero+'</div>';
+    if(f.invitados_estimados) parts.push('👥 ~'+f.invitados_estimados); if(f.zona_preferida) parts.push('🚪 '+f.zona_preferida);
+    if(f.quiere_botellas) parts.push('🍾 botellas'); if(f.quiere_decoracion) parts.push('🎈 decoración'); if(f.presupuesto) parts.push('💰 '+f.presupuesto);
+  } else {
+    if(f.responsable) fichaHtml='<div style="color:var(--dorado);font-weight:700;">🍾 Responsable: '+f.responsable+'</div>';
+    if(f.party_size) parts.push('👥 '+f.party_size); if(f.zona) parts.push('🚪 '+f.zona);
+    if(f.quiere_botellas) parts.push('🍾 botellas'); if(f.consumo_minimo) parts.push('💰 mín '+f.consumo_minimo); if(f.presupuesto) parts.push('💰 '+f.presupuesto);
+  }
+  if(parts.length) fichaHtml+='<div class="sub" style="margin-top:4px;">'+parts.join(' · ')+'</div>';
+  const esc=s=>String(s||'').replace(/</g,'&lt;');
+  const filas = ins.map(x=>`<div style="display:flex;justify-content:space-between;gap:8px;padding:8px 2px;border-bottom:1px solid var(--borde);${x.entered?'':'opacity:.72;'}"><div style="min-width:0;"><div style="font-weight:700;color:${x.entered?'#fff':'var(--gris)'};">${esc(x.nombre)||'—'}</div><div class="sub">${x.rut||''}</div></div><div style="flex-shrink:0;color:${x.entered?'var(--verde)':'var(--dorado)'};font-weight:800;font-size:0.8rem;">${x.entered?'✅ entró':'⏳ falta'}</div></div>`).join('');
+  const ov=document.createElement('div'); ov.id='grupo-ov'; ov.style.cssText='position:fixed;inset:0;background:rgba(0,0,0,.85);z-index:99998;display:flex;align-items:flex-end;justify-content:center;';
+  ov.onclick=(e)=>{ if(e.target===ov) ov.remove(); };
+  ov.innerHTML=`<div style="background:var(--negro2);border:1px solid var(--borde);border-top:3px solid var(--dorado);border-radius:16px 16px 0 0;width:100%;max-width:460px;max-height:82vh;overflow:auto;padding:18px;">
+    <div style="display:flex;justify-content:space-between;align-items:center;"><div style="font-weight:900;font-size:1.2rem;">${emo} ${esc(g.nombre)||'Grupo'}</div><button onclick="document.getElementById('grupo-ov').remove()" style="background:none;border:0;color:var(--gris);font-size:1.4rem;cursor:pointer;">✕</button></div>
+    ${fichaHtml?`<div style="margin-top:8px;">${fichaHtml}</div>`:''}
+    <div style="margin:12px 0 8px;font-weight:800;color:var(--verde);">Entraron ${ent} de ${ins.length} del grupo</div>
+    ${filas || '<div class="sub">Sin inscritos en el grupo.</div>'}
+  </div>`;
+  document.body.appendChild(ov);
+}
+
+// ── Validación vía RPC segura (SECURITY DEFINER) ──
+const _BTN_SIG = `<button class="btn" style="margin-top:12px;width:100%;background:#2a2a2e;color:#fff;font-weight:700;" onclick="siguiente()">➡️ SIGUIENTE (seguir escaneando)</button>`;
+// `outId` = dónde se pinta la ficha. Sin él, la pantalla de escanear de siempre.
+// La búsqueda POR RUT manda 'rut-result' para que el portero no tenga que saltar
+// de pestaña a media validación (antes se cambiaba de vista y ahí se perdía el flujo).
+async function checkQR(code, outId) {
+  const _oid = outId || 'resultado';
+  const out = $(_oid);
+  out.innerHTML = '<div class="card" style="color:var(--gris);text-align:center;">Verificando…</div>';
+  try { out.scrollIntoView({ behavior: 'smooth', block: 'center' }); } catch(e) {}
+  try {
+    const nq = normalizarQR(code);
+    let r = null, error = null;
+    if (navigator.onLine) {
+      try { const res = await sb.rpc('puerta_check_qr', { p_qr: nq }); if (res.error) throw res.error; r = res.data; window._offNow = false; }
+      catch (e) { if (!_esErrorRed(e)) throw e; /* sin internet → cae a offline */ }
+    }
+    if (!r) {
+      const sn = snapEntry(nq);
+      window._offNow = true;
+      if (!sn) { cont('bad'); beep(false); out.innerHTML = '<div class="card res-bad"><b style="color:var(--rojo)">⛔ RECHAZADO (offline)</b><div class="sub" style="margin-top:6px;">Ese código no está en la descarga offline. Conéctate y actualiza, o descarga las entradas del evento.</div>'+_BTN_SIG+'</div>'; return; }
+      r = sn;
+    }
+    if (r?.error) throw new Error(r.error);
+    if (!r.ok) {
+      cont('bad'); beep(false);
+      // ⚠️ `requiere_reembolso` NO es "no pagó": es "PAGÓ y se agotó el cupo".
+    //    Caía en el mensaje de "la cortesía está como borrador", que no tiene
+    //    nada que ver, y el portero dejaba afuera a alguien que ya pagó.
+    const _pago = /requiere_reembolso/i.test(r.motivo||'');
+    const _hintPago = '<div style="font-size:0.78rem;color:#4ade80;margin-top:10px;line-height:1.5;background:rgba(74,222,128,.08);border-left:3px solid #4ade80;border-radius:8px;padding:10px 12px;"><b>Esta persona SÍ PAGÓ.</b> Se le acabó el cupo justo al comprar, por eso la orden quedó pendiente. <b>Tiene derecho a entrar.</b><br>Autorízalo acá abajo, o arréglalo en Órdenes → <b>➕ Dar cupo</b>.</div>'
+      + `<button class="btn btn-verde" style="margin-top:12px;width:100%;font-weight:800;" onclick="autorizarFueraHorario('${String(nq).replace(/'/g,'')}','${String((r.persona&&r.persona.nombre)||r.comprador||'').replace(/'/g,'')}')">✅ AUTORIZAR — pagó su entrada</button>`;
+    const _hint = _pago ? _hintPago : /no existe/i.test(r.motivo||'')
+        ? '<div style="font-size:0.72rem;color:#c9a227;margin-top:8px;line-height:1.4;">Ese código no está en la base. Suele pasar si la cortesía fue <b>borrada</b>, se <b>guardó como borrador</b> (sin emitir), o el QR es de una <b>prueba/evento viejo</b>. Genera una cortesía nueva y escanéala desde el correo o desde el botón 🔳 del panel.</div>'
+        : (/no pagado/i.test(r.motivo||'') ? '<div style="font-size:0.72rem;color:#c9a227;margin-top:8px;line-height:1.4;">La cortesía está como <b>borrador</b>: ábrela en el panel y <b>emítela</b> para que el QR valga.</div>' : '');
+      out.innerHTML = `<div class="card res-bad"><b style="color:var(--rojo)">⛔ RECHAZADO</b><div class="sub" style="margin-top:6px;">${r.motivo}</div>${_hint}<div style="font-size:0.66rem;color:#555;margin-top:8px;word-break:break-all;">Código leído: <code>${String(nq).replace(/</g,'&lt;')}</code></div>${_BTN_SIG}</div>`;
+      return;
+    }
+    // ── Candado por evento: el QR debe ser del evento elegido en la puerta ──
+    if (r.evento_id && eventoSel && r.evento_id !== eventoSel.id) {
+      cont('bad'); beep(false);
+      const _nom = String((r.persona && r.persona.nombre) || r.comprador || '').replace(/'/g,'');
+      const _otroEv = String(r.nombre_evento || 'otro evento').replace(/'/g,'\\u2019');
+      out.innerHTML = `<div class="card res-bad" style="text-align:center;"><b style="color:var(--rojo);font-size:1.15rem;">⛔ OTRO EVENTO</b>
+        <div class="sub" style="margin-top:8px;">Esta entrada es para <b style="color:#fff;">${r.nombre_evento || 'otro evento'}</b>,<br>no para <b style="color:#fff;">${eventoSel.nombre || 'el evento de hoy'}</b>.</div>
+        <div style="font-size:0.66rem;color:#555;margin-top:8px;word-break:break-all;">Código leído: <code>${String(nq).replace(/</g,'&lt;')}</code></div>
+        <button class="btn btn-verde" style="margin-top:12px;background:var(--dorado);color:#1a1a1a;font-weight:800;" onclick="if(confirm('Esta entrada es de OTRO DÍA (${_otroEv}). Ingresar igual solo si el cliente se equivocó de fecha al comprar. ¿Confirmar ingreso?')) quemarQR('${code}','${_nom}',null,true)">INGRESAR IGUAL (otro día)</button>
+        <div class="sub" style="margin-top:6px;font-size:0.7rem;color:#777;">Queda registrado como ingreso forzado.</div>${_BTN_SIG}</div>`;
+      return;
+    }
+    const p = r.persona || {};
+    // 🎂🍾 Si es de una RESERVA/CUMPLE → abre el modal de todo el grupo
+    try{ if(navigator.onLine) sb.rpc('puerta_grupo',{p_qr:nq}).then(g=>{ if(g&&g.data&&g.data.grupo) mostrarGrupoModal(g.data); }).catch(()=>{}); }catch(e){}
+    // NOMBRE y RUT en GRANDE — el validador coteja con el carnet en 1 segundo
+    const nombreG = p.nombre || r.comprador || '—';
+    const rutG    = p.rut || 'SIN RUT';
+    const cnd     = renderCondiciones(r.condiciones);
+    const ficha = `
+      <div style="font-size:1.7rem;font-weight:900;line-height:1.15;margin:10px 0 2px;color:#fff;">${nombreG}</div>
+      <div style="font-size:1.35rem;color:var(--dorado);font-weight:800;letter-spacing:1px;">${rutG}</div>
+      <div class="sub" style="margin-top:10px;">🎟️ ${_etq(r.nombre_ticket) || 'Ticket'} · ${r.orden} · comprador: ${r.comprador || '—'}</div>`;
+    if (r.ya_usado) {
+      cont('dup'); beep(false);
+      out.innerHTML = `<div class="card res-dup" style="text-align:center;">
+        <div style="color:var(--dorado);font-weight:800;letter-spacing:1px;">⚠️ YA ESCANEADO</div>
+        ${ficha}${cnd.html}
+        <div class="sub" style="margin-top:8px;">Entró: ${r.usado_at ? new Date(r.usado_at).toLocaleTimeString('es-CL',{hour:'2-digit',minute:'2-digit'}) : '—'}${r.incidencia ? ' · 🚫 con incidencia' : ''}</div>
+        ${_BTN_SIG}
+      </div>`;
+      return;
+    }
+    const safeN = String(nombreG).replace(/'/g,'');
+    // ⏰ Validez POR TICKET: ¿llegó pasada su hora máxima? (cortesía: condiciones · ticket normal: _ttCortes)
+    const _spec = (r.condiciones && r.condiciones.hora_max_llegada) || (window._ttCortes||{})[String(r.nombre_ticket||'').trim().toUpperCase()];
+    const _corte = _corteTicket(_spec);
+    if (_corte && new Date() > _corte) {
+      cont('bad'); beep(false);
+      const _hh = String(_spec);
+      out.innerHTML = `<div class="card res-bad" style="text-align:center;">
+        <div style="color:var(--rojo);font-weight:900;font-size:1.15rem;">⛔ FUERA DE HORARIO</div>
+        ${ficha}
+        <div class="sub" style="margin-top:8px;">Este ticket era válido hasta <b style="color:#fff;">${_hh.charAt(0)==='-'?(_hh.slice(1)+' min antes del cierre'):('las '+_hh)}</b>. Llegó tarde — <b style="color:var(--rojo)">no ingresa</b>.</div>
+        <button class="btn btn-verde" style="margin-top:12px;background:var(--dorado);color:#1a1a1a;font-weight:800;" onclick="autorizarFueraHorario('${code}','${safeN}')">🔐 Autorizar igual</button>
+        <div class="sub" style="margin-top:6px;font-size:0.7rem;color:#777;">Necesita un admin. Queda registrado quién lo autorizó.</div>
+        ${_BTN_SIG}
+      </div>`;
+      return;
+    }
+    // 💵 ¿Tiene un cobro de diferencia sin pagar? No entra hasta que la caja
+    // lo cobre. Si dejáramos pasar igual, el cobro sería decorativo.
+    const _dp = r.diferencia_pendiente;
+    if (_dp && _dp.codigo) {
+      cont('dup'); beep(false);
+      out.innerHTML = `<div class="card res-dup" style="text-align:center;">
+        <div style="color:var(--dorado);font-weight:900;letter-spacing:1px;">💵 TIENE UN COBRO PENDIENTE</div>
+        ${ficha}
+        <div style="font-family:monospace;font-size:1.9rem;font-weight:900;color:var(--dorado);letter-spacing:2px;margin:10px 0 2px;">${_dEsc(_dp.codigo)}</div>
+        <div style="font-size:1.6rem;font-weight:900;color:#fff;">$${Number(_dp.monto||0).toLocaleString('es-CL')}</div>
+        <div class="sub" style="margin-top:8px;">Tiene que pagarlo en caja antes de entrar.</div>
+        <button class="btn btn-verde" style="margin-top:12px;width:100%;font-weight:800;" onclick="_difPagado(this,'${_dEsc(_dp.codigo)}','${_oid}')">💵 Ya la cobraron — habilitar</button>
+        ${_BTN_SIG}
+      </div>`;
+      window._dif = Object.assign(window._dif||{}, { code: nq });
+      _dif.code = nq;
+      return;
+    }
+      // La zona se pide aparte para no demorar el escaneo: si tarda o falla,
+    // la pantalla ya está y el portero puede seguir.
+    setTimeout(() => pintarZona(nq), 0);
+  // 🪪 Cortesía de miembros solo mujeres / solo hombres: tarjeta ámbar y confirmar
+  // la cédula en dos toques. Las demás (preventas, etc.) van en verde y un toque,
+  // con el aviso SOLO MUJERES / SOLO HOMBRES (sale de cnd.html; si la entrada no trae
+  // condiciones.genero, se pinta aparte). Si ya pagó la diferencia, no aplica la condición.
+  const _g = _sexoCed(r);
+  const _difYa = !!(window._difOk||{})[nq];
+  const _pideCed = !cnd.alerta && !!_GEN_CED[_g] && !_difYa && _esMiembro(r);
+  const onBurn = cnd.alerta
+      ? `if(confirm('⚠️ Esta entrada está FUERA de sus condiciones. ¿Ingresar igual?')) quemarQR('${code}','${safeN}','${_oid}')`
+      : (_pideCed ? `_dosToques(this,'${_GEN_CED[_g]}','${code}',function(){quemarQR('${code}','${safeN}','${_oid}')})` : `quemarQR('${code}','${safeN}','${_oid}')`);
+    const _ambar = cnd.alerta || _pideCed;
+    out.innerHTML = `<div class="card ${_ambar?'res-dup':'res-ok'}" style="text-align:center;">
+      <div style="color:${_ambar?'var(--dorado)':'var(--verde)'};font-weight:800;letter-spacing:1px;">${cnd.alerta?'⚠️ REVISAR CONDICIONES':(_pideCed?'🪪 REVISAR CONDICIONES':'✅ VÁLIDO — cotejar carnet')}</div>
+      ${ficha}<div id="zona-box"></div>${cnd.html}
+      ${(!_pideCed && _GEN_CED[_g] && !(r.condiciones && r.condiciones.genero) && !_difYa) ? `<div style="margin-top:10px;padding:10px;border-radius:10px;border:2px solid ${_GEN_CED[_g]==='MUJER'?'#E8363D':'#3b82f6'};color:#fff;font-weight:900;letter-spacing:1px;">${_GEN_CED[_g]==='MUJER'?'👩 SOLO MUJERES':'👨 SOLO HOMBRES'}</div>` : ''}
+      ${_pideCed ? `<div style="margin-top:10px;font-weight:800;color:var(--dorado);">Pide la cédula: tiene que decir ${_GEN_CED[_g]}</div>` : ''}
+      ${(_difYa && _GEN_CED[_g]) ? `<div style="margin-top:10px;font-weight:800;color:var(--verde);">💵 Diferencia pagada — no aplica la condición</div>` : ''}
+      <button class="btn btn-verde" style="${_ambar?'background:var(--dorado);color:#1a1a1a;':''}" onclick="${onBurn}">${cnd.alerta?'INGRESAR IGUAL (revisar)':(_pideCed?((window._armado&&window._armado.qr===code&&Date.now()-window._armado.t<60000)?('✅ Sí, la cédula dice '+_GEN_CED[_g]+' — INGRESAR'):'🪪 PEDIR CÉDULA'):'CONFIRMAR INGRESO')}</button>
+      ${(r.condiciones && r.condiciones.genero) ? `<button class="btn" style="margin-top:8px;width:100%;background:rgba(212,168,50,.12);border:1px solid var(--dorado);color:var(--dorado);font-size:0.86rem;font-weight:700;" onclick="_difAbrir('${code}','${safeN}','${String(r.nombre_ticket||'').replace(/'/g,'')}',${Number(r.precio_unitario)||0})">💵 No cumple la condición — cobrar diferencia</button>` : ''}
+      <button class="btn" style="margin-top:8px;width:100%;background:transparent;color:#888;font-size:0.82rem;" onclick="noIngresa('${code}','${safeN}','${_oid}')">✕ No ingresa — decir por qué</button>
+    </div>`;
+  } catch(e) { cont('bad'); out.innerHTML = `<div class="card res-bad"><b style="color:var(--rojo)">Error</b><div class="sub">${e.message||e}</div></div>`; }
+}
+// ══ REGISTRO POR CARNET · entrada general ═════════════════════════
+// Por ley hay que verificar nombre, edad y RUT de quien entra. Ya que se
+// escanea, queda registrado. El lector se mantiene encendido para pasar
+// uno tras otro sin tocar la pantalla.
+//
+// ⚖️ VERIFICAR la edad y GUARDAR la identidad son dos cosas distintas. El
+//    guardado tiene su propio interruptor en el servidor y arranca apagado;
+//    la verificación de edad funciona igual con el guardado apagado.
+let REG = { n:0, rech:0, ultimo:'', t:null };
+
+function _regEntrar(){
+  REG.n = Number(sessionStorage.getItem('reg_n')||0);
+  REG.rech = Number(sessionStorage.getItem('reg_rech')||0);
+  _regCuentas();
+  setTimeout(()=>{ const i=$('reg-laser'); if(i){ i.value=''; i.focus(); } }, 60);
+}
+function _regSalir(){ clearTimeout(REG.t); }
+function _regCuentas(){
+  const a=$('reg-cuenta'), b=$('reg-rech');
+  if(a) a.textContent = REG.n;
+  if(b) b.textContent = REG.rech;
+  sessionStorage.setItem('reg_n', REG.n);
+  sessionStorage.setItem('reg_rech', REG.rech);
+}
+
+// El láser vuelca toda la cédula de golpe. Se espera a que termine.
+function _regLaser(){
+  clearTimeout(REG.t);
+  REG.t = setTimeout(()=>{
+    const i=$('reg-laser'); if(!i || !i.value) return;
+    const txt = i.value; i.value='';
+    // Si no se reconoce, se MUESTRA lo que entregó el lector en vez de tragárselo.
+    // Sin ver el texto crudo no hay forma de saber qué código está leyendo el
+    // Sunmi ni de enseñarle a entenderlo. El portero puede seguir a mano.
+    if(!esCedula(txt)){
+      _regCrudo(txt);
+      return;
+    }
+    _regProcesar(txt);
+  }, 200);
+}
+
+// Fecha de nacimiento desde el MRZ de la cédula chilena (formato TD1):
+// la segunda línea parte con AAMMDD. Si no viene, se devuelve null y el
+// portero confirma la edad a ojo — nunca se inventa.
+function _regNacimiento(s){
+  s = String(s||'');
+  const m = s.match(/[?&]mrz=([A-Z0-9<]+)/i);
+  if (m) {
+    const mrz = m[1].toUpperCase();
+    if (mrz.length >= 36) {
+      const d = _regFecha6(mrz.slice(30, 36));
+      if (d) return d;
+    }
+  }
+  // Formatos sueltos por si el lector entrega otra cosa.
+  const iso = s.match(/(?:nac|birth|fnac)[^0-9]{0,4}(\d{4})-(\d{2})-(\d{2})/i);
+  if (iso) return iso[1]+'-'+iso[2]+'-'+iso[3];
+  return null;
+}
+function _regFecha6(yymmdd){
+  if(!/^\d{6}$/.test(yymmdd)) return null;
+  const yy=+yymmdd.slice(0,2), mm=+yymmdd.slice(2,4), dd=+yymmdd.slice(4,6);
+  if(mm<1||mm>12||dd<1||dd>31) return null;
+  const hoy=new Date();
+  let año = 2000+yy;
+  // Solo se va al siglo pasado si el año 20xx todavía no llega. Ojo: NO se
+  // descarta a los muy jóvenes — un carnet de alguien de 6 años es un dato
+  // válido, y es justo el que tiene que salir como menor de edad. Si acá lo
+  // mandáramos a 19xx, quedaría de 106 años, se descartaría por imposible, y
+  // la pantalla diría «edad desconocida» en vez de «MENOR DE EDAD».
+  if (año > hoy.getFullYear()) año = 1900+yy;
+  if (hoy.getFullYear()-año > 100) return null;
+  return año+'-'+String(mm).padStart(2,'0')+'-'+String(dd).padStart(2,'0');
+}
+
+async function _regProcesar(texto){
+  const run = _extraerRun(texto);
+  const nom = _extraerNombreCedula(texto);
+  const nac = _regNacimiento(texto);
+  if(!run && !nom){ vToast('No pude leer el carnet'); return; }
+  if(run && run === REG.ultimo){ vToast('Ese carnet ya lo leíste recién'); return; }
+
+  $('reg-panel').innerHTML = '<div class="sub" style="padding:26px 0;">Registrando…</div>';
+  try{
+    const { data, error } = await sb.rpc('puerta_registrar_ingreso', {
+      p_nombre: nom || '', p_rut: run || null, p_nacimiento: nac,
+      p_evento_id: (eventoSel && eventoSel.id) || null, p_origen: 'general' });
+    if (error) throw error;
+    _regPintar(data || {}, nom, run, nac);
+  }catch(e){
+    $('reg-panel').innerHTML = `<div style="padding:18px 0;color:var(--rojo);font-weight:700;">⚠️ ${_dEsc(e.message||e)}</div>`;
+    setTimeout(()=>{ const i=$('reg-laser'); if(i) i.focus(); }, 100);
+  }
+}
+
+function _regPintar(d, nom, run, nac){
+  REG.ultimo = run || '';
+  const g = $('reg-guardado');
+  if (g) g.textContent = d.guardado === false ? '⚪ guardado apagado' : (d.guardado ? '🟢 se guarda' : '');
+
+  if (d.ok === false && d.error === 'menor_de_edad') {
+    REG.rech++; _regCuentas(); beep(false);
+    try{ if(navigator.vibrate) navigator.vibrate([90,60,90]); }catch(e){}
+    $('reg-panel').innerHTML = `<div style="padding:10px 0;">
+      <div style="font-size:2.2rem;">🚫</div>
+      <div style="color:var(--rojo);font-size:1.35rem;font-weight:900;letter-spacing:1px;">MENOR DE EDAD</div>
+      <div style="font-size:1.05rem;color:#fff;margin-top:8px;">${_dEsc(nom||'—')}</div>
+      <div style="font-size:1.7rem;font-weight:900;color:var(--rojo);margin-top:2px;">${d.edad} años</div>
+      <div class="sub" style="margin-top:8px;">Mínimo: ${d.minima} · queda registrado el intento.</div>
+    </div>`;
+  } else if (d.ok === false) {
+    $('reg-panel').innerHTML = `<div style="padding:20px 0;color:var(--rojo);font-weight:700;">⚠️ ${_dEsc(d.error||'No se pudo')}</div>`;
+  } else {
+    REG.n++; _regCuentas(); beep(true);
+    try{ if(navigator.vibrate) navigator.vibrate(45); }catch(e){}
+    const edad = d.edad != null
+      ? `<div style="display:inline-block;background:rgba(34,197,94,.15);border:1px solid var(--verde);color:var(--verde);font-size:0.86rem;padding:2px 12px;border-radius:99px;margin-top:8px;">✓ ${d.edad} años</div>`
+      : `<div style="display:inline-block;background:rgba(212,168,50,.12);border:1px solid var(--dorado);color:var(--dorado);font-size:0.8rem;padding:2px 12px;border-radius:99px;margin-top:8px;">⚠️ edad no venía — confírmala a ojo</div>`;
+    const vis = (+d.visitas > 0)
+      ? `<div style="background:#151517;border-radius:8px;padding:7px 10px;margin-top:10px;font-size:0.76rem;color:#888;">Ya vino <b style="color:#fff;">${d.visitas} ${+d.visitas===1?'vez':'veces'}</b>${d.ultima?' · última: '+_dEsc(d.ultima):''}</div>`
+      : '';
+    $('reg-panel').innerHTML = `<div style="padding:6px 0;">
+      <div style="font-size:1.45rem;font-weight:900;color:#fff;line-height:1.15;">${_dEsc(nom||'(sin nombre)')}</div>
+      <div style="font-size:1.15rem;color:var(--dorado);font-weight:800;letter-spacing:1px;margin-top:3px;">${run?fmtRut(run):'sin RUT'}</div>
+      ${edad}${vis}
+      <div class="sub" style="margin-top:10px;color:var(--verde);font-weight:700;">✓ Listo — pasa el siguiente</div>
+    </div>`;
+  }
+  setTimeout(()=>{ const i=$('reg-laser'); if(i) i.focus(); }, 120);
+}
+
+// Muestra tal cual lo que entregó el lector, para poder arreglarlo después.
+// No es un error del portero: es información que necesitamos ver.
+function _regCrudo(txt){
+  const p = $('reg-panel'); if(!p) return;
+  const t = String(txt||'').slice(0,300);
+  window._cedRaw = t;   // _copiarCed() lee de acá, no recibe argumentos
+  p.innerHTML = `<div style="background:#241a05;border:1px solid #6b5310;border-radius:12px;padding:14px;">
+    <div style="color:#f0c84a;font-weight:800;margin-bottom:6px;">🔎 No reconocí ese código</div>
+    <div style="color:#c9c2a8;font-size:0.8rem;line-height:1.5;">Sigue registrando a mano. Manda esto por WhatsApp para que lo arreglemos:</div>
+    <div style="margin-top:9px;background:#0d0d0f;border:1px solid #3a3a3c;border-radius:8px;padding:10px;
+                font-family:ui-monospace,monospace;font-size:0.74rem;color:#e4e4e7;word-break:break-all;">${
+      t.replace(/</g,'&lt;')}</div>
+    <div style="display:flex;gap:8px;margin-top:10px;">
+      <button class="btn btn-gris" style="flex:1;" onclick="_copiarCed()">📋 Copiar</button>
+      <button class="btn btn-verde" style="flex:1;" onclick="_regManual()">✍️ A mano</button>
+    </div>
+  </div>`;
+  setTimeout(()=>{ const i=$('reg-laser'); if(i) i.focus(); }, 120);
+}
+
+function _regManual(){
+  const run = prompt('RUT (con o sin puntos):'); if(!run) return;
+  if(!rutValido(run)){ vToast('Ese RUT no es válido'); return; }
+  const nom = prompt('Nombre y apellido:') || '';
+  const nac = prompt('Fecha de nacimiento (AAAA-MM-DD) — deja vacío si no la tienes:') || null;
+  if (nac && !/^\d{4}-\d{2}-\d{2}$/.test(nac)) { vToast('La fecha va como 1999-05-12'); return; }
+  _regProcesar('?name=' + encodeURIComponent(nom) + '&RUN=' + rutLimpio(run) +
+               (nac ? '&nac=' + nac : ''));
+}
+
+// ══ COBRAR LA DIFERENCIA ══════════════════════════════════════════
+// Alguien compró una entrada cuya condición no cumple (no es universitario,
+// se equivocó de género). En vez de devolverle todo o dejarlo afuera, se le
+// cobra la diferencia.
+//
+// DOS REGLAS QUE MANDAN:
+// 1. DECIDE EL ANFITRIÓN, no el sistema. Acá solo se propone un monto; a
+//    veces corresponde devolución y no cobro, y esa salida sigue disponible.
+// 2. LA APP NO COBRA. Emite el documento; el POS lo cobra en caja. Por eso
+//    lo único que sale de acá es un código para llevar a la caja.
+const _DIF_MOTIVOS = [
+  { k:'no_universitario', t:'🎓 No es universitario' },
+  { k:'genero',           t:'⚧ Se equivocó de género' },
+  { k:'otro',             t:'✍️ Otro motivo' }
+];
+let _dif = { code:null, nombre:'', ticket:'', precio:0, motivo:'no_universitario' };
+
+function _difAbrir(code, nombre, ticket, precio) {
+  _dif = { code, nombre, ticket, precio: Number(precio)||0, motivo:'no_universitario' };
+  const tipos = (window._tiposEv || []).filter(t => Number(t.precio) > 0);
+  const opts = tipos.map(t => `<option value="${Number(t.precio)||0}">${_dEsc(t.nombre)} · $${(Number(t.precio)||0).toLocaleString('es-CL')}</option>`).join('');
+  $('resultado').innerHTML = `<div class="card" style="text-align:left;border:2px solid var(--dorado);">
+    <div style="text-align:center;color:var(--dorado);font-weight:900;letter-spacing:1px;">💵 COBRAR DIFERENCIA</div>
+    <div style="text-align:center;font-size:1.25rem;font-weight:800;color:#fff;margin:8px 0 2px;">${_dEsc(nombre)}</div>
+    <div style="text-align:center;font-size:0.78rem;color:#888;margin-bottom:12px;">Tiene: ${_dEsc(ticket)}${_dif.precio?' · $'+_dif.precio.toLocaleString('es-CL'):''}</div>
+
+    <div style="font-size:0.7rem;color:#888;letter-spacing:1px;margin-bottom:5px;">POR QUÉ NO CUMPLE</div>
+    <div id="dif-motivos" style="display:grid;gap:5px;margin-bottom:12px;">
+      ${_DIF_MOTIVOS.map((m,i)=>`<button class="btn dif-m" data-k="${m.k}" onclick="_difMotivo('${m.k}')" style="width:100%;text-align:left;font-size:0.86rem;background:${i?'transparent':'rgba(212,168,50,.15)'};border:1px solid ${i?'#333':'var(--dorado)'};color:${i?'#aaa':'var(--dorado)'};">${m.t}</button>`).join('')}
+    </div>
+
+    <div style="font-size:0.7rem;color:#888;letter-spacing:1px;margin-bottom:5px;">LO QUE LE CORRESPONDE</div>
+    <select id="dif-destino" onchange="_difCalc()" style="width:100%;padding:10px;border-radius:8px;background:#0e0e12;border:1px solid #333;color:#fff;font-size:0.88rem;margin-bottom:10px;">
+      <option value="">— elige la entrada correcta —</option>${opts}
+    </select>
+
+    <div style="font-size:0.7rem;color:#888;letter-spacing:1px;margin-bottom:5px;">MONTO A COBRAR</div>
+    <input id="dif-monto" type="number" inputmode="numeric" min="0" step="500" placeholder="0"
+      style="width:100%;padding:12px;border-radius:8px;background:#0e0e12;border:1px solid var(--dorado);color:var(--dorado);font-size:1.5rem;font-weight:900;text-align:center;" />
+    <div style="font-size:0.7rem;color:#777;margin:5px 0 12px;text-align:center;">Se propone la resta, pero el monto final lo pones tú.</div>
+
+    <button class="btn btn-verde" style="width:100%;font-weight:800;" onclick="_difEmitir(this)">🎫 Emitir el cobro</button>
+    <button class="btn" style="margin-top:8px;width:100%;background:transparent;color:#888;font-size:0.82rem;" onclick="_difNoIngresa()">✕ Mejor no lo dejo pasar — devolución</button>
+    <button class="btn" style="margin-top:6px;width:100%;background:transparent;color:#666;font-size:0.78rem;" onclick="siguiente()">← Volver</button>
+  </div>`;
+}
+function _dEsc(s){ return String(s==null?'':s).replace(/[&<>"]/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c])); }
+// El nombre NO viaja dentro del onclick: el navegador decodifica la entidad al
+// leer el atributo y lo devuelve crudo. Se lee de _dif, que ya lo tiene.
+function _difNoIngresa(){ noIngresa(_dif.code, _dif.nombre); }
+
+function _difMotivo(k){
+  _dif.motivo = k;
+  document.querySelectorAll('#dif-motivos .dif-m').forEach(b => {
+    const on = b.getAttribute('data-k') === k;
+    b.style.background = on ? 'rgba(212,168,50,.15)' : 'transparent';
+    b.style.border     = '1px solid ' + (on ? 'var(--dorado)' : '#333');
+    b.style.color      = on ? 'var(--dorado)' : '#aaa';
+  });
+}
+function _difCalc(){
+  const destino = Number(($('dif-destino')||{}).value) || 0;
+  // Si pagó MÁS que lo que le corresponde, no hay nada que cobrar.
+  const d = Math.max(0, destino - (_dif.precio||0));
+  const m = $('dif-monto'); if (m) m.value = d || '';
+}
+
+async function _difEmitir(btn){
+  const monto = Number(($('dif-monto')||{}).value) || 0;
+  if (monto <= 0) { vToast('Pon un monto mayor que cero'); return; }
+  const sel = $('dif-destino');
+  const destino = sel && sel.selectedIndex > 0 ? sel.options[sel.selectedIndex].text.split(' · $')[0] : null;
+  if (btn) { btn.disabled = true; btn.textContent = 'Emitiendo…'; }
+  try{
+    const { data, error } = await sb.rpc('diferencia_emitir', {
+      p_qr: _dif.code, p_motivo: _dif.motivo, p_monto: monto, p_destino: destino, p_nota: null });
+    if (error) throw error;
+    if (!data || data.ok === false) throw new Error((data && data.error) || 'No se pudo emitir');
+    _difListo(data, monto);
+  }catch(e){
+    if (btn) { btn.disabled = false; btn.textContent = '🎫 Emitir el cobro'; }
+    vToast('No se pudo emitir: ' + (e.message || e));
+  }
+}
+
+function _difListo(d, monto){
+  beep(true);
+  $('resultado').innerHTML = `<div class="card res-ok" style="text-align:center;border:2px solid var(--verde);">
+    <div style="color:var(--verde);font-weight:900;letter-spacing:1px;">🎫 COBRO EMITIDO</div>
+    <div style="font-size:0.8rem;color:#888;margin-top:10px;">Llévalo a la caja con este código</div>
+    <div style="font-family:monospace;font-size:2.3rem;font-weight:900;color:var(--dorado);letter-spacing:2px;margin:6px 0;">${_dEsc(d.codigo)}</div>
+    <div style="font-size:2rem;font-weight:900;color:#fff;">$${Number(monto).toLocaleString('es-CL')}</div>
+    <div style="font-size:0.9rem;color:#ccc;margin-top:8px;">${_dEsc(d.persona || _dif.nombre)}</div>
+    <div style="font-size:0.72rem;color:#777;margin-top:10px;line-height:1.5;">
+      La entrada <b style="color:#aaa">no se habilita</b> hasta que esté pagada.<br>
+      Cuando la caja cobre, vuelve y toca «Ya la cobraron».</div>
+    <button class="btn btn-verde" style="margin-top:12px;width:100%;font-weight:800;" onclick="_difPagado(this,'${_dEsc(d.codigo)}')">💵 Ya la cobraron — habilitar</button>
+    <button class="btn" style="margin-top:8px;width:100%;background:transparent;color:#888;font-size:0.84rem;" onclick="siguiente()">➡️ Siguiente (queda pendiente)</button>
+  </div>`;
+}
+
+async function _difPagado(btn, codigo, outId){
+  if (btn) { btn.disabled = true; btn.textContent = 'Marcando…'; }
+  try{
+    const { data, error } = await sb.rpc('diferencia_pagar', { p_codigo: codigo, p_ref_venta: null, p_monto: null });
+    if (error) throw error;
+    // «ya_pagado» (lo cobró otro equipo o el POS) también habilita.
+    if (!data || (data.ok === false && data.error !== 'ya_pagado')) throw new Error((data && data.error) || 'No se pudo marcar');
+    vToast('✅ Cobrada — ya puede entrar');
+    window._difOk = Object.assign(window._difOk||{}, { [_dif.code]: true });
+    checkQR(_dif.code, outId);   // vuelve a la ficha, en la MISMA pantalla, ya sin el cobro pendiente
+  }catch(e){
+    if (btn) { btn.disabled = false; btn.textContent = '💵 Ya la cobraron — habilitar'; }
+    vToast('No se pudo marcar: ' + (e.message || e));
+  }
+}
+
+async function quemarQR(code, nombre, outId, forzar) {
+  const _autorizado = (extra) => {
+    cont('ok'); beep(true); const m=$('qr-manual'); if(m) m.value='';
+    $(outId || 'resultado').innerHTML = `<div class="card res-ok" style="text-align:center;">
+      <div style="color:var(--verde);font-size:1.35rem;font-weight:900;">✅ AUTORIZADO</div>
+      ${nombre ? `<div style="font-size:1.15rem;font-weight:800;margin-top:4px;color:#fff;">${nombre}</div>` : ''}
+      ${extra || ''}
+      <button class="btn btn-verde" style="margin-top:12px;width:100%;font-size:1.05rem;font-weight:800;" onclick="siguiente()">➡️ SIGUIENTE</button>
+      <button id="btn-deshacer" class="btn" style="margin-top:8px;width:100%;background:transparent;border:1px solid var(--borde);color:var(--dorado);font-size:0.82rem;"
+        onclick="deshacerIngreso('${String(code).replace(/'/g,'')}')">↩️ Deshacer — me equivoqué <span id="deshacer-t"></span></button>
+    </div>`;
+    _deshacerCuenta();
+  };
+  // OFFLINE: quema local y sincroniza después
+  if (window._offNow || !navigator.onLine) {
+    snapBurnLocal(code, nombre); snapRenderEstado();
+    _autorizado('<div class="sub" style="margin-top:6px;color:var(--dorado);">📴 Offline · se sincroniza al reconectar</div>');
+    return;
+  }
+  try {
+    let r, error;
+    ({ data: r, error } = await sb.rpc('puerta_quemar_qr', { p_qr: code, p_evento: (eventoSel && eventoSel.id) || null, p_forzar: !!forzar }));
+    if (error && /function|does not exist|schema|argument|not find/i.test(String(error.message||''))) {
+      ({ data: r, error } = await sb.rpc('puerta_quemar_qr', { p_qr: code }));   // fallback: aún sin correr el SQL del candado
+    }
+    if (error) { if (_esErrorRed(error)) { snapBurnLocal(code, nombre); snapRenderEstado(); _autorizado('<div class="sub" style="margin-top:6px;color:var(--dorado);">📴 Sin señal · se sincroniza al reconectar</div>'); return; } throw error; }
+    if (r?.error || !r.ok) throw new Error(r?.error || r?.motivo || 'No se pudo registrar');
+    snapMarkUsed(code);   // refleja en el cache local para que no se re-queme offline
+    _autorizado();
+  } catch(e) { alert('Error: ' + (e.message||e)); }
+}
+async function marcarIncidencia(code) {
+  const nota = prompt('Motivo (ej: estado de ebriedad):', '');
+  if (nota === null) return;
+  try {
+    const { data: r, error } = await sb.rpc('puerta_incidencia', { p_qr: code, p_nota: nota.trim() || null });
+    if (error) throw error;
+    if (r?.error || !r.ok) throw new Error(r?.error || r?.motivo || 'No se pudo marcar');
+    alert('🚫 Marcado como posible devolución. El admin lo verá en Devoluciones.');
+  } catch(e) { alert('Error: ' + (e.message||e)); }
+}
+
+// ── Vistas: Escanear / Por RUT / Escaneados / Incidencia ──
+function verVista(v) {
+  ['escanear','rut','nuevo','registro','lista','incidencia','pulseras'].forEach(k => {
+    const el=$('vista-'+k); if(el) el.classList.toggle('hidden', k !== v);
+    const ac=$('acc-'+k); if(ac) ac.classList.toggle('active', k === v);
+  });
+  if (v === 'pulseras' && window.FRATE_PULSERAS) FRATE_PULSERAS.mount('pulseras-panel', { mode: 'puerta' });
+  if (v !== 'escanear' && escaneando) toggleScanner(); // ahorra batería
+  if (v !== 'nuevo') capStopScan();
+  if (v !== 'rut') { try { rutStopScan(); } catch(e) {} }
+  if (v === 'registro') _regEntrar(); else _regSalir();
+  if (v === 'lista') cargarEscaneados();
+}
+
+// ── Cámara de cédula en la vista "Por RUT" ───────────────────
+let rutScanner = null, rutScanning = false;
+async function rutToggleScan() {
+  const box = $('rut-reader'), btn = $('rut-scan-btn');
+  if (rutScanning) { rutStopScan(); return; }
+  box.style.display = 'block'; btn.textContent = '⏹ Detener';
+  try {
+    rutScanner = new Html5Qrcode('rut-reader', { experimentalFeatures: { useBarCodeDetectorIfSupported: true }, verbose: false, formatsToSupport: (window.Html5QrcodeSupportedFormats ? [Html5QrcodeSupportedFormats.QR_CODE, Html5QrcodeSupportedFormats.PDF_417] : undefined) });
+    await rutScanner.start({ facingMode: 'environment' }, { fps: 10, qrbox: { width: 260, height: 180 } }, rutOnScan, () => {});
+    rutScanning = true;
+  } catch (e) { btn.textContent = '📷 Escanear cédula (cámara)'; box.style.display = 'none'; alert('No se pudo abrir la cámara: ' + (e.message || e)); }
+}
+async function rutStopScan() {
+  const btn = $('rut-scan-btn'), box = $('rut-reader');
+  if (rutScanner && rutScanning) { try { await rutScanner.stop(); } catch (e) {} }
+  rutScanning = false; if (btn) btn.textContent = '📷 Escanear cédula (cámara)'; if (box) box.style.display = 'none';
+}
+function rutOnScan(texto) {
+  const s = String(texto || '');
+  try { if (navigator.vibrate) navigator.vibrate(60); } catch (e) {}
+  // Si por casualidad leyó un QR de ticket → validar directo
+  if (/FCC-/i.test(s)) { rutStopScan(); verVista('escanear'); checkQR(normalizarQR(s)); return; }
+  if (esCedula(s)) { rutStopScan(); procesarCedula(s); return; }   // 🪪 cédula → RUN + diagnóstico
+  vToast('🪪 No se pudo leer — enfoca el código de barras del reverso');
+}
+
+// ── Cliente nuevo (VIP/artista) ──────────────────────────────
+let capScanner = null, capScanning = false;
+async function capToggleScan() {
+  const box = $('cap-reader'), btn = $('cap-scan-btn');
+  if (capScanning) { capStopScan(); return; }
+  box.style.display = 'block'; btn.textContent = '⏹ Detener';
+  try {
+    capScanner = new Html5Qrcode('cap-reader', { experimentalFeatures: { useBarCodeDetectorIfSupported: true }, verbose: false, formatsToSupport: (window.Html5QrcodeSupportedFormats ? [Html5QrcodeSupportedFormats.QR_CODE, Html5QrcodeSupportedFormats.PDF_417] : undefined) });
+    await capScanner.start({ facingMode: 'environment' }, { fps: 10, qrbox: { width: 240, height: 240 } }, capOnScan, () => {});
+    capScanning = true;
+  } catch (e) { btn.textContent = '📷 Escanear (cédula / QR) para autocompletar'; box.style.display = 'none'; alert('No se pudo abrir la cámara: ' + (e.message || e)); }
+}
+async function capStopScan() {
+  const btn = $('cap-scan-btn'), box = $('cap-reader');
+  if (capScanner && capScanning) { try { await capScanner.stop(); } catch (e) {} }
+  // En Sunmi la cámara y el láser son EXCLUYENTES: si la cámara no suelta el
+  // dispositivo, el láser deja de disparar y hay que reiniciar el equipo en
+  // plena puerta. `stop()` solo no alcanzaba — hay que soltar el objeto y
+  // cortar a mano cualquier pista de video que haya quedado viva.
+  try { if (capScanner) await capScanner.clear(); } catch (e) {}
+  capScanner = null;
+  try {
+    (box ? box.querySelectorAll('video') : []).forEach(v => {
+      const st = v.srcObject; if (st && st.getTracks) st.getTracks().forEach(t => t.stop());
+      v.srcObject = null;
+    });
+  } catch (e) {}
+  capScanning = false; if (btn) btn.textContent = '📷 Escanear cédula (cámara) para autocompletar'; if (box) { box.style.display = 'none'; box.innerHTML = ''; }
+}
+function capOnScan(texto) {
+  const s = String(texto || '');
+  try { if (navigator.vibrate) navigator.vibrate(60); } catch (e) {}
+  // 🪪 Cédula → extrae RUN + rellena lo que se pueda + muestra el crudo (diagnóstico)
+  if (esCedula(s)) { capStopScan(); procesarCedula(s); return; }
+  // Instagram (QR del celular)
+  const mIg = s.match(/instagram\.com\/([A-Za-z0-9._]+)/i) || s.match(/^@?([A-Za-z0-9._]{2,30})$/);
+  if (mIg && !/FCC-/i.test(s)) $('cap-ig').value = '@' + mIg[1].replace(/^@/, '');
+  const mTel = s.match(/tel:([+\d\s]+)/i) || s.match(/TEL[^:]*:([+\d\s]{7,})/i); if (mTel) $('cap-tel').value = mTel[1].trim();
+  const mFn = s.match(/FN[^:]*:(.+)/i); if (mFn && !$('cap-nombre').value.trim()) $('cap-nombre').value = mFn[1].trim().toUpperCase();
+  vToast('📷 Datos capturados — completa lo que falte');
+  capStopScan();
+}
+// ══ Ingreso nuevo: ahora se PIDE, no se hace ══════════════════════════
+// Antes el portero escribía un nombre y la persona entraba. Ahora tiene que
+// decir QUÉ entrada le está regalando, y un admin lo aprueba desde el panel.
+// Nadie entra hasta que alguien firme.
+let _solId = null, _solTimer = null;
+
+async function capCargarTipos() {
+  const sel = document.getElementById('cap-tipo'); if (!sel) return;
+  const evId = (eventoSel && eventoSel.id) || null;
+  sel.innerHTML = '<option value="">— elige la entrada —</option>';
+  if (!evId) return;
+  try {
+    const { data } = await sb.from('tipos_ticket').select('id,nombre,precio')
+      .eq('evento_id', evId).order('orden').order('id');
+    window._tiposEv = data || [];   // los reusa el cobro de diferencia
+    (data || []).forEach(t => {
+      const o = document.createElement('option');
+      o.value = t.id;
+      o.textContent = t.nombre + (t.precio ? ' · $' + Number(t.precio).toLocaleString('es-CL') : ' · $0');
+      sel.appendChild(o);
+    });
+  } catch (e) { /* sin tipos cargados: el admin lo verá igual en la bandeja */ }
+}
+
+function capPintarEspera(nombre, ticket) {
+  document.getElementById('cap-result').innerHTML =
+    '<div class="card" style="text-align:center;border-color:var(--dorado);">'
+    + '<div style="color:var(--dorado);font-size:1.2rem;font-weight:900;">⏳ ESPERANDO AUTORIZACIÓN</div>'
+    + '<div style="font-size:1.1rem;font-weight:800;margin-top:4px;color:#fff;">' + String(nombre||'').replace(/</g,'&lt;') + '</div>'
+    + '<div class="sub" style="margin-top:4px;">' + String(ticket||'').replace(/</g,'&lt;') + '</div>'
+    + '<div class="sub" style="margin-top:10px;">Un admin la está viendo en el panel. <b>No la dejes pasar todavía.</b></div>'
+    + '<button class="btn" style="margin-top:12px;width:100%;background:#2a2a2e;color:#fff;" onclick="capReset()">✕ Cancelar y volver</button>'
+    + '</div>';
+}
+
+async function solicitarIngreso() {
+  const nombre = ($('cap-nombre').value || '').trim();
+  const tipo   = parseInt(($('cap-tipo') || {}).value || '') || null;
+  if (!nombre) { alert('Pon al menos el nombre'); return; }
+  if (!tipo)   { alert('Tienes que elegir QUÉ entrada le estás autorizando.'); return; }
+  const btn = $('cap-btn'); btn.disabled = true; btn.textContent = 'Pidiendo…';
+  try {
+    const rut = ($('cap-rut').value || '').trim();
+    const { data: r, error } = await sb.rpc('puerta_solicitar_ingreso', {
+      p_nombre: nombre.toUpperCase(), p_tipo_ticket_id: tipo,
+      p_evento_id: (eventoSel && eventoSel.id) || null,
+      p_rut: rut ? rutLimpio(rut) : null,
+      p_telefono: ($('cap-tel').value || '').trim() || null,
+      p_instagram: ($('cap-ig').value || '').replace(/^@/, '').trim() || null,
+      p_motivo: $('cap-motivo').value || null
+    });
+    if (error) throw error;
+    if (!r || r.ok === false) throw new Error((r && r.error) || 'No se pudo pedir');
+    _solId = r.id;
+    const tnom = ($('cap-tipo').selectedOptions[0] || {}).textContent || '';
+    capPintarEspera(nombre.toUpperCase(), tnom);
+    capVigilar();
+  } catch (e) {
+    $('cap-result').innerHTML = '<div class="card res-bad" style="text-align:center;">'
+      + '<div style="color:var(--rojo);font-weight:900;">⛔ No se pudo pedir</div>'
+      + '<div class="sub" style="margin-top:6px;">' + String(e.message || e).replace(/</g,'&lt;') + '</div></div>';
+  } finally { btn.disabled = false; btn.textContent = '🙋 PEDIR AUTORIZACIÓN'; }
+}
+
+function capVigilar() {
+  if (_solTimer) clearInterval(_solTimer);
+  _solTimer = setInterval(async () => {
+    if (!_solId) { clearInterval(_solTimer); return; }
+    try {
+      const { data: r } = await sb.rpc('puerta_estado_solicitud', { p_id: _solId });
+      if (!r || r.ok === false || r.estado === 'pendiente') return;
+      clearInterval(_solTimer); _solTimer = null; const id = _solId; _solId = null;
+      if (r.estado === 'aprobada') {
+        cont('ok'); beep(true);
+        $('cap-result').innerHTML = '<div class="card res-ok" style="text-align:center;">'
+          + '<div style="color:var(--verde);font-size:1.35rem;font-weight:900;">✅ AUTORIZADO · PUEDE PASAR</div>'
+          + '<div style="font-size:1.15rem;font-weight:800;margin-top:4px;color:#fff;">' + String(r.nombre||'').replace(/</g,'&lt;') + '</div>'
+          + '<div class="sub" style="margin-top:4px;">' + String(r.ticket||'').replace(/</g,'&lt;') + ' · autorizó <b>' + String(r.quien||'—').replace(/</g,'&lt;') + '</b></div>'
+          + '<button class="btn btn-verde" style="margin-top:12px;width:100%;" onclick="capReset()">➡️ REGISTRAR OTRO</button></div>';
+      } else {
+        beep(false);
+        $('cap-result').innerHTML = '<div class="card res-bad" style="text-align:center;">'
+          + '<div style="color:var(--rojo);font-size:1.25rem;font-weight:900;">⛔ NO AUTORIZADO</div>'
+          + '<div class="sub" style="margin-top:6px;">' + (r.nota ? String(r.nota).replace(/</g,'&lt;') + ' · ' : '') + 'decidió <b>' + String(r.quien||'—').replace(/</g,'&lt;') + '</b></div>'
+          + '<button class="btn" style="margin-top:12px;width:100%;background:#2a2a2e;color:#fff;" onclick="capReset()">➡️ SIGUIENTE</button></div>';
+      }
+    } catch (_) { /* sin señal: se sigue intentando */ }
+  }, 3000);
+}
+
+async function registrarClienteNuevo() {
+  const nombre = ($('cap-nombre').value || '').trim();
+  if (!nombre) { alert('Pon al menos el nombre'); return; }
+  const btn = $('cap-btn'); btn.disabled = true; btn.textContent = 'Registrando…';
+  try {
+    const rut = ($('cap-rut').value || '').trim();
+    const { data: r, error } = await sb.rpc('puerta_capturar_cliente', {
+      p_nombre: nombre.toUpperCase(), p_rut: rut ? rutLimpio(rut) : null,
+      p_telefono: ($('cap-tel').value || '').trim() || null, p_instagram: ($('cap-ig').value || '').replace(/^@/, '').trim() || null,
+      p_motivo: $('cap-motivo').value || null, p_evento_id: (eventoSel && eventoSel.id) || null
+    });
+    if (error) throw error;
+    if (r?.error) throw new Error(r.error);
+    cont('ok'); beep(true);
+    $('cap-result').innerHTML = `<div class="card res-ok" style="text-align:center;"><div style="color:var(--verde);font-size:1.35rem;font-weight:900;">✅ INGRESO REGISTRADO</div><div style="font-size:1.15rem;font-weight:800;margin-top:4px;color:#fff;">${nombre.toUpperCase()}</div><div class="sub" style="margin-top:6px;">${$('cap-motivo').value} · cuenta en el aforo · quedó en el CRM</div><button class="btn btn-verde" style="margin-top:12px;width:100%;" onclick="capReset()">➡️ REGISTRAR OTRO</button></div>`;
+    ['cap-nombre','cap-rut','cap-tel','cap-ig'].forEach(id => $(id).value = '');
+  } catch (e) {
+    const parts = [];
+    if (e && e.message) parts.push(e.message);
+    if (e && e.details) parts.push('detalle: ' + e.details);
+    if (e && e.hint) parts.push('hint: ' + e.hint);
+    if (e && e.code) parts.push('code: ' + e.code);
+    const msg = parts.join('\n') || String(e);
+    try { if (navigator.vibrate) navigator.vibrate([80,60,80]); } catch(_) {}
+    $('cap-result').innerHTML = `<div class="card res-bad" style="text-align:center;"><div style="color:var(--rojo);font-size:1.15rem;font-weight:900;">⛔ No se pudo registrar</div><div style="margin-top:8px;text-align:left;background:#0d0d0e;border:1px solid var(--borde);padding:10px;border-radius:8px;font-family:monospace;font-size:0.72rem;color:#ff8a8a;white-space:pre-wrap;word-break:break-word;">${msg.replace(/</g,'&lt;')}</div><button class="btn btn-verde" style="margin-top:12px;width:100%;" onclick="registrarClienteNuevo()">🔁 REINTENTAR</button></div>`;
+  }
+  finally { btn.disabled = false; btn.textContent = '✅ REGISTRAR INGRESO'; }
+}
+function capReset() { if(_solTimer){clearInterval(_solTimer);_solTimer=null;} _solId=null;
+  $('cap-result').innerHTML = ''; ['cap-nombre','cap-rut','cap-tel','cap-ig'].forEach(id => $(id).value = '');
+  const t=$('cap-tipo'); if(t) t.value=''; capCargarTipos(); $('cap-nombre').focus(); }
+
+// Ficha grande reutilizable (nombre + RUT para cotejar carnet)
+function fichaGrande(t) {
+  return `
+    <div style="font-size:1.55rem;font-weight:900;line-height:1.15;margin:8px 0 2px;color:#fff;">${t.nombre||'—'}</div>
+    <div style="font-size:1.25rem;color:var(--dorado);font-weight:800;letter-spacing:1px;">${t.rut||'SIN RUT'}</div>
+    <div class="sub" style="margin-top:8px;">🎟️ ${_etq(t.nombre_ticket)} · ${t.orden||''}${t.comprador ? ' · comprador: '+t.comprador : ''}</div>`;
+}
+
+// 🪪 Buscar por RUT (gente sin celular)
+// Láser Sunmi: al escanear el carnet vuelca TODA la cédula (URL con RUN=…). Debounce +
+// extrae solo el RUN cuando terminó de escribir, y busca solo.
+let _rutT=null;
+function _rutLaser(){ clearTimeout(_rutT); _rutT=setTimeout(function(){ const inp=$('rut-input'); if(!inp||!inp.value) return; if(esCedula(inp.value)){ const r=_extraerRun(inp.value); if(r){ inp.value=r; buscarPorRUT(); } } }, 180); }
+async function buscarPorRUT() {
+  let rut = $('rut-input').value.trim();
+  if (esCedula(rut)) { const r = _extraerRun(rut); if (r) { rut = r; $('rut-input').value = r; } }  // por si el láser mandó Enter con la cédula completa
+  const out = $('rut-result');
+  if (!rut) return;
+  out.innerHTML = '<div class="card" style="color:var(--gris);text-align:center;">Buscando…</div>';
+  try {
+    const { data: r, error } = await sb.rpc('puerta_buscar_rut', { p_rut: rut, p_evento: eventoSel.id });
+    if (error) throw error;
+    if (r?.error) throw new Error(r.error);
+    const lista = Array.isArray(r) ? r : [];
+    // La búsqueda por RUT no trae las condiciones: se piden a puerta_check_qr
+    // (solo lee) para decidir la cédula igual que por QR. Tope de 2,5 s; si no
+    // llegan, se decide por el nombre del ticket como antes. El precio sirve para
+    // saber si es cortesía de miembros cuando no hay mapa (_esMiembro).
+    try {
+      await Promise.race([
+        Promise.all(lista.filter(t => !t.ya_usado).map(t => sb.rpc('puerta_check_qr', { p_qr: t.qr })
+          .then(x => { if (x && x.data && x.data.ok) { t.condiciones = x.data.condiciones; t.precio_unitario = x.data.precio_unitario; } }).catch(() => {}))),
+        new Promise(res => setTimeout(res, 2500))
+      ]);
+    } catch (_) {}
+    if (!lista.length) { out.innerHTML = '<div class="card res-bad" style="text-align:center;"><b style="color:var(--rojo)">Sin tickets con ese RUT en este evento</b><div class="sub" style="margin-top:6px;">Revisa el RUT, o valida con el código FCC del correo.</div></div>'; return; }
+    // 🎁 Toda entrada de mujer/hombre sigue pasando por checkQR (cobro pendiente,
+    // horario, vencida), pero la ficha se pinta ACÁ MISMO, en la pestaña Por RUT:
+    // antes se cambiaba de pestaña y el portero perdía el hilo a media validación.
+    // La cortesía de miembros pide la cédula en dos toques; las demás, un toque.
+    lista.forEach(t => { t._sx = _GEN_CED[_sexoCed({ nombre_ticket: t.nombre_ticket, condiciones: t.condiciones })] || ''; t._ced = !!t._sx && !t.ya_usado && _esMiembro(t); });
+    out.innerHTML = lista.map(t => t.ya_usado ? `
+      <div class="card res-dup" style="text-align:center;">
+        <div style="color:var(--dorado);font-weight:800;letter-spacing:1px;">⚠️ YA ESCANEADO</div>
+        ${fichaGrande(t)}
+        <div class="sub" style="margin-top:6px;">Entró: ${t.usado_at ? new Date(t.usado_at).toLocaleTimeString('es-CL',{hour:'2-digit',minute:'2-digit'}) : '—'}</div>
+      </div>` : `
+      <div class="card res-ok" style="text-align:center;">
+        <div style="color:var(--verde);font-weight:800;letter-spacing:1px;">✅ VÁLIDO — cotejar carnet</div>
+        ${fichaGrande(t)}
+        ${t._ced
+          ? `<div style="margin-top:8px;font-weight:800;color:var(--dorado);">🪪 Solo ${t._sx==='MUJER'?'mujeres':'hombres'} — revisa la cédula</div>
+             <button class="btn btn-verde" style="background:var(--dorado);color:#1a1a1a;" onclick="checkQR('${t.qr}','rut-result');$('rut-input').value='';">🪪 REVISAR CÉDULA E INGRESAR</button>`
+          : (t._sx
+            ? `<div style="margin-top:8px;padding:6px;border-radius:8px;border:2px solid ${t._sx==='MUJER'?'#E8363D':'#3b82f6'};color:#fff;font-weight:900;letter-spacing:1px;">${t._sx==='MUJER'?'👩 SOLO MUJERES':'👨 SOLO HOMBRES'}</div>
+             <button class="btn btn-verde" onclick="checkQR('${t.qr}','rut-result');$('rut-input').value='';">REVISAR E INGRESAR</button>`
+            : `<button class="btn btn-verde" onclick="quemarQR('${t.qr}','${String(t.nombre||'').replace(/'/g,'')}','rut-result');$('rut-input').value='';">CONFIRMAR INGRESO</button>`)}
+      </div>`).join('');
+  } catch(e) { out.innerHTML = `<div class="card res-bad"><b style="color:var(--rojo)">Error</b><div class="sub">${e.message||e}</div></div>`; }
+}
+
+// 📋 Escaneados de la noche
+window._escMode = 'entraron';
+function setEscMode(m){ window._escMode = m==='todos'?'todos':'entraron';
+  const a=$('esc-m-in'), b=$('esc-m-all'); if(a)a.classList.toggle('on',window._escMode==='entraron'); if(b)b.classList.toggle('on',window._escMode==='todos');
+  cargarEscaneados(); }
+async function cargarEscaneados() {
+  const out = $('lista-body'), res=$('esc-resumen'), tit=$('lista-titulo');
+  out.innerHTML = '<div style="color:var(--gris);padding:14px;text-align:center;">Cargando…</div>';
+  try {
+    if(window._escMode==='todos'){
+      // TODA la lista: todos los QR del evento (entraron verde / faltan gris) + contador
+      const { data, error } = await sb.rpc('puerta_snapshot_qr', { p_evento: eventoSel.id });
+      if (error) throw error; if (data?.error) throw new Error(data.error);
+      const arr = Array.isArray(data)?data:[];
+      const nom = x => (x.persona&&x.persona.nombre) || x.comprador || '—';
+      const rut = x => (x.persona&&x.persona.rut) || '';
+      arr.sort((a,b)=> (a.ya_usado===b.ya_usado)? nom(a).localeCompare(nom(b)) : (a.ya_usado?1:-1)); // faltan arriba
+      const entraron = arr.filter(x=>x.ya_usado).length, faltan = arr.length - entraron;
+      if(tit) tit.innerHTML='📋 Toda la lista · <span style="color:var(--verde)">'+arr.length+'</span>';
+      if(res){ res.style.display='block'; res.innerHTML='<b style="color:var(--verde)">✅ '+entraron+' entraron</b> · <b style="color:var(--dorado)">⏳ '+faltan+' faltan</b>'; }
+      out.innerHTML = arr.length ? arr.map(x=>{ const usado=!!x.ya_usado; return `
+        <div style="display:flex;justify-content:space-between;gap:10px;padding:10px 2px;border-bottom:1px solid var(--borde);align-items:center;${usado?'':'opacity:.72;'}">
+          <div style="min-width:0;">
+            <div style="font-weight:700;color:${usado?'#fff':'var(--gris)'};">${nom(x)}</div>
+            <div class="sub">${rut(x)||''} · ${_etq(x.nombre_ticket)}</div>
+          </div>
+          ${usado
+            ? `<div style="color:var(--verde);font-weight:800;font-family:monospace;flex-shrink:0;">${x.usado_at?new Date(x.usado_at).toLocaleTimeString('es-CL',{hour:'2-digit',minute:'2-digit'}):'✓'}</div>`
+            : `<div style="color:var(--dorado);font-size:0.72rem;font-weight:700;flex-shrink:0;">no ha llegado</div>`}
+        </div>`; }).join('') : '<div style="color:var(--gris);padding:14px;text-align:center;">Sin entradas en este evento. ¿Descargaste? (usa ⬇️ Descargar en Escanear).</div>';
+      try{ filtrarEscaneados(($('lista-buscar')||{}).value||''); }catch(_){}
+      return;
+    }
+    // Solo ENTRARON (modo normal)
+    if(res) res.style.display='none';
+    const { data: r, error } = await sb.rpc('puerta_escaneados', { p_evento: eventoSel.id });
+    if (error) throw error;
+    if (r?.error) throw new Error(r.error);
+    const lista = Array.isArray(r) ? r : [];
+    if(tit) tit.innerHTML='📋 Escaneados esta noche · <span style="color:var(--verde)">'+lista.length+'</span>';
+    out.innerHTML = lista.length ? lista.map(x => `
+      <div style="display:flex;justify-content:space-between;gap:10px;padding:10px 2px;border-bottom:1px solid var(--borde);align-items:center;">
+        <div style="min-width:0;">
+          <div style="font-weight:700;">${x.nombre||'—'}${x.incidencia ? ' <span style="color:var(--rojo);font-size:0.68rem;">🚫 incidencia</span>' : ''}</div>
+          <div class="sub">${x.rut||''} · ${_etq(x.nombre_ticket)}${x.escaneado_por ? ' · por '+x.escaneado_por : ''}</div>
+        </div>
+        <div style="color:var(--verde);font-weight:800;font-family:monospace;flex-shrink:0;">${new Date(x.hora).toLocaleTimeString('es-CL',{hour:'2-digit',minute:'2-digit'})}</div>
+      </div>`).join('') : '<div style="color:var(--gris);padding:14px;text-align:center;">Aún no entra nadie</div>';
+  } catch(e) { out.innerHTML = `<div style="color:var(--rojo);padding:12px;">${e.message||e}</div>`; }
+}
+
+// Buscar dentro de la lista de escaneados (nombre o RUT, sin tildes)
+function filtrarEscaneados(q) {
+  const norm = s => String(s||'').toLowerCase().normalize('NFD').replace(/[̀-ͯ]/g,'');
+  const nq = norm(q);
+  document.querySelectorAll('#lista-body > div').forEach(d => {
+    d.style.display = (!nq || norm(d.textContent).includes(nq)) ? '' : 'none';
+  });
+}
+
+// 🚫 Incidencia: buscar un ticket YA QUEMADO (por RUT o código) y marcarlo
+async function buscarIncidencia() {
+  const q = $('inc-input').value.trim();
+  const out = $('inc-result');
+  if (!q) return;
+  out.innerHTML = '<div class="card" style="color:var(--gris);text-align:center;">Buscando…</div>';
+  try {
+    let usados = [];
+    if (/^fcc-/i.test(q)) {
+      const { data: r } = await sb.rpc('puerta_check_qr', { p_qr: normalizarQR(q) });
+      if (r?.ok && r.ya_usado) {
+        const p = r.persona || {};
+        usados = [{ qr: normalizarQR(q), nombre: p.nombre || r.comprador, rut: p.rut || '', nombre_ticket: r.nombre_ticket, orden: r.orden, usado_at: r.usado_at, incidencia: r.incidencia, ya_usado: true }];
+      } else if (r?.ok) {
+        out.innerHTML = '<div class="card res-bad" style="text-align:center;"><b style="color:var(--rojo)">Ese ticket NO está quemado</b><div class="sub" style="margin-top:6px;">La incidencia es solo para tickets ya escaneados. Si no se escaneó, la persona pide su devolución desde su cuenta en frate.cl.</div></div>'; return;
+      }
+    } else {
+      const { data: r } = await sb.rpc('puerta_buscar_rut', { p_rut: q, p_evento: eventoSel.id });
+      usados = (Array.isArray(r) ? r : []).filter(t => t.ya_usado);
+    }
+    if (!usados.length) { out.innerHTML = '<div class="card res-bad" style="text-align:center;"><b style="color:var(--rojo)">Sin tickets quemados con ese dato</b></div>'; return; }
+    out.innerHTML = usados.map(t => `
+      <div class="card res-dup" style="text-align:center;">
+        ${fichaGrande(t)}
+        <div class="sub" style="margin-top:6px;">Entró: ${t.usado_at ? new Date(t.usado_at).toLocaleTimeString('es-CL',{hour:'2-digit',minute:'2-digit'}) : '—'}${t.incidencia ? ' · 🚫 ya marcada' : ''}</div>
+        ${t.incidencia ? '' : `<button class="btn btn-amarillo" onclick="marcarIncidencia('${t.qr}')">🚫 No entró — posible devolución</button>`}
+      </div>`).join('');
+  } catch(e) { out.innerHTML = `<div class="card res-bad">${e.message||e}</div>`; }
+}
+
+// ── Contadores + beep ──
+function cont(k) { const el = $('c-'+k); el.textContent = parseInt(el.textContent)+1; }
+function beep(ok) {
+  try {
+    const ctx = new (window.AudioContext||window.webkitAudioContext)();
+    const o = ctx.createOscillator(), g = ctx.createGain();
+    o.connect(g); g.connect(ctx.destination);
+    o.frequency.value = ok ? 880 : 220; g.gain.value = 0.08;
+    o.start(); setTimeout(()=>{ o.stop(); ctx.close(); }, ok ? 130 : 320);
+  } catch(e){}
+}
+// ── OFFLINE: descarga de QR del evento + quema local + sync ──
+function _esErrorRed(e){ const m=String((e&&e.message)||e||''); return !navigator.onLine || /Failed to fetch|NetworkError|network|load failed|ECONNREFUSED|timeout|fetch|TypeError/i.test(m); }
+function _snapKey(){ return 'frate_snap_'+((eventoSel&&eventoSel.id)||'x'); }
+function _burnKey(){ return 'frate_burns_'+((eventoSel&&eventoSel.id)||'x'); }
+function _snapGet(){ try{ return JSON.parse(localStorage.getItem(_snapKey())||'null'); }catch(e){ return null; } }
+function _burnsGet(){ try{ return JSON.parse(localStorage.getItem(_burnKey())||'{}'); }catch(e){ return {}; } }
+function _burnsSet(o){ try{ localStorage.setItem(_burnKey(), JSON.stringify(o)); }catch(e){} }
+function snapEntry(qr){ const s=_snapGet(); if(!s||!s.qrs) return null; const e=s.qrs[qr]; if(!e) return null; const b=_burnsGet(); if(b[qr]&&!e.ya_usado) return Object.assign({},e,{ya_usado:true,usado_at:b[qr].at}); return e; }
+function snapMarkUsed(qr){ const s=_snapGet(); if(s&&s.qrs&&s.qrs[qr]){ s.qrs[qr].ya_usado=true; s.qrs[qr].usado_at=new Date().toISOString(); try{ localStorage.setItem(_snapKey(),JSON.stringify(s)); }catch(e){} } }
+// Al deshacer, el cache local también tiene que olvidar que estaba usado —
+// si no, escanear de nuevo sin señal diría "duplicado".
+function snapUnmarkUsed(qr){
+  const s=_snapGet();
+  if(s&&s.qrs&&s.qrs[qr]){ s.qrs[qr].ya_usado=false; delete s.qrs[qr].usado_at;
+    try{ localStorage.setItem(_snapKey(),JSON.stringify(s)); }catch(e){} }
+  const b=_burnsGet(); if(b[qr]){ delete b[qr]; _burnsSet(b); }   // y no se sincroniza después
+}
+function snapBurnLocal(qr,nombre){ const b=_burnsGet(); if(!b[qr]) b[qr]={at:new Date().toISOString(),nombre:nombre||''}; _burnsSet(b); snapMarkUsed(qr); }
+function snapPend(){ return Object.keys(_burnsGet()).length; }
+async function snapDescargar(){
+  if(!eventoSel){ alert('Elige el evento primero.'); return; }
+  if(!navigator.onLine){ alert('Necesitas internet para descargar las entradas.'); return; }
+  const est=$('off-estado'); if(est) est.textContent='⬇️ Descargando…';
+  try{
+    const { data, error } = await sb.rpc('puerta_snapshot_qr', { p_evento: eventoSel.id });
+    if(error) throw error;
+    const arr = Array.isArray(data)?data:[]; const qrs={}; arr.forEach(r=>{ if(r&&r.qr) qrs[r.qr]=r; });
+    // tm = qué tipos son cortesía de miembros (para decidir los dos toques sin señal)
+    localStorage.setItem(_snapKey(), JSON.stringify({ ts:new Date().toISOString(), n:arr.length, qrs, tm:(window._ttMiembros && typeof window._ttMiembros==='object') ? window._ttMiembros : null }));
+    snapRenderEstado(); vToast('⬇️ '+arr.length+' entradas descargadas · ya puedes validar sin internet');
+  }catch(e){ snapRenderEstado(); alert('No se pudo descargar (¿corriste frate-puerta-offline.sql?): '+(e.message||e)); }
+}
+// Identificador estable de este dispositivo/puerta (para rastrear los conflictos)
+function _gateId(){
+  try{ let g=localStorage.getItem('frate_gate_id');
+    if(!g){ g='puerta-'+Math.random().toString(36).slice(2,8); localStorage.setItem('frate_gate_id',g); }
+    window._gateId=g; return g;
+  }catch(e){ return 'puerta-?'; }
+}
+async function snapSync(){
+  if(!navigator.onLine){ vToast('Sin internet — no se puede sincronizar'); return; }
+  const b=_burnsGet(); const qrs=Object.keys(b); if(!qrs.length){ vToast('Nada que sincronizar'); return; }
+  const est=$('off-estado'); if(est) est.textContent='🔄 Sincronizando '+qrs.length+'…';
+  let ok=0, conf=0; const conflictos=[];   // QR que OTRO dispositivo ya había quemado (posible doble-ingreso)
+  for(const qr of qrs){
+    try{
+      let r, error; ({ data:r, error } = await sb.rpc('puerta_quemar_qr', { p_qr: qr, p_evento:(eventoSel&&eventoSel.id)||null, p_forzar:false }));
+      if(error && /function|does not exist|argument|not find/i.test(String(error.message||''))){ ({data:r,error}=await sb.rpc('puerta_quemar_qr',{p_qr:qr})); }
+      if(error){
+        // Error que NO es de red: se deja la quema pendiente en vez de perderla en
+        // silencio (antes se borraba y el ingreso no quedaba registrado en ninguna parte).
+        if(_esErrorRed(error)) break;
+        conf++; continue;
+      }
+      if(r&&r.ok){ ok++; }
+      else { conf++; if(r && /escaneado/i.test(String(r.motivo||''))) conflictos.push({ qr, nombre:(b[qr]&&b[qr].nombre)||'' }); }   // ya estaba quemado en la BD
+      delete b[qr];
+    }catch(e){ if(_esErrorRed(e)) break; }
+  }
+  _burnsSet(b); snapRenderEstado();
+  vToast('🔄 '+ok+' sincronizada(s)'+(conf?' · '+conf+' ya estaban':''));
+  // ⚠️ Doble-ingreso: si un QR ya estaba quemado por OTRO dispositivo, avisar FUERTE
+  if(conflictos.length){
+    // Queda REGISTRADO en la base para que el admin lo vea después (antes solo
+    // salía este alert en el teléfono que sincronizaba segundo y se perdía).
+    for(const c of conflictos){
+      try{ await sb.rpc('puerta_registrar_conflicto', {
+        p_qr: c.qr, p_evento:(eventoSel&&eventoSel.id)||null,
+        p_gate: (window._gateId||_gateId()), p_nombre: c.nombre||'',
+        p_nota: 'Quemado sin internet; ya estaba escaneado en otra puerta.' }); }catch(_){}
+    }
+    const lista = conflictos.slice(0,20).map(c=>'• '+(c.nombre||c.qr)).join('\n');
+    alert('⚠️ POSIBLE DOBLE INGRESO\n\n'+conflictos.length+' entrada(s) que quemaste sin internet YA habían sido escaneadas en otra puerta:\n\n'+lista+(conflictos.length>20?'\n…':'')+'\n\nQuedó registrado para el admin. Revísalo con el equipo.');
+  }
+}
+function snapRenderEstado(){
+  const est=$('off-estado'), syncBtn=$('off-sync-btn'); if(!est) return;
+  const on=navigator.onLine, s=_snapGet(), pend=snapPend();
+  est.innerHTML = (on?'<span style="color:var(--verde)">🟢 En línea</span>':'<span style="color:var(--dorado)">📴 Sin internet</span>')
+    + (s?` · ⬇️ ${s.n||Object.keys(s.qrs||{}).length} desc.`:' · <span style="color:var(--dorado)">sin descarga offline</span>')
+    + (pend?` · <span style="color:var(--dorado)">⏳ ${pend} sin sincronizar</span>`:'');
+  if(syncBtn) syncBtn.style.display = pend?'block':'none';
+}
+window.addEventListener('online', ()=>{ snapRenderEstado(); if(snapPend()) snapSync(); });
+window.addEventListener('offline', ()=>{ snapRenderEstado(); });
+
+init();
+
+// ── PWA: service worker + instalar como app ──────────────────
+if ('serviceWorker' in navigator) {
+  navigator.serviceWorker.register('/sw-validador.js').catch(()=>{});
+}
+let _deferredPrompt = null;
+const _standalone = (window.matchMedia && window.matchMedia('(display-mode: standalone)').matches) || navigator.standalone === true;
+function _showInstall(){ const b=document.getElementById('btn-instalar'); if(b && !_standalone) b.style.display='block'; }
+window.addEventListener('beforeinstallprompt', (e) => { e.preventDefault(); _deferredPrompt = e; _showInstall(); });
+window.addEventListener('appinstalled', () => { const b=document.getElementById('btn-instalar'); if(b) b.style.display='none'; });
+// Firefox/Safari no disparan beforeinstallprompt → mostramos el botón igual (al tocar, instrucción por navegador)
+if(!_standalone) setTimeout(_showInstall, 1500);
+async function instalarApp() {
+  if (_deferredPrompt) {
+    _deferredPrompt.prompt(); try { await _deferredPrompt.userChoice; } catch(e) {}
+    _deferredPrompt = null; const b=document.getElementById('btn-instalar'); if(b) b.style.display='none'; return;
+  }
+  const ua = navigator.userAgent;
+  if (/Firefox/i.test(ua)) alert('En Firefox: toca el menú ⋮ (arriba a la derecha) → "Instalar" o "Agregar a la pantalla de inicio".');
+  else if (/iPhone|iPad|iPod/i.test(ua)) alert('En iPhone: toca Compartir ⬆️ → "Agregar a inicio".');
+  else alert('Abre el menú del navegador (⋮) y elige "Instalar app" / "Agregar a la pantalla de inicio".');
+}
+
+// ── Modo de escaneo: Cámara ↔ Láser (Sunmi) — EXCLUYENTES ─────
+// En Sunmi la cámara y el láser no funcionan a la vez: uno u otro.
+let _scanMode = 'camara';
+function setScanMode(m) {
+  _scanMode = (m === 'laser') ? 'laser' : 'camara';
+  try { localStorage.setItem('frate_scan_mode', _scanMode); } catch (e) {}
+  const laser = _scanMode === 'laser';
+  document.body.classList.toggle('modo-laser', laser);
+  const sub = document.getElementById('modo-sub');
+  if (sub) sub.innerHTML = laser ? '📟 <b>Láser Sunmi</b> activo · cámara apagada' : 'Modo cámara — para iPhone / Android';
+  const bc = document.getElementById('modo-cam'), bl = document.getElementById('modo-las');
+  if (bc) bc.classList.toggle('on', !laser);
+  if (bl) bl.classList.toggle('on', laser);
+  // Al pasar a láser, apaga cualquier cámara encendida.
+  if (laser) {
+    try { if (typeof escaneando !== 'undefined' && escaneando) toggleScanner(); } catch (e) {}
+    try { const cr = document.getElementById('cap-reader'); if (cr && cr.style.display !== 'none') capToggleScan(); } catch (e) {}
+  }
+}
+function _initScanMode() {
+  let saved = null; try { saved = localStorage.getItem('frate_scan_mode'); } catch (e) {}
+  if (saved) { setScanMode(saved); }
+  else if (/Sunmi/i.test(navigator.userAgent || '')) { setScanMode('laser'); try { vToast('📟 Detectamos Sunmi: modo láser activado'); } catch (e) {} }
+  else { setScanMode('camara'); }
+}
+
+// ── Escáner físico (láser Sunmi en modo teclado/HID) ─────────
+// El láser "escribe" el código carácter por carácter. Lo capturamos a nivel
+// documento (sin enfocar ningún campo → no abre el teclado del Sunmi) y lo
+// validamos SOLO (automático), ya sea que el láser mande Enter al final o no:
+//   • Si manda Enter → valida al instante.
+//   • Si NO manda Enter → valida tras una pausa breve (el disparo llega de golpe).
+// Solo activo en modo LÁSER. Si estás escribiendo en un campo, no interfiere.
+let _wBuf = '', _wTimer = null;
+function _wFlush() {
+  clearTimeout(_wTimer); _wTimer = null;
+  let code = _wBuf.trim(); _wBuf = '';
+  // Un gatillo doble del láser puede pegar dos lecturas en el mismo disparo.
+  // Se toma la primera: el resto es repetición, no un segundo invitado.
+  const uno = code.match(/FCC-(?:(?!FCC-)[A-Za-z0-9_-])+/i);
+  if (uno) code = uno[0];
+  if (code.length >= 5) _wedgeRoute(code);
+}
+document.addEventListener('keydown', (e) => {
+  if (_scanMode !== 'laser') return;
+  const ae = document.activeElement;
+  if (ae && ['INPUT', 'TEXTAREA', 'SELECT'].includes(ae.tagName)) { _wBuf = ''; return; } // tecleando en un campo → no interceptar, y se suelta lo acumulado
+  if (e.key === 'Enter') {
+    if (_wBuf.trim().length >= 5) { e.preventDefault(); e.stopPropagation(); _wFlush(); }
+    else { _wBuf = ''; }
+    return;
+  }
+  if (e.key && e.key.length === 1) {
+    e.preventDefault(); e.stopPropagation();
+    _wBuf += e.key;
+    clearTimeout(_wTimer);
+    _wTimer = setTimeout(_wFlush, 160); // sin Enter: valida solo tras la pausa del disparo
+  }
+}, true);
+function _wedgeRoute(code) {
+  code = String(code).trim(); if (!code) return;
+  try { if (navigator.vibrate) navigator.vibrate(60); } catch (e) {}
+  const m = document.getElementById('qr-manual'); if (m) m.value = '';   // que no se acumule
+  if (esCedula(code)) { procesarCedula(code); return; }      // 🪪 cédula → extrae RUN (no la valida como ticket)
+  const active = document.querySelector('.acc.active'), id = active ? active.id : '';
+  if (id === 'acc-nuevo') { capOnScan(code); }               // cliente nuevo con QR de celular
+  else { if (id !== 'acc-escanear') verVista('escanear'); checkQR(normalizarQR(code)); } // ticket → muestra a la persona al instante
+}
+try { _initScanMode(); } catch (e) {}
+</script>
+</body>
+</html>

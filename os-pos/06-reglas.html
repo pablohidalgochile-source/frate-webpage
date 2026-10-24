@@ -1,0 +1,76 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>FRATE OS · POS 06 Reglas de oro</title>
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>⭐</text></svg>">
+<link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@600;800;900&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="/os-manual.css">
+<link rel="stylesheet" href="/os-pos.css">
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<style>
+  .dos{display:grid;grid-template-columns:repeat(auto-fit,minmax(260px,1fr));gap:12px;margin-top:14px}
+  .via{background:var(--neg2);border:1px solid var(--bor);border-radius:13px;padding:16px 18px}
+  .via h4{font-family:var(--disp);font-weight:800;font-size:1.05rem;text-transform:uppercase;margin-bottom:4px}
+  .via .c{font-size:.68rem;letter-spacing:1.3px;text-transform:uppercase;color:var(--gris2);margin-bottom:9px}
+  .via p{font-size:.83rem;color:var(--gris)}
+</style>
+</head>
+<body>
+<div id="bar"></div>
+<div class="wrap">
+
+  <div class="hero">
+    <div class="eyebrow">POS · Manual 06</div>
+    <h1>Reglas de <em>oro</em></h1>
+    <p class="sub">Lo que nunca se hace, lo que está bien resuelto, y lo que el POS todavía no hace.</p>
+    <div class="meta"><span>Para todos</span><span>·</span><span>5 minutos</span><span>·</span><span>Cierra la serie</span></div>
+  </div>
+
+  <section>
+    <div class="stag">Nunca</div>
+    <h2>Lo que no se hace jamás</h2>
+    <div class="peligro"><b>No desplegar en vivo.</b> Nada de subir una versión nueva <strong>mientras se vende</strong>. Las máquinas quedan a medias. Se sube entre eventos.</div>
+    <div class="peligro"><b>No meter el stock ni la sincronización dentro de la venta.</b> Todo lo pesado (bajar inventario, empujar al ERP) va en el cierre o por lote. En el camino de la venta, solo cobrar.</div>
+    <div class="peligro"><b>No reabrir una caja para "arreglarla".</b> Reabrir crea una segunda sesión y descuadra el cierre. Si hay que corregir, se corrige el cotejo, no se reabre.</div>
+  </section>
+
+  <section>
+    <div class="stag">Bien resuelto</div>
+    <h2>Lo que sí está firme</h2>
+    <div class="bien"><b>Vende sin internet.</b> Cada venta se guarda y sincroniza al reconectar.</div>
+    <div class="bien"><b>Un QR = un ingreso.</b> Idempotencia cruzada con la Web. Doble scan, un solo ingreso.</div>
+    <div class="bien"><b>El cotejo billete a billete.</b> El fondo se cuenta, no se adivina. El cierre cuadra de verdad.</div>
+    <div class="bien"><b>La tarjeta no se cobra dos veces.</b> Reintento con el mismo folio; el servidor lo junta en una venta.</div>
+  </section>
+
+  <section>
+    <div class="stag">Casos reales</div>
+    <h2>Cómo lo vives tú</h2>
+    <div class="dos">
+      <div class="via"><h4>👤 Operador · en la Sunmi</h4><div class="c">La Sunmi se pone rara</div><p>Si tras una actualización se ve mal, <b>ciérrala del todo y ábrela</b> (no solo refrescar). Las ventas que hiciste quedaron en cola: no se pierden, se sincronizan cuando vuelve la señal.</p></div>
+      <div class="via"><h4>🛠 Admin · en el panel</h4><div class="c">Corregir sin romper</div><p>Nunca subas versión mientras se vende. Si un cierre quedó raro (como una diferencia falsa por reapertura), <b>corriges el cotejo</b>, no reabres la caja.</p></div>
+    </div>
+  </section>
+
+  <section>
+    <div class="stag">Honestidad</div>
+    <h2>Lo que el POS NO hace (todavía)</h2>
+    <ul>
+      <li><b>No emite boleta con validez SII:</b> imprime un comprobante propio con QR, no un timbre fiscal.</li>
+      <li><b>No descuenta stock en tiempo real durante la venta:</b> el inventario se ajusta en el cierre.</li>
+      <li><b>No maneja mesas ni cuentas por mesa:</b> es venta directa de barra y puerta.</li>
+    </ul>
+  </section>
+
+  <div class="pie">FRATE OS · POS · Manual 06 · <a href="/os-pos-catalogo">← El catálogo</a> · <a href="/os-pos">↑ Volver al índice del POS</a></div>
+</div>
+
+<script src="/os-guard.js"></script>
+<script>
+  document.getElementById('bar').innerHTML = osBarra('06', 'pos');
+  osProteger();
+</script>
+</body>
+</html>

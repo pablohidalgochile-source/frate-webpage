@@ -1,0 +1,40 @@
+<!DOCTYPE html>
+<html lang="es"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Dejar de recibir correos · FRATE</title>
+<meta name="robots" content="noindex">
+<style>
+  body{margin:0;background:#0A0A0B;color:#f4f4f6;font-family:-apple-system,Segoe UI,Roboto,sans-serif;display:flex;min-height:100vh;align-items:center;justify-content:center;padding:18px;box-sizing:border-box}
+  .c{background:#131316;border:1px solid #26262b;border-radius:16px;padding:26px;max-width:420px;width:100%;text-align:center}
+  h1{font-size:1.4rem;margin:10px 0 8px} p{color:#a1a1aa;line-height:1.55;font-size:.92rem}
+  button{width:100%;background:#E8363D;color:#fff;border:0;border-radius:10px;padding:14px;font-weight:800;letter-spacing:1px;cursor:pointer;font-size:.95rem;margin-top:8px}
+  button[disabled]{opacity:.6} a{color:#E6C860}
+</style></head>
+<body><div class="c">
+  <img src="/assets/logo-blanco.png" alt="FRATE" style="height:40px">
+  <h1 id="tit">¿Dejar de recibir nuestros correos?</h1>
+  <p id="txt">Ya no te enviaremos invitaciones ni novedades a <b id="correo"></b>. Los correos de tus entradas (con el QR) te siguen llegando igual.</p>
+  <button id="btn" type="button">Sí, dejar de recibirlos</button>
+  <p style="margin-top:16px;font-size:.8rem"><a href="/">Volver a frate.cl</a></p>
+</div>
+<script>
+(function(){
+  var q = new URLSearchParams(location.search), e = q.get('e') || '', t = q.get('t') || '';
+  var $ = function(id){ return document.getElementById(id); };
+  $('correo').textContent = e || 'tu correo';
+  if (!e || !t) { $('tit').textContent = 'Enlace incompleto'; $('txt').textContent = 'Usa el enlace del final del correo, o escríbenos a hola@frate.cl.'; $('btn').style.display = 'none'; return; }
+  $('btn').onclick = function(){
+    var b = $('btn'); b.disabled = true; b.textContent = 'Un momento…';
+    fetch('https://ydwlpraoaaijlfssevoh.supabase.co/functions/v1/correo-baja', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json', apikey: 'sb_publishable_-_7GeDU_h84zf2v--lWQaQ_15ZFxOWt' },
+      body: JSON.stringify({ e: e, t: t })
+    }).then(function(r){ return r.json().then(function(d){ return { ok: r.ok, d: d }; }); })
+      .then(function(x){
+        if (!x.ok || !x.d || !x.d.ok) throw new Error((x.d && x.d.error) || 'No se pudo');
+        $('tit').textContent = 'Listo'; $('txt').textContent = 'No te enviaremos más invitaciones a ' + e + '. Si fue un error, escríbenos a hola@frate.cl.'; b.style.display = 'none';
+      })
+      .catch(function(err){ b.disabled = false; b.textContent = 'Sí, dejar de recibirlos'; $('txt').textContent = (err && err.message) || 'No se pudo. Escríbenos a hola@frate.cl.'; });
+  };
+})();
+</script>
+</body></html>

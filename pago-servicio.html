@@ -1,0 +1,158 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Pago en proceso — Frate</title>
+<!-- Vuelta de Mercado Pago para los COBROS DE SERVICIO (cumpleaños / reservas)
+     que se generan desde el admin con la edge crm-pago. NO es la página de
+     entradas: acá no se promete QR, no se limpia el carrito ni se juega nada.
+     Sin datos personales y sin llamadas a la base: todo sale de la URL. -->
+<meta name="robots" content="noindex" />
+<meta property="og:type" content="website" />
+<meta property="og:site_name" content="FRATE" />
+<meta property="og:title" content="Pago de tu cumpleaños o reserva · FRATE" />
+<meta property="og:description" content="Estado del pago de tu cumpleaños o reserva en FRATE." />
+<meta property="og:url" content="https://www.frate.cl/" />
+<meta property="og:image" content="https://www.frate.cl/assets/og.png" />
+<meta property="og:image:width" content="1200" />
+<meta property="og:image:height" content="630" />
+<meta name="twitter:card" content="summary_large_image" />
+<meta name="twitter:title" content="Pago de tu cumpleaños o reserva · FRATE" />
+<meta name="twitter:description" content="Estado del pago de tu cumpleaños o reserva en FRATE." />
+<meta name="twitter:image" content="https://www.frate.cl/assets/og.png" />
+
+  <meta name="theme-color" content="#0A0A0B" />
+  <style>
+    * { margin:0; padding:0; box-sizing:border-box; }
+    body { background:#0A0A0B; color:#fff; font-family:'Helvetica Neue',Arial,sans-serif; min-height:100vh; display:flex; align-items:center; justify-content:center; padding:24px; }
+    .card { max-width:440px; width:100%; text-align:center; }
+    .logo { font-size:30px; font-weight:900; letter-spacing:8px; font-family:'Arial Black',sans-serif; margin-bottom:4px; }
+    .sub { font-size:10px; color:#71717a; letter-spacing:4px; text-transform:uppercase; margin-bottom:40px; }
+    .icon { width:88px; height:88px; border-radius:50%; display:flex; align-items:center; justify-content:center; margin:0 auto 28px; font-size:44px; }
+    .icon-ok { background:#16a34a; font-size:48px; animation:pop .4s ease; }
+    .icon-pend { background:#D4A832; }
+    .icon-error { background:#3f1517; border:2px solid #E8363D; }
+    @keyframes pop { 0%{transform:scale(0)} 70%{transform:scale(1.15)} 100%{transform:scale(1)} }
+    h1 { font-size:26px; font-weight:900; margin-bottom:14px; }
+    p { color:#a1a1aa; font-size:15px; line-height:1.6; margin-bottom:12px; }
+    .order { background:#141415; border-radius:6px; padding:16px; margin:24px 0; font-size:13px; color:#71717a; }
+    .order strong { color:#D4A832; font-size:16px; letter-spacing:1px; }
+    .info { background:#1a1a1c; border-left:3px solid #D4A832; border-radius:4px; padding:14px 18px; text-align:left; margin:20px 0; font-size:13px; color:#d4d4d8; line-height:1.6; }
+    .info-ok { border-left-color:#16a34a; }
+    .info-error { border-left-color:#E8363D; }
+    .btn { display:inline-block; background:#E8363D; color:#fff; text-decoration:none; padding:15px 40px; font-weight:900; letter-spacing:3px; font-size:14px; text-transform:uppercase; border-radius:3px; margin-top:8px; }
+    .btn-ghost { display:inline-block; color:#71717a; text-decoration:none; padding:12px; font-size:13px; margin-top:8px; }
+    [hidden] { display:none !important; }
+  </style>
+  <link rel="icon" href="/icon-frate.svg" type="image/svg+xml" />
+  <link rel="apple-touch-icon" href="/icon-frate.svg" />
+</head>
+<body>
+  <div class="card">
+    <div class="logo">FRATE</div>
+    <div class="sub">Fraternidad Campus Central</div>
+
+    <!-- ✅ Pago aprobado. Sin promesa de QR: esto es un servicio, no entradas. -->
+    <div id="st-ok" hidden>
+      <div class="icon icon-ok" aria-hidden="true">✓</div>
+      <h1>¡Pago recibido!</h1>
+      <p><span class="js-recibimos">Recibimos tu pago.</span> Te escribimos para coordinar los detalles.</p>
+      <div class="info info-ok">
+        <strong style="color:#fff;">No necesitas hacer nada más.</strong> Si nos escribes, dinos tu número de orden y te ubicamos al tiro.
+      </div>
+    </div>
+
+    <!-- ⏳ En proceso (transferencia, efectivo, revisión de Mercado Pago…).
+         Es el estado por defecto: si la página no sabe qué pasó, no confirma
+         un pago que quizás no llegó ni invita a pagar de nuevo. -->
+    <div id="st-pendiente">
+      <div class="icon icon-pend" aria-hidden="true">⏳</div>
+      <h1>Tu pago está en proceso</h1>
+      <p>Mercado Pago todavía no confirma tu pago.</p>
+      <div class="info">
+        Algunos medios de pago (como transferencia o efectivo) pueden tardar en acreditarse. Apenas se confirme, te escribimos para coordinar los detalles.
+        <strong style="color:#fff;">No vuelvas a pagar mientras tanto</strong>, así evitamos un cobro doble.
+      </div>
+    </div>
+
+    <!-- ✕ No se completó -->
+    <div id="st-error" hidden>
+      <div class="icon icon-error" aria-hidden="true">✕</div>
+      <h1>No se pudo completar el pago</h1>
+      <p>Puedes volver a intentarlo con el mismo link o escríbenos.</p>
+      <div class="info info-error">
+        Si Mercado Pago no aprobó el pago, no se hizo ningún cargo.
+        <strong style="color:#fff;">Si igual te aparece un cargo en tu cuenta, escríbenos antes de volver a intentarlo</strong> y lo revisamos con tu número de orden.
+      </div>
+    </div>
+
+    <div class="order" id="order-info" hidden>
+      Orden <strong id="order-id">—</strong>
+    </div>
+
+    <a href="/" class="btn">VOLVER A FRATE</a><br>
+    <a href="https://wa.me/56981311548" id="wa-link" class="btn-ghost" target="_blank" rel="noopener">¿Dudas? Escríbenos por WhatsApp →</a>
+  </div>
+
+  <script>
+    // Mercado Pago vuelve con nuestros params (?s=CUM&estado=ok) + los suyos
+    // (&collection_status=approved&external_reference=123&payment_id=...).
+    // Todo se pinta con textContent: nada de la URL entra como HTML.
+    (function () {
+      const params = new URLSearchParams(window.location.search);
+
+      // Prefijo del servicio: solo los que emite crm-pago. Si llega otra cosa
+      // no se inventa uno (un folio con prefijo equivocado confunde al equipo).
+      const SERVICIOS = {
+        CUM: { tu: 'tu cumpleaños', sobre: 'el pago de mi cumpleaños' },
+        RES: { tu: 'tu reserva',    sobre: 'el pago de mi reserva' },
+        SRV: { tu: '',              sobre: 'un pago' }
+      };
+      const s = String(params.get('s') || '').trim().toUpperCase();
+      const servicio = SERVICIOS[s] || null;
+
+      // Estado: manda lo que dice Mercado Pago (collection_status / status);
+      // si no viene o no se reconoce, se usa el `estado` de nuestra back_url.
+      // Lo desconocido cae en «en proceso»: nunca se confirma un pago a ciegas.
+      const MP_ESTADOS = {
+        approved: 'ok',
+        pending: 'pendiente', in_process: 'pendiente', in_mediation: 'pendiente', authorized: 'pendiente',
+        rejected: 'error', cancelled: 'error', refunded: 'error', charged_back: 'error', null: 'error'
+      };
+      const mp = String(params.get('collection_status') || params.get('status') || '').trim().toLowerCase();
+      const nuestro = String(params.get('estado') || '').trim().toLowerCase();
+      let estado = Object.prototype.hasOwnProperty.call(MP_ESTADOS, mp) ? MP_ESTADOS[mp] : '';
+      if (!estado) estado = ['ok', 'pendiente', 'error'].includes(nuestro) ? nuestro : 'pendiente';
+
+      document.getElementById('st-ok').hidden = estado !== 'ok';
+      document.getElementById('st-pendiente').hidden = estado !== 'pendiente';
+      document.getElementById('st-error').hidden = estado !== 'error';
+      document.title = ({ ok: 'Pago recibido', pendiente: 'Pago en proceso', error: 'Pago no completado' })[estado] + ' — Frate';
+
+      // «Recibimos el pago de tu cumpleaños.» — solo si sabemos qué servicio es.
+      if (servicio && servicio.tu) {
+        document.querySelectorAll('.js-recibimos').forEach(function (el) {
+          el.textContent = 'Recibimos el pago de ' + servicio.tu + '.';
+        });
+      }
+
+      // Orden: external_reference es el id NUMÉRICO del pedido. Folio = PREFIJO-lpad(id, 6).
+      const ref = String(params.get('external_reference') || '').trim();
+      let folio = '';
+      if (/^\d{1,12}$/.test(ref) && Number(ref) > 0) {
+        const num = ref.replace(/^0+/, '').padStart(6, '0');
+        folio = servicio ? (s + '-' + num) : ('N.º ' + num);
+        document.getElementById('order-id').textContent = folio;
+        document.getElementById('order-info').hidden = false;
+      }
+
+      // WhatsApp con el número de orden ya escrito (sin nombre ni datos personales).
+      if (folio) {
+        const texto = 'Hola FRATE, te escribo por ' + (servicio ? servicio.sobre : 'un pago') + ' (orden ' + folio + ').';
+        document.getElementById('wa-link').href = 'https://wa.me/56981311548?text=' + encodeURIComponent(texto);
+      }
+    })();
+  </script>
+</body>
+</html>

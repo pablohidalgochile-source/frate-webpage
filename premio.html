@@ -1,0 +1,142 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>FRATE WEB (TICKETERA) · PREMIO</title>
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🎁</text></svg>">
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<style>
+  :root{
+    --bg:#0a0a0d; --panel:#131316; --panel2:#1b1b20; --border:#26262b; --border2:#3a3a41;
+    --text:#f4f4f6; --muted:#8a8a92; --rojo:#E8363D; --dorado:#E6C860; --verde:#00E676;
+    --disp:"Barlow Condensed","Arial Narrow",system-ui,sans-serif;
+    --font:-apple-system,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;
+  }
+  *{box-sizing:border-box;margin:0;padding:0}
+  body{background:var(--bg);color:var(--text);font-family:var(--font);line-height:1.45;padding:26px 14px 60px}
+  .wrap{max-width:440px;margin:0 auto}
+  .card{background:var(--panel);border:1px solid var(--border);border-radius:16px;padding:22px}
+  h1{font-family:var(--disp);font-weight:900;font-size:2.1rem;letter-spacing:1px;line-height:1;text-transform:uppercase}
+  .lbl{font-size:.66rem;letter-spacing:2px;text-transform:uppercase;color:var(--muted)}
+  .big{font-family:var(--disp);font-weight:900;font-size:2.6rem;line-height:1.05;color:var(--dorado);text-transform:uppercase}
+  .btn{display:block;width:100%;border:0;border-radius:10px;padding:15px;font-weight:800;font-size:.95rem;
+       letter-spacing:1px;cursor:pointer;text-transform:uppercase;font-family:var(--font)}
+  .btn-r{background:var(--rojo);color:#fff}
+  .btn-g{background:transparent;border:1px solid var(--border2);color:var(--text)}
+  input{width:100%;background:var(--panel2);border:1px solid var(--border);border-radius:9px;
+        padding:13px;color:var(--text);font-size:.95rem;font-family:var(--font)}
+  .msg{font-size:.82rem;color:var(--muted);line-height:1.55}
+  .hide{display:none}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <div style="text-align:center;margin-bottom:20px;">
+    <div class="lbl">Fraternidad Campus Central</div>
+    <h1 style="margin-top:4px;">Tu premio</h1>
+  </div>
+  <div class="card" id="box"><div class="msg">Buscando tu premio…</div></div>
+</div>
+
+<script>
+const SB_URL = 'https://ydwlpraoaaijlfssevoh.supabase.co';
+const SB_KEY = 'sb_publishable_-_7GeDU_h84zf2v--lWQaQ_15ZFxOWt';
+const sb = window.supabase.createClient(SB_URL, SB_KEY);
+const $  = id => document.getElementById(id);
+const esc = s => String(s==null?'':s).replace(/[&<>"]/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+const CODIGO = (new URLSearchParams(location.search).get('c')||'').trim();
+
+const TITULO = { entrada:'🎟️ Una entrada', cover:'🍹 Un cover', descuento:'🏷️ Un descuento', consumo:'🥂 Consumo' };
+
+// Los motivos de rechazo se explican en persona, no con códigos de error.
+const MOTIVO = {
+  no_existe: 'Este link no corresponde a ningún premio. Puede estar mal copiado — fíjate que no le falte un pedazo.',
+  vencido:   'Este premio ya venció. Escríbenos por Instagram y vemos qué se puede hacer.',
+  agotado:   'Este premio ya fue reclamado por otra persona.',
+  sin_sesion:'Necesitas tu cuenta para guardarlo.',
+  falta_usuario:'Escribe el usuario con el que ganaste.',
+  usuario_no_calza:'Ese usuario no es el que ganó este premio. Revísalo — va sin arroba y tal cual lo tienes en tu perfil.'
+};
+
+function pintarError(motivo){
+  $('box').innerHTML = '<div class="msg">'+esc(MOTIVO[motivo]||'No pudimos leer este premio.')+'</div>'
+    + '<div style="height:16px"></div>'
+    + '<a href="/" class="btn btn-g" style="text-align:center;text-decoration:none;display:block;">Ir a frate.cl</a>';
+}
+
+function pintarPremio(p, sesion){
+  const t = TITULO[p.tipo] || '🎁 Un premio';
+  const detalle = p.detalle ? '<div class="msg" style="margin-top:6px">'+esc(p.detalle)+'</div>' : '';
+  const eventoTxt = p.evento
+    ? '<div class="msg" style="margin-top:14px">Para <b>'+esc(p.evento)+'</b>'+(p.fecha?' · '+esc(p.fecha):'')+'</div>' : '';
+  const vence = p.vence_at
+    ? '<div class="msg" style="margin-top:6px;color:var(--dorado)">Vence el '+new Date(p.vence_at).toLocaleDateString('es-CL')+'</div>' : '';
+  $('box').innerHTML =
+      '<div class="lbl">Ganaste</div>'
+    + '<div class="big" style="margin:6px 0 2px;">'+esc(t)+'</div>'
+    + detalle + eventoTxt + vence
+    + '<div style="height:20px"></div>'
+    + (sesion
+        ? (p.pide_usuario
+            ? '<div class="lbl" style="text-align:left;margin-bottom:5px;">¿Con qué usuario ganaste?</div>'
+              + '<input id="i-user" placeholder="tuusuario" autocapitalize="off" autocorrect="off" spellcheck="false" />'
+              + '<div class="msg" style="margin:6px 0 12px;font-size:0.74rem;">El mismo de '
+              + esc(p.red === 'tiktok' ? 'TikTok' : 'Instagram') + ' con el que participaste. Va sin arroba.</div>'
+            : '')
+          + '<button class="btn btn-r" id="btn-claim">Guardarlo en mi cuenta</button>'
+        : '<div class="msg" style="margin-bottom:12px">Para que quede a tu nombre necesitas tu cuenta FRATE. Es un minuto y así nadie más lo puede usar.</div>'
+          + '<a class="btn btn-r" style="text-align:center;text-decoration:none;display:block;" href="/?premio='+encodeURIComponent(CODIGO)+'">Entrar o crear mi cuenta</a>');
+  if(sesion) $('btn-claim').onclick = canjear;
+}
+
+async function canjear(){
+  const b=$('btn-claim'); b.disabled=true; b.textContent='Guardando…';
+  try{
+    const _u = ($('i-user') && $('i-user').value || '').trim();
+    const { data, error } = await sb.rpc('premio_canjear', { p_codigo: CODIGO, p_usuario: _u || null });
+    if(error) throw error;
+    if(!data || !data.ok){
+      // Tres intentos con el usuario. Después no se lo dejamos golpeando una
+      // puerta cerrada: la gente se cambia el @ y ahí hay que soltarlo a mano.
+      if(data && (data.motivo==='usuario_no_calza' || data.motivo==='falta_usuario')){
+        window._intentos = (window._intentos||0) + 1;
+        const av = $('aviso-user') || (function(){ const d=document.createElement('div');
+          d.id='aviso-user'; d.className='msg'; d.style.cssText='margin-top:10px;color:var(--rojo)';
+          $('btn-claim').parentNode.insertBefore(d, $('btn-claim')); return d; })();
+        av.innerHTML = window._intentos >= 3
+          ? 'No calza después de tres intentos. Escríbenos por Instagram con este link y lo soltamos a mano — no pierdes tu premio.'
+          : esc(MOTIVO[data.motivo]);
+        b.disabled=false; b.textContent='Guardarlo en mi cuenta';
+        return;
+      }
+      pintarError(data && data.motivo); return;
+    }
+    $('box').innerHTML =
+        '<div class="big" style="color:var(--verde)">¡Listo!</div>'
+      + '<div class="msg" style="margin-top:10px">'
+      + (data.repetido ? 'Este premio ya estaba guardado a tu nombre.' : 'Tu premio quedó guardado a tu nombre.')
+      + ' Muéstralo en la puerta o en la barra desde <b>Mi cuenta</b>.</div>'
+      + '<div style="height:18px"></div>'
+      + '<a href="/mi-entrada" class="btn btn-r" style="text-align:center;text-decoration:none;display:block;">Ver mi cuenta</a>';
+  }catch(e){
+    b.disabled=false; b.textContent='Guardarlo en mi cuenta';
+    $('box').insertAdjacentHTML('beforeend','<div class="msg" style="color:var(--rojo);margin-top:10px">No se pudo guardar: '+esc(e.message||e)+'</div>');
+  }
+}
+
+(async () => {
+  if(!CODIGO){ pintarError('no_existe'); return; }
+  try{
+    const { data, error } = await sb.rpc('premio_ver', { p_codigo: CODIGO });
+    if(error) throw error;
+    if(!data || !data.ok){ pintarError(data && data.motivo); return; }
+    const { data: s } = await sb.auth.getSession();
+    pintarPremio(data, !!(s && s.session));
+  }catch(e){
+    $('box').innerHTML = '<div class="msg" style="color:var(--rojo)">No pudimos leer el premio: '+esc(e.message||e)+'</div>';
+  }
+})();
+</script>
+</body>
+</html>

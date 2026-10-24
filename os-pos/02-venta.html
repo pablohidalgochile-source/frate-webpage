@@ -1,0 +1,84 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>FRATE OS · POS 02 La venta</title>
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🧾</text></svg>">
+<link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@600;800;900&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="/os-manual.css">
+<link rel="stylesheet" href="/os-pos.css">
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<style>
+  .dos{display:grid;grid-template-columns:repeat(auto-fit,minmax(260px,1fr));gap:12px;margin-top:14px}
+  .via{background:var(--neg2);border:1px solid var(--bor);border-radius:13px;padding:16px 18px}
+  .via h4{font-family:var(--disp);font-weight:800;font-size:1.05rem;text-transform:uppercase;margin-bottom:4px}
+  .via .c{font-size:.68rem;letter-spacing:1.3px;text-transform:uppercase;color:var(--gris2);margin-bottom:9px}
+  .via p{font-size:.83rem;color:var(--gris)}
+  .kpis{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:12px;margin-top:16px}
+  .kpi{background:var(--neg);border:1px solid var(--bor2);border-radius:13px;padding:16px 18px}
+  .kpi .k{font-size:.72rem;letter-spacing:1px;text-transform:uppercase;color:var(--gris2)}
+  .kpi .v{font-family:var(--disp);font-weight:900;font-size:1.9rem;font-variant-numeric:tabular-nums;margin-top:4px}
+</style>
+</head>
+<body>
+<div id="bar"></div>
+<div class="wrap">
+
+  <div class="hero">
+    <div class="eyebrow">POS · Manual 02</div>
+    <h1>La <em>venta</em></h1>
+    <p class="sub">De tocar un producto a entregar el comprobante, en segundos y sin errores caros.</p>
+    <div class="meta"><span>Para cajeros</span><span>·</span><span>7 minutos</span></div>
+  </div>
+
+  <section>
+    <div class="stag">Capítulo 1</div>
+    <h2>Cómo se paga</h2>
+    <p class="lead">Producto → carrito → pago → comprobante. Lo único que cambia es cómo entra la plata.</p>
+    <table>
+      <tr><th>Método</th><th>Qué hace el POS</th><th>Dónde se cuadra</th></tr>
+      <tr><td>Efectivo</td><td>Registra el monto y calcula el vuelto</td><td>Cotejo del cajón, al cierre</td></tr>
+      <tr><td>Tarjeta (Point)</td><td>Cobra en la máquina Mercado Pago y espera el OK</td><td>Voucher del datáfono</td></tr>
+      <tr><td>Mixto</td><td>Parte efectivo + parte tarjeta en una sola venta</td><td>Cada parte por su lado</td></tr>
+      <tr><td>Cortesía</td><td>Venta $0 con motivo; igual emite ticket QR</td><td>No suma plata; queda auditada</td></tr>
+    </table>
+    <div class="peligro"><b>La tarjeta se cobra ANTES de registrar.</b> El Point cobra y después el POS guarda la venta. Si algo falla en el medio, el POS <strong>reintenta con el mismo folio</strong> y el servidor lo junta en una sola venta — nunca cobra dos veces ni pierde el cobro.</div>
+  </section>
+
+  <section>
+    <div class="stag">Capítulo 2</div>
+    <h2>Cómo lo vives tú</h2>
+    <div class="dos">
+      <div class="via"><h4>👤 Operador · en la Sunmi</h4><div class="c">Un grupo pide 3 chelas y 2 shots</div><p>Tocas los productos, el carrito suma solo. Cobras con débito: el Point pide la tarjeta, aprueba, y sale el comprobante. Si pagan mitad y mitad, usas <b>mixto</b> y el POS separa las dos partes.</p></div>
+      <div class="via"><h4>🛠 Admin · en el panel</h4><div class="c">Corregir una venta equivocada</div><p>En Ventas en vivo ves subir el total de BESUCONA. Un cajero cobró un cover como entrada: entras, tocas <b>Corregir venta</b>, la anulas con tu PIN de admin y se rehace bien — sin reabrir nada.</p></div>
+    </div>
+  </section>
+
+  <section>
+    <div class="stag">Capítulo 3</div>
+    <h2>La noche de BESUCONA, en plata</h2>
+    <div class="kpis">
+      <div class="kpi"><div class="k">Ventas</div><div class="v" style="color:var(--acc)">267</div></div>
+      <div class="kpi"><div class="k">Total cobrado</div><div class="v" style="color:var(--acc)">$4.378.000</div></div>
+      <div class="kpi"><div class="k">Tarjeta</div><div class="v">81%</div></div>
+    </div>
+    <table>
+      <tr><th>Método</th><th>Monto</th><th>Operaciones</th></tr>
+      <tr><td>Débito</td><td>$2.727.500</td><td>171</td></tr>
+      <tr><td>Crédito</td><td>$805.500</td><td>45</td></tr>
+      <tr><td>Efectivo</td><td>$845.000</td><td>53</td></tr>
+    </table>
+    <div class="bien"><b>Bien resuelto · la venta no se cae.</b> Sin internet, el POS guarda la venta y la sincroniza al volver. El doble-toque en "Confirmar" no genera doble venta: hay un candado por folio.</div>
+  </section>
+
+  <div class="pie">FRATE OS · POS · Manual 02 · <a href="/os-pos-turno">← El turno</a> · <a href="/os-pos-dinero">Siguiente: el dinero →</a></div>
+</div>
+
+<script src="/os-guard.js"></script>
+<script>
+  document.getElementById('bar').innerHTML = osBarra('02', 'pos');
+  osProteger();
+</script>
+</body>
+</html>

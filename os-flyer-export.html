@@ -1,0 +1,127 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>FRATE WEB (TICKETERA) · OS FLYER 09 LA EXPORTACIÓN</title>
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>📦</text></svg>">
+<link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@600;800;900&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="/os-manual.css">
+<link rel="stylesheet" href="/os-flyer.css">
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<style>
+  .paq{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin-top:8px}
+  @media(max-width:560px){.paq{grid-template-columns:1fr}}
+  .item{background:var(--neg2);border:1px solid var(--bor);border-radius:13px;padding:16px;cursor:pointer;transition:border-color .2s;text-align:center}
+  .item.on{border-color:var(--acc);background:linear-gradient(160deg,rgba(6,229,176,.08),transparent)}
+  .item .ic{font-size:1.7rem}
+  .item h4{font-family:var(--disp);font-weight:800;font-size:1rem;text-transform:uppercase;margin:7px 0 2px}
+  .item .d{font-size:.7rem;color:var(--gris)}
+  .item .ck{margin-top:9px;font-family:var(--disp);font-weight:800;font-size:.72rem;letter-spacing:1px;text-transform:uppercase;color:var(--gris2)}
+  .item.on .ck{color:var(--acc)}
+  .veredicto{font-family:var(--disp);font-weight:900;text-transform:uppercase;font-size:1.15rem;margin-top:16px;text-align:center;color:var(--gris)}
+  .veredicto.ok{color:var(--acc)}
+</style>
+</head>
+<body>
+<div id="bar"></div>
+<div class="wrap">
+
+  <div class="hero">
+    <div class="eyebrow">FLYER · Manual 09</div>
+    <h1>Sacar el<br><em>paquete</em></h1>
+    <p class="sub">La pestaña Exportar no fabrica nada: junta. Es la checklist de lo que necesitas para publicar una noche —el flyer, el reel y el caption— con el botón para ir a terminar lo que falte. El último paso antes de subir.</p>
+    <div class="meta"><span>Para quien publica</span><span>·</span><span>5 minutos</span></div>
+  </div>
+
+  <section>
+    <div class="stag">Capítulo 1</div>
+    <h2>El hub de entregables</h2>
+    <p class="lead">Cuando un evento está armado, la vista <b>Exportar</b> te muestra los tres entregables de esa noche en un solo lugar: <b>todo lo del evento, listo para publicar</b>.</p>
+    <p style="color:var(--gris)">No es una cuarta herramienta: es un tablero. Cada entregable se hace en su cocina —el flyer en Studio, el reel en la nube, el caption con la IA—; acá se juntan para que no se te olvide ninguno antes de subir.</p>
+    <div class="oro"><b>Regla de oro.</b> Exportar no crea: <strong>recuerda y reúne</strong>. Si un entregable no está, el botón te lleva al lugar donde se hace. Es la lista de «¿tengo todo?», no una máquina más.</div>
+  </section>
+
+  <section>
+    <div class="stag">Capítulo 2 · Tócalo</div>
+    <h2>Los tres del paquete</h2>
+    <p class="lead">Marca lo que ya tienes. El paquete está listo cuando están los tres.</p>
+    <div class="demo">
+      <div class="dl">Demo · arma el paquete</div>
+      <div class="paq">
+        <div class="item" id="i0"><div class="ic">🖼️</div><h4>Flyer (PNG)</h4><div class="d">La imagen del Studio — historia, carrusel o afiche.</div><div class="ck">○ falta</div></div>
+        <div class="item" id="i1"><div class="ic">🎬</div><h4>Reel (MP4)</h4><div class="d">El video 1080×1920, generado en la nube.</div><div class="ck">○ falta</div></div>
+        <div class="item" id="i2"><div class="ic">✍️</div><h4>Caption</h4><div class="d">El texto para Instagram — sale del brief.</div><div class="ck">○ falta</div></div>
+      </div>
+      <div class="veredicto" id="ver">0 de 3 · aún no publicable</div>
+    </div>
+    <div class="bien"><b>Bien resuelto.</b> El caption se copia de una: un botón «⧉ Copiar caption» lo deja en el portapapeles, listo para pegar en Instagram. El flyer y el reel te mandan a su herramienta con un clic.</div>
+  </section>
+
+  <section>
+    <div class="stag">Capítulo 3</div>
+    <h2>Cada cosa en su cocina</h2>
+    <div class="tw"><table class="tabla">
+      <thead><tr><th>Entregable</th><th>Dónde se hace</th><th>Formato</th></tr></thead>
+      <tbody>
+        <tr><td><b>🖼️ Flyer</b></td><td>Studio → diseñas y descargas la imagen (se baja en el navegador).</td><td>PNG · historia / carrusel / afiche</td></tr>
+        <tr><td><b>🎬 Reel</b></td><td>Reel → «Generar en la nube» y esperas el MP4. Ver <a href="/os-flyer-nube">08 · La nube</a>.</td><td>MP4 · 1080×1920</td></tr>
+        <tr><td><b>✍️ Caption</b></td><td>Eventos → la IA lo genera con el brief. Acá se copia.</td><td>Texto</td></tr>
+      </tbody>
+    </table></div>
+    <div class="peligro"><b>Sin evento activo no hay qué exportar.</b> Si entras a Exportar y no elegiste una noche, te pide crear o elegir un evento primero. El paquete es siempre de <b>un</b> evento.</div>
+  </section>
+
+  <section>
+    <div class="stag">Capítulo 4</div>
+    <h2>Lo que todavía no hace</h2>
+    <ul>
+      <li><b>El «ZIP con todo» está en camino.</b> La idea es un solo archivo con flyer + reel + caption. Todavía no: por ahora bajas cada cosa por su lado. Cuando esté, juntará el flyer y esperará el reel de la nube.</li>
+      <li><b>No publica por ti.</b> Exportar deja los archivos listos; subir a Instagram lo haces tú. FLYER no postea.</li>
+    </ul>
+    <div class="oro"><b>Cierre de la serie.</b> Con esto tienes el recorrido completo de FLYER: nace el evento, se diseña, se filma, se arma el brief, se ordena en la mesa, se controla quién entra, se cocina el reel afuera y —acá— se saca el paquete para publicar.</div>
+  </section>
+
+  <section>
+    <div class="stag">La serie completa</div>
+    <h2>Manual de FLYER</h2>
+    <div class="serie">
+      <a class="mn" href="/os-flyer"><span class="num2">00</span><div><h4>El mapa</h4><p>Los cuatro cerebros y de qué es dueño FLYER.</p></div></a>
+      <a class="mn" href="/os-flyer-evento"><span class="num2">01</span><div><h4>Un evento</h4><p>De una fecha y una canción a una campaña completa.</p></div></a>
+      <a class="mn" href="/os-flyer-diseno"><span class="num2">02</span><div><h4>Un flyer</h4><p>Studio: de los datos a la gráfica final.</p></div></a>
+      <a class="mn" href="/os-flyer-reel"><span class="num2">03</span><div><h4>Un reel</h4><p>El mini-estudio de video: de un evento a un MP4.</p></div></a>
+      <a class="mn" href="/os-flyer-brief"><span class="num2">04</span><div><h4>El brief</h4><p>El documento que despierta a los otros tres sistemas.</p></div></a>
+      <a class="mn" href="/os-flyer-mesa"><span class="num2">05</span><div><h4>La mesa</h4><p>El flujo guiado: evento, diseño, video y descarga.</p></div></a>
+      <a class="mn" href="/os-flyer-reglas"><span class="num2">06</span><div><h4>Reglas de oro</h4><p>Lo que FLYER hace, lo que nunca hace y por qué.</p></div></a>
+      <a class="mn" href="/os-flyer-id"><span class="num2">07</span><div><h4>FRATE ID</h4><p>Quién entra: las dos puertas, los roles y la firma.</p></div></a>
+      <a class="mn" href="/os-flyer-nube"><span class="num2">08</span><div><h4>La nube</h4><p>El reel se cocina afuera: subir, renderizar, esperar el MP4.</p></div></a>
+      <a class="mn" href="/os-flyer-export"><span class="num2">09</span><div><h4>La exportación</h4><p>El paquete del evento: flyer, reel y caption.</p><span class="tag">Estás aquí</span></div></a>
+    </div>
+  </section>
+
+  <div class="pie">
+    <p><b>FRATE OS · Manual de FLYER 09.</b> <a href="/os-flyer-nube">← La nube</a> · <a href="/os-flyer">Volver al mapa →</a></p>
+  </div>
+
+</div>
+
+<script src="/os-guard.js"></script>
+<script>
+  document.getElementById('bar').innerHTML = osBarra('09','fly');
+  osProteger();
+
+  (function(){
+    var items=[document.getElementById('i0'),document.getElementById('i1'),document.getElementById('i2')];
+    var ver=document.getElementById('ver');
+    function render(){
+      var n=items.filter(function(it){return it.classList.contains('on')}).length;
+      items.forEach(function(it){ it.querySelector('.ck').textContent = it.classList.contains('on')?'✓ listo':'○ falta'; });
+      ver.classList.toggle('ok', n===3);
+      ver.textContent = n===3 ? '3 de 3 · listo para publicar 🚀' : (n+' de 3 · aún no publicable');
+    }
+    items.forEach(function(it){ it.addEventListener('click',function(){ it.classList.toggle('on'); render(); }); });
+    render();
+  })();
+</script>
+</body>
+</html>

@@ -1,0 +1,14 @@
+{
+  "name": "FRATE · CONNECT",
+  "short_name": "CONNECT",
+  "description": "La bandeja única de FRATE: WhatsApp, web e Instagram en un solo lugar.",
+  "start_url": "/connect",
+  "scope": "/connect",
+  "display": "standalone",
+  "orientation": "portrait",
+  "background_color": "#0c0c10",
+  "theme_color": "#0c0c10",
+  "icons": [
+    { "src": "/icon-frate.svg", "sizes": "any", "type": "image/svg+xml", "purpose": "any" }
+  ]
+}

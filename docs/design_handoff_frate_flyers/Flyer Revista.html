@@ -1,0 +1,166 @@
+<!DOCTYPE html>
+<html lang="es-CL">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>PROHIBIDA · Revista universitaria</title>
+<link rel="stylesheet" href="revista.css">
+</head>
+<body>
+<div class="rv-stage">
+  <div class="rv-canvas" id="canvas">
+
+    <!-- FOTO -->
+    <div class="rv-photo">
+      <image-slot id="rv-face" shape="rect" placeholder="ARRASTRA LA FOTO DE PORTADA · FULL-BLEED"></image-slot>
+    </div>
+
+    <div class="rv-frame"></div>
+
+    <div class="rv-ui">
+      <!-- TOP -->
+      <div class="rv-top">
+        <span data-slot="issueTop">Nº 04 · MAYO 2026</span>
+        <span class="mid" data-slot="edicion">EDICIÓN NOCTURNA</span>
+        <span data-slot="ageTop">+18 · CHILE</span>
+      </div>
+      <div class="rv-hair"></div>
+
+      <!-- MASTHEAD -->
+      <div class="rv-mast">
+        <h1 data-slot="masthead">PROHIBIDA</h1>
+        <div class="tagline" data-slot="tagline">REVISTA UNIVERSITARIA · FRATE CAMPUS CENTRAL</div>
+      </div>
+
+      <!-- número marca de agua -->
+      <div class="rv-issue" data-slot="issueBig">04</div>
+
+      <!-- COVERLINES IZQ -->
+      <div class="rv-side l">
+        <div class="rv-cl"><div class="k" data-slot="l1k">PORTADA</div><h3 data-slot="l1h">La chica de la pista</h3><p data-slot="l1p">Perfil de quien nadie pudo dejar de mirar</p></div>
+        <div class="rv-cl"><div class="k" data-slot="l2k">TENDENCIA</div><h3 data-slot="l2h">Vestir para la madrugada</h3><p data-slot="l2p">El código: tu mejor versión</p></div>
+        <div class="rv-cl"><div class="k" data-slot="l3k">PLAYLIST</div><h3 data-slot="l3h">Lo que sonará</h3><p data-slot="l3p">Perreo, nostalgia y himnos de cierre</p></div>
+      </div>
+
+      <!-- COVERLINES DER -->
+      <div class="rv-side r">
+        <div class="rv-cl"><div class="k" data-slot="r1k">CONFIDENCIAL</div><h3 data-slot="r1h">Se busca portada</h3><p data-slot="r1p">Etiqueta a tu candidat@ del mes</p></div>
+        <div class="rv-cl"><div class="k" data-slot="r2k">AGENDA</div><h3 data-slot="r2h">Sábado 02 · 11 PM</h3><p data-slot="r2p">Pista central · cupos limitados</p></div>
+      </div>
+
+      <!-- SELLO PROHIBIDA -->
+      <div class="rv-seal">
+        <svg class="ring" viewBox="0 0 176 176"><defs><path id="rvring" d="M88,14 a74,74 0 1,1 -0.1,0"></path></defs>
+          <text><textPath href="#rvring" startOffset="0">CONTENIDO EXCLUSIVO · SOLO SOCIOS · FRATE · </textPath></text></svg>
+        <div class="in"><div class="big" data-slot="sealBig">PROHIBIDA<br>SU VENTA</div><div class="sm" data-slot="sealSm">A ADULTOS ABURRIDOS</div></div>
+      </div>
+
+      <!-- COVERLINE PRINCIPAL -->
+      <div class="rv-hero">
+        <div class="over" data-slot="heroOver">EXCLUSIVA DEL MES</div>
+        <h2 data-slot="heroTitle">ME ENCANTA <em>TU</em> SONRISA</h2>
+        <div class="sub" data-slot="heroSub">La noche que todos fingen que no esperaban. Perfil íntimo de la pista, el deseo y el after.</div>
+        <div class="credit" data-slot="heroCredit">FOTOGRAFÍA · FRATE STUDIO — ESTILISMO · LA NOCHE</div>
+      </div>
+
+      <!-- FOOTER -->
+      <div class="rv-foot">
+        <div class="info"><b data-slot="site">WWW.FRATE.CL</b><br><span data-slot="meta">ACCESO +18 · DRESS CODE ESTRICTO</span></div>
+        <div class="rv-price">
+          <div><div class="rv-barcode" id="barcode"></div><div class="lbl" data-slot="barLbl">FRATE · 02 · MAYO</div></div>
+        </div>
+      </div>
+    </div>
+
+    <div class="rv-grain"></div>
+  </div>
+</div>
+
+<div id="tweaks">
+  <h3>Tweaks <button id="tw-close">×</button></h3>
+  <div class="tw-group"><button class="tw-regen" id="tw-regen">⟳ Regenerar (demo)</button></div>
+  <div class="tw-group"><label>Foil (acento)</label><div class="tw-swatches" id="tw-accent"></div></div>
+  <div class="tw-group"><label>Grade de foto</label><div class="tw-seg" id="tw-grade"></div></div>
+</div>
+
+<script src="image-slot.js"></script>
+<script>
+const TWEAKS = /*EDITMODE-BEGIN*/{ "accent": "#d9b46a", "grade": "mono" }/*EDITMODE-END*/;
+const ACCENTS = ["#d9b46a", "#ff2f6d", "#e7e3da", "#7cf2c8", "#b18cff"];
+const GRADES = { mono: "grayscale(.85) contrast(1.12) brightness(.92)", warm: "grayscale(.25) sepia(.25) contrast(1.06) brightness(.95)", cold: "grayscale(.4) contrast(1.1) brightness(.94) hue-rotate(-12deg)", color: "grayscale(0) contrast(1.05) saturate(1.05)" };
+const W = 1080, H = 1620;
+
+const EVENT = {
+  issueTop: "Nº 04 · MAYO 2026", edicion: "EDICIÓN NOCTURNA", ageTop: "+18 · CHILE",
+  masthead: "PROHIBIDA", tagline: "REVISTA UNIVERSITARIA · FRATE CAMPUS CENTRAL", issueBig: "04",
+  l1k: "PORTADA", l1h: "La chica de la pista", l1p: "Perfil de quien nadie pudo dejar de mirar",
+  l2k: "TENDENCIA", l2h: "Vestir para la madrugada", l2p: "El código: tu mejor versión",
+  l3k: "PLAYLIST", l3h: "Lo que sonará", l3p: "Perreo, nostalgia y himnos de cierre",
+  r1k: "CONFIDENCIAL", r1h: "Se busca portada", r1p: "Etiqueta a tu candidat@ del mes",
+  r2k: "AGENDA", r2h: "Sábado 02 · 11 PM", r2p: "Pista central · cupos limitados",
+  sealBig: "PROHIBIDA<br>SU VENTA", sealSm: "A ADULTOS ABURRIDOS",
+  heroOver: "EXCLUSIVA DEL MES", heroTitle: "ME ENCANTA <em>TU</em> SONRISA",
+  heroSub: "La noche que todos fingen que no esperaban. Perfil íntimo de la pista, el deseo y el after.",
+  heroCredit: "FOTOGRAFÍA · FRATE STUDIO — ESTILISMO · LA NOCHE",
+  site: "WWW.FRATE.CL", meta: "ACCESO +18 · DRESS CODE ESTRICTO", barLbl: "FRATE · 02 · MAYO"
+};
+
+function fillData(d) {
+  document.querySelectorAll("[data-slot]").forEach(el => { const k = el.dataset.slot; if (d[k] != null) el.innerHTML = d[k]; });
+  let seed = 7; const rnd = () => (seed = (seed * 1103515245 + 12345) & 0x7fffffff) / 0x7fffffff;
+  document.getElementById("barcode").innerHTML = Array.from({ length: 34 }, () =>
+    `<i style="width:${(rnd() * 3 + 1).toFixed(1)}px;opacity:${rnd() > .5 ? 1 : .82}"></i>`).join("");
+}
+function applyTweaks(t) {
+  const r = document.documentElement.style;
+  r.setProperty("--accent", t.accent || "#d9b46a");
+  const slot = document.querySelector("#rv-face");
+  const host = document.querySelector(".rv-photo image-slot");
+  document.querySelectorAll(".rv-photo image-slot").forEach(s => s.style.filter = GRADES[t.grade] || GRADES.mono);
+}
+
+function loadInjected() {
+  try { const raw = new URLSearchParams(location.search).get("data");
+    if (raw) { const d = JSON.parse(decodeURIComponent(escape(atob(raw)))); Object.assign(EVENT, d.event || {}); Object.assign(TWEAKS, d.tweaks || {}); }
+  } catch (e) {}
+  if (window.FRATE_EVENT) Object.assign(EVENT, window.FRATE_EVENT);
+  if (window.FRATE_TWEAKS) Object.assign(TWEAKS, window.FRATE_TWEAKS);
+}
+
+const SAMPLES = [
+  { heroTitle: "ME ENCANTA <em>TU</em> SONRISA", heroOver: "EXCLUSIVA DEL MES", l1h: "La chica de la pista", issueBig: "04", issueTop: "Nº 04 · MAYO 2026", barLbl: "FRATE · 02 · MAYO" },
+  { heroTitle: "NADIE BAILA <em>COMO</em> TÚ", heroOver: "PERFIL DE LA NOCHE", l1h: "El rey del after", issueBig: "05", issueTop: "Nº 05 · JUNIO 2026", barLbl: "FRATE · 15 · JUNIO" },
+  { heroTitle: "NO TIENE <em>DUEÑ@</em>", heroOver: "MANIFIESTO", l1h: "Libertad en la pista", issueBig: "06", issueTop: "Nº 06 · JULIO 2026", barLbl: "FRATE · 07 · JULIO" }
+];
+let si = 0;
+function regenDemo() {
+  si = (si + 1) % SAMPLES.length; Object.assign(EVENT, SAMPLES[si]);
+  TWEAKS.accent = ACCENTS[(ACCENTS.indexOf(TWEAKS.accent) + 1) % ACCENTS.length];
+  fillData(EVENT); applyTweaks(TWEAKS); buildPanel();
+}
+
+function buildPanel() {
+  const acc = document.getElementById("tw-accent");
+  acc.innerHTML = ACCENTS.map(c => `<div class="tw-sw${c === TWEAKS.accent ? ' sel' : ''}" style="background:${c}" data-c="${c}"></div>`).join("");
+  acc.onclick = e => { const sw = e.target.closest(".tw-sw"); if (!sw) return; setTweak("accent", sw.dataset.c); acc.querySelectorAll(".tw-sw").forEach(x => x.classList.toggle("sel", x === sw)); };
+  const g = document.getElementById("tw-grade"); const labels = { mono: "Mono", warm: "Cálido", cold: "Frío", color: "Color" };
+  g.innerHTML = Object.keys(labels).map(k => `<button class="${k === TWEAKS.grade ? 'sel' : ''}" data-k="${k}">${labels[k]}</button>`).join("");
+  g.onclick = e => { const b = e.target.closest("button"); if (!b) return; setTweak("grade", b.dataset.k); g.querySelectorAll("button").forEach(x => x.classList.toggle("sel", x === b)); };
+  const rg = document.getElementById("tw-regen"); if (rg) rg.onclick = regenDemo;
+}
+function setTweak(k, v) { TWEAKS[k] = v; applyTweaks(TWEAKS); try { window.parent.postMessage({ type: "__edit_mode_set_keys", edits: { [k]: v } }, "*"); } catch (e) {} }
+
+window.addEventListener("message", e => {
+  if (e.data?.type === "__activate_edit_mode") document.getElementById("tweaks").classList.add("on");
+  if (e.data?.type === "__deactivate_edit_mode") document.getElementById("tweaks").classList.remove("on");
+});
+document.getElementById("tw-close").onclick = () => { document.getElementById("tweaks").classList.remove("on"); try { window.parent.postMessage({ type: "__edit_mode_dismissed" }, "*"); } catch (e) {} };
+
+loadInjected(); fillData(EVENT); applyTweaks(TWEAKS); buildPanel();
+try { window.parent.postMessage({ type: "__edit_mode_available" }, "*"); } catch (e) {}
+
+function scale() { const c = document.getElementById("canvas"); const st = document.querySelector(".rv-stage"); const s = window.innerWidth / W; c.style.transform = `scale(${s})`; if (st) st.style.height = (H * s) + "px"; }
+scale(); window.addEventListener("resize", scale);
+</script>
+</body>
+</html>

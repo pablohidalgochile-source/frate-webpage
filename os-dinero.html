@@ -1,0 +1,155 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>FRATE WEB (TICKETERA) · OS 02 EL VIAJE DEL DINERO</title>
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>💰</text></svg>">
+<link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@600;800;900&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="/os-manual.css">
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<style>
+  .calc{display:grid;grid-template-columns:1fr 1fr;gap:14px;align-items:start}
+  @media(max-width:640px){.calc{grid-template-columns:1fr}}
+  .calc input,.calc select{width:100%;background:var(--neg);border:1px solid var(--bor2);color:var(--txt);padding:10px 12px;border-radius:9px;font-size:.95rem;margin-top:5px}
+  .calc label{font-size:.68rem;letter-spacing:1.2px;text-transform:uppercase;color:var(--gris2)}
+  .lin{display:flex;justify-content:space-between;padding:7px 0;border-bottom:1px solid var(--bor);font-size:.88rem}
+  .lin b{font-variant-numeric:tabular-nums}
+  .lin.tot{border-bottom:0;padding-top:11px;font-size:1.05rem}
+  .lin.tot b{font-family:var(--disp);font-size:1.5rem;color:var(--verde)}
+</style>
+</head>
+<body>
+<div id="bar"></div>
+<div class="wrap">
+
+  <div class="hero">
+    <div class="eyebrow">Manual 02</div>
+    <h1>El viaje<br>del <em>dinero</em></h1>
+    <p class="sub">Del precio en pantalla hasta el cierre contable: cómo se cobra, cómo se verifica, cómo se devuelve y cómo cuadra ante el SII.</p>
+    <div class="meta"><span>Administración</span><span>·</span><span>12 minutos</span></div>
+  </div>
+
+  <section>
+    <div class="stag">Capítulo 1</div>
+    <h2>La regla que sostiene todo</h2>
+    <p class="lead">Hay una sola regla de la que dependen todas las demás:</p>
+    <div class="oro" style="font-size:1.1rem;padding:20px"><b>Ningún monto viene del navegador del cliente.</b><br>
+      Ni el precio, ni el descuento, ni el crédito, ni la comisión. Todo se recalcula en el servidor contra la base de datos, cada vez.</div>
+    <p>Esto significa que aunque alguien manipule la pantalla y mande "esta entrada vale $1", el servidor la recalcula a $15.000 y cobra eso. <b>El precio de pantalla es solo informativo.</b></p>
+    <div class="bien"><b>Lo mismo aplica a:</b> los códigos de descuento (se validan contra la tabla), el crédito FRATE (se lee de la cuenta real de la persona logueada) y la comisión del 4% (sale de la configuración, no del cliente).</div>
+  </section>
+
+  <section>
+    <div class="stag">Capítulo 2 · demo</div>
+    <h2>Cómo se arma un cobro</h2>
+    <p class="lead">Mueve los números y mira cómo se compone el total.</p>
+    <div class="demo">
+      <div class="dl">Calculadora · lo que ve el cliente</div>
+      <div class="calc">
+        <div>
+          <label>Precio de la entrada</label>
+          <input type="number" id="c-precio" value="15000" oninput="calc()">
+          <label style="margin-top:12px;display:block">Cantidad</label>
+          <input type="number" id="c-cant" value="2" min="1" oninput="calc()">
+          <label style="margin-top:12px;display:block">Descuento (código)</label>
+          <input type="number" id="c-desc" value="0" min="0" oninput="calc()">
+        </div>
+        <div style="background:var(--neg);border:1px solid var(--bor);border-radius:12px;padding:15px 17px">
+          <div class="lin"><span>Entradas</span><b id="r-sub">$30.000</b></div>
+          <div class="lin"><span>Descuento</span><b id="r-desc">–$0</b></div>
+          <div class="lin"><span>Cargo por servicio (4%)</span><b id="r-fee">$1.200</b></div>
+          <div class="lin tot"><span>Total a pagar</span><b id="r-tot">$31.200</b></div>
+          <div style="font-size:.72rem;color:var(--gris2);margin-top:10px">Si más adelante pide devolución del total: se le devuelven <b id="r-dev" style="color:var(--oro)">$28.080</b> (retención 10%).</div>
+        </div>
+      </div>
+    </div>
+    <div class="oro"><b>Ojo con la comisión:</b> el 4% es de FRATE, no de MercadoPago. MercadoPago cobra lo suyo aparte (≈3,5%) y se descuenta de lo que te depositan.</div>
+  </section>
+
+  <section>
+    <div class="stag">Capítulo 3</div>
+    <h2>Cómo se confirma un pago</h2>
+    <p class="lead">Este es el punto donde un sistema mal hecho regala entradas. El nuestro no confía en nadie.</p>
+    <div class="flujo">
+      <div class="paso"><div class="n">1</div><h4>Cliente paga</h4><p>En MercadoPago o Khipu, fuera de nuestro sitio.</p></div>
+      <div class="paso"><div class="n">2</div><h4>Llega un aviso</h4><p>El proveedor nos avisa "este pago se hizo".</p></div>
+      <div class="paso"><div class="n">3</div><h4>NO le creemos</h4><p>Le preguntamos <b>al proveedor</b> con nuestra propia credencial.</p></div>
+      <div class="paso"><div class="n">4</div><h4>Comparamos el monto</h4><p>Si pagó menos que el total, <b>no se emite</b>.</p></div>
+      <div class="paso"><div class="n">5</div><h4>Recién ahí</h4><p>Se marca pagado, se emiten los QR y sale el correo.</p></div>
+    </div>
+    <div class="bien"><b>Por qué es importante:</b> cualquiera puede mandarnos un mensaje falso diciendo "fulano pagó". Como verificamos contra la cuenta real de MercadoPago, <b>un aviso falso no sirve de nada</b>. Y si el mismo aviso llega dos veces, la entrada se emite una sola vez.</div>
+  </section>
+
+  <section>
+    <div class="stag">Capítulo 4</div>
+    <h2>Las devoluciones</h2>
+    <p class="lead">Nada se devuelve solo. Siempre hay una persona que aprueba.</p>
+    <div class="tw"><table class="tabla">
+      <thead><tr><th>Opción</th><th>Retención</th><th>Cuándo conviene</th><th>Qué pasa</th></tr></thead>
+      <tbody>
+        <tr><td><b>💵 Dinero de vuelta</b></td><td style="color:var(--oro)"><b>10%</b></td><td>Cuando la persona no volverá.</td><td>Vuelve por el mismo medio. Hasta 5 días hábiles.</td></tr>
+        <tr><td><b>🎟️ Crédito FRATE</b></td><td style="color:var(--verde)"><b>0%</b></td><td>Cuando volverá otro día. <b>Ofrécelo primero.</b></td><td>Queda a su favor, al instante. No sale plata.</td></tr>
+        <tr><td><b>🔄 Cambio de día</b></td><td style="color:var(--verde)"><b>0%</b></td><td>Cuando se equivocó de fecha.</td><td>Se anula su QR y se emite otro. La plata se queda.</td></tr>
+      </tbody>
+    </table></div>
+    <div class="oro"><b>Por qué se retiene el 10%:</b> la comisión que ya cobró MercadoPago no se recupera completa, y la gestión tiene costo. Está avisado en el checkout <b>antes</b> de comprar, así que no es sorpresa.</div>
+
+    <h3>Devolver solo algunas entradas</h3>
+    <p>Si compró 4 y solo devuelve 1, se marcan cuáles. <b>Se quema solo ese QR</b> y las otras 3 siguen sirviendo. Nunca se anula la orden completa por una entrada.</p>
+    <div class="peligro"><b>Cuidado al aprobar:</b> revisa que estén marcadas <b>solo</b> las entradas que la persona pidió. Devolver de más significa que el cliente pierde entradas válidas que sí quería usar.</div>
+  </section>
+
+  <section>
+    <div class="stag">Capítulo 5</div>
+    <h2>Notas de crédito e IVA</h2>
+    <p class="lead">La parte que le importa al contador.</p>
+    <p>Cada devolución genera una <b>nota de crédito</b> con tres números:</p>
+    <div class="kpis">
+      <div class="kpi"><b>$28.080</b><span>Bruto devuelto</span></div>
+      <div class="kpi"><b>$23.597</b><span>Neto (÷ 1,19)</span></div>
+      <div class="kpi o"><b>$4.483</b><span>IVA a recuperar</span></div>
+    </div>
+    <p style="margin-top:14px">Ese IVA es plata que ya le pagaste al SII y que puedes recuperar. Por eso <b>cada devolución tiene que quedar registrada</b>: si no está, pagas IVA de una venta que no ocurrió.</p>
+    <div class="bien"><b>Una fila por devolución.</b> Si a la misma orden le devuelves $8.000 hoy y $8.000 mañana, quedan <b>dos</b> notas de crédito por $8.000 cada una — no una sola. El total que ve el contador son $16.000, que es la verdad.</div>
+    <div class="peligro"><b>Pendiente conocido:</b> hoy el sistema <b>no emite boleta electrónica</b>. Se vende con IVA incluido pero sin documento tributario. Una nota de crédito del SII debe colgar del folio de una boleta — sin boleta, no tiene dónde anclarse. <b>Es el próximo proyecto grande</b> y hasta que esté, la cuadratura ante el SII es incompleta.</div>
+  </section>
+
+  <section>
+    <div class="stag">Capítulo 6</div>
+    <h2>Cuando el dinero no cuadra</h2>
+    <div class="tw"><table class="tabla">
+      <thead><tr><th>Caso</th><th>Qué significa</th><th>Qué hacer</th></tr></thead>
+      <tbody>
+        <tr><td><b>Requiere reembolso</b></td><td>Le cobraste y no había cupo.</td><td>Botón <b>➕ Dar cupo</b>: le emites la entrada. Solo si de verdad no cabe, devuelves.</td></tr>
+        <tr><td><b>Pendiente / expirada</b></td><td>Empezó a comprar y no terminó.</td><td>Nada. El cupo se liberó solo a los 15 min. Se le puede mandar recordatorio.</td></tr>
+        <tr><td><b>Pagó pero no llegó el correo</b></td><td>El correo rebotó o está mal escrito.</td><td>Panel → correos rebotados. Corriges el correo y reenvías el comprobante.</td></tr>
+        <tr><td><b>Transferencia sin identificar</b></td><td>Pagó por Khipu y no se cruzó sola.</td><td>Pestaña Transferencias → conciliar.</td></tr>
+      </tbody>
+    </table></div>
+    <div class="oro"><b>Regla de oro del cierre:</b> al final de la noche, <b>ninguna orden debería quedar en "requiere reembolso"</b>. O se le dio cupo, o se le devolvió. Si queda ahí, es plata cobrada que no figura como venta ni como devolución — y eso descuadra el mes.</div>
+  </section>
+
+  <div class="pie">FRATE OS · Manual 02 · <a href="/os-entrada">← La entrada</a> · <a href="/os-persona">Siguiente: la persona →</a></div>
+</div>
+
+<script src="/os-guard.js"></script>
+<script>
+  document.getElementById('bar').innerHTML = osBarra('02');
+  osProteger();
+  var clp = function(n){ return '$' + Math.round(n||0).toLocaleString('es-CL'); };
+  function calc(){
+    var p = +document.getElementById('c-precio').value || 0;
+    var c = +document.getElementById('c-cant').value || 1;
+    var d = +document.getElementById('c-desc').value || 0;
+    var sub = p*c, base = Math.max(0, sub-d), fee = Math.round(base*0.04), tot = base+fee;
+    document.getElementById('r-sub').textContent  = clp(sub);
+    document.getElementById('r-desc').textContent = '–'+clp(d);
+    document.getElementById('r-fee').textContent  = clp(fee);
+    document.getElementById('r-tot').textContent  = clp(tot);
+    document.getElementById('r-dev').textContent  = clp(Math.round(tot*0.9));
+  }
+  calc();
+</script>
+</body>
+</html>

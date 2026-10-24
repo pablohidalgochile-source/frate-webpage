@@ -1,0 +1,120 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>FRATE WEB (TICKETERA) · OS 06 REGLAS DE ORO</title>
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>⚖️</text></svg>">
+<link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@600;800;900&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="/os-manual.css">
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<style>
+  .regla{background:var(--neg2);border:1px solid var(--bor);border-left:4px solid var(--rojo);border-radius:12px;padding:18px 20px;margin-top:12px}
+  .regla .n{font-family:var(--disp);font-weight:900;font-size:.72rem;letter-spacing:2px;color:var(--rojo);margin-bottom:5px}
+  .regla h4{font-family:var(--disp);font-weight:800;font-size:1.25rem;text-transform:uppercase;margin-bottom:6px}
+  .regla p{color:var(--gris);font-size:.9rem}
+  .regla .pq{margin-top:9px;font-size:.82rem;color:var(--gris2);border-top:1px solid var(--bor);padding-top:9px}
+  .regla .pq b{color:var(--txt)}
+</style>
+</head>
+<body>
+<div id="bar"></div>
+<div class="wrap">
+
+  <div class="hero">
+    <div class="eyebrow">Manual 06</div>
+    <h1>Reglas<br>de <em>oro</em></h1>
+    <p class="sub">Diez reglas que no se rompen. No son burocracia: cada una existe porque algo salió mal alguna vez.</p>
+    <div class="meta"><span>Obligatorio</span><span>·</span><span>Todo el equipo</span></div>
+  </div>
+
+  <section>
+    <div class="stag">Las diez</div>
+    <h2>Lo que no se hace</h2>
+
+    <div class="regla"><div class="n">Regla 01</div><h4>Nunca dejar entrar sin registrar</h4>
+      <p>Toda persona que cruza la puerta queda en el sistema. Sin excepciones: ni el amigo del dueño, ni el artista, ni la prensa.</p>
+      <div class="pq"><b>Por qué:</b> si entra gente que no está registrada, el aforo miente. Y el aforo es un tema de seguridad, no de contabilidad. Para eso existe <b>➕ Nuevo</b>: 15 segundos.</div></div>
+
+    <div class="regla"><div class="n">Regla 02</div><h4>Nunca emitir una lista sin revisarla</h4>
+      <p>Cada QR emitido es una entrada válida. Antes de emitir, se revisa: vetados, menores, duplicados, RUT inválidos.</p>
+      <div class="pq"><b>Por qué:</b> después de emitir ya no hay vuelta atrás — esa entrada está en el teléfono de alguien.</div></div>
+
+    <div class="regla"><div class="n">Regla 03</div><h4>Nunca cobrar sin cupo</h4>
+      <p>Si no hay cupo, la persona tiene que enterarse <b>antes</b> de pagar. El sistema reserva el lugar al elegir, no al pagar.</p>
+      <div class="pq"><b>Por qué:</b> ya pasó. Gente que pagó y llegó a la puerta sin entrada. Es la peor experiencia posible y la más difícil de arreglar en el momento.</div></div>
+
+    <div class="regla"><div class="n">Regla 04</div><h4>Nunca devolver sin aprobación humana</h4>
+      <p>El cliente <b>solicita</b>; una persona del equipo <b>aprueba</b>. Nada de devoluciones automáticas.</p>
+      <div class="pq"><b>Por qué:</b> es plata real saliendo. Y porque muchas veces conviene ofrecer crédito o cambio de día, que no cuestan plata y mantienen al cliente.</div></div>
+
+    <div class="regla"><div class="n">Regla 05</div><h4>Nunca escribirle a un cliente desde tu teléfono</h4>
+      <p>Todo por el WhatsApp de FRATE. Así queda en el historial y cualquiera del equipo puede continuar la conversación.</p>
+      <div class="pq"><b>Por qué:</b> si escribes desde tu número, esa conversación no existe para el equipo. Y si te vas, se va contigo.</div></div>
+
+    <div class="regla"><div class="n">Regla 06</div><h4>Nunca sacar datos de clientes del sistema</h4>
+      <p>No se exportan listas de RUT ni correos para uso personal, ni se comparten por WhatsApp, ni se proyectan en pantallas.</p>
+      <div class="pq"><b>Por qué:</b> en Chile los datos personales están protegidos por ley (19.628). Los datos son de las personas, no nuestros.</div></div>
+
+    <div class="regla"><div class="n">Regla 07</div><h4>Nunca prestar tu cuenta</h4>
+      <p>Cada quien entra con la suya. Si alguien necesita acceso, se le crea una cuenta.</p>
+      <div class="pq"><b>Por qué:</b> cada acción queda registrada con tu nombre. Lo que haga otra persona con tu cuenta, queda a tu nombre.</div></div>
+
+    <div class="regla"><div class="n">Regla 08</div><h4>Nunca eliminar una orden con plata</h4>
+      <p>Si hubo pago, se <b>cancela</b> o se <b>devuelve</b>, pero no se borra. Eliminar es solo para pruebas.</p>
+      <div class="pq"><b>Por qué:</b> una orden borrada desaparece de la contabilidad, pero la plata entró igual. Eso descuadra el mes y no hay cómo reconstruirlo.</div></div>
+
+    <div class="regla"><div class="n">Regla 09</div><h4>Nunca tocar configuración sin saber qué hace</h4>
+      <p>Si no estás seguro, pregunta. Especialmente: roles, retención, horarios y zona de pruebas.</p>
+      <div class="pq"><b>Por qué:</b> la configuración afecta a todos y a todo lo que venga. Preguntar toma 2 minutos; arreglar puede tomar un día.</div></div>
+
+    <div class="regla"><div class="n">Regla 10</div><h4>Nunca dejar un problema para mañana si hay alguien esperando</h4>
+      <p>Banner rojo, solicitud de devolución, correo rebotado: hay una persona real esperando algo que ya pagó.</p>
+      <div class="pq"><b>Por qué:</b> un problema resuelto en el día es un cliente que vuelve. Al otro día ya es un reclamo público.</div></div>
+  </section>
+
+  <section>
+    <div class="stag">Capítulo 2</div>
+    <h2>Qué hacer si…</h2>
+    <div class="tw"><table class="tabla">
+      <thead><tr><th>Situación</th><th>Qué haces</th></tr></thead>
+      <tbody>
+        <tr><td>Un cliente dice que pagó y no le llegó nada</td><td>Buscas su orden en Órdenes. Si está pagada, revisas si su correo rebotó, lo corriges y reenvías el comprobante.</td></tr>
+        <tr><td>Un cliente llega con un QR ya escaneado</td><td>No entra. Puede ser una captura reenviada. Registras incidencia y revisas con el equipo.</td></tr>
+        <tr><td>Alguien exige que le devuelvas el 100%</td><td>Le explicas la retención del 10% (está avisada antes de comprar) y le ofreces <b>crédito sin retención</b>.</td></tr>
+        <tr><td>El cupo se agotó y hay gente pagada afuera</td><td>Botón <b>➕ Dar cupo</b> en su orden. Si de verdad no cabe nadie más, devolución.</td></tr>
+        <tr><td>Se cayó internet en la puerta</td><td>Sigues escaneando normal. Al volver la señal, <b>🔄 Sincronizar</b>.</td></tr>
+        <tr><td>Alguien pide que borres sus datos</td><td>Se borra. Es su derecho. Avisa al admin para dejarlo registrado.</td></tr>
+        <tr><td>Ves algo raro con la plata o los accesos</td><td><b>Avisas de inmediato.</b> No investigues solo ni lo dejes pasar.</td></tr>
+      </tbody>
+    </table></div>
+  </section>
+
+  <section>
+    <div class="stag">Capítulo 3</div>
+    <h2>Lo que el sistema NO hace (todavía)</h2>
+    <p class="lead">Ser honestos con los límites evita promesas que no podemos cumplir.</p>
+    <ul>
+      <li><b>No emite boleta electrónica.</b> Se vende con IVA incluido pero sin documento tributario. Es el próximo proyecto grande.</li>
+      <li><b>No borra un mensaje del teléfono del cliente.</b> Si le mandaste algo por WhatsApp, ya está. Se puede borrar del inbox nuestro, no del suyo.</li>
+      <li><b>No sabe qué consumió cada persona en la barra.</b> Eso vive en el POS.</li>
+      <li><b>No detecta al instante un doble ingreso offline.</b> Lo detecta al sincronizar y lo deja registrado.</li>
+    </ul>
+    <div class="oro"><b>Si alguien promete algo de esta lista a un cliente</b>, estamos creando un problema. Mejor decir "déjame confirmarlo" que prometer y fallar.</div>
+  </section>
+
+  <section>
+    <div class="stag">Cierre</div>
+    <h2>Una sola idea</h2>
+    <p class="lead" style="font-size:1.15rem;max-width:700px">Todo este sistema existe para una cosa: que <b>cada persona que pasa por Fraternidad tenga una buena noche</b>, y que nosotros sepamos quién es para que la siguiente sea mejor.</p>
+    <p>Los QR, el CRM, las notas de crédito y los aforos son herramientas para eso. Cuando tengas una duda que el manual no responde, la pregunta es: <b>¿qué le sirve más a la persona que está del otro lado?</b></p>
+    <div class="bien" style="margin-top:20px"><b>Y si algo del sistema te complica el trabajo, dilo.</b> Se puede cambiar. Casi todo lo que está acá se construyó porque alguien del equipo dijo "esto no me sirve así".</div>
+  </section>
+
+  <div class="pie">FRATE OS · Manual 06 · <a href="/os-panel">← El panel</a> · <a href="/os">Volver al mapa →</a></div>
+</div>
+
+<script src="/os-guard.js"></script>
+<script>document.getElementById('bar').innerHTML = osBarra('06'); osProteger();</script>
+</body>
+</html>

@@ -1,0 +1,44 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+<title>FRATE · Tu entrada</title>
+<link rel="icon" href="/icon-frate.svg" />
+<style>
+  *{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent;}
+  html,body{height:100%;}
+  body{background:#fff;color:#0a0a0b;font-family:'Inter',system-ui,-apple-system,sans-serif;display:flex;flex-direction:column;align-items:center;justify-content:center;min-height:100vh;padding:20px;text-align:center;}
+  .brand{font-family:'Barlow Condensed','Arial Narrow',sans-serif;font-weight:900;letter-spacing:3px;font-size:1.4rem;color:#0a0a0b;margin-bottom:4px;}
+  .brand b{color:#E8363D;}
+  .sub{color:#666;font-size:.82rem;margin-bottom:16px;}
+  .qr{width:min(78vw,360px);height:min(78vw,360px);image-rendering:pixelated;}
+  .tok{font-family:ui-monospace,monospace;font-weight:800;letter-spacing:4px;font-size:1.2rem;margin-top:12px;color:#111;}
+  .nom{font-weight:800;font-size:1.05rem;margin-top:6px;}
+  .hint{color:#888;font-size:.8rem;margin-top:14px;line-height:1.5;max-width:320px;}
+  .err{color:#E8363D;font-weight:700;margin-top:20px;}
+</style>
+</head>
+<body>
+  <div class="brand"><b>●</b> FRATE</div>
+  <div class="sub">Muestra este código en la puerta</div>
+  <img id="qr" class="qr" alt="Tu QR de entrada" />
+  <div id="tok" class="tok"></div>
+  <div id="nom" class="nom"></div>
+  <div id="err" class="err" style="display:none;">Falta el código de la entrada en el link.</div>
+  <div class="hint">📱 Sube el <b>brillo al máximo</b> para que el escáner lo lea al toque. Se valida una sola vez.</div>
+<script>
+  function tok(){ const u=new URL(location.href); let t=u.searchParams.get('t'); if(t) return decodeURIComponent(t).trim();
+    const p=location.pathname.split('/').filter(Boolean); if(p[0]==='entrada'&&p[1]) return decodeURIComponent(p[1]).trim(); return ''; }
+  const t=tok();
+  if(!t){ document.getElementById('qr').style.display='none'; document.getElementById('err').style.display='block'; }
+  else {
+    document.getElementById('qr').src='https://ydwlpraoaaijlfssevoh.supabase.co/functions/v1/qr?s=520&d='+encodeURIComponent(t);
+    document.getElementById('tok').textContent=t.length<=16?t:t.slice(-12);
+    const u=new URL(location.href); const n=u.searchParams.get('n'); if(n){ document.getElementById('nom').textContent=decodeURIComponent(n); }
+  }
+  // Mantener la pantalla despierta (iOS 16.4+ / Android)
+  try{ if(navigator.wakeLock) navigator.wakeLock.request('screen').catch(()=>{}); }catch(e){}
+</script>
+</body>
+</html>

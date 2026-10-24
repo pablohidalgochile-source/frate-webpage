@@ -1,0 +1,178 @@
+<!DOCTYPE html>
+<html lang="es-CL">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>THE FRATE TIMES · Portada</title>
+<link rel="stylesheet" href="frate-times.css">
+</head>
+<body>
+<div class="ft-stage">
+  <div class="ft-canvas" id="canvas">
+    <div class="ft-pad">
+
+      <!-- FOLIO -->
+      <div class="ft-folio">
+        <span data-slot="vol">VOL. IV — Nº 042</span>
+        <span class="c" data-slot="edicion">EDICIÓN NOCTURNA</span>
+        <span data-slot="precio">EJEMPLAR GRATUITO</span>
+      </div>
+      <div class="ft-rule dbl"></div>
+
+      <!-- MASTHEAD -->
+      <div class="ft-mast"><h1 data-slot="masthead">The Frate Times</h1></div>
+      <div class="ft-rule"></div>
+      <div class="ft-dateline">
+        <span><b data-slot="place">CAMPUS CENTRAL · SANTIAGO</b></span>
+        <span class="mid" data-slot="motto">“El diario oficial de la noche”</span>
+        <span data-slot="fecha">SÁBADO 02 DE MAYO</span>
+      </div>
+      <div class="ft-rule"></div>
+
+      <!-- ÚLTIMA HORA -->
+      <div class="ft-breaking">
+        <span class="tag" data-slot="breakingTag">ÚLTIMA HORA</span>
+        <span class="txt" data-slot="breakingTxt">Se reportan sonrisas peligrosas en la pista principal</span>
+      </div>
+
+      <!-- TITULAR -->
+      <div class="ft-head">
+        <h2 data-slot="headline">ME ENCANTA <em>TU</em> SONRISA</h2>
+        <div class="ft-deck" data-slot="deck">Testigos aseguran que “se les olvidó todo” apenas comenzó a sonar el perreo. Autoridades del campus piden asistir con actitud.</div>
+      </div>
+      <div class="ft-byline" data-slot="byline">POR LA REDACCIÓN DE PISTA · FOTOGRAFÍA: PAPARAZZI FRATE · SECCIÓN NOCTURNA</div>
+
+      <!-- CUERPO -->
+      <div class="ft-body">
+        <!-- Columna 1: texto -->
+        <div class="ft-col">
+          <p data-slot="col1a">Todo comenzó pasadas las once. Fuentes cercanas a la pista confirman que el ambiente escaló minuto a minuto hasta volverse, según sus palabras, “absolutamente incontrolable”.</p>
+          <p data-slot="col1b">El caso —catalogado como MIRADA 7.2B— mantiene al campus en alerta romántica. Se recomienda no hacer contacto visual prolongado sin estar dispuesto a bailar.</p>
+          <div class="ft-quote" data-slot="quote">“Nunca vi a nadie irse temprano.”</div>
+          <p data-slot="col1c">La redacción insiste: quien llega, se queda. Y quien se queda, vuelve el sábado siguiente.</p>
+          <p data-slot="col1d">Los reportes preliminares hablan de miradas cruzadas, canciones dedicadas y al menos un “nos vemos en FRATE” que lo cambió todo. Se esperan más antecedentes durante la madrugada.</p>
+        </div>
+
+        <!-- Columna 2-3: foto + subtítulos -->
+        <div class="ft-photo">
+          <div class="ft-kicker" data-slot="kicker">EXCLUSIVA DE PORTADA</div>
+          <image-slot id="ft-face" shape="rect" placeholder="ARRASTRA LA FOTO DE PORTADA"></image-slot>
+          <div class="halftone"></div>
+          <div class="cap"><b data-slot="capBold">CAPTADA EN VIVO:</b> <span data-slot="capText">la protagonista de la noche, momentos antes de que sonara su canción.</span></div>
+          <div class="ft-classified">
+            <h3 data-slot="classTitle">CLASIFICADOS · CONCURSO</h3>
+            <p data-slot="classText">SE BUSCA: la próxima portada. Etiqueta a quien debería salir en la edición del sábado.</p>
+            <div class="win"><span data-slot="prize">GANA CABINA + BOTELLA</span></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- SECUNDARIAS -->
+      <div class="ft-briefs">
+        <div class="lbl" data-slot="briefsLbl">— EN ESTA EDICIÓN —</div>
+        <div class="cols">
+          <div class="ft-brief"><div class="k" data-slot="b1k">SOCIEDAD</div><h4 data-slot="b1h">La pista no da abasto</h4><p data-slot="b1p">Vecinos reportan perreo sostenido hasta el amanecer. No se descartan réplicas el sábado.</p></div>
+          <div class="ft-brief"><div class="k" data-slot="b2k">OPINIÓN</div><h4 data-slot="b2h">Cómo entrar en personaje</h4><p data-slot="b2p">Editorial: llegar con actitud, perder la vergüenza y bailar como si nadie cobrara mañana.</p></div>
+          <div class="ft-brief"><div class="k" data-slot="b3k">CARTELERA</div><h4 data-slot="b3h">Agenda de la noche</h4><p data-slot="b3p">11 PM apertura · 01 AM show central · 05 AM cierre. Cupos limitados por edición.</p></div>
+        </div>
+      </div>
+      <div class="ft-foot">
+        <div class="l"><b data-slot="site">WWW.FRATE.CL</b><br><span data-slot="meta">ACCESO +18 · DRESS CODE: TU MEJOR VERSIÓN</span></div>
+        <div class="brand"><div class="fr" data-slot="brand">FRATE</div><div class="sub" data-slot="brandSub">CAMPUS CENTRAL</div></div>
+        <div class="price"><div class="ft-barcode" id="barcode"></div></div>
+      </div>
+    </div>
+
+    <!-- SELLO -->
+    <div class="ft-stamp">
+      <div class="in">
+        <span class="big" data-slot="stampBig">EDICIÓN<br>LIMITADA</span>
+        <span class="sm" data-slot="stampSm">CAMPUS CENTRAL</span>
+        <span class="date" data-slot="stampDate">02 · MAYO</span>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div id="tweaks">
+  <h3>Tweaks <button id="tw-close">×</button></h3>
+  <div class="tw-group"><button class="tw-regen" id="tw-regen">⟳ Regenerar (demo)</button></div>
+  <div class="tw-group"><label>Sello / acento</label><div class="tw-swatches" id="tw-stamp"></div></div>
+</div>
+
+<script src="image-slot.js"></script>
+<script>
+const TWEAKS = /*EDITMODE-BEGIN*/{
+  "stamp": "#0f9d58"
+}/*EDITMODE-END*/;
+const STAMPS = ["#ff2d78", "#e5342b", "#1f6dff", "#0f9d58", "#111111"];
+const W = 1080, H = 1620;
+
+const EVENT = {
+  vol: "VOL. IV — Nº 042", edicion: "EDICIÓN NOCTURNA", precio: "EJEMPLAR GRATUITO",
+  masthead: "The Frate Times", place: "CAMPUS CENTRAL · SANTIAGO", motto: "“El diario oficial de la noche”",
+  fecha: "SÁBADO 02 DE MAYO",
+  breakingTag: "ÚLTIMA HORA", breakingTxt: "Se reportan sonrisas peligrosas en la pista principal",
+  headline: "ME ENCANTA <em>TU</em> SONRISA",
+  deck: "Testigos aseguran que “se les olvidó todo” apenas comenzó a sonar el perreo. Autoridades del campus piden asistir con actitud.",
+  byline: "POR LA REDACCIÓN DE PISTA · FOTOGRAFÍA: PAPARAZZI FRATE · SECCIÓN NOCTURNA",
+  kicker: "EXCLUSIVA DE PORTADA",
+  quote: "“Nunca vi a nadie irse temprano.”",
+  classTitle: "CLASIFICADOS · CONCURSO",
+  classText: "SE BUSCA: la próxima portada. Etiqueta a quien debería salir en la edición del sábado.",
+  prize: "GANA CABINA + BOTELLA",
+  site: "WWW.FRATE.CL", meta: "ACCESO +18 · DRESS CODE: TU MEJOR VERSIÓN",
+  brand: "FRATE", brandSub: "CAMPUS CENTRAL",
+  stampBig: "EDICIÓN<br>LIMITADA", stampSm: "CAMPUS CENTRAL", stampDate: "02 · MAYO"
+};
+
+function fillData(d) {
+  document.querySelectorAll("[data-slot]").forEach(el => { const k = el.dataset.slot; if (d[k] != null) el.innerHTML = d[k]; });
+  let seed = 5; const rnd = () => (seed = (seed * 1103515245 + 12345) & 0x7fffffff) / 0x7fffffff;
+  document.getElementById("barcode").innerHTML = Array.from({ length: 40 }, () =>
+    `<i style="width:${(rnd() * 3 + 1).toFixed(1)}px;opacity:${rnd() > .5 ? 1 : .8}"></i>`).join("");
+}
+function applyTweaks(t) { document.documentElement.style.setProperty("--stamp", t.stamp || "#ff2d78"); }
+
+function loadInjected() {
+  try { const raw = new URLSearchParams(location.search).get("data");
+    if (raw) { const d = JSON.parse(decodeURIComponent(escape(atob(raw)))); Object.assign(EVENT, d.event || {}); Object.assign(TWEAKS, d.tweaks || {}); }
+  } catch (e) {}
+  if (window.FRATE_EVENT) Object.assign(EVENT, window.FRATE_EVENT);
+  if (window.FRATE_TWEAKS) Object.assign(TWEAKS, window.FRATE_TWEAKS);
+}
+
+const SAMPLES = [
+  { headline: "ME ENCANTA <em>TU</em> SONRISA", breakingTxt: "Se reportan sonrisas peligrosas en la pista principal", quote: "“Nunca vi a nadie irse temprano.”", fecha: "SÁBADO 02 DE MAYO", stampDate: "02 · MAYO" },
+  { headline: "NADIE BAILA <em>COMO</em> TÚ", breakingTxt: "Confirmado: la pista no da abasto con tanto flow", quote: "“Llegué por una hora y volví el jueves.”", fecha: "VIERNES 15 DE MAYO", stampDate: "15 · MAYO" },
+  { headline: "NO TIENE <em>DUEÑ@</em>", breakingTxt: "Alerta: exceso de actitud detectado en la entrada", quote: "“Vine a bailar, no a explicar.”", fecha: "SÁBADO 07 DE JUNIO", stampDate: "07 · JUNIO" }
+];
+let si = 0;
+function regenDemo() {
+  si = (si + 1) % SAMPLES.length; Object.assign(EVENT, SAMPLES[si]);
+  TWEAKS.stamp = STAMPS[(STAMPS.indexOf(TWEAKS.stamp) + 1) % STAMPS.length];
+  fillData(EVENT); applyTweaks(TWEAKS); buildPanel();
+}
+
+function buildPanel() {
+  const s = document.getElementById("tw-stamp");
+  s.innerHTML = STAMPS.map(c => `<div class="tw-sw${c === TWEAKS.stamp ? ' sel' : ''}" style="background:${c}" data-c="${c}"></div>`).join("");
+  s.onclick = e => { const sw = e.target.closest(".tw-sw"); if (!sw) return; setTweak("stamp", sw.dataset.c); s.querySelectorAll(".tw-sw").forEach(x => x.classList.toggle("sel", x === sw)); };
+  const rg = document.getElementById("tw-regen"); if (rg) rg.onclick = regenDemo;
+}
+function setTweak(k, v) { TWEAKS[k] = v; applyTweaks(TWEAKS); try { window.parent.postMessage({ type: "__edit_mode_set_keys", edits: { [k]: v } }, "*"); } catch (e) {} }
+
+window.addEventListener("message", e => {
+  if (e.data?.type === "__activate_edit_mode") document.getElementById("tweaks").classList.add("on");
+  if (e.data?.type === "__deactivate_edit_mode") document.getElementById("tweaks").classList.remove("on");
+});
+document.getElementById("tw-close").onclick = () => { document.getElementById("tweaks").classList.remove("on"); try { window.parent.postMessage({ type: "__edit_mode_dismissed" }, "*"); } catch (e) {} };
+
+loadInjected(); fillData(EVENT); applyTweaks(TWEAKS); buildPanel();
+try { window.parent.postMessage({ type: "__edit_mode_available" }, "*"); } catch (e) {}
+
+function scale() { const c = document.getElementById("canvas"); const st = document.querySelector(".ft-stage"); const s = window.innerWidth / W; c.style.transform = `scale(${s})`; if (st) st.style.height = (H * s) + "px"; }
+scale(); window.addEventListener("resize", scale);
+</script>
+</body>
+</html>

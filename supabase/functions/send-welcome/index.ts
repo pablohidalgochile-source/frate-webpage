@@ -1,3 +1,4 @@
+import { permitirStaffOServicio, emailDelToken } from '../_shared/guard.ts';
 // ============================================================
 // FRATE — Edge Function: send-welcome
 // Envía email de bienvenida cuando un nuevo usuario se registra.
@@ -32,10 +33,40 @@ Deno.serve(async (req: Request) => {
     const { nombre, apellidos, username, email } = await req.json();
     if (!email) return new Response(JSON.stringify({ error: 'email requerido' }), { status: 400, headers });
 
+    // 🔒 Antes era un relay abierto: cualquiera mandaba correos con la marca FRATE
+    //    desde el dominio verificado. Ahora se permite solo:
+    //    (a) el backend / staff logueado, o
+    //    (b) el usuario recién registrado enviándose la bienvenida A SÍ MISMO.
+    const permiso = await permitirStaffOServicio(req);
+    if (!permiso.ok) {
+      const propio = await emailDelToken(req);
+      if (!propio || propio.toLowerCase() !== String(email).trim().toLowerCase()) {
+        return new Response(JSON.stringify({ error: permiso.error }), { status: permiso.status, headers });
+      }
+    }
+
     const displayName = username ? `@${username}` : `${nombre || ''} ${apellidos || ''}`.trim() || 'nuevo socio';
     const primerNombre = nombre || displayName;
 
-    const html = buildWelcomeHtml({ displayName, primerNombre, username, email });
+    // El logo sale de `config_valores.mail_logo_url`, la MISMA llave que usa
+    // el correo de tickets. Así se cambia en un solo lugar y los dos correos
+    // quedan iguales — antes este tenía la marca escrita a mano y por eso
+    // mostraba las letras en vez del logo.
+    let logo = '', color = '#E8363D';
+    try {
+      const sbUrl = Deno.env.get('SUPABASE_URL');
+      const srv   = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY');
+      const r = await fetch(`${sbUrl}/rest/v1/config_valores?clave=in.(mail_logo_url,mail_color)&select=clave,valor`,
+                            { headers: { apikey: srv!, Authorization: `Bearer ${srv}` } });
+      if (r.ok) {
+        const rows = await r.json();
+        const m = new Map(rows.map((x: any) => [x.clave, x.valor]));
+        logo  = String(m.get('mail_logo_url') || '');
+        color = String(m.get('mail_color') || color);
+      }
+    } catch (e) { console.warn('[send-welcome] config:', e); }
+
+    const html = buildWelcomeHtml({ displayName, primerNombre, username, email, logo, color });
 
     const resendKey = Deno.env.get('RESEND_API_KEY');
     if (!resendKey) throw new Error('RESEND_API_KEY no configurada');
@@ -65,8 +96,9 @@ Deno.serve(async (req: Request) => {
 });
 
 // ── HTML del email de bienvenida ──────────────────────────────
-function buildWelcomeHtml({ displayName, primerNombre, username, email }: {
+function buildWelcomeHtml({ displayName, primerNombre, username, email, logo, color }: {
   displayName: string; primerNombre: string; username: string; email: string;
+  logo: string; color: string;
 }) {
   return `<!DOCTYPE html>
 <html lang="es">
@@ -80,10 +112,10 @@ function buildWelcomeHtml({ displayName, primerNombre, username, email }: {
     <table width="100%" style="max-width:560px;background:#0A0A0B;border-radius:4px;overflow:hidden;">
 
       <!-- Header rojo -->
-      <tr><td style="background:#E8363D;padding:28px 36px;text-align:center;">
-        <div style="font-size:28px;font-weight:900;color:#fff;letter-spacing:6px;font-family:'Arial Black',sans-serif;">
-          FRATE
-        </div>
+      <tr><td style="background:${color || '#E8363D'};padding:28px 36px;text-align:center;">
+        ${logo
+          ? `<img src="${logo}" alt="FRATE" height="46" style="display:inline-block;max-height:56px;border:0;" />`
+          : `<div style="font-size:28px;font-weight:900;color:#fff;letter-spacing:6px;font-family:'Arial Black',sans-serif;">FRATE</div>`}
         <div style="font-size:10px;color:rgba(255,255,255,0.7);letter-spacing:4px;margin-top:4px;text-transform:uppercase;">
           Fraternidad Campus Central
         </div>

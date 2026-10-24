@@ -1,0 +1,394 @@
+<!DOCTYPE html>
+<html lang="es"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Campañas de correo · FRATE</title>
+<meta name="robots" content="noindex">
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<style>
+  :root{--bg:#0A0A0B;--c:#131316;--b:#26262b;--t:#f4f4f6;--m:#a1a1aa;--r:#E8363D;--d:#E6C860;--v:#22c55e}
+  *{box-sizing:border-box} body{margin:0;background:var(--bg);color:var(--t);font-family:-apple-system,Segoe UI,Roboto,sans-serif}
+  .wrap{max-width:1100px;margin:0 auto;padding:18px 16px 60px} h1{font-size:1.3rem;margin:4px 0 2px} .sub{color:var(--m);font-size:.85rem;margin-bottom:16px}
+  .grid{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:16px} @media(max-width:860px){.grid{grid-template-columns:1fr}}
+  .card{background:var(--c);border:1px solid var(--b);border-radius:12px;padding:16px}
+  label{display:block;font-size:.72rem;letter-spacing:1px;text-transform:uppercase;color:var(--m);margin:10px 0 4px}
+  input,textarea{width:100%;background:#1b1b20;border:1px solid var(--b);border-radius:8px;padding:10px;color:var(--t);font:inherit;font-size:.9rem}
+  textarea{min-height:84px;resize:vertical} .row{display:flex;gap:8px;flex-wrap:wrap;margin-top:12px}
+  button{background:#1b1b20;color:var(--t);border:1px solid #3a3a3c;border-radius:8px;padding:10px 14px;font-weight:700;cursor:pointer;font-size:.85rem}
+  button.pri{background:var(--r);border-color:var(--r);color:#fff} button.oro{background:var(--d);border-color:var(--d);color:#1a1405} button[disabled]{opacity:.5;cursor:not-allowed}
+  iframe{width:100%;height:760px;border:0;border-radius:8px;background:#f4f4f5} .kpi{display:grid;grid-template-columns:repeat(5,1fr);gap:8px;margin-top:10px} @media(max-width:520px){.kpi{grid-template-columns:repeat(3,1fr)}}
+  .k{background:#1b1b20;border-radius:8px;padding:10px;text-align:center} .k b{display:block;font-size:1.3rem} .k span{font-size:.7rem;color:var(--m)}
+  #log{font-family:ui-monospace,Menlo,monospace;font-size:.75rem;color:var(--m);max-height:180px;overflow:auto;white-space:pre-wrap;margin-top:10px}
+  .aviso{background:#241d06;border:1px solid #e0b53b;color:#f0e2b0;border-radius:10px;padding:10px 12px;font-size:.82rem;margin-top:10px}
+  .chk{display:flex;gap:8px;align-items:center;margin-top:12px;font-size:.85rem;color:var(--m)} .chk input{width:auto}
+</style></head>
+<body><div class="wrap">
+  <h1>✉️ Campañas de correo</h1>
+  <div class="sub">Solo admin. Se envía por tandas desde hola@frate.cl, con registro: nunca se repite un correo y quien se da de baja no vuelve a recibir.</div>
+  <div id="gate" class="card">Revisando tu sesión…</div>
+  <div id="app" style="display:none">
+    <div class="card" style="margin-bottom:16px;display:flex;gap:8px;flex-wrap:wrap;align-items:center">
+      <a href="/admin" style="color:#E6C860;font-size:.85rem;margin-right:6px">← Admin</a>
+      <select id="sel-campana" style="flex:1;min-width:220px;background:#1b1b20;border:1px solid #26262b;border-radius:8px;padding:9px;color:#f4f4f6"></select>
+      <button id="b-nueva">+ Nueva</button><button id="b-duplicar">Duplicar</button><button id="b-archivar">Archivar</button><button id="b-borrar" style="border-color:#7f1d1d;color:#fca5a5">Borrar</button>
+    </div>
+    <div id="bloqueo" class="aviso" style="display:none;margin:0 0 16px"></div>
+    <div class="grid">
+      <div class="card">
+        <label>Identificador (no cambia nunca: así un correo no se repite)</label><input id="f-campana" placeholder="ej: aniversario-octubre">
+        <label>Nombre visible (se puede cambiar)</label><input id="f-nombre" placeholder="ej: Aniversario · invitación">
+        <label>Asunto</label><input id="f-asunto">
+        <label>Texto de vista previa en la bandeja</label><input id="f-preheader">
+        <label>Logo del encabezado (vacío = insignia de siempre)</label><input id="f-logo_url" placeholder="https://www.frate.cl/assets/logo-mail-blanco.png">
+        <label>Gráfica (600 px de ancho, liviana)</label>
+        <div style="display:flex;gap:8px"><input id="f-imagen_url" placeholder="https://… o sube el archivo"><input id="f-archivo" type="file" accept="image/*" style="max-width:190px"></div>
+        <label>Texto alternativo de la gráfica</label><input id="f-imagen_alt">
+        <label>Antetítulo</label><input id="f-antetitulo">
+        <label>Título ({nombre} = primer nombre)</label><input id="f-titulo">
+        <label>Texto (un párrafo por línea)</label><textarea id="f-texto"></textarea>
+        <label>Pasos (uno por línea)</label><textarea id="f-pasos"></textarea>
+        <label>Texto del botón</label><input id="f-boton_texto">
+        <label>Enlace del botón</label><input id="f-boton_url">
+        <label>Nota final</label><input id="f-nota">
+
+        <!-- ⭐ SEGUNDO BLOQUE · una llamada secundaria, debajo del botón principal.
+             Se dibuja en el correo SOLO si tiene título o enlace: déjalo vacío y
+             el correo queda como siempre. -->
+        <div style="margin:18px 0 6px;padding-top:14px;border-top:1px solid #2a2a2e;">
+          <div style="font-size:.66rem;letter-spacing:2px;text-transform:uppercase;color:#E6C860;">Segundo bloque · opcional</div>
+          <div style="font-size:.74rem;color:#8b8b93;margin-top:3px;">Una segunda invitación, más discreta que el botón de arriba (por ejemplo: «hazte una cuenta»). Vacío = no aparece.</div>
+        </div>
+        <label>Antetítulo del bloque</label><input id="f-b2_kicker" placeholder="YA QUE ESTÁS AQUÍ">
+        <label>Título del bloque</label><input id="f-b2_titulo" placeholder="Hazte una cuenta">
+        <label>Texto del bloque</label><textarea id="f-b2_texto" rows="3"></textarea>
+        <label>Lista (una por línea)</label><textarea id="f-b2_lista" rows="3"></textarea>
+        <label>Texto del botón</label><input id="f-b2_boton_texto" placeholder="Quiero hacerme mi cuenta">
+        <label>Enlace del botón</label><input id="f-b2_boton_url" placeholder="https://www.frate.cl/mi-entrada">
+        <label>Nota del bloque</label><input id="f-b2_nota" placeholder="Toma 30 segundos">
+
+        <label>Pie · por qué le llega este correo</label><input id="f-pie_motivo" placeholder="Recibes este correo porque tienes cuenta en frate.cl">
+        <div style="font-size:.72rem;color:#8b8b93;margin:-4px 0 10px;">Tiene que ser VERDAD para quien lo recibe: es lo que mira antes de marcar spam. Vacío = el texto de siempre.</div>
+
+        <label>¿A quién le llega?</label>
+        <div class="chk" style="margin-top:4px"><input type="radio" name="publico" id="f-pub-miem" value="miembros" checked> Todos los miembros (cuentas de frate.cl)</div>
+        <div class="chk" style="margin-top:6px"><input type="radio" name="publico" id="f-pub-sel" value="seleccion"> Solo una selección (elegida desde Admin → Usuarios o Comunidad → Personas)</div>
+        <div id="pub-sel-info" class="aviso" style="display:none"></div>
+        <label>No enviar a quien ya reservó su cortesía en el evento N° (vacío = no excluir)</label><input id="f-excluir_evento" inputmode="numeric" style="max-width:120px">
+        <div class="chk"><input type="checkbox" id="f-excluir_x" checked> No enviar a quien eligió «Prefiero no decirlo» (no calza con ninguna cortesía por sexo)</div>
+        <div class="row"><button class="pri" id="b-guardar">Guardar</button><button id="b-preview">Vista previa</button><button id="b-prueba">Enviarme una prueba</button></div>
+        <div id="msg" class="aviso" style="display:none"></div>
+      </div>
+      <div>
+        <div class="card"><iframe id="preview" title="Vista previa del correo"></iframe></div>
+        <div class="card" style="margin-top:16px">
+          <div style="display:flex;justify-content:space-between;align-items:center"><b>Envío</b><button id="b-resumen">Actualizar conteo</button></div>
+          <div class="kpi"><div class="k"><b id="k-pend">—</b><span>pendientes</span></div><div class="k"><b id="k-env">—</b><span>enviados</span></div><div class="k"><b id="k-err">—</b><span>errores</span></div><div class="k"><b id="k-cur">—</b><span>en curso</span></div><div class="k"><b id="k-baj">—</b><span>bajas</span></div></div>
+          <div class="aviso">Antes de enviar: guarda, revisa la vista previa y mándate una prueba. Se envía de a 40 con pausa; termina el martes en la tarde, lejos de la noche del evento.</div>
+          <div class="row"><button class="oro" id="b-enviar">Enviar a todos por tandas</button><button id="b-detener" disabled>Detener</button></div>
+          <div id="log"></div>
+        </div>
+        <div class="card" style="margin-top:16px">
+          <div style="display:flex;justify-content:space-between;align-items:center;gap:8px;flex-wrap:wrap"><b>A quién ya le llegó</b>
+            <span style="display:flex;gap:6px;flex-wrap:wrap">
+              <select id="env-estado" style="background:#1b1b20;border:1px solid #26262b;border-radius:8px;padding:7px;color:#f4f4f6">
+                <option value="todos">Todos</option><option value="enviado">Enviados</option><option value="error">Con error (se reintentan)</option>
+                <option value="sin_remedio">Sin remedio (3 errores)</option><option value="enviando">Enviando</option><option value="colgado">Colgados</option><option value="baja">Se dieron de baja</option>
+              </select>
+              <input id="env-q" placeholder="Buscar correo" style="width:170px">
+            </span></div>
+          <div id="env-tabla" style="margin-top:10px;font-size:.8rem;color:#a1a1aa">—</div>
+          <div class="row" style="justify-content:space-between"><span><button id="env-ant">← Anterior</button><button id="env-sig">Siguiente →</button></span><button id="env-reintentar">Reintentar «sin remedio»</button></div>
+        </div>
+        <div class="card" style="margin-top:16px" id="sel-card">
+          <div style="display:flex;justify-content:space-between;align-items:center;gap:8px;flex-wrap:wrap"><b>Selección de destinatarios</b>
+            <input id="sel-q" placeholder="Buscar en la selección" style="width:190px"></div>
+          <div style="font-size:.78rem;color:#a1a1aa;margin-top:6px">Para agregar: en el admin marca personas en <b>Usuarios</b> o en <b>Comunidad → Personas</b> y usa «✉️ Agregar a campaña».</div>
+          <div id="sel-tabla" style="margin-top:10px;font-size:.8rem;color:#a1a1aa">—</div>
+          <div class="row" style="justify-content:space-between"><span><button id="sel-ant">← Anterior</button><button id="sel-sig">Siguiente →</button></span><button id="sel-vaciar" style="border-color:#7f1d1d;color:#fca5a5">Quitar a todos</button></div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+<script>
+const sb = window.supabase.createClient('https://ydwlpraoaaijlfssevoh.supabase.co','sb_publishable_-_7GeDU_h84zf2v--lWQaQ_15ZFxOWt');
+const $ = id => document.getElementById(id);
+const CAMPOS = ['asunto','preheader','logo_url','imagen_url','imagen_alt','antetitulo','titulo','texto','pasos','boton_texto','boton_url','nota',
+  // Segundo bloque. Van en CAMPOS a propósito: leerForm() arma un objeto NUEVO
+  // con esta lista, así que un campo que no esté acá se BORRA al guardar.
+  'b2_kicker','b2_titulo','b2_texto','b2_lista','b2_boton_texto','b2_boton_url','b2_nota','pie_motivo'];
+const BASE = {
+  campana: 'primera-patita-16sep',
+  asunto: 'Tu cortesía de miembro para la Primera Patita',
+  preheader: 'Resérvala antes de que se acaben los cupos · miércoles 16 desde las 23:00',
+  logo_url: 'https://www.frate.cl/assets/logo-mail-blanco.png',
+  imagen_url: '', imagen_alt: 'Primera Patita · Fonda Los Parientes · FRATE',
+  antetitulo: 'Fonda Los Parientes · miércoles 16 de septiembre · desde las 23:00',
+  titulo: 'Hola {nombre}, la Primera Patita es por la casa',
+  texto: 'Por ser miembro de FRATE puedes reservar una cortesía para la Primera Patita de la Fonda Los Parientes, en la Fraternidad Campus Central, hasta agotar cupos.\nHay cortesías para mujeres, hombres y hombres universitarios, según tu cédula. Entra con tu cuenta y resérvala: si a tu perfil le falta un dato, te lo pedimos en el mismo paso.',
+  pasos: '1 · Entra a frate.cl con tu cuenta\n2 · Completa tu perfil si te lo pide\n3 · Reserva tu cortesía: el QR te llega al correo',
+  boton_texto: 'Reservar mi cortesía',
+  boton_url: 'https://www.frate.cl/?e=primera-patita&src=mail-16sep',
+  nota: 'Cupos limitados, por orden de llegada · Una por persona y a tu nombre · Ingreso con cortesía hasta las 00:30 · Presenta tu cédula en la puerta',
+  excluir_evento: 42, excluir_x: true, publico: 'miembros'
+};
+let detener = false;
+function msg(t, ok){ const m=$('msg'); m.style.display = t ? '' : 'none'; m.textContent = t || ''; m.style.borderColor = ok ? '#22c55e' : '#e0b53b'; }
+function log(t){ const l=$('log'); l.textContent = new Date().toLocaleTimeString('es-CL') + ' · ' + t + '\n' + l.textContent; }
+function leerForm(){ const c={}; CAMPOS.forEach(k=>c[k]=$('f-'+k).value.trim()); const ev=$('f-excluir_evento').value.trim(); c.excluir_evento = ev ? Number(ev) : null; c.excluir_x=$('f-excluir_x').checked; c.publico = $('f-pub-sel').checked ? 'seleccion' : 'miembros'; return c; }
+function llenar(c){ if(!c) return; CAMPOS.forEach(k=>{ if(c[k]!=null) $('f-'+k).value=c[k]; }); if('excluir_evento' in c) $('f-excluir_evento').value = c.excluir_evento==null ? '' : c.excluir_evento; if('excluir_x' in c) $('f-excluir_x').checked = c.excluir_x !== false; if('publico' in c){ $('f-pub-sel').checked = c.publico === 'seleccion'; $('f-pub-miem').checked = c.publico !== 'seleccion'; } pintarPublico(); }
+function igualAGuardado(g){ const f=leerForm(); if(!g) return false; return CAMPOS.every(k => String(g[k]??'') === String(f[k]??'')) && String(g.excluir_evento??'') === String(f.excluir_evento??'') && (g.excluir_x!==false) === f.excluir_x && ((g.publico === 'seleccion') ? 'seleccion' : 'miembros') === f.publico; }
+function pintarResumen(r){ r=r||{}; $('k-pend').textContent=r.pendientes??'—'; $('k-env').textContent=r.enviados??'—'; $('k-err').textContent=r.errores??'—'; $('k-cur').textContent=r.en_curso??'—'; $('k-baj').textContent=r.bajas??'—'; }
+async function llamar(body){
+  const { data, error } = await sb.functions.invoke('send-campana', { body });
+  if (error) { let m = error.message, code = null, extra = {}; try { const c = await error.context?.json?.(); if (c?.error) m = c.error; code = c?.code || null; extra = c || {}; } catch(_){} throw Object.assign(new Error(m), { code, extra }); }
+  if (data?.error) throw new Error(data.error);
+  return data;
+}
+function campana(){ return $('f-campana').value.trim().toLowerCase(); }
+async function resumen(){
+  try { const id = campana(); const d = await llamar({ accion:'resumen', campana: id }); const r=d.resumen||{}; if (campana() !== id) return r; pintarResumen(r);
+    if(!d.guardada) msg('La campaña todavía no está guardada.'); return r;
+  } catch(e){ msg('Conteo: ' + e.message); }
+}
+async function preview(){
+  try { const d = await llamar({ accion:'preview', config: leerForm() }); $('preview').srcdoc = d.html;
+    if (d.faltan && d.faltan.length) msg('Para enviar falta: ' + d.faltan.join(', ') + '.'); else msg('Vista previa lista.', true);
+  } catch(e){ msg('Vista previa: ' + e.message); }
+}
+async function achicar(file){
+  const img = new Image(), url = URL.createObjectURL(file);
+  await new Promise((ok, no) => { img.onload = ok; img.onerror = () => no(new Error('No pude leer la imagen: expórtala como JPG o PNG.')); img.src = url; });
+  const w = Math.min(1200, img.width), h = Math.round(img.height * w / img.width);
+  const cv = document.createElement('canvas'); cv.width = w; cv.height = h; cv.getContext('2d').drawImage(img, 0, 0, w, h);
+  URL.revokeObjectURL(url);
+  for (const q of [0.85, 0.75, 0.65]) { const b = await new Promise(r => cv.toBlob(r, 'image/jpeg', q)); if (b && (b.size < 280000 || q === 0.65)) return b; }
+  throw new Error('No pude comprimir la imagen.');
+}
+$('f-archivo').onchange = async e => {
+  const f = e.target.files && e.target.files[0]; if (!f) return;
+  try { msg('Subiendo la gráfica…', true);
+    const blob = await achicar(f);
+    const ruta = 'mail/' + (campana().normalize('NFD').replace(/[^a-z0-9_-]/g, '-') || 'campana') + '-' + Date.now() + '.jpg';
+    const { error } = await sb.storage.from('frate-media').upload(ruta, blob, { contentType: 'image/jpeg', upsert: false });
+    if (error) throw error;
+    $('f-imagen_url').value = sb.storage.from('frate-media').getPublicUrl(ruta).data.publicUrl;
+    msg('Gráfica subida (' + Math.round(blob.size/1024) + ' KB). Guarda la campaña.', true); preview();
+  } catch(err){ msg('No se pudo subir: ' + (err.message || err)); }
+};
+async function guardar(forzar){
+  if(!campana()) return msg('Ponle un identificador a la campaña.');
+  try {
+    const body = { accion:'guardar', campana: campana(), config: leerForm(), nombre: $('f-nombre').value.trim(), nueva: !ACT.existe || campana() !== ACT.id };
+    if (forzar) body.forzar = 'CAMBIAR';
+    const d = await llamar(body);
+    try{ localStorage.setItem('campana_ultima', d.campana); }catch(_){}
+    msg('Campaña guardada.', true); await cargarCampana(d.campana, true); listarCampanas(); preview();
+  } catch(e){
+    if (e.code === 'BLOQUEADA') {
+      const ok = prompt(e.message + '\n\nPara corregir lo que falta por enviar (por ejemplo, un enlace roto) escribe CAMBIAR. Ojo: «Duplicar» crea una campaña NUEVA que se envía a toda la base otra vez.');
+      if (ok === 'CAMBIAR') return guardar(true);
+      return msg('No se guardó.');
+    }
+    msg('Guardar: ' + e.message);
+  }
+}
+$('b-guardar').onclick = () => guardar(false);
+$('b-preview').onclick = preview;
+$('b-resumen').onclick = resumen;
+$('b-prueba').onclick = async () => { const b=$('b-prueba'); b.disabled=true; try { const d = await llamar({ accion:'prueba', campana: campana(), config: leerForm() }); msg('Prueba enviada a ' + d.enviados.join(', ') + '. Revisa tu bandeja (y spam).', true); } catch(e){ msg('Prueba: ' + e.message); } finally { b.disabled=false; } };
+$('b-detener').onclick = () => { detener = true; log('Deteniendo al terminar la tanda en curso…'); };
+$('b-enviar').onclick = async () => {
+  const btn = $('b-enviar'); if (btn.disabled) return; btn.disabled = true;      // doble clic
+  const nombre = campana();
+  try {
+    const g = await llamar({ accion:'obtener', campana: nombre });
+    if (!igualAGuardado(g.config)) { msg('Tienes cambios sin guardar (o la campaña no está guardada): guarda y vuelve a mandarte la prueba.'); btn.disabled = false; return; }
+    // Antes de enviar: el servidor tiene que estar usando el MISMO público que se ve en pantalla.
+    const d0 = await llamar({ accion:'resumen', campana: nombre });
+    if ((leerForm().publico === 'seleccion') !== (d0.publico === 'seleccion')) { msg('El servidor no está usando el público que ves en pantalla: no envíes y avísame.'); btn.disabled = false; return; }
+    const r = d0.resumen || {}; pintarResumen(r);
+    const escrito = prompt('Vas a enviar la campaña «' + nombre + '» a ' + r.pendientes + ' personas' + (d0.publico === 'seleccion' ? ' de la SELECCIÓN' : ' (todos los miembros)') + ', en tandas de 40 (~1 por segundo).\nAntes: ¿revisaste la vista previa y te llegó la prueba?\n\nEscribe ENVIAR para confirmar.');
+    if (escrito !== 'ENVIAR') { msg('Envío cancelado.'); btn.disabled = false; return; }
+  } catch(e){ msg('Envío: ' + e.message); btn.disabled = false; return; }
+  detener = false; $('b-detener').disabled = false; $('f-campana').readOnly = true; ENVIANDO = true;
+  let esperasEnCurso = 0;
+  try {
+    while (!detener) {
+      let d;
+      try { d = await llamar({ accion:'tanda', campana: nombre, limite: 40, confirmar: 'ENVIAR' }); }
+      catch(e) {
+        if (/tanda en curso/i.test(e.message) && esperasEnCurso < 12) { esperasEnCurso++; log('Otra tanda sigue corriendo; espero 15 s…'); await new Promise(res => setTimeout(res, 15000)); continue; }
+        throw e;
+      }
+      esperasEnCurso = 0;
+      log('Tanda: ' + d.enviados + ' enviados · ' + d.errores + ' errores · ' + d.saltados + ' ya tomados · quedan ' + (d.resumen?.pendientes ?? '?'));
+      if (d.resumen && ACT.id === nombre) pintarResumen(d.resumen);
+      if (d.frenado) { log('Resend pidió bajar el ritmo: espero ' + Math.max(10, d.frenado) + ' s y sigo.'); await new Promise(res => setTimeout(res, Math.max(10, d.frenado) * 1000)); continue; }
+      if (d.resumen == null) { log('No pude contar los pendientes (' + (d.aviso || 'sin detalle') + '): me detengo. Aprieta Enviar de nuevo.'); break; }
+      if (d.resumen.pendientes === 0 || (d.enviados === 0 && d.errores === 0 && d.saltados === 0)) { log('Terminado.'); break; }
+      if (d.errores > 10) { log('Muchos errores en la tanda: me detengo para revisar.'); break; }
+      await new Promise(res => setTimeout(res, 3000));
+    }
+  } catch(e){ log('Error: ' + e.message); msg('Envío: ' + e.message); }
+  finally { btn.disabled = false; $('b-detener').disabled = true; $('f-campana').readOnly = ACT.existe; ENVIANDO = false; if (ACT.id === nombre) cargarCampana(nombre, true).catch(()=>{}); }
+};
+const VACIA = { asunto:'', preheader:'', logo_url:'https://www.frate.cl/assets/logo-mail-blanco.png', imagen_url:'', imagen_alt:'', antetitulo:'', titulo:'Hola {nombre}', texto:'', pasos:'', boton_texto:'Ver en frate.cl', boton_url:'https://www.frate.cl/', nota:'', excluir_evento:null, excluir_x:true, publico:'miembros' };
+let ACT = { id:'', existe:false, registros:0, archivada:false };
+let ENV = { pagina:0, total:0 };
+let ENVIANDO = false;
+let SEL = { pagina:0, total:0, con:0, sin:0 };
+// Público «selección»: qué se ve y cuántos tienen cuenta (los sin cuenta reciben una invitación a crearla).
+function pintarPublico(){
+  const sel = $('f-pub-sel') && $('f-pub-sel').checked, box = $('pub-sel-info'); if (!box) return;
+  if (!sel) { box.style.display = 'none'; return; }
+  box.style.display = '';
+  const partes = ['Seleccionados: ' + (SEL.con + SEL.sin) + ' (' + SEL.con + ' con cuenta · ' + SEL.sin + ' sin cuenta).'];
+  if (!ACT.existe) partes.push('Guarda la campaña y después agrega personas desde el admin.');
+  if (SEL.sin > 0) partes.push('Quienes no tienen cuenta no pueden reservar cortesías de miembros: el correo debería invitarlos a crearla.');
+  box.innerHTML = partes.map(t => t.replace(/</g,'&lt;')).join('<br>') + (SEL.sin > 0 ? '<br><button type="button" id="b-tpl-cuenta" style="margin-top:8px">Usar botón «Crear mi cuenta»</button>' : '');
+  const bt = $('b-tpl-cuenta'); if (bt) bt.onclick = () => { $('f-boton_texto').value = 'Crear mi cuenta'; $('f-boton_url').value = 'https://www.frate.cl/cuenta?modo=up&volver=%2F&src=mail'; msg('Botón cambiado a «Crear mi cuenta». Guarda para aplicarlo.', true); preview(); };
+}
+async function seleccion(){
+  if (!ACT.existe) { SEL = { pagina:0, total:0, con:0, sin:0, tok: SEL.tok }; $('sel-tabla').textContent = '—'; pintarPublico(); return; }
+  try {
+    const idSel = ACT.id; const tok = (SEL.tok = (SEL.tok || 0) + 1);
+    const d = await llamar({ accion:'seleccion_listar', campana: idSel, q: $('sel-q').value.trim(), pagina: SEL.pagina });
+    if (ACT.id !== idSel || tok !== SEL.tok) return;
+    if (!(d.filas || []).length && SEL.pagina > 0 && (d.total || 0) > 0) { SEL.pagina = Math.max(0, Math.ceil(d.total / (d.por || 50)) - 1); return seleccion(); }
+    SEL.total = d.total || 0; SEL.con = d.con_cuenta || 0; SEL.sin = d.sin_cuenta || 0; pintarPublico();
+    const e = v => String(v ?? '').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+    const por = d.por || 50;
+    $('sel-tabla').innerHTML = !(d.filas||[]).length ? 'Nadie en la selección' + ($('sel-q').value.trim() ? ' con esa búsqueda.' : '.') :
+      '<div style="overflow-x:auto"><table style="width:100%;border-collapse:collapse"><tr style="color:#71717a;text-align:left"><th style="padding:5px">Correo</th><th>Nombre</th><th>Desde</th><th>Cuenta</th><th>Estado</th><th></th></tr>' +
+      d.filas.map(r => '<tr style="border-top:1px solid #26262b"><td style="padding:5px;color:#e4e4e7">' + e(r.email) + '</td><td>' + e(r.nombre) + '</td><td>' + (r.origen === 'personas' ? 'Personas' : 'Usuarios') +
+        '</td><td>' + (r.con_cuenta ? '✅' : '—') + '</td><td>' + (r.baja ? '🚫 baja' : r.enviado ? '✅ enviado' : 'pendiente') +
+        '</td><td><button type="button" data-quitar="' + e(r.email) + '" style="padding:4px 8px;font-size:.75rem">Quitar</button></td></tr>').join('') +
+      '</table></div><div style="margin-top:6px;color:#71717a">' + (SEL.pagina * por + 1) + '–' + Math.min(SEL.total, (SEL.pagina + 1) * por) + ' de ' + SEL.total + '</div>';
+    $('sel-ant').disabled = SEL.pagina === 0; $('sel-sig').disabled = (SEL.pagina + 1) * por >= SEL.total;
+    [...$('sel-tabla').querySelectorAll('button[data-quitar]')].forEach(b => b.onclick = async () => {
+      if (ocupado()) return;
+      try { await llamar({ accion:'seleccion_quitar', campana: ACT.id, emails: [b.dataset.quitar] }); seleccion(); resumen(); } catch(err){ msg('Quitar: ' + err.message); }
+    });
+  } catch(err){ $('sel-tabla').textContent = 'No pude cargar la selección: ' + err.message; }
+}
+const ocupado = () => ENVIANDO && (msg('Hay un envío corriendo: detenlo primero.'), true);
+function pintarEstado(){
+  $('f-campana').readOnly = ACT.existe;
+  $('b-duplicar').disabled = !ACT.existe; $('b-archivar').disabled = !ACT.existe; $('b-borrar').disabled = !ACT.existe;
+  $('b-archivar').textContent = ACT.archivada ? 'Desarchivar' : 'Archivar';
+  const avisos = [];
+  if (ACT.archivada) avisos.push('Esta campaña está ARCHIVADA: no se puede enviar hasta desarchivarla.');
+  if (ACT.registros > 0) avisos.push('Ya tiene ' + ACT.registros + ' envíos registrados: si cambias el contenido o el público, al guardar te pediremos confirmar (los que faltan recibirán la versión nueva). Ojo: «Duplicar» crea una campaña nueva que se envía a TODOS otra vez.');
+  $('bloqueo').style.display = avisos.length ? '' : 'none'; $('bloqueo').textContent = avisos.join(' ');
+  try { const u = new URL(location.href); if (ACT.id) { u.searchParams.set('c', ACT.id); u.searchParams.delete('nueva'); } else u.searchParams.delete('c'); history.replaceState(null, '', u); } catch(_){}
+}
+async function cargarCampana(id, silencioso){
+  const d = await llamar({ accion:'obtener', campana: id });
+  llenar(VACIA); if (d.campana === BASE.campana && !d.config) llenar(BASE);
+  if (d.config) llenar(d.config);
+  $('f-campana').value = d.campana; $('f-nombre').value = d.nombre || '';
+  ACT = { id: d.campana, existe: !!d.config, registros: d.registros || 0, archivada: !!d.archivada_at };
+  pintarEstado();
+  if (d.config) { try { localStorage.setItem('campana_ultima', d.campana); } catch(_){} }
+  if (!silencioso) { log('Abierta «' + (d.nombre || d.campana) + '».'); preview(); }
+  resumen(); ENV.pagina = 0; envios(); SEL.pagina = 0; seleccion();
+  const sel = $('sel-campana'); if (sel && [...sel.options].some(o => o.value === d.campana)) sel.value = d.campana;
+}
+function nuevaCampana(){
+  llenar(VACIA); $('f-campana').value = ''; $('f-nombre').value = '';
+  ACT = { id:'', existe:false, registros:0, archivada:false }; pintarEstado();
+  $('sel-campana').value = ''; pintarResumen({}); $('env-tabla').textContent = '—'; $('sel-q').value = ''; SEL.pagina = 0; seleccion();
+  msg('Campaña nueva: ponle identificador y nombre, completa y guarda.', true); preview();
+}
+async function listarCampanas(){
+  try {
+    const d = await llamar({ accion:'listar', archivadas: null });
+    const sel = $('sel-campana'); const e = v => String(v ?? '').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+    sel.innerHTML = '<option value="">Abrir campaña…</option>' + (d.campanas || []).map(c =>
+      '<option value="' + e(c.id) + '">' + (c.archivada_at ? '🗄 ' : '') + e(c.nombre || c.id) + ' · ' + e(c.enviados) + ' enviados</option>').join('');
+    if (ACT.id) sel.value = ACT.id;
+  } catch(err){ log('No pude listar campañas: ' + err.message); }
+}
+async function envios(){
+  if (!ACT.existe) { $('env-tabla').textContent = '—'; return; }
+  try {
+    const idEnv = ACT.id;
+    const d = await llamar({ accion:'envios', campana: idEnv, estado: $('env-estado').value, q: $('env-q').value.trim(), pagina: ENV.pagina });
+    if (ACT.id !== idEnv) return;
+    ENV.total = d.total || 0;
+    const e = v => String(v ?? '').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+    const f = t => t ? new Date(t).toLocaleString('es-CL', { day:'2-digit', month:'2-digit', hour:'2-digit', minute:'2-digit' }) : '—';
+    const est = r => r.baja ? '🚫 baja' : r.estado === 'enviado' ? '✅ enviado' : r.estado === 'error' ? (r.intentos >= 3 ? '⛔ sin remedio' : '⚠️ error') : '⏳ enviando';
+    $('env-tabla').innerHTML = !(d.filas||[]).length ? 'Sin registros con ese filtro.' :
+      '<div style="overflow-x:auto"><table style="width:100%;border-collapse:collapse">' +
+      '<tr style="color:#71717a;text-align:left"><th style="padding:5px">Correo</th><th>Estado</th><th>Intentos</th><th>Enviado</th><th>Detalle</th></tr>' +
+      d.filas.map(r => '<tr style="border-top:1px solid #26262b"><td style="padding:5px;color:#e4e4e7">' + e(r.email) + '</td><td>' + est(r) + '</td><td>' + e(r.intentos) +
+        '</td><td>' + f(r.enviado_at) + '</td><td title="' + e(r.error) + '">' + e(String(r.error || '').slice(0, 40)) + '</td></tr>').join('') +
+      '</table></div><div style="margin-top:6px;color:#71717a">' + (ENV.pagina * (d.por||50) + 1) + '–' + Math.min(ENV.total, (ENV.pagina + 1) * (d.por||50)) + ' de ' + ENV.total + '</div>';
+    $('env-ant').disabled = ENV.pagina === 0; $('env-sig').disabled = (ENV.pagina + 1) * (d.por||50) >= ENV.total;
+  } catch(err){ $('env-tabla').textContent = 'No pude cargar los envíos: ' + err.message; }
+}
+$('sel-campana').onchange = e => { if (ocupado()) { e.target.value = ACT.id; return; } if (e.target.value) cargarCampana(e.target.value).catch(err => msg(err.message)); };
+$('b-nueva').onclick = () => { if (!ocupado()) nuevaCampana(); };
+$('b-duplicar').onclick = async () => {
+  if (!ACT.existe || ocupado()) return;
+  if (ACT.registros > 0 && !confirm((leerForm().publico === 'seleccion' ? 'La copia lleva la MISMA selección y se enviará de nuevo a toda ella, incluidos los ' : 'La copia es una campaña NUEVA: se enviará a toda la base otra vez, incluidos los ') + ACT.registros + ' que ya tienen registro en «' + ACT.id + '».\nPara corregir solo lo que falta, usa Guardar y escribe CAMBIAR.\n\n¿Duplicar igual?')) return;
+  const nuevo = prompt('Identificador de la copia (minúsculas, sin espacios):', ACT.id + '-v2'); if (!nuevo) return;
+  try { const d = await llamar({ accion:'duplicar', campana: ACT.id, nuevo }); msg('Copia creada: ' + d.campana, true); await listarCampanas(); await cargarCampana(d.campana); }
+  catch(err){ msg('Duplicar: ' + err.message); }
+};
+$('b-archivar').onclick = async () => {
+  if (!ACT.existe || ocupado()) return;
+  const archivar = !ACT.archivada;
+  if (archivar && !confirm('¿Archivar «' + ACT.id + '»? No se borra: queda en la lista de archivadas y no se puede enviar.')) return;
+  try { await llamar({ accion:'archivar', campana: ACT.id, archivar }); await cargarCampana(ACT.id, true); listarCampanas(); msg(archivar ? 'Archivada.' : 'Desarchivada.', true); }
+  catch(err){ msg('Archivar: ' + err.message); }
+};
+$('b-borrar').onclick = async () => {
+  if (!ACT.existe || ocupado()) return;
+  let n = 0;
+  try { const f = await llamar({ accion:'obtener', campana: ACT.id }); if (f.tanda_en_curso) return msg('Tiene una tanda enviándose: detenla primero.'); n = f.registros || 0; }
+  catch(err){ return msg('Borrar: ' + err.message); }
+  const adv = n > 0
+    ? 'Esta campaña tiene ' + n + ' envíos registrados. Si la borras se pierde ese registro: si más adelante creas otra con el mismo identificador, les volvería a llegar.'
+    : 'No tiene envíos registrados.';
+  if (!confirm('¿Borrar «' + ACT.id + '» para siempre?\n\n' + adv + '\n\nTambién se borra su selección de destinatarios. Para campañas reales es mejor «Archivar». Borrar es para pruebas.')) return;
+  const motivo = prompt('¿Por qué la borras? (queda anotado; por ejemplo: «era una prueba»)'); if (!motivo || motivo.trim().length < 4) return msg('Borrado cancelado: falta el motivo.');
+  if (prompt('Escribe BORRAR para confirmar.') !== 'BORRAR') return msg('Borrado cancelado.');
+  try { const d = await llamar({ accion:'borrar', campana: ACT.id, confirmar:'BORRAR', motivo: motivo.trim() }); try{ if (localStorage.getItem('campana_ultima') === ACT.id) localStorage.removeItem('campana_ultima'); }catch(_){}
+        await listarCampanas(); nuevaCampana(); msg('Campaña «' + d.borrada + '» borrada (' + d.registros_borrados + ' registros).', true); }
+  catch(err){ msg('Borrar: ' + err.message); }
+};
+$('env-estado').onchange = () => { ENV.pagina = 0; envios(); };
+$('f-pub-sel').onchange = pintarPublico; $('f-pub-miem').onchange = pintarPublico;
+let _selT; $('sel-q').oninput = () => { clearTimeout(_selT); _selT = setTimeout(() => { SEL.pagina = 0; seleccion(); }, 350); };
+$('sel-ant').onclick = () => { if (SEL.pagina > 0) { SEL.pagina--; seleccion(); } };
+$('sel-sig').onclick = () => { SEL.pagina++; seleccion(); };
+$('sel-vaciar').onclick = async () => {
+  if (!ACT.existe || ocupado()) return;
+  if (!confirm('¿Quitar a TODAS las personas de la selección de «' + ACT.id + '»? Quienes ya recibieron el correo siguen registrados y no se les reenvía.')) return;
+  try { const d = await llamar({ accion:'seleccion_quitar', campana: ACT.id, todos: true }); msg(d.quitados + ' personas quitadas de la selección.', true); SEL.pagina = 0; seleccion(); resumen(); }
+  catch(err){ msg('Quitar: ' + err.message); }
+};
+let _envT; $('env-q').oninput = () => { clearTimeout(_envT); _envT = setTimeout(() => { ENV.pagina = 0; envios(); }, 350); };
+$('env-ant').onclick = () => { if (ENV.pagina > 0) { ENV.pagina--; envios(); } };
+$('env-sig').onclick = () => { ENV.pagina++; envios(); };
+$('env-reintentar').onclick = async () => {
+  if (!ACT.existe) return;
+  if (!confirm('Los correos «sin remedio» (3 errores) vuelven a quedar pendientes y la próxima tanda los intenta de nuevo. ¿Seguir?')) return;
+  try { const d = await llamar({ accion:'reintentar', campana: ACT.id }); msg(d.reintentados + ' correos vuelven a pendientes.', true); resumen(); envios(); }
+  catch(err){ msg('Reintentar: ' + err.message); }
+};
+(async () => {
+  const { data } = await sb.auth.getSession(); const ses = data && data.session;
+  if (!ses) { $('gate').innerHTML = 'Entra primero al <a href="/admin" style="color:#E6C860">admin</a> con tu cuenta y vuelve a esta página.'; return; }
+  const { data: c } = await sb.from('clientes').select('rol').eq('id', ses.user.id).maybeSingle();
+  if (!c || c.rol !== 'admin') { $('gate').textContent = 'Esta página es solo para admin.'; return; }
+  $('gate').style.display = 'none'; $('app').style.display = '';
+  await listarCampanas();
+  const q = new URLSearchParams(location.search);
+  if (q.get('nueva')) { nuevaCampana(); return; }
+  let id = q.get('c'); if (!id) { id = BASE.campana; try { id = localStorage.getItem('campana_ultima') || id; } catch(_){} }
+  try { await cargarCampana(id); } catch(err){ msg('No pude abrir la campaña: ' + err.message); }
+})();
+</script>
+</body></html>

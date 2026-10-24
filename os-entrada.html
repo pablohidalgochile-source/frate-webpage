@@ -1,0 +1,164 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>FRATE WEB (TICKETERA) · OS 01 EL VIAJE DE UNA ENTRADA</title>
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🎟️</text></svg>">
+<link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@600;800;900&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="/os-manual.css">
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<style>
+  .qrbox{width:104px;height:104px;border-radius:12px;border:5px solid #fff;flex-shrink:0;
+    background:repeating-linear-gradient(0deg,#fff 0 8px,#08080a 8px 16px),repeating-linear-gradient(90deg,#fff 0 8px,transparent 8px 16px);
+    background-blend-mode:difference}
+  .res{flex:1;min-width:250px;border-radius:12px;padding:15px 17px;border:1px solid}
+  .res.ok{background:rgba(74,222,128,.1);border-color:var(--verde)}
+  .res.no{background:rgba(232,54,61,.1);border-color:var(--rojo)}
+  .res.warn{background:rgba(230,200,96,.1);border-color:var(--oro)}
+  .res .tit{font-family:var(--disp);font-weight:900;font-size:1.7rem;line-height:1}
+  .res.ok .tit{color:var(--verde)} .res.no .tit{color:var(--rojo)} .res.warn .tit{color:var(--oro)}
+  .res .nm{font-weight:800;margin-top:5px} .res .dt{font-size:.76rem;color:var(--gris);margin-top:2px}
+  .scan{display:flex;gap:18px;align-items:center;flex-wrap:wrap}
+</style>
+</head>
+<body>
+<div id="bar"></div>
+<div class="wrap">
+
+  <div class="hero">
+    <div class="eyebrow">Manual 01</div>
+    <h1>El viaje de<br>una <em>entrada</em></h1>
+    <p class="sub">Desde que alguien ve un flyer en Instagram hasta que cruza la puerta. Todo lo que le pasa a un ticket, paso por paso.</p>
+    <div class="meta"><span>Para todo el equipo</span><span>·</span><span>10 minutos</span></div>
+  </div>
+
+  <section>
+    <div class="stag">Capítulo 1</div>
+    <h2>Los cuatro tipos de entrada</h2>
+    <p class="lead">Todas abren la puerta igual. La diferencia es de dónde vienen y qué significan para el negocio.</p>
+    <div class="tw"><table class="tabla">
+      <thead><tr><th>Tipo</th><th>Cómo se consigue</th><th>¿Es venta?</th><th>Ejemplo real</th></tr></thead>
+      <tbody>
+        <tr><td><b>💰 Preventa</b></td><td>La compra en frate.cl y paga.</td><td style="color:var(--verde)"><b>Sí</b></td><td>Pre-Venta PRO Mujer · 39 vendidas</td></tr>
+        <tr><td><b>🎁 Cortesía</b></td><td>Va en una lista de embajadora o del local.</td><td style="color:var(--rojo)"><b>No</b></td><td>Cortesía Hombre (Embajadora) · 150 emitidas</td></tr>
+        <tr><td><b>🎂 Cumpleaños</b></td><td>El/la cumpleañer@ manda su lista de invitados.</td><td>Depende</td><td>Cumpleaños Invitad@ · 29 emitidas</td></tr>
+        <tr><td><b>🚪 Puerta</b></td><td>Se registra en el momento (VIP, artista, prensa).</td><td style="color:var(--rojo)"><b>No</b></td><td>Ingreso · VIP · 11 personas</td></tr>
+      </tbody>
+    </table></div>
+    <div class="oro"><b>Por qué importa la diferencia:</b> si mezclas cortesías con ventas, los porcentajes mienten. Una noche con 366 personas donde solo 110 pagaron <b>no es lo mismo</b> que una con 366 pagadas. El panel las muestra siempre separadas.</div>
+  </section>
+
+  <section>
+    <div class="stag">Capítulo 2</div>
+    <h2>La compra, paso a paso</h2>
+
+    <h3>1 · Elige sus entradas</h3>
+    <p>Entra por el link del flyer (<b>frate.cl/e/nombre-del-evento</b>) o por el sitio. Elige cuántas y de qué tipo.</p>
+    <div class="bien"><b>Acá pasa lo más importante:</b> apenas elige, <b>el cupo queda reservado a su nombre por 15 minutos</b>. Si no alcanza, se le dice <i>"se acaba de agotar, no se te cobró nada"</i> — <b>antes</b> de pedirle plata. Si no paga en 15 minutos, el cupo vuelve solo a la venta.</div>
+    <div class="peligro"><b>Antes esto no era así</b> y pasó lo que tenía que pasar: tres personas compraban el último cupo, las tres pagaban y solo una recibía entrada. Las otras quedaban cobradas y sin nada. <b>Eso ya no puede ocurrir.</b></div>
+
+    <h3>2 · Escribe los datos de cada asistente</h3>
+    <p>Las entradas son <b>nominativas</b>: cada una lleva nombre y RUT de quien la va a usar. No es burocracia — es lo que permite que el portero verifique con el carnet y que la persona quede en el CRM.</p>
+    <ul>
+      <li>El sistema <b>valida el RUT de verdad</b> (dígito verificador). No acepta 11.111.111-1.</li>
+      <li>Si escribe mal el correo (<i>gmial.com</i>), le sugiere el correcto y le pide confirmarlo dos veces.</li>
+      <li>Si el dominio del correo no existe, <b>no lo deja pagar</b> hasta que lo corrija.</li>
+    </ul>
+    <div class="oro"><b>Por qué tanto cuidado con el correo:</b> ahí llega el QR. Un correo mal escrito = una persona que pagó y no tiene entrada, y que va a llegar reclamando a la puerta.</div>
+
+    <h3>3 · Paga</h3>
+    <p>Dos caminos: <b>MercadoPago</b> (tarjeta, al instante) o <b>transferencia por Khipu</b>. Se suma un <b>4% de cargo por servicio</b>.</p>
+    <div class="oro"><b>El precio nunca viene del navegador.</b> Aunque alguien manipule la pantalla, el servidor recalcula todo desde la base de datos. Mandar "precio: 1" no funciona. → detalle en el <a href="/os-dinero">manual 02</a>.</div>
+
+    <h3>4 · Recibe su QR</h3>
+    <p>Llega un correo con <b>un QR por asistente</b>, con su nombre, el horario del evento y las condiciones de esa entrada específica (hasta qué hora puede entrar, si es transferible, la zona).</p>
+    <div class="bien"><b>El correo dice exactamente lo mismo que ve el portero.</b> Si el ticket vale hasta las 02:30, el correo lo dice y el escáner lo dice. Sin sorpresas en la puerta.</div>
+  </section>
+
+  <section>
+    <div class="stag">Capítulo 3 · demo</div>
+    <h2>Qué ve el portero</h2>
+    <p class="lead">Aprieta el botón y mira los distintos resultados posibles del escáner.</p>
+    <div class="demo">
+      <div class="dl">Simulador · validador de puerta</div>
+      <div class="scan">
+        <div class="qrbox"></div>
+        <div class="res ok" id="d-res">
+          <div class="tit">✓ AUTORIZADO</div>
+          <div class="nm">CATALINA MUÑOZ SOTO</div>
+          <div class="dt">Pre-Venta PRO Mujer · 12.345.678-9<br>Válida hasta las 02:30 · no transferible</div>
+        </div>
+      </div>
+      <button class="btn" onclick="sig()">▶︎ Escanear siguiente</button>
+      <button class="btn g" onclick="reset()">Volver al primero</button>
+    </div>
+    <div class="tw"><table class="tabla">
+      <thead><tr><th>Resultado</th><th>Qué significa</th><th>Qué hace el portero</th></tr></thead>
+      <tbody>
+        <tr><td style="color:var(--verde)"><b>✓ AUTORIZADO</b></td><td>Entrada válida y sin usar.</td><td>Entra. Pulsera según su tipo.</td></tr>
+        <tr><td style="color:var(--rojo)"><b>YA ESCANEADO</b></td><td>Ese QR ya se usó.</td><td>No entra. Puede ser captura de pantalla reenviada.</td></tr>
+        <tr><td style="color:var(--oro)"><b>OTRO EVENTO</b></td><td>Es de otra fecha.</td><td>No entra, salvo que un admin autorice el ingreso igual.</td></tr>
+        <tr><td style="color:var(--oro)"><b>FUERA DE HORARIO</b></td><td>Pasó su hora máxima de ingreso.</td><td>Pide autorización (PIN de admin).</td></tr>
+        <tr><td style="color:var(--rojo)"><b>DEVUELTA</b></td><td>Se le devolvió la plata.</td><td>No entra. Esa entrada ya no existe.</td></tr>
+      </tbody>
+    </table></div>
+    <div class="oro"><b>La regla del portero:</b> verde entra, rojo no. Nada de interpretar. Si hay duda, se registra una <b>incidencia</b> y se resuelve después con calma — pero la fila sigue avanzando.</div>
+  </section>
+
+  <section>
+    <div class="stag">Capítulo 4</div>
+    <h2>Cuando algo cambia</h2>
+    <p class="lead">La vida pasa: la gente se enferma, se equivoca de fecha, o no puede ir. El sistema tiene una salida para cada caso.</p>
+    <div class="tw"><table class="tabla">
+      <thead><tr><th>Situación</th><th>Solución</th><th>Qué pasa con el cupo</th></tr></thead>
+      <tbody>
+        <tr><td>Se equivocó de día</td><td><b>Cambiar de día</b>: se anula su QR y se le emite uno nuevo para la otra fecha.</td><td>La plata queda en el evento original; toma un cupo del nuevo.</td></tr>
+        <tr><td>No sabe cuándo irá</td><td><b>Ticket abierto</b>: entrada sin fecha fija, válida cualquier día.</td><td>No toma cupo hasta que se le asigna un evento.</td></tr>
+        <tr><td>No puede ir y quiere su plata</td><td><b>Devolución</b> con 10% de retención. La aprueba una persona, nunca es automática.</td><td>El cupo vuelve a la venta.</td></tr>
+        <tr><td>No puede ir pero volverá</td><td><b>Crédito FRATE</b>: el valor completo queda a su favor, sin retención.</td><td>El cupo vuelve a la venta.</td></tr>
+        <tr><td>Compró de más</td><td>Devolución <b>por ticket</b>: se devuelven solo algunos y los demás siguen válidos.</td><td>Vuelven solo los cupos devueltos.</td></tr>
+      </tbody>
+    </table></div>
+    <div class="peligro"><b>Nunca se devuelve una entrada ya usada.</b> Si la persona entró, consumió el servicio. El sistema no lo permite y el equipo tampoco debería.</div>
+  </section>
+
+  <section>
+    <div class="stag">Capítulo 5</div>
+    <h2>Las cortesías</h2>
+    <p class="lead">Más de la mitad de las entradas de una noche son cortesías. Así funcionan.</p>
+    <ol>
+      <li><b>Se arma la lista.</b> Una embajadora la llena desde su portal, o se importa un archivo, o se pega desde WhatsApp.</li>
+      <li><b>Se revisa a mano.</b> Este paso <b>no se salta</b>: el sistema marca duplicados, RUT inválidos, menores de edad y personas vetadas.</li>
+      <li><b>Se emite.</b> Recién ahí se generan los QR reales y salen los correos.</li>
+      <li><b>Se mide.</b> Al día siguiente sabes cuántos de esa lista llegaron de verdad.</li>
+    </ol>
+    <div class="oro"><b>El dato que cambia decisiones:</b> el 23 de julio, las listas de embajadora rindieron <b>~49%</b> y la Lista VIP Fuego <b>72%</b>. Si quieres 100 personas de una lista que rinde la mitad, tienes que emitir 200. Eso es planificar con datos.</div>
+  </section>
+
+  <div class="pie">FRATE OS · Manual 01 · <a href="/os">← Volver al mapa</a> · <a href="/os-dinero">Siguiente: el dinero →</a></div>
+</div>
+
+<script src="/os-guard.js"></script>
+<script>
+  document.getElementById('bar').innerHTML = osBarra('01');
+  osProteger();
+  var CASOS = [
+    {c:'ok',   t:'✓ AUTORIZADO',      n:'CATALINA MUÑOZ SOTO',  d:'Pre-Venta PRO Mujer · 12.345.678-9<br>Válida hasta las 02:30 · no transferible'},
+    {c:'no',   t:'✕ YA ESCANEADO',    n:'MATÍAS ROJAS PINTO',   d:'Este QR se usó a las 00:41 en la puerta principal.<br>Puede ser una captura reenviada.'},
+    {c:'warn', t:'⚠ OTRO EVENTO',     n:'ANTONIA SILVA DÍAZ',   d:'Su entrada es para BESUCONA (25 jul).<br>Un admin puede autorizar el ingreso igual.'},
+    {c:'warn', t:'⏰ FUERA DE HORARIO',n:'DIEGO CASTRO LEÓN',    d:'Su ticket permitía ingreso hasta las 02:30.<br>Son las 03:10 — requiere PIN de admin.'},
+    {c:'no',   t:'✕ ENTRADA DEVUELTA',n:'JOSEFA MORA VEGA',     d:'Se le devolvió el dinero el 22 de julio.<br>Esta entrada ya no es válida.'},
+    {c:'ok',   t:'✓ AUTORIZADO',      n:'BENJAMÍN TAPIA RUIZ',  d:'Cortesía Hombre (Embajadora) · sin RUT<br>Se valida por nombre · válida toda la noche'}
+  ];
+  var i = 0;
+  function pinta(){
+    var x = CASOS[i], el = document.getElementById('d-res');
+    el.className = 'res ' + x.c;
+    el.innerHTML = '<div class="tit">'+x.t+'</div><div class="nm">'+x.n+'</div><div class="dt">'+x.d+'</div>';
+  }
+  function sig(){ i = (i+1) % CASOS.length; pinta(); }
+  function reset(){ i = 0; pinta(); }
+</script>
+</body>
+</html>

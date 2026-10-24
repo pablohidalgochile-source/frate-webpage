@@ -1,0 +1,77 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>FRATE OS · POS 03 El dinero</title>
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>💰</text></svg>">
+<link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@600;800;900&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="/os-manual.css">
+<link rel="stylesheet" href="/os-pos.css">
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<style>
+  .dos{display:grid;grid-template-columns:repeat(auto-fit,minmax(260px,1fr));gap:12px;margin-top:14px}
+  .via{background:var(--neg2);border:1px solid var(--bor);border-radius:13px;padding:16px 18px}
+  .via h4{font-family:var(--disp);font-weight:800;font-size:1.05rem;text-transform:uppercase;margin-bottom:4px}
+  .via .c{font-size:.68rem;letter-spacing:1.3px;text-transform:uppercase;color:var(--gris2);margin-bottom:9px}
+  .via p{font-size:.83rem;color:var(--gris)}
+  .tres{display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:12px;margin-top:14px}
+  .est{border:1px solid var(--bor2);border-left-width:4px;border-radius:12px;padding:15px 17px;background:var(--neg)}
+  .est h4{font-family:var(--disp);font-weight:800;font-size:1.05rem;text-transform:uppercase}
+  .est p{font-size:.83rem;color:var(--gris);margin-top:6px}
+</style>
+</head>
+<body>
+<div id="bar"></div>
+<div class="wrap">
+
+  <div class="hero">
+    <div class="eyebrow">POS · Manual 03</div>
+    <h1>El <em>dinero</em></h1>
+    <p class="sub">Por qué el cajón calza o no calza, y cómo saberlo sin pelear.</p>
+    <div class="meta"><span>Para jefes de caja y finanzas</span><span>·</span><span>7 minutos</span></div>
+  </div>
+
+  <section>
+    <div class="stag">Capítulo 1</div>
+    <h2>Esperado contra contado</h2>
+    <p class="lead">El efectivo esperado es <b>el fondo más las ventas en efectivo</b>. Se cuenta el cajón billete a billete y se compara. La diferencia es plata real: falta o sobra.</p>
+    <p style="color:var(--gris)">La tarjeta se cuadra aparte, contra el <b>voucher del datáfono</b>. Con el Point integrado, el total de tarjeta del POS ya es el del Point: se autocompleta.</p>
+    <table>
+      <tr><th>Caja (BESUCONA)</th><th>Esperado</th><th>Contado</th><th>Diferencia</th></tr>
+      <tr><td>Puerta 1</td><td>$187.000</td><td>$187.000</td><td><b style="color:var(--verde)">$0</b></td></tr>
+      <tr><td>Puerta 2</td><td>$240.000</td><td>$241.000</td><td><b style="color:var(--oro)">+$1.000</b></td></tr>
+      <tr><td>Caja Schop</td><td>$211.000</td><td>$201.000</td><td><b style="color:var(--rojo)">−$10.000</b></td></tr>
+    </table>
+    <div class="oro"><b>La propina de tarjeta va aparte.</b> La propina que se paga con tarjeta no infla las ventas: se muestra como <strong>línea separada</strong> en el cierre, para que el cuadre de la venta sea limpio.</div>
+  </section>
+
+  <section>
+    <div class="stag">Capítulo 2</div>
+    <h2>Cómo lo vives tú</h2>
+    <div class="dos">
+      <div class="via"><h4>👤 Operador · en la Sunmi</h4><div class="c">Cierra Puerta 2</div><p>Cuenta el cajón: <b>$241.000</b>. El POS esperaba $240.000 (fondo $100.000 + $140.000 en efectivo). Sobra <b>$1.000</b>: el sistema te pide una observación, la escribes y cierras tranquilo.</p></div>
+      <div class="via"><h4>🛠 Admin · en el panel</h4><div class="c">Revisa los cierres</div><p>Puerta 1 en <b style="color:var(--verde)">$0</b>, Puerta 2 <b style="color:var(--oro)">+$1.000</b>, Caja Schop <b style="color:var(--rojo)">−$10.000</b>. El −$10.000 <b>no es un error del sistema</b>: es plata que faltó. Hablas con quien tuvo esa caja.</p></div>
+    </div>
+  </section>
+
+  <section>
+    <div class="stag">Capítulo 3</div>
+    <h2>Cuando hay diferencia</h2>
+    <div class="tres">
+      <div class="est" style="border-left-color:var(--verde)"><h4 style="color:var(--verde)">$0 · cuadra</h4><p>La caja cierra sola, sin observación.</p></div>
+      <div class="est" style="border-left-color:var(--oro)"><h4 style="color:var(--oro)">Sobra o falta poco</h4><p>Pide una observación obligatoria y queda marcada para revisar.</p></div>
+      <div class="est" style="border-left-color:var(--rojo)"><h4 style="color:var(--rojo)">Falta plata real</h4><p>Como el −$10.000 de Schop: no es bug, es un faltante que alguien tiene que responder.</p></div>
+    </div>
+  </section>
+
+  <div class="pie">FRATE OS · POS · Manual 03 · <a href="/os-pos-venta">← La venta</a> · <a href="/os-pos-puerta">Siguiente: puerta y barra →</a></div>
+</div>
+
+<script src="/os-guard.js"></script>
+<script>
+  document.getElementById('bar').innerHTML = osBarra('03', 'pos');
+  osProteger();
+</script>
+</body>
+</html>

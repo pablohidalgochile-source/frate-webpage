@@ -4,6 +4,21 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Pago confirmado — Frate</title>
+<!-- Previsualización al compartir. Sin esto, un link de frate.cl en
+     WhatsApp o Instagram sale sin imagen y parece spam. -->
+<meta property="og:type" content="website" />
+<meta property="og:site_name" content="FRATE" />
+<meta property="og:title" content="¡Listo! · FRATE" />
+<meta property="og:description" content="Tu compra quedó confirmada. Nos vemos en la pista 🔥" />
+<meta property="og:url" content="https://www.frate.cl/" />
+<meta property="og:image" content="https://www.frate.cl/assets/og.png" />
+<meta property="og:image:width" content="1200" />
+<meta property="og:image:height" content="630" />
+<meta name="twitter:card" content="summary_large_image" />
+<meta name="twitter:title" content="¡Listo! · FRATE" />
+<meta name="twitter:description" content="Tu compra quedó confirmada. Nos vemos en la pista 🔥" />
+<meta name="twitter:image" content="https://www.frate.cl/assets/og.png" />
+
   <meta name="theme-color" content="#0A0A0B" />
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
   <style>
@@ -22,6 +37,8 @@
     .btn-ghost { display:inline-block; color:#71717a; text-decoration:none; padding:12px; font-size:13px; margin-top:8px; }
     .mail { background:#1a1a1c; border-left:3px solid #D4A832; border-radius:4px; padding:14px 18px; text-align:left; margin:20px 0; font-size:13px; color:#d4d4d8; line-height:1.6; }
   </style>
+  <link rel="icon" href="/icon-frate.svg" type="image/svg+xml" />
+  <link rel="apple-touch-icon" href="/icon-frate.svg" />
 </head>
 <body>
   <div class="card">
@@ -51,7 +68,48 @@
       <div id="song-done" style="display:none;color:#4ade80;font-size:13px;padding:8px 0;">✓ ¡Gracias! Tu canción se sumó al ranking 🎶</div>
     </div>
 
-    <button onclick="generarHistoria()" class="btn" style="background:linear-gradient(45deg,#E8363D,#D4A832);margin-bottom:10px;">📲 Comparte tu historia</button><br>
+    <!-- ¡ESTÁS DE SUERTE! — juegos post-compra (si tu compra ganó un giro) -->
+    <div id="suerte-box" style="display:none;background:#141415;border:1px solid #D4A832;border-radius:10px;padding:20px;margin:0 0 24px;text-align:center;">
+      <div style="font-weight:900;color:#D4A832;font-size:1.2rem;letter-spacing:1px;">🎉 ¡ESTÁS DE SUERTE!</div>
+      <div id="suerte-sub" style="font-size:12px;color:#71717a;margin:4px 0 14px;">Tu compra ganó un juego. Elige el tuyo:</div>
+      <div id="suerte-menu" style="display:flex;gap:8px;justify-content:center;flex-wrap:wrap;"></div>
+
+      <!-- 🎡 RULETA-VINILO: la púa decide -->
+      <div id="j-ruleta" style="display:none;">
+        <div style="position:relative;width:240px;height:246px;margin:0 auto 12px;">
+          <div style="position:absolute;top:-4px;left:50%;transform:translateX(-50%);z-index:3;font-size:1.3rem;">🔻</div>
+          <div style="position:absolute;top:6px;right:-6px;z-index:3;transform:rotate(38deg);transform-origin:top right;">
+            <div style="width:64px;height:5px;background:linear-gradient(90deg,#8a8a92,#d8d8de);border-radius:3px;"></div>
+            <div style="position:absolute;right:-7px;top:-6px;width:16px;height:16px;border-radius:50%;background:#d8d8de;border:2px solid #55555c;"></div>
+          </div>
+          <div id="ruleta-disco" style="position:absolute;left:0;bottom:0;width:240px;height:240px;border-radius:50%;border:4px solid #D4A832;transition:transform 4s cubic-bezier(.12,.65,.15,1);display:flex;align-items:center;justify-content:center;background:conic-gradient(rgba(232,54,61,.78) 0 72deg, rgba(18,18,20,.55) 72deg 144deg, rgba(212,168,50,.78) 144deg 216deg, rgba(18,18,20,.55) 216deg 288deg, rgba(96,96,106,.6) 288deg 360deg), repeating-radial-gradient(circle at 50% 50%, #171717 0 1px, #0b0b0b 1px 3px);">
+            <div style="background:radial-gradient(circle at 38% 32%, #ff6a6f, #E8363D 60%, #7d1216);border-radius:50%;width:78px;height:78px;display:flex;flex-direction:column;align-items:center;justify-content:center;font-weight:900;color:#fff;font-size:0.7rem;letter-spacing:1px;box-shadow:0 0 0 4px #050506;">FRATE<div style="width:7px;height:7px;border-radius:50%;background:#050506;margin-top:3px;"></div></div>
+          </div>
+        </div>
+        <button id="ruleta-btn" onclick="girarRuleta()" class="btn" style="background:#D4A832;color:#0A0A0B;font-weight:900;">PONER LA PÚA 🎶</button>
+        <div id="ruleta-result" style="margin-top:12px;font-weight:700;font-size:1rem;"></div>
+      </div>
+
+      <!-- 🎫 RASPE: la Entrada Dorada -->
+      <div id="j-raspe" style="display:none;">
+        <div id="raspe-zona" style="max-width:300px;margin:0 auto;">
+          <div style="background:linear-gradient(135deg,#1a1a1c,#0f0f10);border:1px dashed #D4A832;border-radius:12px;padding:14px;">
+            <div style="display:flex;justify-content:space-between;font-size:9px;color:#71717a;letter-spacing:2px;"><span>FRATE · FCC</span><span>⭐ ENTRADA DORADA</span></div>
+            <div style="position:relative;height:112px;margin:10px 0;border-radius:8px;overflow:hidden;background:#0A0A0B;display:flex;align-items:center;justify-content:center;">
+              <div id="raspe-premio" style="color:#D4A832;font-weight:700;text-align:center;line-height:1.5;padding:0 10px;"></div>
+              <canvas id="raspe-canvas" width="272" height="112" style="position:absolute;left:0;top:0;width:100%;height:100%;touch-action:none;cursor:crosshair;"></canvas>
+            </div>
+            <div style="display:flex;justify-content:space-between;align-items:center;"><span style="font-size:8px;color:#3f3f46;letter-spacing:1px;">🎟 ADMIT ONE</span><div style="height:14px;flex:1;margin-left:8px;background:repeating-linear-gradient(90deg,#3f3f46 0 2px,transparent 2px 5px);border-radius:2px;"></div></div>
+          </div>
+          <div style="font-size:11px;color:#71717a;margin-top:8px;">✨ Raspa con el dedo la zona dorada</div>
+        </div>
+      </div>
+
+      <!-- 🎵 TRIVIA MUSICAL -->
+      <div id="j-trivia" style="display:none;"><div id="trivia-zona" style="max-width:340px;margin:0 auto;"></div></div>
+    </div>
+
+    <button onclick="compartirCasita()" class="btn" style="background:linear-gradient(45deg,#E8363D,#D4A832);margin-bottom:10px;">🔥 Comparte que vas (video)</button><br>
     <a href="/" class="btn" style="background:transparent;border:1px solid #2a2a2c;">VOLVER A FRATE</a><br>
     <a href="/#cuenta" class="btn-ghost">Ver mis entradas en mi cuenta →</a>
     <canvas id="historia-canvas" width="1080" height="1920" style="display:none;"></canvas>
@@ -61,6 +119,9 @@
     // MercadoPago agrega params como ?status=approved&external_reference=123&payment_id=...
     const params = new URLSearchParams(window.location.search);
     const ref = params.get('external_reference');
+    // Ya pagó: se borra el rastro para que la barra de «tu compra está esperando»
+    // no le siga apareciendo en el checkout.
+    try{ localStorage.removeItem('frate_pend'); }catch(_){}
     if (ref) {
       document.getElementById('order-info').style.display = 'block';
       document.getElementById('order-id').textContent = 'FCC-' + String(ref).padStart(6, '0');
@@ -74,6 +135,197 @@
     const sb = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON);
     let clienteId = null;
     try { clienteId = (JSON.parse(localStorage.getItem('frate_session')||'null')||{}).id || null; } catch(e) {}
+    // ══ ¡ESTÁS DE SUERTE! — juegos post-compra ══════════════════
+    // El webhook regala un "giro" si la compra superó el mínimo. El
+    // premio SIEMPRE lo decide el servidor. Modo configurable desde
+    // el admin: el cliente elige / al azar / un juego fijo.
+    const JCONF = { modo: 'cliente', on: { ruleta: true, raspe: true, trivia: true } };
+    const esJugar = params.get('jugar') === '1';
+    if (esJugar) {
+      // Vista "solo juegos" (se llega desde Mi cuenta → Promos)
+      try {
+        document.querySelector('.check')?.remove();
+        const h1 = document.querySelector('h1'); if (h1) h1.textContent = '🎰 Tus juegos';
+        document.querySelectorAll('p').forEach(p => { if (/procesó|No te llegó/.test(p.textContent)) p.remove(); });
+        document.querySelector('.mail')?.remove();
+        document.getElementById('song-q')?.remove();
+      } catch (e) {}
+    }
+    (async () => {
+      try {
+        const { data: s } = await sb.auth.getSession();
+        if (!s?.session) return;
+        try {
+          const { data: vals } = await sb.from('config_valores').select('clave,valor')
+            .in('clave', ['juegos_modo', 'juego_ruleta_on', 'juego_raspe_on', 'juego_trivia_on']);
+          (vals || []).forEach(v => {
+            if (v.clave === 'juegos_modo') JCONF.modo = v.valor || 'cliente';
+            if (v.clave === 'juego_ruleta_on') JCONF.on.ruleta = v.valor !== '0';
+            if (v.clave === 'juego_raspe_on')  JCONF.on.raspe  = v.valor !== '0';
+            if (v.clave === 'juego_trivia_on') JCONF.on.trivia = v.valor !== '0';
+          });
+        } catch (e) {}
+        const intentos = esJugar ? 1 : 3;   // el webhook puede demorar unos segundos
+        for (let i = 0; i < intentos; i++) {
+          const { data: giros } = await sb.from('giros').select('id').eq('usado', false).limit(1);
+          if (giros && giros.length) { mostrarSuerte(); return; }
+          if (i < intentos - 1) await new Promise(r => setTimeout(r, 2500));
+        }
+        if (esJugar) {
+          document.getElementById('suerte-box').style.display = 'block';
+          document.getElementById('suerte-sub').textContent = '';
+          document.getElementById('suerte-menu').innerHTML = '<div style="color:#71717a;font-size:13px;">No tienes juegos pendientes. ¡Compra tu próxima entrada y juega! 🎟️</div>';
+        }
+      } catch (e) { /* sin juegos */ }
+    })();
+
+    function juegosActivos() { return ['ruleta', 'raspe', 'trivia'].filter(k => JCONF.on[k]); }
+    function mostrarSuerte() {
+      document.getElementById('suerte-box').style.display = 'block';
+      const juegos = juegosActivos();
+      const menu = document.getElementById('suerte-menu');
+      if (!juegos.length) { menu.innerHTML = '<div style="color:#71717a">Los juegos están desactivados por ahora.</div>'; return; }
+      if (JCONF.modo === 'azar') return abrirJuego(juegos[Math.floor(Math.random() * juegos.length)]);
+      if (juegos.includes(JCONF.modo)) return abrirJuego(JCONF.modo);   // modo fijo
+      if (juegos.length === 1) return abrirJuego(juegos[0]);
+      const meta = { ruleta: ['🎡', 'Ruleta-Vinilo'], raspe: ['🎫', 'Entrada Dorada'], trivia: ['🎵', 'Trivia Musical'] };
+      menu.innerHTML = juegos.map(g => `<button onclick="abrirJuego('${g}')" style="flex:1;min-width:96px;background:#0A0A0B;border:1px solid #D4A832;color:#D4A832;padding:14px 8px;border-radius:10px;cursor:pointer;font-weight:800;font-size:0.82rem;line-height:1.6;">${meta[g][0]}<br>${meta[g][1]}</button>`).join('');
+    }
+    function abrirJuego(g) {
+      document.getElementById('suerte-menu').style.display = 'none';
+      document.getElementById('suerte-sub').textContent = { ruleta: 'La púa decide tu premio 🎶', raspe: 'Raspa tu Entrada Dorada ✨', trivia: '3 preguntas · pocos segundos por respuesta ⏱️' }[g] || '';
+      document.getElementById('j-' + g).style.display = 'block';
+      if (g === 'raspe') iniciarRaspe();
+      if (g === 'trivia') iniciarTrivia();
+    }
+
+    // ── 🎡 Ruleta-Vinilo ──
+    let ruletaGirando = false;
+    async function girarRuleta() {
+      if (ruletaGirando) return;
+      ruletaGirando = true;
+      const btn = document.getElementById('ruleta-btn');
+      const res = document.getElementById('ruleta-result');
+      btn.disabled = true; btn.textContent = 'SONANDO...'; res.textContent = '';
+      try {
+        const { data, error } = await sb.rpc('girar_ruleta');
+        if (error) throw error;
+        if (data?.error === 'sin_giros') { res.style.color = '#71717a'; res.textContent = 'No te quedan juegos pendientes.'; btn.style.display = 'none'; return; }
+        if (data?.error) throw new Error(data.error);
+        const idx = { credito: data.valor >= 2000 ? 2 : 0, puntos: 1, beneficio: 3, nada: 4 }[data.tipo] ?? 4;
+        const angulo = 5 * 360 + (360 - (idx * 72 + 36));
+        document.getElementById('ruleta-disco').style.transform = 'rotate(' + angulo + 'deg)';
+        setTimeout(() => {
+          const gano = data.tipo !== 'nada';
+          res.style.color = gano ? '#4ade80' : '#71717a';
+          res.textContent = gano ? '🎉 ¡Ganaste ' + data.premio + '!' : '😅 ' + data.premio + ' — la próxima será';
+          if (data.tipo === 'credito') res.textContent += ' Ya está en tu cuenta.';
+          if (data.tipo === 'puntos')  res.textContent += ' Ya se sumaron a tus puntos.';
+          if (data.tipo === 'beneficio') res.textContent += ' Muéstralo en la barra 🍹';
+          btn.style.display = 'none';
+        }, 4200);
+      } catch (e) {
+        res.style.color = '#f87171'; res.textContent = 'No se pudo girar: ' + (e.message || e);
+        btn.disabled = false; btn.textContent = 'PONER LA PÚA 🎶';
+      } finally { ruletaGirando = false; }
+    }
+
+    // ── 🎫 Raspe "Entrada Dorada" ──
+    // El premio se decide en el servidor ANTES de raspar; la capa
+    // dorada solo lo tapa. Rasca con dedo o mouse.
+    let raspeIniciado = false;
+    async function iniciarRaspe() {
+      if (raspeIniciado) return; raspeIniciado = true;
+      try {
+        const { data, error } = await sb.rpc('girar_ruleta');
+        if (error) throw error;
+        if (data?.error === 'sin_giros') { document.getElementById('raspe-zona').innerHTML = '<div style="color:#71717a">No te quedan juegos pendientes.</div>'; return; }
+        if (data?.error) throw new Error(data.error);
+        const gano = data.tipo !== 'nada';
+        let extra = data.tipo === 'credito' ? 'Ya está en tu cuenta 💳' : data.tipo === 'puntos' ? 'Ya se sumaron a tus puntos ⭐' : data.tipo === 'beneficio' ? 'Muéstralo en la barra 🍹' : '';
+        document.getElementById('raspe-premio').innerHTML = gano
+          ? '🎉<br><b style="font-size:1.05rem;">' + data.premio + '</b><br><span style="font-size:10px;color:#71717a;">' + extra + '</span>'
+          : '😅<br><b>Sigue participando</b><br><span style="font-size:10px;color:#71717a;">La próxima será 🎶</span>';
+        prepararRaspeCanvas();
+      } catch (e) { document.getElementById('raspe-zona').innerHTML = '<div style="color:#f87171">Error: ' + (e.message || e) + '</div>'; }
+    }
+    function prepararRaspeCanvas() {
+      const c = document.getElementById('raspe-canvas');
+      const ctx = c.getContext('2d');
+      const g = ctx.createLinearGradient(0, 0, c.width, c.height);
+      g.addColorStop(0, '#D4A832'); g.addColorStop(.5, '#f0d78a'); g.addColorStop(1, '#b8871f');
+      ctx.fillStyle = g; ctx.fillRect(0, 0, c.width, c.height);
+      ctx.fillStyle = 'rgba(10,10,11,.85)'; ctx.font = '900 15px sans-serif'; ctx.textAlign = 'center';
+      ctx.fillText('✨ RASPA AQUÍ ✨', c.width / 2, c.height / 2 + 5);
+      ctx.globalCompositeOperation = 'destination-out';
+      ctx.lineWidth = 28; ctx.lineCap = 'round';
+      let raspando = false, last = null, trazos = 0, listo = false;
+      const pos = e => { const r = c.getBoundingClientRect(); const t = e.touches ? e.touches[0] : e; return { x: (t.clientX - r.left) * (c.width / r.width), y: (t.clientY - r.top) * (c.height / r.height) }; };
+      const down = e => { raspando = true; last = pos(e); e.preventDefault(); };
+      const move = e => {
+        if (!raspando) return;
+        const p = pos(e);
+        ctx.beginPath(); ctx.moveTo(last.x, last.y); ctx.lineTo(p.x, p.y); ctx.stroke();
+        last = p; trazos++;
+        if (trazos > 42 && !listo) { listo = true; c.style.transition = 'opacity .6s'; c.style.opacity = '0'; setTimeout(() => c.remove(), 650); }
+        e.preventDefault();
+      };
+      const up = () => { raspando = false; };
+      c.addEventListener('mousedown', down); c.addEventListener('mousemove', move); window.addEventListener('mouseup', up);
+      c.addEventListener('touchstart', down, { passive: false }); c.addEventListener('touchmove', move, { passive: false }); c.addEventListener('touchend', up);
+    }
+
+    // ── 🎵 Trivia Musical (anti-trampa: el servidor corrige) ──
+    const TRIVIA = { seg: 10, sesion: null, pregs: [], idx: 0, resps: [], timer: null };
+    async function iniciarTrivia() {
+      const zona = document.getElementById('trivia-zona');
+      zona.innerHTML = '<div style="color:#71717a">Preparando preguntas…</div>';
+      try {
+        const { data, error } = await sb.rpc('trivia_iniciar');
+        if (error) throw error;
+        if (data?.error === 'sin_giros') { zona.innerHTML = '<div style="color:#71717a">No te quedan juegos pendientes.</div>'; return; }
+        if (data?.error) throw new Error(data.error);
+        TRIVIA.sesion = data.sesion; TRIVIA.pregs = data.preguntas || []; TRIVIA.seg = data.segundos || 10;
+        TRIVIA.idx = 0; TRIVIA.resps = [];
+        mostrarPregunta();
+      } catch (e) { zona.innerHTML = '<div style="color:#f87171">' + (e.message || e) + '</div>'; }
+    }
+    function mostrarPregunta() {
+      clearInterval(TRIVIA.timer);
+      const zona = document.getElementById('trivia-zona');
+      if (TRIVIA.idx >= 3) return enviarTrivia();
+      const q = TRIVIA.pregs[TRIVIA.idx];
+      let t = TRIVIA.seg;
+      const cat = { musica: '🎶 Música', fiestas: '🎉 Fiestas', frate: '🏠 FRATE' }[q.categoria] || q.categoria;
+      zona.innerHTML = `
+        <div style="display:flex;justify-content:space-between;font-size:11px;color:#71717a;margin-bottom:6px;"><span>Pregunta ${TRIVIA.idx + 1}/3 · ${cat}</span><span id="tv-timer" style="color:#D4A832;font-weight:900;font-size:13px;">${t}s</span></div>
+        <div style="height:5px;background:#0A0A0B;border-radius:4px;margin-bottom:12px;overflow:hidden;"><div id="tv-barra" style="height:100%;width:100%;background:#D4A832;transition:width 1s linear;"></div></div>
+        <div style="color:#fff;font-weight:700;font-size:0.98rem;margin-bottom:12px;text-align:left;">${q.pregunta}</div>
+        ${['a','b','c','d'].map(k => `<button onclick="responderTrivia('${k}')" style="display:block;width:100%;text-align:left;background:#0A0A0B;border:1px solid #2a2a2c;color:#e4e4e7;padding:11px 13px;border-radius:8px;margin-bottom:7px;cursor:pointer;font-size:0.9rem;">${k.toUpperCase()}) ${q[k]}</button>`).join('')}`;
+      TRIVIA.timer = setInterval(() => {
+        t--;
+        const el = document.getElementById('tv-timer'); if (el) el.textContent = t + 's';
+        const b = document.getElementById('tv-barra'); if (b) b.style.width = Math.max(0, t * 100 / TRIVIA.seg) + '%';
+        if (t <= 0) responderTrivia('');   // sin respuesta = mala
+      }, 1000);
+    }
+    function responderTrivia(k) { clearInterval(TRIVIA.timer); TRIVIA.resps.push(k); TRIVIA.idx++; mostrarPregunta(); }
+    async function enviarTrivia() {
+      const zona = document.getElementById('trivia-zona');
+      zona.innerHTML = '<div style="color:#71717a">Corrigiendo… 🥁</div>';
+      try {
+        const { data, error } = await sb.rpc('trivia_responder', { p_sesion: TRIVIA.sesion, p_respuestas: TRIVIA.resps });
+        if (error) throw error;
+        if (data?.error === 'tiempo') { zona.innerHTML = '<div style="color:#D4A832;font-weight:700;">' + (data.mensaje || '⏱️ Se acabó el tiempo') + '</div>'; return; }
+        if (data?.error) throw new Error(data.error);
+        const gano = data.tipo === 'credito';
+        zona.innerHTML = `
+          <div style="font-size:2.2rem;">${data.aciertos === 3 ? '🏆' : data.aciertos === 2 ? '🥈' : '🎧'}</div>
+          <div style="color:#fff;font-weight:900;font-size:1.15rem;margin:6px 0;">${data.aciertos}/3 correctas</div>
+          <div style="color:${gano ? '#4ade80' : '#71717a'};font-weight:700;">${gano ? '🎉 ¡Ganaste ' + data.premio + '! Ya está en tu cuenta.' : 'Sigue participando — la próxima será 🎶'}</div>`;
+      } catch (e) { zona.innerHTML = '<div style="color:#f87171">' + (e.message || e) + '</div>'; }
+    }
+
     let songResults = [];
     let songTimer = null;
     const sInput = document.getElementById('song-input');
@@ -95,46 +347,117 @@
           </div>`).join('');
       } catch(e) { sOut.innerHTML = '<div style="color:#71717a;padding:8px;">Error al buscar.</div>'; }
     }
-    // ── Historia para Instagram (imagen 1080x1920) ──
-    window.generarHistoria = function() {
-      let nombre = '';
-      try { nombre = (JSON.parse(localStorage.getItem('frate_session')||'null')||{}).nombres || ''; } catch(e) {}
+    // ── Historia para compartir (imagen 1080x1920) — logo + día + compartir nativo ──
+    function _loadImg(src, cross){ return new Promise(function(res){ const im=new Image(); if(cross) im.crossOrigin='anonymous'; im.onload=function(){res(im);}; im.onerror=function(){res(null);}; im.src=src; }); }
+    async function _getEventoDia(){
+      if (!ref) return '';
+      try {
+        const { data: ped } = await sb.from('pedidos').select('*').eq('id', ref).maybeSingle();
+        if (!ped) return '';
+        let items = ped.items || ped.carrito || ped.detalle || [];
+        if (typeof items === 'string') { try { items = JSON.parse(items); } catch(e){ items = []; } }
+        if (Array.isArray(items)) { for (const it of items){ if (it && it.fecha) return String(it.fecha); } }
+        return ped.evento_fecha || ped.fecha_evento || '';
+      } catch(e){ return ''; }
+    }
+    // Fecha bonita para el video (ISO → "MIÉRCOLES 15 JULIO")
+    function _fmtFechaCasita(f){
+      if(!f) return '';
+      const m=String(f).match(/(\d{4})-(\d{2})-(\d{2})/);
+      if(m){ const d=new Date(+m[1],+m[2]-1,+m[3]);
+        const DOW=['DOMINGO','LUNES','MARTES','MIÉRCOLES','JUEVES','VIERNES','SÁBADO'];
+        const MON=['ENERO','FEBRERO','MARZO','ABRIL','MAYO','JUNIO','JULIO','AGOSTO','SEPTIEMBRE','OCTUBRE','NOVIEMBRE','DICIEMBRE'];
+        return DOW[d.getDay()]+' '+d.getDate()+' '+MON[d.getMonth()]; }
+      return String(f);
+    }
+    // Abre el video personalizado del casita (nombre + fecha) para descargar/compartir
+    // ⚠️ El nombre sale del PEDIDO, nunca de la sesión abierta en el navegador.
+    // Antes era al revés y por eso una clienta compartió una historia con el
+    // nombre de otra persona: compró en un aparato con otra sesión adentro.
+    // Si el pedido no trae nombre, la imagen sale SIN nombre — mejor vacía
+    // que con el de otro.
+    window._nombreDelPedido = async function(ref){
+      if(ref){
+        // ⚠️ NO leer `pedidos` directo: la RLS la tapa para quien compró sin
+        // cuenta, que es el 96%. Devolvía vacío y la foto salía con el nombre
+        // de ejemplo. El RPC devuelve SOLO el primer nombre, a propósito.
+        try{ const { data: d } = await sb.rpc('pedido_para_compartir', { p_id: Number(ref) });
+          if(d && d.ok && d.nombre) return String(d.nombre).trim(); }catch(e){}
+        try{ const { data: ped } = await sb.from('pedidos').select('nombre_cliente').eq('id', ref).maybeSingle();
+          if(ped && ped.nombre_cliente) return String(ped.nombre_cliente).trim(); }catch(e){}
+      }
+      // Sin pedido a la mano (llegó directo a la página), la sesión sirve de respaldo.
+      if(!ref){ try{ return (JSON.parse(localStorage.getItem('frate_session')||'null')||{}).nombres||''; }catch(e){} }
+      return '';
+    };
+    window.compartirCasita = async function(){
+      let nombre='', dia='';
+      nombre = await window._nombreDelPedido(ref);
+      try{
+        if(ref){ const { data: ped } = await sb.from('pedidos').select('*').eq('id', ref).maybeSingle();
+          if(ped){
+            let items=ped.items||ped.carrito||ped.detalle||[]; if(typeof items==='string'){ try{ items=JSON.parse(items); }catch(e){ items=[]; } }
+            if(Array.isArray(items)){ for(const it of items){ if(it&&it.fecha){ dia=String(it.fecha); break; } } }
+            if(!dia) dia=ped.evento_fecha||ped.fecha_evento||'';
+          }
+        }
+      }catch(e){}
+      const url='/casita?n='+encodeURIComponent(nombre||'')+'&f='+encodeURIComponent(_fmtFechaCasita(dia));
+      const w=window.open(url,'_blank'); if(!w) location.href=url;
+    };
+    window.generarHistoria = async function() {
+      // Mismo criterio que la casita: manda el pedido. Esta función ni
+      // siquiera miraba el pedido — solo la sesión.
+      const nombre = await window._nombreDelPedido(ref);
+      // Config: imagen de fondo personalizada (opcional) + el día del evento
+      let bgUrl = '';
+      try { const { data: cfg } = await sb.from('config_valores').select('clave,valor').eq('clave','share_img_url').maybeSingle(); bgUrl = (cfg && cfg.valor) || ''; } catch(e){}
+      const dia = await _getEventoDia();
+      const logo = await _loadImg('assets/logo-blanco.png', false);
+      const bg   = bgUrl ? await _loadImg(bgUrl, true) : null;
+
       const c = document.getElementById('historia-canvas');
       const x = c.getContext('2d');
-      // Fondo
-      const g = x.createLinearGradient(0, 0, 0, 1920);
-      g.addColorStop(0, '#1a0508'); g.addColorStop(0.5, '#0A0A0B'); g.addColorStop(1, '#0A0A0B');
-      x.fillStyle = g; x.fillRect(0, 0, 1080, 1920);
-      // Glow rojo
-      const rg = x.createRadialGradient(540, 700, 50, 540, 700, 700);
-      rg.addColorStop(0, 'rgba(232,54,61,0.35)'); rg.addColorStop(1, 'rgba(232,54,61,0)');
-      x.fillStyle = rg; x.fillRect(0, 0, 1080, 1400);
-      x.textAlign = 'center';
-      // FRATE
-      x.fillStyle = '#fff'; x.font = '900 150px Arial'; x.textBaseline = 'middle';
-      x.fillText('FRATE', 540, 560);
-      // Subtítulo
-      x.fillStyle = '#71717a'; x.font = '700 34px Arial';
-      x.fillText('FRATERNIDAD CAMPUS CENTRAL', 540, 660);
-      // Mensaje grande
-      x.fillStyle = '#fff'; x.font = '900 110px Arial';
-      x.fillText('NOS VEMOS', 540, 980);
-      x.fillStyle = '#E8363D';
-      x.fillText('EN LA PISTA', 540, 1110);
-      x.fillStyle = '#fff'; x.font = '900 100px Arial';
-      x.fillText('🔥', 540, 1260);
-      // Nombre
-      if (nombre) {
-        x.fillStyle = '#D4A832'; x.font = '700 56px Arial';
-        x.fillText('— ' + nombre.toUpperCase() + ' —', 540, 1430);
+      // Fondo: imagen personalizada (cover) o gradiente + glow
+      if (bg) {
+        const s = Math.max(1080 / bg.width, 1920 / bg.height);
+        const w = bg.width * s, h = bg.height * s;
+        x.drawImage(bg, (1080 - w)/2, (1920 - h)/2, w, h);
+        x.fillStyle = 'rgba(10,10,11,0.55)'; x.fillRect(0,0,1080,1920);
+        const og = x.createLinearGradient(0,0,0,1920); og.addColorStop(0,'rgba(10,10,11,0.35)'); og.addColorStop(0.55,'rgba(10,10,11,0.25)'); og.addColorStop(1,'rgba(10,10,11,0.85)');
+        x.fillStyle = og; x.fillRect(0,0,1080,1920);
+      } else {
+        const g = x.createLinearGradient(0, 0, 0, 1920);
+        g.addColorStop(0, '#1a0508'); g.addColorStop(0.5, '#0A0A0B'); g.addColorStop(1, '#0A0A0B');
+        x.fillStyle = g; x.fillRect(0, 0, 1080, 1920);
+        const rg = x.createRadialGradient(540, 760, 50, 540, 760, 720);
+        rg.addColorStop(0, 'rgba(232,54,61,0.35)'); rg.addColorStop(1, 'rgba(232,54,61,0)');
+        x.fillStyle = rg; x.fillRect(0, 0, 1080, 1500);
       }
+      x.textAlign = 'center'; x.textBaseline = 'middle';
+      // Logo oficial (siempre)
+      if (logo) { const lw = 300, lh = logo.height * (lw / logo.width); x.drawImage(logo, 540 - lw/2, 300 - lh/2, lw, lh); }
+      else { x.fillStyle = '#fff'; x.font = '900 130px Arial'; x.fillText('FRATE', 540, 320); }
+      x.fillStyle = '#a1a1aa'; x.font = '700 32px Arial'; x.fillText('FRATERNIDAD CAMPUS CENTRAL', 540, 470);
+      // Mensaje
+      x.fillStyle = '#fff'; x.font = '900 118px Arial'; x.fillText('NOS VEMOS', 540, 900);
+      x.fillStyle = '#E8363D'; x.fillText('EN LA PISTA', 540, 1035);
+      x.fillStyle = '#fff'; x.font = '900 100px Arial'; x.fillText('🔥', 540, 1180);
+      // Día del evento (siempre que se pueda)
+      if (dia) { x.fillStyle = '#D4A832'; x.font = '900 60px Arial'; x.fillText(String(dia).toUpperCase(), 540, 1340); }
+      // Nombre
+      if (nombre) { x.fillStyle = '#e4e4e7'; x.font = '700 50px Arial'; x.fillText('— ' + nombre.toUpperCase() + ' —', 540, dia ? 1440 : 1360); }
       // Footer
-      x.fillStyle = '#fff'; x.font = '900 60px Arial';
-      x.fillText('frate.cl', 540, 1760);
-      // Descargar
-      const url = c.toDataURL('image/png');
-      const a = document.createElement('a');
-      a.href = url; a.download = 'voy-a-frate.png'; a.click();
+      x.fillStyle = '#fff'; x.font = '900 60px Arial'; x.fillText('frate.cl', 540, 1770);
+
+      // Compartir nativo (móvil) o descargar (desktop)
+      c.toBlob(async function(blob){
+        if (!blob) return;
+        const file = new File([blob], 'voy-a-frate.png', { type: 'image/png' });
+        const data = { files: [file], text: '¡Nos vemos en la pista! 🔥 frate.cl', title: 'FRATE' };
+        try { if (navigator.canShare && navigator.canShare({ files: [file] })) { await navigator.share(data); return; } } catch(e){ if (e && e.name === 'AbortError') return; }
+        const url = URL.createObjectURL(blob); const a = document.createElement('a'); a.href = url; a.download = 'voy-a-frate.png'; a.click(); URL.revokeObjectURL(url);
+      }, 'image/png');
     };
 
     window.votarSong = async function(i) {

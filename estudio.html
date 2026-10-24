@@ -1,0 +1,171 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>FRATE WEB (TICKETERA) · ESTUDIO · MULTICAM</title>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="/frate-supabase.js"></script>
+<style>
+  :root{--bg:#08080a;--panel:#101014;--panel2:#16161c;--line:rgba(255,255,255,.08);--line2:rgba(255,255,255,.14);--ink:#f2f0f4;--dim:#8b8892;--faint:#5a5862;--air:#ff3040;--prev:#22d37a;--gold:#f0c84a;--blue:#4d8dff;}
+  *{box-sizing:border-box;margin:0;padding:0;}
+  html,body{height:100%;}
+  body{background:var(--bg);color:var(--ink);font-family:'Inter',system-ui,-apple-system,sans-serif;overflow:hidden;-webkit-font-smoothing:antialiased;}
+  .app{display:flex;flex-direction:column;height:100vh;}
+  .top{display:flex;align-items:center;gap:14px;padding:12px 18px;border-bottom:1px solid var(--line);background:linear-gradient(180deg,#101015,#0b0b0e);}
+  .logo{font-weight:900;letter-spacing:3px;font-size:1.05rem;} .logo b{color:var(--air);}
+  .tag{font-size:.62rem;letter-spacing:2px;color:var(--faint);text-transform:uppercase;border:1px solid var(--line2);padding:3px 8px;border-radius:6px;}
+  .live{display:inline-flex;align-items:center;gap:7px;font-weight:800;font-size:.8rem;color:var(--air);letter-spacing:1px;}
+  .live .dot{width:9px;height:9px;border-radius:50%;background:var(--air);animation:pulse 1.5s infinite;}
+  @keyframes pulse{0%{box-shadow:0 0 0 0 rgba(255,48,64,.6);}70%{box-shadow:0 0 0 9px rgba(255,48,64,0);}100%{box-shadow:0 0 0 0 rgba(255,48,64,0);}}
+  .room{margin-left:auto;display:flex;align-items:center;gap:8px;}
+  .room .k{font-size:.6rem;letter-spacing:2px;color:var(--faint);text-transform:uppercase;}
+  .room .code{font-family:ui-monospace,monospace;font-weight:800;letter-spacing:3px;font-size:1.15rem;color:var(--gold);background:#0d0d10;border:1px solid var(--line2);padding:5px 12px;border-radius:8px;}
+  .cnt{font-size:.8rem;color:var(--dim);}
+  .stage{flex:1;padding:16px;display:grid;grid-template-columns:1fr 1fr;grid-template-rows:1fr 1fr;gap:14px;min-height:0;}
+  .stage.n1{grid-template-columns:1fr;grid-template-rows:1fr;} .stage.n2{grid-template-columns:1fr 1fr;grid-template-rows:1fr;}
+  .cam{position:relative;border-radius:14px;overflow:hidden;background:#000;border:2px solid var(--line);box-shadow:0 10px 40px rgba(0,0,0,.5);cursor:pointer;}
+  .cam.air{border-color:var(--air);box-shadow:0 0 0 1px var(--air),0 0 34px rgba(255,48,64,.35);}
+  .cam video{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;background:#000;}
+  .ov{position:absolute;inset:0;padding:11px 13px;display:flex;flex-direction:column;justify-content:space-between;pointer-events:none;}
+  .ov-top{display:flex;align-items:flex-start;justify-content:space-between;}
+  .badge{font-size:.62rem;font-weight:800;letter-spacing:1.5px;padding:4px 9px;border-radius:6px;backdrop-filter:blur(4px);}
+  .b-cam{background:rgba(0,0,0,.5);border:1px solid var(--line2);color:#fff;} .b-air{background:var(--air);color:#fff;}
+  .ov-bot{display:flex;align-items:flex-end;justify-content:space-between;}
+  .name{font-weight:800;font-size:.98rem;text-shadow:0 2px 10px rgba(0,0,0,.8);}
+  .rec{display:inline-flex;align-items:center;gap:5px;font-size:.6rem;font-weight:800;color:#fff;}
+  .rec .d{width:8px;height:8px;border-radius:50%;background:var(--air);animation:pulse 1.5s infinite;}
+  .empty{grid-column:1/-1;grid-row:1/-1;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:12px;color:var(--dim);text-align:center;border:2px dashed var(--line2);border-radius:16px;}
+  .empty .big{font-size:2rem;font-weight:900;color:var(--gold);letter-spacing:3px;font-family:ui-monospace,monospace;}
+  .dock{display:flex;align-items:center;gap:10px;padding:12px 18px;border-top:1px solid var(--line);background:linear-gradient(0deg,#101015,#0b0b0e);flex-wrap:wrap;}
+  .seg{display:flex;background:#0d0d11;border:1px solid var(--line2);border-radius:10px;overflow:hidden;}
+  .seg button{background:none;border:0;color:var(--dim);font-family:inherit;font-weight:700;font-size:.78rem;padding:9px 13px;cursor:pointer;}
+  .seg button.on{background:var(--panel2);color:#fff;}
+  .btn{font-family:inherit;font-weight:800;font-size:.82rem;border:1px solid var(--line2);background:#0d0d11;color:var(--ink);padding:10px 15px;border-radius:10px;cursor:pointer;display:inline-flex;align-items:center;gap:7px;}
+  .btn.ghost{color:var(--dim);} .btn.join{background:var(--air);border-color:var(--air);color:#fff;margin-left:auto;}
+  .modal{position:fixed;inset:0;background:rgba(0,0,0,.72);display:none;align-items:center;justify-content:center;padding:20px;z-index:50;}
+  .modal.show{display:flex;}
+  .mbox{background:var(--panel);border:1px solid var(--line2);border-radius:18px;padding:26px;max-width:420px;width:100%;text-align:center;}
+  .mbox .code2{font-family:ui-monospace,monospace;font-weight:800;letter-spacing:4px;font-size:1.7rem;color:var(--gold);margin:8px 0;}
+  @media(max-width:640px){.stage{grid-template-columns:1fr;grid-template-rows:none;grid-auto-rows:minmax(160px,1fr);}.tag{display:none;}}
+</style>
+</head>
+<body>
+<div class="app">
+  <div class="top">
+    <div class="logo"><b>●</b> FRATE ESTUDIO</div>
+    <div class="tag">Multicam</div>
+    <div class="live"><span class="dot"></span>EN VIVO</div>
+    <div class="room">
+      <span class="cnt" id="cnt">0 cámaras</span>
+      <span class="k">Sala</span>
+      <span class="code" id="code">…</span>
+    </div>
+  </div>
+
+  <div class="stage" id="stage">
+    <div class="empty" id="empty">
+      <div>📱 Esperando cámaras…</div>
+      <div class="big" id="empty-code">…</div>
+      <div style="font-size:.85rem;">En cada iPhone abre <b style="color:#fff;">frate.cl/cam</b><br>y escribe este código. Todos en la misma WiFi.</div>
+    </div>
+  </div>
+
+  <div class="dock">
+    <div class="seg" id="layout">
+      <button class="on" onclick="setLay(this,'grid')">▦ Grilla</button>
+      <button onclick="setLay(this,'solo')">▢ Solo aire</button>
+    </div>
+    <button class="btn ghost" onclick="fs()">⛶ Pantalla completa</button>
+    <button class="btn join" onclick="document.getElementById('join').classList.add('show')">➕ Conectar cámara</button>
+  </div>
+</div>
+
+<div class="modal" id="join" onclick="if(event.target===this)this.classList.remove('show')">
+  <div class="mbox">
+    <div style="font-weight:900;font-size:1.15rem;">📱 Conectar una cámara</div>
+    <p style="color:var(--dim);font-size:.86rem;margin-top:6px;">En cada iPhone abre <b style="color:#fff;">frate.cl/cam</b> y escribe este código:</p>
+    <div class="code2" id="code3">…</div>
+    <p style="color:var(--faint);font-size:.74rem;">Todos en la misma WiFi. La cámara aparece sola en la grilla. Toca una cámara para ponerla EN AIRE.</p>
+    <button class="btn" style="margin-top:14px;width:100%;justify-content:center;" onclick="document.getElementById('join').classList.remove('show')">Listo</button>
+  </div>
+</div>
+
+<script>
+  const ICE = { iceServers:[{urls:'stun:stun.l.google.com:19302'},{urls:'stun:stun1.l.google.com:19302'}] };
+  let ch=null, sala='', air=null;
+  const pcs = {}; // id -> {pc, tile}
+  const $ = id => document.getElementById(id);
+  const esc = s => String(s||'').replace(/</g,'&lt;');
+
+  function nuevaSala(){ return 'FRATE-' + Math.floor(1000 + Math.random()*9000); }
+  (function init(){
+    // sala desde ?sala= o nueva
+    try{ const u=new URL(location.href); sala=(u.searchParams.get('sala')||'').toUpperCase(); }catch(e){}
+    if(!sala) sala = nuevaSala();
+    ['code','empty-code','code3'].forEach(id=>{ const e=$(id); if(e) e.textContent=sala; });
+    ch = sb.channel('estudio-'+sala, { config:{ broadcast:{ self:false } } });
+    ch.on('broadcast', { event:'sig' }, ({payload})=>onSig(payload));
+    ch.subscribe((s)=>{ if(s==='SUBSCRIBED') send({t:'hello-estudio'}); });
+  })();
+
+  function send(p){ if(ch) ch.send({ type:'broadcast', event:'sig', payload:p }); }
+
+  async function onSig(p){
+    if(!p) return;
+    if(p.t==='hello-cam'){ send({t:'hello-estudio'}); }        // saluda para que la cam ofrezca
+    else if(p.t==='offer'){ await handleOffer(p); }
+    else if(p.t==='ice' && p.to==='estudio'){ const st=pcs[p.from]; if(st){ try{ await st.pc.addIceCandidate(p.cand); }catch(e){} } }
+  }
+
+  async function handleOffer(p){
+    let st = pcs[p.from];
+    if(!st){ st = crearTile(p.from, p.nombre); pcs[p.from]=st; }
+    else if(p.nombre){ st.setName(p.nombre); }
+    try{
+      await st.pc.setRemoteDescription(p.sdp);
+      const ans = await st.pc.createAnswer(); await st.pc.setLocalDescription(ans);
+      send({t:'answer', to:p.from, sdp:ans});
+    }catch(e){ console.warn('offer', e); }
+  }
+
+  function crearTile(id, nombre){
+    const pc = new RTCPeerConnection(ICE);
+    pc.onicecandidate = e=>{ if(e.candidate) send({t:'ice', from:'estudio', to:id, cand:e.candidate}); };
+    const video = document.createElement('video'); video.autoplay=true; video.playsInline=true; video.muted=true;
+    pc.ontrack = e=>{ video.srcObject = e.streams[0]; };
+    pc.onconnectionstatechange = ()=>{ if(['failed','closed','disconnected'].includes(pc.connectionState)) setTimeout(()=>{ if(['failed','closed','disconnected'].includes(pc.connectionState)) removerTile(id); }, 4000); };
+
+    const tile = document.createElement('div'); tile.className='cam'; tile.dataset.id=id;
+    tile.onclick = ()=> setAir(id);
+    tile.appendChild(video);
+    const ov = document.createElement('div'); ov.className='ov';
+    ov.innerHTML = `<div class="ov-top"><span class="badge b-cam camlbl">CÁM</span><span class="rec airbadge" style="display:none;"><span class="d"></span>EN AIRE</span></div>
+                    <div class="ov-bot"><div class="name">${esc(nombre||'Cámara')}</div></div>`;
+    tile.appendChild(ov);
+    $('empty').style.display='none';
+    $('stage').appendChild(tile);
+    relayout();
+    return { pc, tile, setName:(n)=>{ const el=tile.querySelector('.name'); if(el) el.textContent=n; } };
+  }
+
+  function removerTile(id){ const st=pcs[id]; if(!st) return; try{ st.pc.close(); }catch(e){} st.tile.remove(); delete pcs[id]; if(air===id) air=null;
+    if(!Object.keys(pcs).length) $('empty').style.display=''; relayout(); }
+
+  function setAir(id){ air=id; Object.entries(pcs).forEach(([k,st])=>{ const on=k===id; st.tile.classList.toggle('air',on); const b=st.tile.querySelector('.airbadge'); if(b) b.style.display=on?'inline-flex':'none'; }); if(curLay==='solo') relayout(); }
+
+  let curLay='grid';
+  function setLay(b,mode){ document.querySelectorAll('#layout button').forEach(x=>x.classList.remove('on')); b.classList.add('on'); curLay=mode; relayout(); }
+  function relayout(){
+    const ids=Object.keys(pcs); const n=ids.length; const st=$('stage');
+    $('cnt').textContent = n+' cámara'+(n===1?'':'s');
+    st.classList.remove('n1','n2');
+    if(curLay==='solo' && air){ ids.forEach(k=>{ pcs[k].tile.style.display = k===air?'':'none'; }); st.classList.add('n1'); return; }
+    ids.forEach(k=>pcs[k].tile.style.display='');
+    if(n<=1) st.classList.add('n1'); else if(n===2) st.classList.add('n2');
+    st.style.gridTemplateColumns=''; st.style.gridTemplateRows='';
+  }
+  function fs(){ const el=document.documentElement; if(!document.fullscreenElement){ (el.requestFullscreen||el.webkitRequestFullscreen||(()=>{})).call(el); } else { (document.exitFullscreen||(()=>{})).call(document); } }
+</script>
+</body>
+</html>

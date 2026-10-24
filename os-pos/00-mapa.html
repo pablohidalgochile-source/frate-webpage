@@ -1,0 +1,79 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>FRATE OS · POS 00 El mapa</title>
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🗺️</text></svg>">
+<link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@600;800;900&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="/os-manual.css">
+<link rel="stylesheet" href="/os-pos.css">
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+</head>
+<body>
+<div id="bar"></div>
+<div class="wrap">
+
+  <div class="hero">
+    <div class="eyebrow">POS · Manual 00</div>
+    <h1>El cerebro<br>que <em>cobra la noche</em></h1>
+    <p class="sub">Qué guarda el POS, de qué datos manda él y de cuáles obedece. El mapa completo, para saber siempre dónde se arregla cada cosa.</p>
+    <div class="meta"><span>Para todo el equipo</span><span>·</span><span>6 minutos</span><span>·</span><span>Léelo antes de los otros 6</span></div>
+  </div>
+
+  <section>
+    <div class="stag">Capítulo 1</div>
+    <h2>Los cuatro cerebros</h2>
+    <p class="lead">Fraternidad no corre sobre un sistema: corre sobre cuatro. Cada uno es dueño de una parte de la verdad. Cuando dos no coinciden, no se discute: manda el dueño del dato.</p>
+    <div class="cerebros">
+      <div class="cer fly"><div class="ic">🟢</div><h4>Flyer</h4><div class="rol">Nace el evento</div><p>Nombre, fecha y gráfica de la noche.</p></div>
+      <div class="cer web"><div class="ic">🌐</div><h4>Web</h4><div class="rol">Vende y registra</div><p>Entradas, QR, check-in de puerta, clientes.</p></div>
+      <div class="cer pos"><div class="yo">Tú</div><div class="ic">💵</div><h4>POS</h4><div class="rol">Cobra adentro</div><p>El consumo en la barra y la caja, durante la noche.</p></div>
+      <div class="cer erp"><div class="ic">🧠</div><h4>ERP</h4><div class="rol">Consolida</div><p>Personal, finanzas y la ficha maestra de cada persona.</p></div>
+    </div>
+  </section>
+
+  <section>
+    <div class="stag">Capítulo 2</div>
+    <h2>De qué eres dueño</h2>
+    <p class="lead">Ser dueño significa que, si hay una diferencia entre sistemas, <b>manda el POS</b>.</p>
+    <table>
+      <tr><th>Dato</th><th>Qué es</th><th>Quién manda</th></tr>
+      <tr><td>Consumo en barra</td><td>Cada trago y producto que se vende adentro</td><td><b class="s-pos">POS</b></td></tr>
+      <tr><td>La caja del turno</td><td>Fondo, cotejo de billetes, cierre y cuadre</td><td><b class="s-pos">POS</b></td></tr>
+      <tr><td>Entrada y cover</td><td>Vender y <b>canjear (quemar)</b> el QR</td><td><b class="s-pos">POS</b> + <b class="s-web">Web</b> · compartido</td></tr>
+      <tr><td>El catálogo</td><td>Precios y productos de la noche</td><td>Del Flyer / ERP</td></tr>
+      <tr><td>El cliente y su ficha</td><td>Quién compró, su historial (CRM)</td><td class="s-web">Manda la Web</td></tr>
+    </table>
+    <div class="choque">
+      <div class="quien">💵 POS &nbsp;vs&nbsp; 🌐 Web — la entrada es compartida (R35)</div>
+      <b>Web y POS venden y queman la misma entrada</b>, y cada uno lee el QR del otro. Un QR es un token con <b>namespace compartido</b>: quemar es idempotente <b>cruzado</b> — doble scan, en cualquiera de los dos, es un solo ingreso. El <b>ERP concilia</b> y registra el primer quemado. Nadie es dueño único, y está bien así.
+    </div>
+  </section>
+
+  <section>
+    <div class="stag">Capítulo 3</div>
+    <h2>Con quién hablas</h2>
+    <p class="lead">El POS recibe el evento y el catálogo, cobra la noche, y le devuelve al ERP las ventas y los cierres para que consolide.</p>
+    <div class="oro"><b>La identidad única.</b> Una persona es <strong>una sola ficha</strong> en los cuatro sistemas. El RUT y el correo son el hilo que amarra todo. El POS no inventa clientes: usa el que trae la Web.</div>
+  </section>
+
+  <section>
+    <div class="stag">Capítulo 4</div>
+    <h2>Qué pasa si algo se cae</h2>
+    <div class="bien"><b>Se cae el internet.</b> El POS <strong>sigue vendiendo</strong>: guarda cada venta en la máquina y sincroniza al reconectar. La barra no se detiene.</div>
+    <div class="oro"><b>Se cae la Web.</b> No lees entradas nuevas, pero <strong>cobras consumo igual</strong>. Los covers ya importados siguen funcionando.</div>
+    <div class="peligro"><b>Se cae una máquina.</b> Se pierde el cobro de esa caja. Por eso: <strong>varias máquinas</strong>, cada una con su caja y su respaldo offline.</div>
+    <div class="oro"><b>Se cae el ERP.</b> Vendes y cierras normal; la <strong>consolidación</strong> (finanzas, conciliación de QR) se pone al día cuando vuelve.</div>
+  </section>
+
+  <div class="pie">FRATE OS · POS · Manual 00 · <a href="/os-erp">Ver la serie del ERP</a> · <a href="/os-pos-turno">Siguiente: el turno →</a></div>
+</div>
+
+<script src="/os-guard.js"></script>
+<script>
+  document.getElementById('bar').innerHTML = osBarra('00', 'pos');
+  osProteger();
+</script>
+</body>
+</html>

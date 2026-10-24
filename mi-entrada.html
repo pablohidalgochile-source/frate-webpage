@@ -1,0 +1,546 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>FRATE · Gestiona tu entrada</title>
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🎟️</text></svg>">
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<style>
+  :root{
+    --bg:#0a0a0d; --panel:#131316; --panel2:#1b1b20; --border:#26262b; --border2:#3a3a41;
+    --text:#f4f4f6; --muted:#8a8a92; --muted2:#5a5a62;
+    --rojo:#E8363D; --dorado:#E6C860; --verde:#00E676; --azul:#18D9FF; --amarillo:#FFE600;
+    --disp:"Barlow Condensed","Arial Narrow",system-ui,sans-serif;
+    --font:-apple-system,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;
+  }
+  *{box-sizing:border-box;margin:0;padding:0}
+  body{background:var(--bg);color:var(--text);font-family:var(--font);-webkit-font-smoothing:antialiased;line-height:1.45;padding:22px 14px 60px}
+  .wrap{max-width:460px;margin:0 auto}
+  /* El wordmark oficial, el mismo del navbar de la home. Es blanco sobre
+     transparente, así que va tal cual sobre el fondo oscuro. */
+  .logo{display:block;height:34px;width:auto;margin:0 auto 14px;object-fit:contain}
+  h1{font-family:var(--disp);font-weight:800;font-size:1.5rem;letter-spacing:.5px;text-align:center;margin-bottom:4px}
+  .lead{color:var(--muted);font-size:.82rem;text-align:center;margin-bottom:20px}
+  .card{background:var(--panel);border:1px solid var(--border);border-radius:16px;padding:18px;margin-bottom:12px}
+  label.lb{display:block;font-size:.62rem;text-transform:uppercase;letter-spacing:.8px;color:var(--muted);margin:12px 0 5px}
+  label.lb:first-child{margin-top:0}
+  input,select,textarea{width:100%;background:#0e0e12;border:1px solid var(--border2);color:var(--text);border-radius:10px;padding:12px 13px;font-size:.95rem;font-family:inherit}
+  input:focus,select:focus,textarea:focus{outline:none;border-color:var(--rojo)}
+  textarea{resize:vertical;min-height:60px}
+  .btn{width:100%;background:var(--rojo);color:#fff;border:0;border-radius:11px;padding:14px;font-weight:800;font-size:.95rem;cursor:pointer;margin-top:14px;letter-spacing:.3px;font-family:inherit}
+  .btn:disabled{opacity:.5;cursor:default}
+  .btn.ghost{background:transparent;border:1px solid var(--border2);color:var(--muted)}
+  .btn.sm{padding:10px;font-size:.85rem;margin-top:8px}
+  .msg{font-size:.82rem;padding:10px 12px;border-radius:9px;margin-top:12px;display:none}
+  .msg.err{display:block;background:rgba(232,54,61,.12);border:1px solid rgba(232,54,61,.4);color:#ff9ba0}
+  .msg.ok{display:block;background:rgba(0,230,118,.1);border:1px solid rgba(0,230,118,.4);color:var(--verde)}
+  .hint{font-size:.68rem;color:var(--muted2);text-align:center;margin-top:10px;line-height:1.5}
+  .tabs{display:flex;gap:6px;margin-bottom:14px}
+  .tab{flex:1;text-align:center;padding:9px;border-radius:9px;font-size:.82rem;cursor:pointer;border:1px solid var(--border2);color:var(--muted)}
+  .tab.on{background:var(--rojo);border-color:var(--rojo);color:#fff;font-weight:700}
+  .ev{border-left:3px solid var(--rojo);border-radius:8px;background:var(--panel2);padding:10px 12px;margin-bottom:10px}
+  .ev .n{font-weight:800;font-size:.95rem}
+  .ev .f{color:var(--amarillo);font-size:.76rem;margin-top:1px}
+  .tk{background:#0e0e12;border:1px solid var(--border);border-radius:11px;padding:11px 12px;margin-bottom:8px}
+  .tk.dis{opacity:.45}
+  .tk .nm{font-weight:700;font-size:.88rem}
+  .tk .mt{font-size:.68rem;color:var(--muted);margin-top:2px}
+  .aviso{border-radius:9px;padding:10px 11px;font-size:.74rem;line-height:1.55;margin-top:9px}
+  .aviso.azul{background:rgba(24,217,255,.08);border:1px solid rgba(24,217,255,.4);color:var(--azul)}
+  .aviso.am{background:rgba(255,230,0,.07);border:1px solid rgba(255,230,0,.4);color:var(--amarillo)}
+  .opt{border-radius:11px;padding:12px;margin-bottom:8px;cursor:pointer;display:flex;gap:10px;align-items:flex-start}
+  .opt .ic{font-size:1.15rem;line-height:1}
+  .opt .t{font-weight:700;font-size:.9rem}
+  .opt .d{font-size:.72rem;color:var(--muted);margin-top:2px;line-height:1.45}
+  .opt.a{background:rgba(0,230,118,.08);border:2px solid var(--verde)}
+  .opt.b{background:rgba(255,230,0,.06);border:1px solid var(--amarillo)}
+  .opt.c{background:#0e0e12;border:1px solid var(--border)}
+  .opt.c .t{color:var(--muted)}
+  .pill{display:inline-block;background:var(--verde);color:#0a0a0d;font-size:.6rem;padding:1px 7px;border-radius:99px;margin-top:4px;font-weight:800}
+  .mot{background:#0e0e12;border:1px solid var(--border2);border-radius:8px;padding:9px 11px;font-size:.82rem;margin-bottom:5px;cursor:pointer;color:#aaa}
+  .mot.on{background:rgba(255,230,0,.08);border-color:var(--amarillo);color:var(--amarillo)}
+  .tot{background:#0e0e12;border-radius:9px;padding:11px;text-align:center;margin-top:12px}
+  .tot .l{font-size:.64rem;color:var(--muted);letter-spacing:1px}
+  .tot .v{font-size:1.5rem;font-weight:900}
+  .tot .s{font-size:.66rem;color:var(--muted2)}
+  .polbox{background:#0e0e12;border:1px solid var(--border);border-radius:9px;padding:11px 12px;
+    max-height:150px;overflow-y:auto;font-size:.72rem;color:#aaa;line-height:1.6;white-space:pre-wrap}
+  .acepto{display:flex;gap:9px;align-items:flex-start;background:#0e0e12;border:1px solid var(--border2);
+    border-radius:9px;padding:11px 12px;margin-top:9px;cursor:pointer;user-select:none}
+  .acepto .ck{width:19px;height:19px;border-radius:5px;border:1.5px solid var(--border2);flex-shrink:0;
+    display:grid;place-items:center;font-size:.75rem;color:#fff}
+  .acepto.on .ck{background:var(--rojo);border-color:var(--rojo)}
+  .acepto .tx{font-size:.76rem;line-height:1.45}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <!-- Ruta absoluta a propósito: la página se sirve como /mi-entrada por un
+       rewrite, y una ruta relativa se rompería si algún día cuelga de /algo/ -->
+  <img class="logo" src="/assets/logo-blanco.png" alt="FRATE" />
+  <h1>Gestiona tu entrada</h1>
+  <div class="lead">Cambia de día, déjala abierta o pide tu devolución.</div>
+
+  <!-- ── PASO 1 · entrar ─────────────────────────────────────── -->
+  <div id="v-login">
+    <div class="card">
+      <div class="tabs">
+        <div class="tab on" id="tab-in"  onclick="modo('in')">Entrar</div>
+        <div class="tab"    id="tab-up"  onclick="modo('up')">Crear cuenta</div>
+      </div>
+      <label class="lb">Correo de la compra</label>
+      <input id="i-mail" type="email" autocomplete="email" placeholder="tucorreo@correo.cl" />
+      <div id="wrap-rut" style="display:none">
+        <div style="display:flex;gap:8px">
+          <div style="flex:1"><label class="lb">Nombres</label><input id="i-nom" autocomplete="given-name" placeholder="Tus nombres" /></div>
+          <div style="flex:1"><label class="lb">Apellidos</label><input id="i-ape" autocomplete="family-name" placeholder="Tus apellidos" /></div>
+        </div>
+        <label class="lb">RUT</label>
+        <input id="i-rut" placeholder="12.345.678-9" />
+        <label style="display:flex;align-items:center;gap:8px;font-size:.74rem;color:#999;margin:6px 0 2px;cursor:pointer"><input type="checkbox" id="i-ext" style="width:auto" /> Soy extranjer@ (pasaporte o DNI)</label>
+        <label class="lb">Sexo (como en tu cédula · se guarda una sola vez)</label>
+        <select id="i-sexo"><option value="">Selecciona</option><option value="F">Mujer</option><option value="M">Hombre</option><option value="X">Prefiero no decirlo</option></select>
+      </div>
+      <label class="lb">Contraseña</label>
+      <input id="i-pass" type="password" autocomplete="current-password" placeholder="••••••••" />
+      <button class="btn" id="b-go" onclick="entrar()">Entrar</button>
+      <div class="msg" id="m-login"></div>
+      <div class="hint" id="h-login">Al crear tu cuenta se te pegan todas tus compras anteriores,
+        aunque las hayas hecho sin cuenta.</div>
+    </div>
+  </div>
+
+  <!-- ── PASO 2 · sus entradas ───────────────────────────────── -->
+  <div id="v-lista" style="display:none"></div>
+
+  <!-- ── PASO 3 · la gestión ─────────────────────────────────── -->
+  <div id="v-gestion" style="display:none"></div>
+</div>
+
+<script>
+const SB_URL = 'https://ydwlpraoaaijlfssevoh.supabase.co';
+const SB_KEY = 'sb_publishable_-_7GeDU_h84zf2v--lWQaQ_15ZFxOWt';
+const sb = window.supabase.createClient(SB_URL, SB_KEY);
+const $ = id => document.getElementById(id);
+// 🏷️ Etiqueta para el cliente: PREV 3 MUJER… → MUJER… · PREVENTA 3.
+// Copia chica de frate-afiche.js (esta página no carga ese módulo).
+// El nombre REAL del tipo no se toca: lo usan la puerta y el ERP.
+function _etq(nombre){ var x=String(nombre==null?'':nombre);
+  var m=x.match(/^\s*PREV(?:ENTA)?\s*(\d+)\s+(.+)$/i);
+  return m ? (m[2].trim()+' · PREVENTA '+m[1]) : x; }
+const esc = s => String(s==null?'':s).replace(/[&<>"]/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+const clp = n => '$' + Number(n||0).toLocaleString('es-CL');
+let MODO = 'in', ENTRADAS = [], SEL = null;
+// ?volver=/e/... — viene del checkout de una entrada solo para miembros.
+// Solo rutas de este mismo sitio: nada de mandar a la gente a otra página.
+const VOLVER = (()=>{ try{ const v=new URLSearchParams(location.search).get('volver')||''; return (v.startsWith('/') && !v.startsWith('//')) ? v : ''; }catch(e){ return ''; } })();
+// ?crear=1 abre directo en «Crear cuenta».
+// Sin esto, quien llega desde un correo que dice «hazte una cuenta» cae en el
+// formulario de ENTRAR —con campo de contraseña— y tiene que darse cuenta solo
+// de que hay una pestaña al lado. Se aplica al final del arranque, cuando los
+// elementos ya existen.
+const ABRIR_CREAR = (()=>{ try{ const p=new URLSearchParams(location.search); return p.get('crear')==='1' || p.get('modo')==='up'; }catch(e){ return false; } })();
+// La política, el % y el interruptor los manda el admin desde config_valores.
+// Acá no se escribe ninguno de esos números a mano.
+let CFG = { politica:'', activo:false, retencion:8, dias:5 };
+let ACEPTO = false;
+
+async function cargarCfg(){
+  try{
+    const { data } = await sb.from('config_valores').select('clave,valor')
+      .in('clave',['devoluciones_politica','devoluciones_activo','devolucion_retencion_pct','devolucion_dias_habiles']);
+    const m = {}; (data||[]).forEach(r=>m[r.clave]=r.valor);
+    CFG.activo    = String(m.devoluciones_activo||'').toLowerCase()==='true';
+    CFG.retencion = parseInt(m.devolucion_retencion_pct) || 8;
+    CFG.dias      = parseInt(m.devolucion_dias_habiles)  || 5;
+    // El texto trae {RETENCION} para que el % nunca quede escrito a mano.
+    CFG.politica  = String(m.devoluciones_politica||'')
+      .replace(/\{RETENCION\}/g, CFG.retencion)
+      .replace(/\{DIAS\}/g, CFG.dias);
+  }catch(e){}
+}
+
+// Arranca en «Crear cuenta» si el enlace lo pidió.
+document.addEventListener('DOMContentLoaded', function(){ if (ABRIR_CREAR) { try { modo('up'); } catch(e){} } });
+function modo(m){
+  MODO = m;
+  $('tab-in').classList.toggle('on', m==='in');
+  $('tab-up').classList.toggle('on', m==='up');
+  $('wrap-rut').style.display = m==='up' ? 'block' : 'none';
+  $('b-go').textContent = m==='up' ? 'Crear mi cuenta' : 'Entrar';
+  $('h-login').textContent = m==='up'
+    ? 'Usa el MISMO correo con el que compraste. Si te compró otra persona, pon tu RUT: con eso encontramos tu entrada igual.'
+    : 'Al crear tu cuenta se te pegan todas tus compras anteriores, aunque las hayas hecho sin cuenta.';
+}
+
+function err(t){ const m=$('m-login'); m.className='msg err'; m.textContent=t; }
+
+async function entrar(){
+  const mail=($('i-mail').value||'').trim().toLowerCase();
+  const pass=($('i-pass').value||'');
+  if(!mail || !pass){ err('Escribe tu correo y tu contraseña.'); return; }
+  const b=$('b-go'); b.disabled=true; b.textContent='Un momento…';
+  try{
+    if(MODO==='up'){
+      const rut=($('i-rut').value||'').trim();
+      const nom=(($('i-nom')||{}).value||'').trim(), ape=(($('i-ape')||{}).value||'').trim();
+      const ext=!!(($('i-ext')||{}).checked), sexo=(($('i-sexo')||{}).value||'');
+      if(!nom||!ape){ err('Escribe tu nombre y tu apellido.'); b.disabled=false; b.textContent='Crear mi cuenta'; return; }
+      // Misma regla que el servidor: RUT chileno con dígito verificador; extranjero, documento de 5+ caracteres.
+      const _doc = ext ? String(rut).toUpperCase().replace(/[^0-9A-Z]/g,'') : String(rut).replace(/[^0-9kK]/g,'').toUpperCase();
+      let _docOk = ext ? _doc.length>=5 : (_doc.length>=8 && _doc.length<=9);
+      if(_docOk && !ext){ const dv=_doc.slice(-1), num=_doc.slice(0,-1); let s=0,m=2; for(let i=num.length-1;i>=0;i--){ s+=parseInt(num[i],10)*m; m=m<7?m+1:2; } const r=11-(s%11); _docOk=(r===11?'0':r===10?'K':String(r))===dv; }
+      if(!_docOk){ err(ext?'Escribe tu número de documento completo.':'Ese RUT no es válido. Revísalo, o marca que eres extranjer@.'); b.disabled=false; b.textContent='Crear mi cuenta'; return; }
+      if(!sexo){ err('Elige tu sexo (como en tu cédula).'); b.disabled=false; b.textContent='Crear mi cuenta'; return; }
+      const { data:_up, error } = await sb.auth.signUp({ email:mail, password:pass });
+      if(error) throw error;
+      // Antes esta cuenta quedaba SIN ficha en clientes (solo auth). Sin ficha,
+      // las entradas de miembros no pueden ir a su nombre. Con sesión, se crea.
+      if(_up && _up.session && _up.user){
+        const fila={ id:_up.user.id, email:mail, nombres:nom, apellidos:ape, rut, extranjero:ext, sexo };
+        let r=await sb.from('clientes').upsert(fila,{ onConflict:'id' });
+        if(r.error && /sexo/i.test(r.error.message||'')){ delete fila.sexo; r=await sb.from('clientes').upsert(fila,{ onConflict:'id' }); }
+        if(r.error){
+          const t=String(r.error.message||'');
+          err(/rut|check_violation/i.test(t) ? 'Tu cuenta quedó creada, pero ese RUT no es válido. Corrígelo cuando reserves.' : 'Tu cuenta quedó creada, pero no pudimos guardar tus datos: '+t);
+        }
+      }
+      // El RUT es lo que permite encontrar entradas que compró OTRA persona.
+      try{ await sb.from('clientes').update({ rut }).eq('email', mail); }catch(e){}
+      try{ await sb.rpc('activar_socio'); }catch(e){}
+      // Si el proyecto exige confirmar el correo, no hay sesión todavía:
+      // mandarlo de vuelta al checkout lo dejaría otra vez sin cuenta.
+      if(!(_up && _up.session)){
+        modo('in'); b.disabled=false;
+        const m=$('m-login'); m.className='msg'; m.textContent='Te mandamos un correo para confirmar tu cuenta. Confírmala y vuelve a entrar con tu clave.';
+        return;
+      }
+    } else {
+      const { error } = await sb.auth.signInWithPassword({ email:mail, password:pass });
+      if(error) throw error;
+      try{ await sb.rpc('activar_socio'); }catch(e){}
+    }
+    if(VOLVER){ location.href = VOLVER; return; }
+    await cargar();
+  }catch(e){
+    b.disabled=false; b.textContent = MODO==='up'?'Crear mi cuenta':'Entrar';
+    err(e.message==='Invalid login credentials' ? 'Correo o contraseña incorrectos.' : (e.message||String(e)));
+  }
+}
+
+async function cargar(){
+  const { data, error } = await sb.rpc('mis_entradas');
+  if(error || !data || data.ok===false){
+    err((data && data.error) || (error && error.message) || 'No se pudieron cargar tus entradas.');
+    const b=$('b-go'); if(b){ b.disabled=false; b.textContent='Entrar'; }
+    return;
+  }
+  ENTRADAS = (data.entradas||[]).filter(e => !e.ya_entro && !e.evento_paso);
+  $('v-login').style.display='none';
+  pintarLista(data);
+}
+
+function pintarLista(d){
+  const v=$('v-lista'); v.style.display='block';
+  if(!ENTRADAS.length){
+    v.innerHTML = `<div class="card" style="text-align:center">
+      <div style="font-size:2rem">🎟️</div>
+      <div style="font-weight:700;margin-top:8px">No tienes entradas por usar</div>
+      <div class="hint">Si compraste con otro correo, o te compró otra persona, crea tu cuenta
+        con tu RUT y las encontramos.<br><br>Tu correo: <b>${esc(d.correo||'—')}</b></div>
+      <button class="btn ghost sm" onclick="location.href='/'">Ver próximos eventos</button>
+    </div>`;
+    return;
+  }
+  // Agrupadas por orden: así es como se devuelve la plata de verdad.
+  const porOrden = {};
+  ENTRADAS.forEach(e => { (porOrden[e.orden] = porOrden[e.orden] || []).push(e); });
+
+  v.innerHTML = Object.keys(porOrden).map(orden => {
+    const g = porOrden[orden], p = g[0];
+    const ajeno = !p.pago_es_mio;
+    return `<div class="card">
+      <div class="ev">
+        <div class="n">${esc(p.evento||'Evento')}</div>
+        <div class="f">${esc(p.fecha_evento||'')}${p.hora?' · '+esc(p.hora):''}</div>
+      </div>
+      <div style="font-size:.68rem;color:var(--muted2);letter-spacing:1px;margin-bottom:7px">
+        ${esc(orden)} · ${g.length} ${g.length===1?'entrada':'entradas'}</div>
+      ${g.map(e=>`<div class="tk">
+        <div class="nm">${esc(e.persona || e.comprador || 'Entrada')}</div>
+        <div class="mt">${esc(_etq(e.nombre_ticket)||'')} · ${clp(e.precio)}</div>
+      </div>`).join('')}
+      ${ajeno ? `<div class="aviso azul">
+        💳 Esta compra la pagó <b>${esc(p.comprador||'otra persona')}</b>.
+        Si pides devolución, <b>la plata le vuelve a quien pagó</b>, no a ti.
+        Les avisamos a los dos por correo.</div>` : ''}
+      ${p.dev_estado ? `<div class="aviso am">Ya hay una solicitud de devolución en revisión para esta orden.</div>`
+        : `<button class="btn sm" onclick="gestionar('${esc(orden)}')">Gestionar esta orden</button>`}
+    </div>`;
+  }).join('');
+}
+
+function gestionar(orden){
+  if (SEL !== orden) PIN_OK = false;   // el permiso no se arrastra a otra orden
+  SEL = orden;
+  const g = ENTRADAS.filter(e => e.orden === orden);
+  const p = g[0], ajeno = !p.pago_es_mio;
+  const total = g.reduce((s,e)=>s+(Number(e.precio)||0), 0);
+  $('v-lista').style.display='none';
+  const v=$('v-gestion'); v.style.display='block';
+  v.innerHTML = `<div class="card">
+    <div class="ev"><div class="n">${esc(p.evento||'Evento')}</div>
+      <div class="f">${esc(p.fecha_evento||'')} · ${g.length} ${g.length===1?'entrada':'entradas'} · ${clp(total)}</div></div>
+
+    <div class="opt a" onclick="pedir('cambio_dia')">
+      <div class="ic">📅</div><div>
+        <div class="t">Cámbiala de día</div>
+        <div class="d">La usas otro jueves. No pierdes nada.</div>
+        <div class="pill">LO MÁS FÁCIL</div></div></div>
+
+    <div class="opt b" onclick="pedir('abierto')">
+      <div class="ic">🎟️</div><div>
+        <div class="t">Déjala abierta</div>
+        <div class="d">Queda a tu nombre y la ocupas cuando quieras.</div></div></div>
+
+    ${_yaTermino(p) ? `<div class="opt c" onclick="pedirPin()" style="border-style:dashed;">
+      <div class="ic" style="opacity:.5">🔒</div><div>
+        <div class="t">Pedir devolución</div>
+        <div class="d">Esta noche ya pasó. Para devoluciones fuera de plazo necesitas
+          un código del equipo — escríbenos por Instagram.</div></div></div>`
+    : `<div class="opt c" onclick="verDevolucion()">
+      <div class="ic" style="opacity:.6">💸</div><div>
+        <div class="t">Pedir devolución</div>
+        <div class="d">La revisa el equipo y demora hasta 10 días hábiles en llegarte.</div></div></div>`}
+
+    ${ajeno ? `<div class="aviso azul">💳 Ojo: esta compra la pagó <b>${esc(p.comprador||'otra persona')}</b>.
+      Cambiar de día o dejarla abierta te sirve a ti. <b>La devolución le llega a quien pagó.</b></div>` : ''}
+
+    <button class="btn ghost sm" onclick="volver()">← Volver</button>
+    <div class="msg" id="m-ges"></div>
+  </div>`;
+}
+
+let PIN_OK = false;
+function pedirPin(){
+  const g = ENTRADAS.filter(e => e.orden === SEL); if(!g.length) return;
+  const p = g[0];
+  $('v-gestion').innerHTML = `<div class="card" style="text-align:center;">
+    <div style="font-size:2rem;">🕐</div>
+    <div style="font-weight:800;font-size:1.1rem;margin-top:6px;">Esta noche ya pasó</div>
+    <div class="hint" style="margin-top:8px;">
+      Por política no aceptamos devoluciones después del evento.<br>
+      Si crees que hubo un problema de nuestro lado, escríbenos y lo revisamos contigo.</div>
+    <button class="btn ghost sm" onclick="window.open('https://instagram.com/frate.cl','_blank')">Escribirnos por Instagram</button>
+
+    <div style="border-top:1px solid var(--border);margin:16px 0 0;padding-top:14px;">
+      <label class="lb" style="text-align:left;">¿Tienes un código de autorización?</label>
+      <input id="i-pin" inputmode="numeric" autocomplete="off" maxlength="8" placeholder="••••"
+        style="text-align:center;font-size:1.4rem;letter-spacing:8px;font-family:ui-monospace,monospace;" />
+      <button class="btn" id="b-pin" onclick="validarPin()">Continuar</button>
+      <div class="msg" id="m-pin"></div>
+      <div class="hint">El equipo lo entrega caso a caso.</div>
+    </div>
+    <button class="btn ghost sm" onclick="gestionar('${esc(SEL)}')">← Volver</button>
+  </div>`;
+}
+
+async function validarPin(){
+  const pin = (($('i-pin')||{}).value||'').trim();
+  const m = $('m-pin');
+  if(!pin){ m.className='msg err'; m.textContent='Escribe el código.'; return; }
+  const b=$('b-pin'); b.disabled=true; b.textContent='Verificando…';
+  try{
+    // El PIN NO viaja al navegador: se manda lo escrito y el servidor compara.
+    const { data, error } = await sb.rpc('devolucion_pin_ok', { p_pin: pin });
+    if(error) throw error;
+    if(data !== true){ throw new Error('Ese código no es válido.'); }
+    PIN_OK = true;
+    verDevolucion();
+  }catch(e){
+    b.disabled=false; b.textContent='Continuar';
+    m.className='msg err'; m.textContent = e.message || 'No se pudo verificar.';
+  }
+}
+
+function volver(){ $('v-gestion').style.display='none'; $('v-lista').style.display='block'; }
+
+// ¿Ya empezó la noche? La fiesta corre 23:00 → 05:00, así que se compara
+// contra la hora de apertura del evento.
+// ¿Ya terminó la noche? La fiesta corre hasta las 05:00 del día siguiente.
+// Después de eso la devolución se cierra: quien no llegó, no llegó.
+function _yaTermino(e){
+  if (!e || !e.fecha_evento) return false;
+  const fin = new Date(e.fecha_evento + 'T05:00:00');
+  fin.setDate(fin.getDate() + 1);
+  return fin < new Date();
+}
+
+function _yaEmpezo(e){
+  if (!e || !e.fecha_evento) return false;
+  const h = (e.hora || '23:00').slice(0,5);
+  return new Date(e.fecha_evento + 'T' + h + ':00') <= new Date();
+}
+
+function verDevolucion(){
+  ACEPTO = false;   // cada vez se vuelve a aceptar, no se arrastra
+  const g = ENTRADAS.filter(e => e.orden === SEL);
+  // Si la noche terminó, no se llega acá sin haber pasado por el PIN.
+  if (g.length && _yaTermino(g[0]) && !PIN_OK) { pedirPin(); return; }
+  const p = g[0], ajeno = !p.pago_es_mio;
+  const total = g.reduce((s,e)=>s+(Number(e.precio)||0), 0);
+  // La retención es la REGLA (config: devolucion_retencion_pct). El monto
+  // final lo confirma el equipo al aprobar, pero acá se muestra lo que
+  // corresponde por política — no una promesa distinta.
+  const neto = Math.round(total * (1 - CFG.retencion/100));
+  const MOT = [
+    ['no_puedo','Ya no puedo ir'],
+    ['cortesia','Me llegó una cortesía'],
+    ['genero','Me equivoqué de género'],
+    ['no_universitario','No soy universitario'],
+    ['otro','Otro motivo']
+  ];
+  const v=$('v-gestion');
+  v.innerHTML = `<div class="card">
+    <div class="ev"><div class="n">${esc(p.evento||'Evento')}</div>
+      <div class="f">${esc(p.fecha_evento||'')} · ${g.length} ${g.length===1?'entrada':'entradas'}</div></div>
+
+    ${ajeno ? `<div class="aviso azul" style="margin-top:0;margin-bottom:12px">
+      💳 <b>Importante.</b> Esta compra la pagó <b>${esc(p.comprador||'otra persona')}</b>
+      (${esc(p.correo_comprador||'')}). El dinero <b>le vuelve a esa persona</b>, no a ti —
+      así funciona la devolución del medio de pago. Les avisamos a los dos por correo.</div>` : ''}
+
+    <label class="lb">¿Por qué quieres devolver?</label>
+    <div id="mots">${MOT.map(m=>`<div class="mot" data-k="${m[0]}" onclick="mot('${m[0]}')">${m[1]}</div>`).join('')}</div>
+    <label class="lb">${_yaEmpezo(p) ? 'Cuéntanos qué pasó — obligatorio' : 'Cuéntanos un poco más'}</label>
+    <textarea id="i-com" placeholder="${_yaEmpezo(p) ? 'Explica con detalle qué ocurrió esa noche' : 'Opcional'}"></textarea>
+
+    <div class="tot"><div class="l">TE DEVOLVEMOS</div>
+      <div class="v">${clp(neto)}</div>
+      <div class="s">${clp(total)} menos la retención del ${CFG.retencion}%</div></div>
+
+    ${_yaEmpezo(p) ? `<div style="background:rgba(232,54,61,.12);border:2px solid var(--rojo);border-radius:11px;padding:13px;margin-bottom:14px;">
+      <div style="font-size:1.5rem;text-align:center;">⚠️</div>
+      <div style="font-weight:800;font-size:1.05rem;text-align:center;color:#ff9ba0;line-height:1.25;margin-top:4px;">
+        Esta noche ya empezó</div>
+      <div style="font-size:.82rem;color:#ffb3b8;line-height:1.6;margin-top:9px;">
+        Por política, <b>una vez iniciado el evento no se aceptan devoluciones</b> por
+        cambio de planes, imposibilidad de asistir u otros motivos personales.<br><br>
+        Puedes enviar tu solicitud igual, pero <b>cuéntanos bien qué pasó</b>: el equipo
+        la revisa una por una y solo se aprueba si hubo un problema de nuestro lado.</div>
+    </div>` : ''}
+
+    <label class="lb">Condiciones</label>
+    <div class="polbox">${esc(CFG.politica || 'La devolución es una solicitud: el equipo la revisa y aprueba. No es automática.')}</div>
+    <div class="acepto" id="acepto-box" onclick="tacepto()">
+      <div class="ck" id="acepto-ck"></div>
+      <div class="tx">He leído y <b>acepto las condiciones</b> de devolución.</div>
+    </div>
+
+    <button class="btn" id="b-dev" onclick="pedir('devolucion')" disabled>Enviar solicitud</button>
+    <button class="btn ghost sm" onclick="gestionar('${esc(SEL)}')">← Volver a las opciones</button>
+    <div class="hint">Queda pendiente. La revisa una persona del equipo y te avisamos por correo.</div>
+    <div class="msg" id="m-ges"></div>
+  </div>`;
+}
+
+let MOTIVO = '';
+function tacepto(){
+  ACEPTO = !ACEPTO;
+  const b=$('acepto-box'), c=$('acepto-ck'), btn=$('b-dev');
+  if(b) b.classList.toggle('on', ACEPTO);
+  if(c) c.textContent = ACEPTO ? '✓' : '';
+  if(btn) btn.disabled = !ACEPTO;   // sin aceptar, no se puede enviar
+}
+function mot(k){
+  MOTIVO = k;
+  document.querySelectorAll('#mots .mot').forEach(el =>
+    el.classList.toggle('on', el.getAttribute('data-k') === k));
+}
+
+async function pedir(tipo){
+  const g = ENTRADAS.filter(e => e.orden === SEL);
+  if(!g.length) return;
+  // Se revalida: alguien pudo apagarlo mientras la pestaña estaba abierta.
+  await cargarCfg();
+  if(!CFG.activo){
+    const m=$('m-ges'); if(m){ m.className='msg err';
+      m.textContent='Las gestiones por la web están pausadas. Escríbenos por Instagram.'; }
+    return;
+  }
+  if(tipo==='devolucion' && !MOTIVO){
+    const m=$('m-ges'); m.className='msg err'; m.textContent='Elige un motivo.'; return;
+  }
+  if(tipo==='devolucion' && _yaTermino(g[0]) && !PIN_OK){
+    const m=$('m-ges'); if(m){ m.className='msg err';
+      m.textContent='Esta noche ya pasó: necesitas el código del equipo.'; }
+    return;
+  }
+  if(tipo==='devolucion' && !ACEPTO){
+    const m=$('m-ges'); m.className='msg err'; m.textContent='Tienes que aceptar las condiciones.'; return;
+  }
+  // Si la noche ya empezó, no basta con marcar un motivo: hay que explicar.
+  if(tipo==='devolucion' && _yaEmpezo(g[0]) && (($('i-com')||{}).value||'').trim().length < 20){
+    const m=$('m-ges'); m.className='msg err';
+    m.textContent='La noche ya empezó: cuéntanos con detalle qué pasó (al menos 20 caracteres).'; return;
+  }
+  const b = $('b-dev'); if(b){ b.disabled=true; b.textContent='Enviando…'; }
+  try{
+    // Se usa un RPC propio y NO `solicitar-devolucion`: esa edge exige que
+    // el pedido esté pegado a tu cuenta, y acá el caso central es justo el
+    // contrario — tu entrada dentro de la orden de otra persona.
+    const { data, error } = await sb.rpc('mi_entrada_gestion', {
+      p_pedido_id: g[0].pedido_id, p_tipo: tipo,
+      p_motivo: MOTIVO || tipo, p_comentario: ($('i-com')||{}).value || '',
+      p_pin: (($('i-pin')||{}).value||'').trim() || null });
+    if(error) throw error;
+    if(!data || data.ok === false) throw new Error((data && data.error) || 'No se pudo enviar');
+    listo(tipo, g[0]);
+  }catch(e){
+    if(b){ b.disabled=false; b.textContent='Enviar solicitud'; }
+    const m=$('m-ges'); if(m){ m.className='msg err'; m.textContent='No se pudo enviar: '+(e.message||e); }
+  }
+}
+
+function listo(tipo, p){
+  const t = { cambio_dia:['📅','Pedimos el cambio de día','Te escribimos por correo para coordinar el nuevo día.'],
+              abierto:['🎟️','Tu entrada queda abierta','Te avisamos por correo cuando esté lista para usar cuando quieras.'],
+              devolucion:['💸','Solicitud enviada','La revisa una persona del equipo. Te avisamos por correo.'] }[tipo]
+           || ['✅','Listo','Te avisamos por correo.'];
+  const ajeno = !p.pago_es_mio;
+  $('v-gestion').innerHTML = `<div class="card" style="text-align:center">
+    <div style="font-size:2.4rem">${t[0]}</div>
+    <div style="font-weight:800;font-size:1.1rem;margin-top:8px">${t[1]}</div>
+    <div class="hint" style="margin-top:8px">${t[2]}</div>
+    ${(tipo==='devolucion' && ajeno) ? `<div class="aviso azul">El dinero se le devuelve a
+      <b>${esc(p.comprador||'quien pagó')}</b>. Le avisamos a esa persona también.</div>` : ''}
+    <button class="btn ghost sm" onclick="location.reload()">Volver a mis entradas</button>
+  </div>`;
+}
+
+// Si ya venía con sesión, se salta el login.
+(async () => {
+  await cargarCfg();
+  // El interruptor del admin manda. Apagado: se ve la página pero no se
+  // puede pedir nada, y se dice a dónde escribir en vez de dejar que la
+  // persona llene todo y choque al final.
+  if (!CFG.activo && !VOLVER) {
+    $('v-login').innerHTML = `<div class="card" style="text-align:center">
+      <div style="font-size:2rem">🔧</div>
+      <div style="font-weight:800;margin-top:8px">Estamos ajustando esto</div>
+      <div class="hint">Por ahora las gestiones de entradas las hacemos a mano.
+        Escríbenos por Instagram o WhatsApp y lo vemos contigo.</div>
+      <button class="btn ghost sm" onclick="location.href='/'">Volver a FRATE</button>
+    </div>`;
+    return;
+  }
+  try{
+    const { data } = await sb.auth.getSession();
+    try{ if(new URLSearchParams(location.search).get('modo')==='up') modo('up'); }catch(e){}
+    if (data && data.session) { if (VOLVER) { location.href = VOLVER; return; } await cargar(); }
+  }catch(e){}
+})();
+</script>
+</body>
+</html>

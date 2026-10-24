@@ -1,0 +1,649 @@
+<!DOCTYPE html>
+<html lang="es-CL">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>FRATE · Modales del admin</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@700;900&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <style>
+    :root{
+      --bg:#0a0a0d;--bg2:#131316;--bg3:#1b1b20;
+      --border:#26262b;--border2:#3a3a41;
+      --text:#f4f4f6;--muted:#8a8a92;--muted2:#5a5a62;
+      --rojo:#E8363D;--rojo2:#ff5a60;--dorado:#E6C860;
+      --verde:#4ade80;--azul:#60a5fa;--morado:#c4b5fd;
+      --r:9px;--r-card:15px;--r-pill:999px;
+      --shadow:0 8px 26px rgba(0,0,0,.4);
+      --font:'Inter',sans-serif;--disp:'Barlow Condensed',sans-serif;
+    }
+    *{box-sizing:border-box;}
+    html{scroll-behavior:smooth;}
+    body{margin:0;background:var(--bg);color:var(--text);font-family:var(--font);font-size:14px;line-height:1.5;}
+    button,input,select,textarea{font:inherit;}
+    button{color:inherit;}
+    a{color:inherit;}
+
+    /* Clases reales del admin */
+    .mo{position:fixed;inset:0;background:rgba(0,0,0,.82);z-index:1000;display:flex;align-items:center;justify-content:center;padding:20px;opacity:0;pointer-events:none;transition:opacity .12s;}
+    .mo.open{opacity:1;pointer-events:auto;}
+    .mb{background:var(--bg2);border:1px solid var(--border);border-radius:var(--r-card);box-shadow:var(--shadow);width:100%;max-width:620px;max-height:88vh;overflow-y:auto;}
+    .mh{padding:14px 18px;border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between;}
+    .mht{font-weight:700;font-size:1rem;letter-spacing:-.2px;}
+    .mc{background:none;border:none;color:var(--muted);cursor:pointer;font-size:1rem;}
+    .mc:hover{color:var(--text);}
+    .mbody{padding:18px;}
+    .mfoot{padding:12px 18px;border-top:1px solid var(--border);display:flex;gap:6px;justify-content:flex-end;}
+    .fg{display:flex;flex-direction:column;gap:5px;margin-bottom:12px;}
+    .fg label{font-size:.68rem;font-weight:500;color:var(--muted);}
+    .fg input,.fg select,.fg textarea{width:100%;outline:none;color-scheme:dark;background:var(--bg3);border:1px solid var(--border);color:var(--text);padding:9px 10px;border-radius:var(--r);font-size:.82rem;transition:border-color .12s,box-shadow .12s;}
+    .fg input:focus,.fg select:focus,.fg textarea:focus{border-color:var(--rojo);box-shadow:0 0 0 3px rgba(232,54,61,.13);}
+    .fg textarea{resize:vertical;min-height:76px;}
+    .form-2{display:grid;grid-template-columns:1fr 1fr;gap:10px;}
+    .form-3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px;}
+    .btn{padding:8px 16px;border-radius:var(--r);border:0;cursor:pointer;font-size:.78rem;font-weight:600;transition:background .12s,border-color .12s,transform .12s;display:inline-flex;align-items:center;gap:5px;}
+    .btn:active{transform:scale(.98);}
+    .btn-p{background:var(--rojo);color:#fff;box-shadow:0 2px 10px rgba(232,54,61,.25);}
+    .btn-p:hover{background:var(--rojo2);}
+    .btn-s{background:var(--bg3);color:var(--text);border:1px solid var(--border);}
+    .btn-g{background:none;color:var(--muted);border:1px solid var(--border);}
+    .btn-g:hover{color:var(--text);border-color:var(--border2);}
+    .btn-del{background:rgba(232,54,61,.1);color:var(--rojo2);border:1px solid rgba(232,54,61,.28);}
+    .btn-sm{padding:6px 10px;font-size:.71rem;}
+
+    .page-head{position:relative;overflow:hidden;border-bottom:1px solid var(--border);background:linear-gradient(160deg,#17171c 0%,var(--bg) 64%);}
+    .page-head::after{content:'PASO · PASO · PASO';position:absolute;right:-12px;top:-30px;color:rgba(232,54,61,.055);font:900 7rem/1 var(--disp);letter-spacing:-4px;white-space:nowrap;pointer-events:none;}
+    .head-inner{position:relative;z-index:1;width:min(1180px,calc(100% - 32px));margin:auto;padding:42px 0 34px;}
+    .eyebrow{display:flex;align-items:center;gap:8px;color:var(--rojo2);font-size:.66rem;font-weight:800;letter-spacing:2px;text-transform:uppercase;}
+    .eyebrow::before{content:'';width:24px;height:2px;background:var(--rojo);}
+    h1{margin:8px 0 10px;font:900 clamp(2.5rem,7vw,5.5rem)/.88 var(--disp);letter-spacing:-2px;text-transform:uppercase;max-width:780px;}
+    .lead{max-width:690px;margin:0;color:var(--muted);font-size:.94rem;line-height:1.65;}
+    .head-facts{display:flex;gap:8px;flex-wrap:wrap;margin-top:20px;}
+    .fact{padding:6px 10px;border:1px solid var(--border);border-radius:var(--r-pill);background:rgba(19,19,22,.72);color:var(--muted);font-size:.68rem;}
+    .fact b{color:var(--text);}
+    .jumpbar{position:sticky;top:0;z-index:80;border-bottom:1px solid var(--border);background:rgba(10,10,13,.9);backdrop-filter:blur(14px);}
+    .jump-inner{width:min(1180px,calc(100% - 32px));margin:auto;display:flex;gap:4px;overflow:auto;padding:8px 0;scrollbar-width:none;}
+    .jump-inner::-webkit-scrollbar{display:none;}
+    .jump-inner a{text-decoration:none;white-space:nowrap;padding:7px 10px;border-radius:8px;color:var(--muted);font-size:.72rem;font-weight:650;}
+    .jump-inner a:hover{color:var(--text);background:var(--bg3);}
+    main{width:min(1180px,calc(100% - 32px));margin:auto;padding:38px 0 72px;}
+    .section{scroll-margin-top:62px;margin-bottom:64px;}
+    .section-kicker{color:var(--rojo2);font-size:.62rem;font-weight:800;letter-spacing:2px;text-transform:uppercase;margin-bottom:5px;}
+    .section-title{font:900 clamp(1.9rem,4vw,3rem)/1 var(--disp);text-transform:uppercase;letter-spacing:-.5px;margin:0;}
+    .section-intro{color:var(--muted);max-width:720px;margin:9px 0 20px;font-size:.84rem;line-height:1.6;}
+    .demo-grid{display:grid;grid-template-columns:420px 1fr;gap:26px;align-items:start;}
+    .phone-wrap{position:sticky;top:64px;}
+    .phone-label{display:flex;align-items:center;justify-content:space-between;margin-bottom:8px;color:var(--muted);font-size:.68rem;}
+    .phone-label b{color:var(--text);}
+    .phone{width:390px;max-width:100%;height:780px;max-height:calc(100vh - 100px);position:relative;overflow:hidden;margin:auto;border:1px solid var(--border2);border-radius:25px;background:var(--bg);box-shadow:0 24px 80px rgba(0,0,0,.55),0 0 0 6px #08080a;}
+    .phone::before{content:'';position:absolute;z-index:9;top:7px;left:50%;transform:translateX(-50%);width:58px;height:4px;border-radius:99px;background:#303036;pointer-events:none;}
+    .phone-empty{position:absolute;inset:0;display:grid;place-items:center;text-align:center;padding:28px;color:var(--muted);}
+    .phone-empty strong{display:block;color:var(--text);font-size:1rem;margin-bottom:8px;}
+    .demo-panel{display:grid;gap:14px;}
+    .demo-card,.spec-card,.pattern-card{background:var(--bg2);border:1px solid var(--border);border-radius:var(--r-card);padding:16px;}
+    .demo-card h3,.pattern-card h3{margin:0 0 6px;font-size:.9rem;}
+    .demo-card p,.pattern-card p{margin:0;color:var(--muted);font-size:.76rem;line-height:1.55;}
+    .state-buttons{display:grid;grid-template-columns:repeat(2,1fr);gap:7px;margin-top:13px;}
+    .state-buttons .btn{justify-content:center;}
+    .rule-list{display:grid;gap:8px;margin-top:12px;}
+    .rule{display:flex;align-items:flex-start;gap:9px;font-size:.74rem;color:var(--muted);}
+    .rule span:first-child{width:22px;height:22px;display:grid;place-items:center;flex:0 0 22px;border-radius:7px;background:var(--bg3);}
+    .rule b{display:block;color:var(--text);margin-bottom:1px;}
+
+    .choice-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:7px;}
+    .choice{appearance:none;text-align:left;padding:10px;border:1px solid var(--border);border-radius:10px;background:var(--bg3);cursor:pointer;}
+    .choice[aria-pressed="true"]{border-color:var(--rojo);background:rgba(232,54,61,.09);}
+    .choice strong{display:block;font-size:.76rem;}
+    .choice small{color:var(--muted);font-size:.65rem;}
+    .media-box{padding:15px 12px;text-align:center;border:1px dashed var(--border2);border-radius:10px;background:var(--bg3);color:var(--muted);font-size:.72rem;}
+    .tip{display:flex;gap:8px;padding:9px 10px;border:1px solid rgba(96,165,250,.22);border-radius:var(--r);background:rgba(96,165,250,.07);color:var(--muted);font-size:.7rem;line-height:1.45;margin-bottom:12px;}
+    .tip b{color:var(--text);}
+    .toggle-row{display:flex;align-items:center;justify-content:space-between;gap:10px;padding:10px 0;border-bottom:1px solid var(--border);font-size:.78rem;}
+    .toggle-row input{accent-color:var(--rojo);width:18px;height:18px;}
+    .ticket-mini{display:flex;align-items:center;gap:9px;padding:9px;border:1px solid var(--border);border-radius:10px;background:var(--bg3);margin-bottom:7px;}
+    .ticket-mini .emoji{width:30px;height:30px;display:grid;place-items:center;border-radius:8px;background:#18D9FF;color:#08080a;}
+    .ticket-mini .copy{flex:1;min-width:0;}
+    .ticket-mini strong{display:block;font-size:.76rem;}
+    .ticket-mini small{color:var(--muted);font-size:.65rem;}
+    .ticket-mini .price{font-weight:750;font-size:.72rem;}
+
+    .bar-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;}
+    .bar-card{min-width:0;padding:13px;background:var(--bg2);border:1px solid var(--border);border-radius:var(--r-card);overflow:hidden;}
+    .bar-card-head{display:flex;align-items:center;justify-content:space-between;margin-bottom:10px;font-size:.72rem;}
+    .bar-card-head span{color:var(--muted);font-size:.64rem;}
+    .bar-card .fm-progress{padding-bottom:3px;}
+    .bar-card .fm-step-btn{pointer-events:none;min-width:88px;}
+    .bar-note{margin:12px 0 0;padding:10px 11px;border-left:2px solid var(--rojo);background:rgba(232,54,61,.06);color:var(--muted);font-size:.74rem;line-height:1.55;}
+
+    .field-tabs{display:flex;gap:6px;overflow:auto;margin:16px 0 12px;padding-bottom:2px;scrollbar-width:none;}
+    .field-tab{white-space:nowrap;border:1px solid var(--border);border-radius:var(--r-pill);background:var(--bg2);color:var(--muted);padding:7px 12px;cursor:pointer;font-size:.72rem;font-weight:650;}
+    .field-tab.is-active{background:var(--rojo);border-color:var(--rojo);color:#fff;}
+    .field-plan{display:none;}
+    .field-plan.is-active{display:block;}
+    .plan-head{display:flex;justify-content:space-between;gap:12px;align-items:flex-end;margin-bottom:12px;}
+    .plan-head h3{margin:0;font-size:1rem;}
+    .plan-head span{color:var(--muted);font-size:.68rem;}
+    .step-cards{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;}
+    .spec-card{padding:14px;min-height:172px;}
+    .spec-num{font:900 1.5rem/1 var(--disp);color:var(--rojo2);}
+    .spec-card h4{margin:5px 0 10px;font-size:.84rem;line-height:1.25;}
+    .field-chips{display:flex;gap:5px;flex-wrap:wrap;}
+    .field-chip{padding:4px 7px;border:1px solid var(--border);border-radius:6px;background:var(--bg3);color:var(--muted);font-size:.62rem;line-height:1.25;}
+    .spec-note{margin-top:10px;color:var(--muted);font-size:.66rem;line-height:1.45;}
+
+    .patterns-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:12px;}
+    .pattern-card{min-width:0;}
+    .pattern-card.wide{grid-column:1/-1;}
+    .pattern-demo{margin-top:14px;padding:12px;border:1px solid var(--border);border-radius:11px;background:var(--bg);}
+    .status-row{display:flex;gap:7px;flex-wrap:wrap;}
+    .night-fields{display:grid;grid-template-columns:1.2fr .8fr .8fr;gap:7px;}
+    .night-fields .fg{margin:0;}
+    .money-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px;}
+    .money-grid .fg{margin:0;}
+    .danger-row{display:flex;gap:7px;flex-wrap:wrap;}
+    .pattern-result{min-height:18px;margin-top:9px;color:var(--muted);font-size:.7rem;}
+
+    .integration{display:grid;grid-template-columns:.8fr 1.2fr;gap:12px;}
+    .code-box{margin:0;overflow:auto;padding:14px;background:#070709;border:1px solid var(--border);border-radius:var(--r-card);color:#d5d5da;font:500 .7rem/1.6 ui-monospace,SFMono-Regular,Menlo,monospace;white-space:pre;}
+    .decision-list{display:grid;gap:8px;}
+    .decision{padding:11px 12px;border:1px solid var(--border);border-radius:10px;background:var(--bg2);font-size:.74rem;color:var(--muted);}
+    .decision b{color:var(--text);}
+    .page-foot{border-top:1px solid var(--border);padding:24px 16px 42px;text-align:center;color:var(--muted);font-size:.68rem;}
+    #demo-toast{position:fixed;right:18px;bottom:18px;z-index:4000;opacity:0;transform:translateY(6px);pointer-events:none;padding:9px 13px;border:1px solid var(--border2);border-radius:var(--r);background:var(--bg3);box-shadow:var(--shadow);font-size:.74rem;transition:opacity .12s,transform .12s;}
+    #demo-toast.show{opacity:1;transform:none;}
+    .mobile-only-note{display:none;}
+
+    @media(max-width:960px){
+      .demo-grid{grid-template-columns:1fr;}
+      .phone-wrap{position:relative;top:auto;}
+      .bar-grid{grid-template-columns:1fr;}
+      .step-cards{grid-template-columns:repeat(2,1fr);}
+      .integration{grid-template-columns:1fr;}
+    }
+    @media(max-width:640px){
+      .head-inner,main,.jump-inner{width:min(100% - 24px,1180px);}
+      .head-inner{padding-top:32px;}
+      .page-head::after{font-size:4rem;}
+      h1{font-size:3.2rem;}
+      main{padding-top:28px;}
+      .section{margin-bottom:48px;}
+      .phone{height:720px;max-height:calc(100vh - 88px);border-radius:20px;}
+      .demo-panel{grid-template-columns:1fr;}
+      .step-cards,.patterns-grid{grid-template-columns:1fr;}
+      .pattern-card.wide{grid-column:auto;}
+      .night-fields,.money-grid{grid-template-columns:1fr;}
+      .form-2,.form-3{grid-template-columns:1fr;}
+      .state-buttons{grid-template-columns:1fr 1fr;}
+      .mobile-only-note{display:block;}
+    }
+  </style>
+</head>
+<body>
+  <header class="page-head">
+    <div class="head-inner">
+      <div class="eyebrow">Handoff implementable · Admin FRATE</div>
+      <h1>Menos muro.<br>Más avance.</h1>
+      <p class="lead">Una sola cáscara de modal para operar rápido, de noche y desde el teléfono. Valida antes de avanzar, mantiene un borrador disponible y nunca pierde los datos cuando la base falla.</p>
+      <div class="head-facts">
+        <span class="fact"><b>390 px</b> primero</span>
+        <span class="fact"><b>1 pregunta</b> por paso</span>
+        <span class="fact"><b>1 acción primaria</b> visible</span>
+        <span class="fact"><b>120 ms</b> máximo</span>
+        <span class="fact"><b>Sin dependencias</b></span>
+      </div>
+    </div>
+  </header>
+
+  <nav class="jumpbar" aria-label="Secciones del handoff">
+    <div class="jump-inner">
+      <a href="#cascaron">A · Cáscara</a>
+      <a href="#barras">Barras de pasos</a>
+      <a href="#campos">B · Reparto de campos</a>
+      <a href="#patrones">C · Patrones</a>
+      <a href="#integracion">Cómo se integra</a>
+    </div>
+  </nav>
+
+  <main>
+    <section class="section" id="cascaron">
+      <div class="section-kicker">Entrega A</div>
+      <h2 class="section-title">La cáscara única, en móvil</h2>
+      <p class="section-intro">La maqueta es funcional. Recorre los seis pasos, fuerza cada estado y prueba el aviso de cambios sin guardar. El contenido usa el modal de evento porque es el flujo más frecuente.</p>
+
+      <div class="demo-grid">
+        <div class="phone-wrap">
+          <div class="phone-label"><b>Vista real · 390 px</b><span>caso principal</span></div>
+          <div class="phone" id="phone">
+            <div class="phone-empty"><div><strong>El modal está cerrado</strong><span>Usa “Abrir modal” en los controles.</span></div></div>
+            <div class="mo open" id="demo-modal-evento" data-fm-mobile aria-hidden="false">
+              <div class="mb">
+                <div class="mh"><span class="mht">🗓️ Nuevo evento</span><button class="mc" data-fm-close aria-label="Cerrar">✕</button></div>
+                <div class="mbody">
+                  <section class="fm-step-panel" data-fm-step data-fm-label="Qué noche" data-fm-icon="1">
+                    <h3 class="fm-question">¿Qué noche estás armando?</h3>
+                    <p class="fm-question-help">Parte por lo que el equipo necesita reconocer sin dudar.</p>
+                    <div class="fg"><label>Nombre del evento — obligatorio</label><input id="demo-ev-nombre" type="text" value="VIERNES SIN FILTRO" required></div>
+                    <div class="fg"><label>Fecha publicada — obligatorio</label><input id="demo-ev-fecha" type="date" value="2026-08-07" required></div>
+                    <div class="tip"><span>🌙</span><span>La fecha es la de la noche publicada, aunque el evento termine después de medianoche.</span></div>
+                  </section>
+
+                  <section class="fm-step-panel" data-fm-step data-fm-label="A qué hora" data-fm-icon="2">
+                    <h3 class="fm-question">¿Cuándo abre y quién toca?</h3>
+                    <p class="fm-question-help">La madrugada sigue contando como la noche del viernes.</p>
+                    <div class="form-2">
+                      <div class="fg"><label>Hora de inicio — obligatorio</label><input id="demo-ev-inicio" type="time" value="23:00" required></div>
+                      <div class="fg"><label>Hora de término — obligatorio</label><input id="demo-ev-fin" type="time" value="05:00" required></div>
+                    </div>
+                    <div class="fg"><label>DJs / lineup</label><input id="demo-ev-djs" type="text" value="DJ KRE, BASTIAN"></div>
+                    <div class="fg"><label>Aforo / capacidad</label><input id="demo-ev-aforo" type="number" value="500" min="0" step="10"></div>
+                    <div class="fm-night-preview" id="demo-night-preview"></div>
+                  </section>
+
+                  <section class="fm-step-panel" data-fm-step data-fm-label="Cómo la encontrarán" data-fm-icon="3">
+                    <h3 class="fm-question">¿Cómo la encontrarán?</h3>
+                    <p class="fm-question-help">Deja el link listo para compartir y registra a quienes colaboran.</p>
+                    <div class="fg"><label>Link directo de compra — obligatorio</label><div style="display:flex;align-items:center;border:1px solid var(--border);border-radius:var(--r);background:var(--bg3);padding-left:9px"><span style="color:var(--muted);font-size:.72rem">frate.cl/e/</span><input id="demo-ev-slug" type="text" value="viernes-sin-filtro" required style="border:0;box-shadow:none;padding-left:3px"></div></div>
+                    <div class="fg"><label>Links de colaborador · uno por línea</label><textarea id="demo-ev-colab" rows="3" placeholder="https://instagram.com/productora"></textarea></div>
+                  </section>
+
+                  <section class="fm-step-panel" data-fm-step data-fm-label="Cómo se verá" data-fm-icon="4">
+                    <h3 class="fm-question">¿Cómo se verá?</h3>
+                    <p class="fm-question-help">YouTube manda sobre el video; el video manda sobre la imagen.</p>
+                    <div class="fg"><label>Descripción</label><textarea id="demo-ev-desc">La noche para cantar sin filtro.</textarea></div>
+                    <div class="media-box">📷 Arrastra una imagen o toca para subir<br><small>También puedes pegar una URL</small></div>
+                    <div class="form-2" style="margin-top:10px">
+                      <div class="fg"><label>Video</label><input type="url" placeholder="MP4 corto"></div>
+                      <div class="fg"><label>YouTube</label><input type="url" placeholder="youtube.com/…"></div>
+                    </div>
+                    <div class="toggle-row"><span>⭐ Evento especial</span><input id="demo-ev-especial" type="checkbox" checked></div>
+                  </section>
+
+                  <section class="fm-step-panel" data-fm-step data-fm-label="Qué entradas" data-fm-icon="5">
+                    <h3 class="fm-question">¿Qué entradas tendrá?</h3>
+                    <p class="fm-question-help">Carga una receta y ajusta precio y stock para esta noche.</p>
+                    <div class="choice-grid" style="margin-bottom:12px">
+                      <button type="button" class="choice" data-ticket-preset="finde" aria-pressed="true"><strong>🗓️ Mis tickets FINDE</strong><small>4 tipos habituales</small></button>
+                      <button type="button" class="choice" data-ticket-preset="semana" aria-pressed="false"><strong>📅 Mis tickets SEMANA</strong><small>3 tipos habituales</small></button>
+                    </div>
+                    <div class="ticket-mini"><span class="emoji">👩</span><span class="copy"><strong>Anticipada mujeres</strong><small>Venta · 120 disponibles</small></span><span class="price">$8.000</span></div>
+                    <div class="ticket-mini"><span class="emoji" style="background:#FF4FC3">🎁</span><span class="copy"><strong>Cortesía RRPP</strong><small>Cortesía · 40 disponibles</small></span><span class="price" style="color:var(--morado)">Cortesía</span></div>
+                    <button type="button" class="btn btn-g" style="width:100%;justify-content:center;margin-top:4px">＋ Agregar del catálogo</button>
+                  </section>
+
+                  <section class="fm-step-panel" data-fm-step data-fm-label="Listo" data-fm-icon="6">
+                    <h3 class="fm-question">¿Está listo para publicar?</h3>
+                    <p class="fm-question-help">Revisa lo importante. Puedes volver a cualquier paso ya visitado.</p>
+                    <div class="status-row"><span class="fm-status fm-status--borrador">Borrador</span></div>
+                    <dl class="fm-summary" id="demo-summary"></dl>
+                    <div class="tip" style="margin-top:12px;margin-bottom:0"><span>💡</span><span><b>Publicar</b> deja el evento visible y a la venta. “Guardar y salir” lo conserva como borrador.</span></div>
+                  </section>
+                </div>
+                <div class="mfoot"></div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <aside class="demo-panel">
+          <div class="demo-card">
+            <h3>Cuatro estados obligatorios</h3>
+            <p>Estos controles muestran la anatomía sin tener que completar todo el flujo.</p>
+            <div class="state-buttons">
+              <button class="btn btn-s" data-demo-state="first">Primer paso</button>
+              <button class="btn btn-s" data-demo-state="middle">Paso intermedio</button>
+              <button class="btn btn-s" data-demo-state="last">Último paso</button>
+              <button class="btn btn-del" data-demo-state="error">Error de guardado</button>
+              <button class="btn btn-s" data-demo-state="unsaved">Cambios sin guardar</button>
+              <button class="btn btn-p" data-demo-state="open">Abrir modal</button>
+            </div>
+          </div>
+          <div class="demo-card">
+            <h3>Pie con una sola prioridad</h3>
+            <div class="rule-list">
+              <div class="rule"><span>↙</span><div><b>Guardar y salir queda separado</b>Siempre a la izquierda; guarda borrador y cierra.</div></div>
+              <div class="rule"><span>←</span><div><b>Atrás aparece desde el paso 2</b>No compite con la acción principal.</div></div>
+              <div class="rule"><span>→</span><div><b>Siguiente o Publicar va a la derecha</b>Solo ese botón usa el rojo sólido.</div></div>
+            </div>
+          </div>
+          <div class="demo-card">
+            <h3>Cuando la base falla</h3>
+            <p>El modal no se cierra, ningún campo se limpia y el error aparece arriba del contenido. El botón principal cambia a “Reintentar”. El mensaje técnico puede venir de la base, pero la interfaz siempre aclara que los cambios siguen ahí.</p>
+          </div>
+          <div class="demo-card">
+            <h3>Decisión para 390 px</h3>
+            <p>El modal ocupa la pantalla completa. Cabecera, barra y pie no se pierden; solo se desplaza el cuerpo. Los pasos tienen un ancho mínimo de 92 px, los nombres usan hasta dos líneas y la barra lleva el paso activo al centro.</p>
+          </div>
+        </aside>
+      </div>
+    </section>
+
+    <section class="section" id="barras">
+      <div class="section-kicker">Anatomía de navegación</div>
+      <h2 class="section-title">La misma barra con 3, 4 y 6 pasos</h2>
+      <p class="section-intro">La barra no comprime los nombres hasta volverlos ilegibles. Cuando no caben, se desplaza horizontalmente. Los pasos futuros quedan visibles, pero bloqueados hasta validar el actual.</p>
+      <div class="bar-grid">
+        <article class="bar-card">
+          <div class="bar-card-head"><b>3 pasos</b><span>todos caben</span></div>
+          <div class="fm-progress">
+            <button class="fm-step-btn is-done"><span class="fm-step-number">✓</span><span class="fm-step-name">Qué estás creando</span></button>
+            <button class="fm-step-btn" aria-current="step"><span class="fm-step-number">2</span><span class="fm-step-name">Cómo funciona</span></button>
+            <button class="fm-step-btn"><span class="fm-step-number">3</span><span class="fm-step-name">Listo</span></button>
+          </div>
+        </article>
+        <article class="bar-card">
+          <div class="bar-card-head"><b>4 pasos</b><span>nombre largo</span></div>
+          <div class="fm-progress">
+            <button class="fm-step-btn is-done"><span class="fm-step-number">✓</span><span class="fm-step-name">Qué lista</span></button>
+            <button class="fm-step-btn is-done"><span class="fm-step-number">✓</span><span class="fm-step-name">Qué información pide</span></button>
+            <button class="fm-step-btn" aria-current="step"><span class="fm-step-number">3</span><span class="fm-step-name">Cómo se ve</span></button>
+            <button class="fm-step-btn"><span class="fm-step-number">4</span><span class="fm-step-name">Listo</span></button>
+          </div>
+        </article>
+        <article class="bar-card">
+          <div class="bar-card-head"><b>6 pasos</b><span>desplazable</span></div>
+          <div class="fm-progress">
+            <button class="fm-step-btn is-done"><span class="fm-step-number">✓</span><span class="fm-step-name">Qué noche</span></button>
+            <button class="fm-step-btn is-done"><span class="fm-step-number">✓</span><span class="fm-step-name">A qué hora</span></button>
+            <button class="fm-step-btn" aria-current="step"><span class="fm-step-number">3</span><span class="fm-step-name">Cómo la encontrarán</span></button>
+            <button class="fm-step-btn"><span class="fm-step-number">4</span><span class="fm-step-name">Cómo se verá</span></button>
+            <button class="fm-step-btn"><span class="fm-step-number">5</span><span class="fm-step-name">Qué entradas</span></button>
+            <button class="fm-step-btn"><span class="fm-step-number">6</span><span class="fm-step-name">Listo</span></button>
+          </div>
+        </article>
+      </div>
+      <p class="bar-note"><b>Pantalla angosta:</b> el nombre nunca desaparece ni se reduce a un punto sin contexto. La barra conserva números, nombres de hasta dos líneas y desplazamiento con el dedo. “Paso 3 de 6” queda siempre visible arriba.</p>
+    </section>
+
+    <section class="section" id="campos">
+      <div class="section-kicker">Entrega B</div>
+      <h2 class="section-title">Cómo se reparten los tres más pesados</h2>
+      <p class="section-intro">Los títulos son preguntas concretas. Los campos técnicos ocultos —identificadores, URL de archivo y estado de carga— siguen en el DOM junto a su paso, pero no se presentan como preguntas.</p>
+      <div class="field-tabs" role="tablist">
+        <button class="field-tab is-active" data-plan="evento">Evento · 21</button>
+        <button class="field-tab" data-plan="paquete">Paquete · 26</button>
+        <button class="field-tab" data-plan="catalogo">Tipo de ticket · 17</button>
+      </div>
+
+      <div class="field-plan is-active" data-plan-panel="evento">
+        <div class="plan-head"><h3>modal-evento · 6 pasos</h3><span>el más frecuente</span></div>
+        <div class="step-cards">
+          <article class="spec-card"><div class="spec-num">01</div><h4>¿Qué noche estás armando?</h4><div class="field-chips"><span class="field-chip">Nombre</span><span class="field-chip">Fecha publicada</span></div></article>
+          <article class="spec-card"><div class="spec-num">02</div><h4>¿Cuándo abre y quién toca?</h4><div class="field-chips"><span class="field-chip">Hora inicio</span><span class="field-chip">Hora término</span><span class="field-chip">DJs / lineup</span><span class="field-chip">Aforo</span></div></article>
+          <article class="spec-card"><div class="spec-num">03</div><h4>¿Cómo la encontrarán?</h4><div class="field-chips"><span class="field-chip">Slug</span><span class="field-chip">Link directo</span><span class="field-chip">Links de colaborador</span></div></article>
+          <article class="spec-card"><div class="spec-num">04</div><h4>¿Cómo se verá?</h4><div class="field-chips"><span class="field-chip">Descripción</span><span class="field-chip">Imagen</span><span class="field-chip">Video</span><span class="field-chip">YouTube</span><span class="field-chip">Especial</span><span class="field-chip">Segundo inicial</span><span class="field-chip">Zoom</span><span class="field-chip">Posición vertical</span><span class="field-chip">Color</span></div></article>
+          <article class="spec-card"><div class="spec-num">05</div><h4>¿Qué entradas tendrá?</h4><div class="field-chips"><span class="field-chip">Receta FINDE / SEMANA</span><span class="field-chip">Tipos del catálogo</span><span class="field-chip">Precio por evento</span><span class="field-chip">Stock por evento</span></div><p class="spec-note">El precio se ajusta para la noche; nunca se presenta como decisión automática.</p></article>
+          <article class="spec-card"><div class="spec-num">06</div><h4>¿Está listo para publicar?</h4><div class="field-chips"><span class="field-chip">Resumen</span><span class="field-chip">Estado</span><span class="field-chip">Publicar</span></div><p class="spec-note">Guardar y salir conserva “Creado · borrador”.</p></article>
+        </div>
+      </div>
+
+      <div class="field-plan" data-plan-panel="paquete">
+        <div class="plan-head"><h3>modal-paquete · 6 pasos</h3><span>el más largo</span></div>
+        <div class="step-cards">
+          <article class="spec-card"><div class="spec-num">01</div><h4>¿Qué estás ofreciendo?</h4><div class="field-chips"><span class="field-chip">Categoría</span><span class="field-chip">Nombre</span><span class="field-chip">Descripción</span><span class="field-chip">Qué incluye</span></div></article>
+          <article class="spec-card"><div class="spec-num">02</div><h4>¿Para cuántas personas y cómo se paga?</h4><div class="field-chips"><span class="field-chip">Precio de referencia</span><span class="field-chip">Personas</span><span class="field-chip">Entran gratis</span><span class="field-chip">Pago</span><span class="field-chip">Trago de cortesía</span></div><p class="spec-note">Texto fijo: “Monto de referencia; lo confirma una persona”.</p></article>
+          <article class="spec-card"><div class="spec-num">03</div><h4>¿Cuándo y por dónde entran?</h4><div class="field-chips"><span class="field-chip">Tipo de entrada</span><span class="field-chip">Hora límite</span><span class="field-chip">Días válidos</span><span class="field-chip">Nota / plazo</span></div></article>
+          <article class="spec-card"><div class="spec-num">04</div><h4>¿Cómo se verá?</h4><div class="field-chips"><span class="field-chip">Foto</span><span class="field-chip">Galería</span></div><p class="spec-note">Las URL ocultas se mantienen dentro de este paso.</p></article>
+          <article class="spec-card"><div class="spec-num">05</div><h4>¿Cómo aparecerá en la web?</h4><div class="field-chips"><span class="field-chip">Orden</span><span class="field-chip">Activo</span><span class="field-chip">Destacado</span></div></article>
+          <article class="spec-card"><div class="spec-num">06</div><h4>¿Está listo para ofrecer?</h4><div class="field-chips"><span class="field-chip">Resumen completo</span><span class="field-chip">Vista de condiciones</span><span class="field-chip">Publicar</span></div></article>
+        </div>
+      </div>
+
+      <div class="field-plan" data-plan-panel="catalogo">
+        <div class="plan-head"><h3>modal-catalogo · 6 pasos</h3><span>fuente de verdad: clase</span></div>
+        <div class="step-cards">
+          <article class="spec-card"><div class="spec-num">01</div><h4>¿Qué entrada es?</h4><div class="field-chips"><span class="field-chip">Nombre</span><span class="field-chip">Clase obligatoria</span><span class="field-chip">Descripción</span></div></article>
+          <article class="spec-card"><div class="spec-num">02</div><h4>¿Para quién es?</h4><div class="field-chips"><span class="field-chip">Público</span><span class="field-chip">Rótulo</span><span class="field-chip">Zona / posición</span></div></article>
+          <article class="spec-card"><div class="spec-num">03</div><h4>¿Qué referencia verá quien la use?</h4><div class="field-chips"><span class="field-chip">Precio sugerido</span><span class="field-chip">Máx. por compra</span></div><p class="spec-note">Si clase = cortesía, el valor es null y se lee “Cortesía”. Nunca se muestra como precio cero.</p></article>
+          <article class="spec-card"><div class="spec-num">04</div><h4>¿Hasta cuándo se puede usar?</h4><div class="field-chips"><span class="field-chip">Hora máx. ingreso</span><span class="field-chip">Minutos antes</span><span class="field-chip">Cierre de venta</span></div></article>
+          <article class="spec-card"><div class="spec-num">05</div><h4>¿Cómo se verá y qué dirá?</h4><div class="field-chips"><span class="field-chip">Color</span><span class="field-chip">Emoji</span><span class="field-chip">Condiciones</span><span class="field-chip">No transferible</span><span class="field-chip">Activo</span></div></article>
+          <article class="spec-card"><div class="spec-num">06</div><h4>¿Está lista para usar?</h4><div class="field-chips"><span class="field-chip">Resumen</span><span class="field-chip">Clase visible</span><span class="field-chip">Guardar tipo</span></div></article>
+        </div>
+      </div>
+    </section>
+
+    <section class="section" id="patrones">
+      <div class="section-kicker">Entrega C</div>
+      <h2 class="section-title">Cinco patrones compartidos</h2>
+      <p class="section-intro">Misma estructura, mismos estados y mismas palabras en todos los modales. Los ejemplos de búsqueda, dinero, noche y confirmación son funcionales.</p>
+      <div class="patterns-grid">
+        <article class="pattern-card wide">
+          <h3>🔎 Buscar una persona</h3>
+          <p>Busca desde dos caracteres, muestra estado de carga, permite teclado y deja una selección inequívoca. Si no aparece, se puede completar a mano.</p>
+          <div class="pattern-demo">
+            <div class="fg" id="person-search">
+              <label>Persona registrada</label>
+              <input type="search" data-fm-person-input autocomplete="off" placeholder="Nombre, RUT, correo o teléfono…">
+              <div data-fm-person-results></div>
+              <div data-fm-person-selected></div>
+            </div>
+          </div>
+        </article>
+
+        <article class="pattern-card">
+          <h3>Pastilla de estado</h3>
+          <p>Texto y color siempre viajan juntos. El color ayuda, pero nunca es la única señal.</p>
+          <div class="pattern-demo status-row">
+            <span class="fm-status fm-status--borrador">Borrador</span>
+            <span class="fm-status fm-status--publicado">Publicado</span>
+            <span class="fm-status fm-status--cerrado">Cerrado</span>
+            <span class="fm-status fm-status--cortesia">Cortesía</span>
+            <span class="fm-status fm-status--venta">Venta</span>
+          </div>
+        </article>
+
+        <article class="pattern-card">
+          <h3>🌙 Noche publicada</h3>
+          <p>El término puede caer al día siguiente, pero la fecha guardada sigue siendo la publicada.</p>
+          <div class="pattern-demo">
+            <div class="night-fields">
+              <div class="fg"><label>Fecha publicada</label><input id="night-date" type="date" value="2026-08-07"></div>
+              <div class="fg"><label>Inicio</label><input id="night-start" type="time" value="23:00"></div>
+              <div class="fg"><label>Término</label><input id="night-end" type="time" value="05:00"></div>
+            </div>
+            <div class="fm-night-preview" id="night-output" style="margin-top:9px"></div>
+          </div>
+        </article>
+
+        <article class="pattern-card">
+          <h3>Dinero en pesos chilenos</h3>
+          <p>Se escribe con separador de miles. La clase manda: una cortesía guarda null y muestra “Cortesía”.</p>
+          <div class="pattern-demo">
+            <div class="money-grid">
+              <div class="fg"><label>Clase</label><select id="money-class"><option value="venta">Venta</option><option value="cortesia">Cortesía</option></select></div>
+              <div class="fg"><label>Precio sugerido</label><input id="money-input" value="8000"></div>
+            </div>
+            <div class="pattern-result" id="money-output"></div>
+          </div>
+        </article>
+
+        <article class="pattern-card">
+          <h3>Confirmación destructiva</h3>
+          <p>Repite exactamente qué se afectará. Una devolución exige escribir una palabra para evitar toques accidentales.</p>
+          <div class="pattern-demo">
+            <div class="danger-row">
+              <button class="btn btn-del" id="delete-list">🗑️ Borrar lista</button>
+              <button class="btn btn-del" id="refund-payment">↩️ Devolver pago</button>
+            </div>
+            <div class="pattern-result" id="danger-output">Ninguna acción realizada.</div>
+          </div>
+        </article>
+      </div>
+    </section>
+
+    <section class="section" id="integracion">
+      <div class="section-kicker">Entrega técnica</div>
+      <h2 class="section-title">Se pega sin cambiar la arquitectura</h2>
+      <p class="section-intro">Cada modal conserva sus identificadores y todos sus campos. Las funciones actuales siguen leyendo el DOM; la cáscara solo muestra un bloque por vez y llama las funciones de guardar que ya existen.</p>
+      <div class="integration">
+        <div class="decision-list">
+          <div class="decision"><b>1. Carga única:</b> agrega <code>/frate-modal.js</code> junto a <code>/frate-afiche.js</code>.</div>
+          <div class="decision"><b>2. HTML existente:</b> envuelve los campos de cada pregunta en <code>[data-fm-step]</code>. No cambies sus ID.</div>
+          <div class="decision"><b>3. Validación:</b> usa <code>required</code> para lo simple y <code>validarPaso</code> para reglas cruzadas.</div>
+          <div class="decision"><b>4. Guardado:</b> conecta <code>guardarBorrador</code> y <code>enviar</code> con las funciones actuales.</div>
+          <div class="decision"><b>5. Error:</b> deja que la promesa rechace. El componente conserva todo y muestra “Reintentar”.</div>
+        </div>
+        <pre class="code-box" aria-label="Ejemplo de integración">&lt;script src="/frate-modal.js?v=1"&gt;&lt;/script&gt;
+
+&lt;div class="mo" id="modal-evento"&gt;
+  &lt;div class="mb"&gt;
+    &lt;div class="mh"&gt;…&lt;/div&gt;
+    &lt;div class="mbody"&gt;
+      &lt;section data-fm-step data-fm-label="Qué noche"&gt;
+        &lt;!-- mismos inputs ev-* --&gt;
+      &lt;/section&gt;
+      &lt;section data-fm-step data-fm-label="A qué hora"&gt;…&lt;/section&gt;
+      &lt;section data-fm-step data-fm-label="Listo"&gt;…&lt;/section&gt;
+    &lt;/div&gt;
+    &lt;div class="mfoot"&gt;&lt;/div&gt;
+  &lt;/div&gt;
+&lt;/div&gt;
+
+const eventoModal = FrateModal.registrar('modal-evento', {
+  etiquetaFinal: 'Publicar',
+  guardarBorrador: () =&gt; saveEvento({ borrador: true }),
+  enviar: () =&gt; saveEvento({ publicar: true }),
+  armarResumen: panel =&gt; renderResumenEvento(panel)
+});</pre>
+      </div>
+    </section>
+  </main>
+
+  <footer class="page-foot">FRATE · Admin oscuro · español de Chile · propuesta del 5 de agosto de 2026</footer>
+  <div id="demo-toast" role="status" aria-live="polite"></div>
+
+  <script src="../../frate-modal.js"></script>
+  <script>
+    (function () {
+      const $ = id => document.getElementById(id);
+      const toast = mensaje => {
+        const t = $('demo-toast');
+        t.textContent = mensaje;
+        t.classList.add('show');
+        clearTimeout(window._demoToastTimer);
+        window._demoToastTimer = setTimeout(() => t.classList.remove('show'), 1800);
+      };
+      const valor = id => ($(id) || {}).value || '';
+      const filaResumen = (titulo, contenido) => `<div class="fm-summary-row"><dt>${titulo}</dt><dd>${contenido || '—'}</dd></div>`;
+      const pausa = ms => new Promise(resolve => setTimeout(resolve, ms));
+
+      function pintarNoche(fechaId, inicioId, finId, salidaId) {
+        const n = FrateModal.noche(valor(fechaId), valor(inicioId), valor(finId));
+        const out = $(salidaId);
+        if (!n) { out.textContent = 'Completa fecha y horas.'; return; }
+        out.innerHTML = `<b>${n.texto}</b><br><span>Se guarda como noche publicada: ${n.fechaPublicada}${n.cruzaMedianoche ? ' · termina al día siguiente' : ''}</span>`;
+      }
+
+      const modal = FrateModal.registrar('demo-modal-evento', {
+        pasos: [
+          { nombre:'Qué noche', icono:'1' },
+          { nombre:'A qué hora', icono:'2' },
+          { nombre:'Cómo la encontrarán', icono:'3' },
+          { nombre:'Cómo se verá', icono:'4' },
+          { nombre:'Qué entradas', icono:'5' },
+          { nombre:'Listo', icono:'6' }
+        ],
+        etiquetaFinal: 'Publicar',
+        etiquetaReintentar: 'Reintentar',
+        cerrarAlGuardar: false,
+        validarPaso: paso => {
+          if (paso === 1 && valor('demo-ev-inicio') === valor('demo-ev-fin')) return 'La hora de término debe ser distinta de la hora de inicio.';
+          return true;
+        },
+        armarResumen: () => {
+          const noche = FrateModal.noche(valor('demo-ev-fecha'), valor('demo-ev-inicio'), valor('demo-ev-fin'));
+          $('demo-summary').innerHTML = [
+            filaResumen('Noche', valor('demo-ev-nombre')),
+            filaResumen('Fecha y hora', noche ? noche.texto : 'Falta completar'),
+            filaResumen('Link', 'frate.cl/e/' + valor('demo-ev-slug')),
+            filaResumen('Lineup', valor('demo-ev-djs')),
+            filaResumen('Entradas', '4 tipos · incluye cortesías')
+          ].join('');
+        },
+        guardarBorrador: async () => { await pausa(300); toast('Borrador guardado'); },
+        enviar: async () => {
+          await pausa(450);
+          throw new Error('La base no respondió. Código EV-503.');
+        }
+      });
+      modal.marcarLimpio();
+
+      ['demo-ev-fecha','demo-ev-inicio','demo-ev-fin'].forEach(id => $(id).addEventListener('input', () => pintarNoche('demo-ev-fecha','demo-ev-inicio','demo-ev-fin','demo-night-preview')));
+      pintarNoche('demo-ev-fecha','demo-ev-inicio','demo-ev-fin','demo-night-preview');
+
+      document.querySelectorAll('[data-ticket-preset]').forEach(btn => btn.addEventListener('click', () => {
+        document.querySelectorAll('[data-ticket-preset]').forEach(x => x.setAttribute('aria-pressed', x === btn ? 'true' : 'false'));
+        modal.marcarSucio();
+      }));
+
+      document.querySelectorAll('[data-demo-state]').forEach(btn => btn.addEventListener('click', () => {
+        const estado = btn.dataset.demoState;
+        modal.abrir();
+        modal.ocultarError();
+        if (estado === 'first') modal.mostrarPaso(0);
+        if (estado === 'middle') modal.mostrarPaso(2);
+        if (estado === 'last') modal.mostrarPaso(5);
+        if (estado === 'error') { modal.mostrarPaso(5); modal.mostrarError(new Error('La base rechazó el guardado. Código EV-503.')); }
+        if (estado === 'unsaved') { modal.marcarSucio(); modal.solicitarCierre(); }
+        if (estado === 'open') modal.mostrarPaso(modal.paso);
+      }));
+
+      document.querySelectorAll('.field-tab').forEach(tab => tab.addEventListener('click', () => {
+        document.querySelectorAll('.field-tab').forEach(x => x.classList.toggle('is-active', x === tab));
+        document.querySelectorAll('[data-plan-panel]').forEach(panel => panel.classList.toggle('is-active', panel.dataset.planPanel === tab.dataset.plan));
+      }));
+
+      const personas = [
+        { nombre:'Constanza Rojas', rut:'18.456.321-7', email:'constanza@ejemplo.cl', telefono:'+56 9 6123 4455' },
+        { nombre:'Javiera Muñoz', rut:'19.224.817-3', email:'javiera@ejemplo.cl', telefono:'+56 9 7344 2108' },
+        { nombre:'Matías Silva', rut:'17.930.118-5', email:'matias@ejemplo.cl', telefono:'+56 9 8120 3377' },
+        { nombre:'Camila Soto', rut:'20.103.745-9', email:'camila@ejemplo.cl', telefono:'+56 9 6681 9022' }
+      ];
+      const normalizar = s => String(s || '').normalize('NFD').replace(/[\u0300-\u036f]/g,'').toLowerCase();
+      FrateModal.patrones.persona('person-search', {
+        buscar: async q => {
+          await pausa(260);
+          const nq = normalizar(q);
+          return personas.filter(p => normalizar([p.nombre,p.rut,p.email,p.telefono].join(' ')).includes(nq));
+        },
+        alElegir: p => toast(`${p.nombre} seleccionada`)
+      });
+
+      ['night-date','night-start','night-end'].forEach(id => $(id).addEventListener('input', () => pintarNoche('night-date','night-start','night-end','night-output')));
+      pintarNoche('night-date','night-start','night-end','night-output');
+
+      const money = FrateModal.patrones.dinero('money-input', { clase:'money-class', etiqueta:'Precio sugerido en pesos chilenos' });
+      const pintarDinero = () => {
+        const clase = $('money-class').value;
+        $('money-output').textContent = `Valor que se guarda: ${money.valor() === null ? 'null' : money.valor()} · La interfaz muestra: ${FrateModal.clp(money.valor(), clase)}`;
+      };
+      $('money-input').addEventListener('input', pintarDinero);
+      $('money-class').addEventListener('change', () => setTimeout(pintarDinero));
+      money.formatear();
+      pintarDinero();
+
+      $('delete-list').addEventListener('click', async () => {
+        const ok = await FrateModal.patrones.confirmarDestructivo({
+          titulo:'¿Borrar esta lista?',
+          mensaje:'Se eliminará la lista “Cortesía mujeres · viernes 7”.',
+          detalle:'38 personas inscritas · 12 ya tienen QR',
+          aviso:'La lista y sus inscripciones dejarán de estar disponibles.',
+          etiqueta:'Borrar lista'
+        });
+        $('danger-output').textContent = ok ? 'Ejemplo: lista confirmada para borrar.' : 'Acción cancelada. No cambió nada.';
+      });
+      $('refund-payment').addEventListener('click', async () => {
+        const ok = await FrateModal.patrones.confirmarDestructivo({
+          titulo:'¿Devolver este pago?',
+          mensaje:'Se solicitará la devolución completa de la orden #4821.',
+          detalle:'$32.000 · 4 entradas · Constanza Rojas',
+          aviso:'Los cuatro QR quedarán anulados y la devolución no se puede revertir desde el admin.',
+          textoRequerido:'DEVOLVER',
+          etiqueta:'Devolver $32.000'
+        });
+        $('danger-output').textContent = ok ? 'Ejemplo: devolución confirmada.' : 'Acción cancelada. No cambió nada.';
+      });
+    })();
+  </script>
+</body>
+</html>

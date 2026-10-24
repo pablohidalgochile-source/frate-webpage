@@ -1,0 +1,137 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>FRATE OS · POS 09 El sábado real</title>
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🌙</text></svg>">
+<link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@600;800;900&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="/os-manual.css">
+<link rel="stylesheet" href="/os-pos.css">
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<style>
+  .dos{display:grid;grid-template-columns:repeat(auto-fit,minmax(260px,1fr));gap:12px;margin-top:14px}
+  .via{background:var(--neg2);border:1px solid var(--bor);border-radius:13px;padding:16px 18px}
+  .via h4{font-family:var(--disp);font-weight:800;font-size:1.05rem;text-transform:uppercase;margin-bottom:4px}
+  .via .c{font-size:.68rem;letter-spacing:1.3px;text-transform:uppercase;color:var(--gris2);margin-bottom:9px}
+  .via p{font-size:.83rem;color:var(--gris)}
+  .cifras{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:12px;margin-top:16px}
+  .cif{background:var(--neg2);border:1px solid var(--bor);border-radius:13px;padding:18px;text-align:center}
+  .cif .n{font-family:var(--disp);font-weight:900;font-size:1.85rem;color:var(--acc);line-height:1}
+  .cif .l{font-size:.7rem;letter-spacing:1.2px;text-transform:uppercase;color:var(--gris2);margin-top:6px}
+  .tabla{width:100%;border-collapse:collapse;margin-top:14px;font-size:.9rem}
+  .tabla th,.tabla td{padding:9px 12px;text-align:left;border-bottom:1px solid var(--bor)}
+  .tabla th{font-family:var(--disp);text-transform:uppercase;letter-spacing:1px;font-size:.7rem;color:var(--gris2)}
+  .tabla td.n,.tabla th.n{text-align:right;font-variant-numeric:tabular-nums}
+  .tabla tfoot td{font-family:var(--disp);font-weight:800;border-top:2px solid var(--bor2);border-bottom:none}
+  .ok{color:var(--verde)} .warn{color:var(--oro)} .bad{color:var(--rojo)}
+  .tabwrap{overflow-x:auto}
+</style>
+</head>
+<body>
+<div id="bar"></div>
+<div class="wrap">
+
+  <div class="hero">
+    <div class="eyebrow">POS · Manual 09 · Caso real</div>
+    <h1>El sábado <em>real</em></h1>
+    <p class="sub">Una noche de verdad —<span class="num">&nbsp;FCC-2026-07-25&nbsp;</span>— de la apertura al cierre: los números que salieron, el susto de las diferencias falsas, y cómo la caja terminó cuadrada.</p>
+    <div class="meta"><span>Con datos de esa noche</span><span>·</span><span>7 minutos</span><span>·</span><span>Para todos</span></div>
+  </div>
+
+  <section>
+    <div class="stag">22:00 · Abrir</div>
+    <h2>Cada caja abrió con su sencillo contado</h2>
+    <p class="lead">Nadie adivinó el fondo. Cada caja lo contó billete a billete y lo dejó escrito. Así, a las 4 AM, el sistema sabe con qué empezaste y no hay «me parece que era».</p>
+    <p style="color:var(--gris);margin-top:12px">La Caja Schop, por ejemplo, abrió con esto:</p>
+    <div class="tabwrap">
+    <table class="tabla">
+      <thead><tr><th>Billete / moneda</th><th class="n">Cantidad</th><th class="n">Subtotal</th></tr></thead>
+      <tbody>
+        <tr><td>$10.000</td><td class="n">2</td><td class="n">$20.000</td></tr>
+        <tr><td>$5.000</td><td class="n">4</td><td class="n">$20.000</td></tr>
+        <tr><td>$1.000</td><td class="n">50</td><td class="n">$50.000</td></tr>
+        <tr><td>$500</td><td class="n">10</td><td class="n">$5.000</td></tr>
+        <tr><td>$100</td><td class="n">20</td><td class="n">$2.000</td></tr>
+      </tbody>
+      <tfoot><tr><td>Sencillo inicial</td><td class="n">86 unidades</td><td class="n">$97.000</td></tr></tfoot>
+    </table>
+    </div>
+    <div class="bien"><b>Puerta 2</b> abrió con 3 billetes de $10.000. Ese dato —cuánto sencillo, en qué billetes— es la base de todo el cierre. Si está mal cargado, el cierre miente.</div>
+  </section>
+
+  <section>
+    <div class="stag">22:00 – 04:00 · Vender</div>
+    <h2>La noche entera cobrando</h2>
+    <p class="lead">Dos puertas y la barra, toda la noche. Efectivo, tarjeta, mixto. Cuando el internet se cortaba, se seguía vendiendo igual: cada venta quedó guardada y se sincronizó al volver la señal.</p>
+    <div class="cifras">
+      <div class="cif"><div class="n">$4.378.000</div><div class="l">Vendido en la noche</div></div>
+      <div class="cif"><div class="n">267</div><div class="l">Ventas</div></div>
+      <div class="cif"><div class="n">3</div><div class="l">Cajas abiertas</div></div>
+    </div>
+  </section>
+
+  <section>
+    <div class="stag">04:30 · Cerrar</div>
+    <h2>«Puerta 1: diferencia de $97.000»</h2>
+    <p class="lead">Llegó la hora de cerrar y el sistema tiró un susto. Dos cajas marcaron diferencias enormes, como si hubiera desaparecido plata:</p>
+    <div class="tabwrap">
+    <table class="tabla">
+      <thead><tr><th>Caja</th><th class="n">Lo que marcó al cerrar</th></tr></thead>
+      <tbody>
+        <tr><td>Puerta 1</td><td class="n bad">− $97.000</td></tr>
+        <tr><td>Puerta 2</td><td class="n bad">− $141.000</td></tr>
+      </tbody>
+    </table>
+    </div>
+    <div class="choque">
+      <div class="quien">🧠 La pista</div>
+      Una diferencia <b>enorme y redonda</b> ($97.000, $141.000) casi nunca es un robo. Un faltante de verdad es feo y con monedas: −$3.250, −$8.700. Cuando ves cifras grandes y limpias, sospecha del <b>conteo o del sistema</b>, no de la gente. Antes de acusar a nadie: respira.
+    </div>
+  </section>
+
+  <section>
+    <div class="stag">El diagnóstico</div>
+    <h2>No faltaba plata: la caja se había reabierto</h2>
+    <p class="lead">Lo que pasó no fue un robo. Fue esto: en la noche, esas cajas se <b>reabrieron</b> para «seguir vendiendo un rato más». Y reabrir crea una <strong>segunda sesión</strong>.</p>
+    <div class="peligro"><b>El error en cadena.</b> Al cerrar, el sistema calculaba lo esperado sobre la <b>sesión nueva</b> —que estaba casi vacía— y de paso <b>borraba el sencillo inicial</b> que habías contado. Resultado: te comparaba toda la plata real contra una caja «recién nacida». De ahí salían los $97.000 y los $141.000 fantasma.</div>
+  </section>
+
+  <section>
+    <div class="stag">La corrección</div>
+    <h2>Se corrige el cotejo, no se reabre</h2>
+    <p class="lead">La solución no fue reabrir otra vez ni «forzar» un número. Se arregló de raíz: el cierre ahora suma <b>por activación de la caja</b> (toda la noche junta, no por sesión suelta) y <b>conserva</b> el sencillo inicial. Con eso, los números reales aparecieron solos:</p>
+    <div class="tabwrap">
+    <table class="tabla">
+      <thead><tr><th>Caja</th><th class="n">Diferencia real</th><th>Qué significa</th></tr></thead>
+      <tbody>
+        <tr><td>Puerta 1</td><td class="n ok">$0</td><td>Cuadró exacto.</td></tr>
+        <tr><td>Puerta 2</td><td class="n warn">+ $1.000</td><td>Sobró mil. Un vuelto de más, nada grave.</td></tr>
+        <tr><td>Caja Schop</td><td class="n bad">− $10.000</td><td>Faltante real. Chico, y ese sí hay que revisarlo.</td></tr>
+      </tbody>
+      <tfoot><tr><td>La noche</td><td class="n bad">− $10.000</td><td>De $4.378.000 vendidos.</td></tr></tfoot>
+    </table>
+    </div>
+    <div class="oro"><b>El susto pasó de $238.000 a $10.000.</b> Las dos diferencias gigantes eran mentira del sistema. La única de verdad fue un faltante de $10.000 en una caja — chiquito para una noche de $4,3 millones, y por fin un número en el que sí vale la pena mirar.</div>
+  </section>
+
+  <section>
+    <div class="stag">La lección</div>
+    <h2>Cómo lo vives tú</h2>
+    <div class="dos">
+      <div class="via"><h4>👤 Operador · en la Sunmi</h4><div class="c">Tu cierre marca una diferencia enorme</div><p>No cunda el pánico ni acuses a nadie. Si el número es grande y redondo, <b>avisa al admin</b>: casi siempre es la caja reabierta o el sencillo mal cargado, no plata perdida. Y nunca reabras «para arreglarlo».</p></div>
+      <div class="via"><h4>🛠 Admin · en el panel</h4><div class="c">Ordenar el cierre</div><p>Revisa primero el <b>sencillo inicial</b> y si la caja se reabrió. Corriges el <b>cotejo</b> —no reabres— y el sistema recalcula solo. La diferencia que quede después de eso es la de verdad: esa sí se persigue.</p></div>
+    </div>
+    <div class="bien"><b>La regla que salió de esta noche:</b> reabrir una caja para «seguir un rato» descuadra el cierre. Si hay que vender más, se abre un turno nuevo bien hecho; si hay que corregir, se corrige el cotejo. Nunca se reabre para tapar.</div>
+  </section>
+
+  <div class="pie">FRATE OS · POS · Manual 09 · <a href="/os-pos-covers">← Covers</a> · <a href="/os-pos-reglas">Ver las reglas de oro →</a> · <a href="/os-pos">↑ Volver al índice del POS</a></div>
+</div>
+
+<script src="/os-guard.js"></script>
+<script>
+  document.getElementById('bar').innerHTML = osBarra('09', 'pos');
+  osProteger();
+</script>
+</body>
+</html>

@@ -1,0 +1,130 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+<title>FRATE WEB (TICKETERA) · CÁMARA</title>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="/frate-supabase.js"></script>
+<style>
+  :root{--bg:#08080a;--card:#141416;--borde:#26262b;--gris:#8b8892;--verde:#22d37a;--air:#ff3040;--gold:#f0c84a;}
+  *{box-sizing:border-box;margin:0;padding:0;}
+  body{background:var(--bg);color:#fff;font-family:'Inter',system-ui,sans-serif;min-height:100vh;padding:16px;}
+  .wrap{max-width:520px;margin:0 auto;}
+  h1{font-size:1.2rem;font-weight:900;letter-spacing:1px;}
+  h1 b{color:var(--air);}
+  .sub{color:var(--gris);font-size:.84rem;margin:2px 0 14px;}
+  .card{background:var(--card);border:1px solid var(--borde);border-radius:14px;padding:16px;margin-bottom:12px;}
+  label{font-size:.74rem;color:var(--gris);text-transform:uppercase;letter-spacing:1px;display:block;margin-bottom:5px;}
+  input,select{width:100%;background:#0d0d10;border:1px solid var(--borde);color:#fff;padding:12px;border-radius:10px;font-family:inherit;font-size:1rem;margin-bottom:10px;}
+  #sala{text-transform:uppercase;letter-spacing:3px;font-weight:800;text-align:center;font-family:ui-monospace,monospace;}
+  button{font-family:inherit;font-weight:800;border:0;border-radius:11px;padding:14px;cursor:pointer;width:100%;font-size:1rem;}
+  .b-v{background:var(--verde);color:#04120a;} .b-r{background:var(--air);color:#fff;} .b-g{background:transparent;border:1px solid var(--borde);color:var(--gris);}
+  #video{width:100%;border-radius:12px;background:#000;aspect-ratio:16/9;object-fit:cover;}
+  .status{display:flex;align-items:center;gap:9px;font-weight:800;font-size:.9rem;margin-top:6px;}
+  .dot{width:10px;height:10px;border-radius:50%;background:var(--gris);}
+  .dot.on{background:var(--verde);box-shadow:0 0 0 0 rgba(34,211,122,.6);animation:p 1.4s infinite;}
+  .dot.wait{background:var(--gold);}
+  @keyframes p{0%{box-shadow:0 0 0 0 rgba(34,211,122,.5);}70%{box-shadow:0 0 0 8px rgba(34,211,122,0);}100%{box-shadow:0 0 0 0 rgba(34,211,122,0);}}
+  .row{display:flex;gap:8px;align-items:center;margin-top:8px;}
+  .row span{font-size:.82rem;color:var(--gris);white-space:nowrap;}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <h1><b>●</b> FRATE · Cámara</h1>
+  <div class="sub">Transmite la cámara de este iPhone a la pantalla del estudio. Todos en la misma WiFi.</div>
+
+  <div class="card" id="setup">
+    <label>Código de la sala (lo ves en la pantalla del estudio)</label>
+    <input id="sala" placeholder="FRATE-482" maxlength="14" />
+    <label>Nombre de esta cámara</label>
+    <input id="nombre" placeholder="Ej: Escenario, DJ, Público…" />
+    <label>Cámara</label>
+    <div class="row" style="margin-top:0;">
+      <select id="cam"><option value="">— por defecto (trasera) —</option></select>
+      <button class="b-g" style="width:auto;padding:12px 14px;white-space:nowrap;" onclick="detectar()">🎥</button>
+    </div>
+    <button class="b-v" id="go" onclick="transmitir()">▶ Transmitir</button>
+  </div>
+
+  <div class="card" id="live" style="display:none;">
+    <video id="video" autoplay playsinline muted></video>
+    <div class="status"><span class="dot" id="dot"></span><span id="st">Conectando…</span></div>
+    <div class="row"><span>🔍 Zoom</span><input type="range" id="zoom" min="1" max="5" step="0.1" value="1" style="flex:1;margin:0;accent-color:var(--verde);" oninput="setZoom(this.value)" /><span id="zval">1x</span></div>
+    <button class="b-r" style="margin-top:12px;" onclick="cortar()">■ Detener transmisión</button>
+  </div>
+</div>
+
+<script>
+  const camId = 'cam-' + Math.random().toString(36).slice(2,9);
+  let pc=null, stream=null, ch=null, sala='', nombre='', connected=false;
+  const $ = id => document.getElementById(id);
+  const ICE = { iceServers:[{urls:'stun:stun.l.google.com:19302'},{urls:'stun:stun1.l.google.com:19302'}] };
+
+  // Prefill sala desde ?sala=
+  try{ const u=new URL(location.href); const s=u.searchParams.get('sala'); if(s) $('sala').value=s.toUpperCase(); }catch(e){}
+
+  async function detectar(){
+    try{
+      const cams = await navigator.mediaDevices.enumerateDevices().then(d=>d.filter(x=>x.kind==='videoinput'));
+      if(!cams.length){ // pedir permiso primero
+        await navigator.mediaDevices.getUserMedia({video:true}).then(s=>s.getTracks().forEach(t=>t.stop()));
+      }
+      const list = (await navigator.mediaDevices.enumerateDevices()).filter(x=>x.kind==='videoinput');
+      $('cam').innerHTML = '<option value="">— por defecto (trasera) —</option>' + list.map((c,i)=>`<option value="${c.deviceId}">${(c.label||('Cámara '+(i+1))).replace(/</g,'&lt;')}</option>`).join('');
+      alert('Cámaras: '+list.length);
+    }catch(e){ alert('Permite el acceso a la cámara primero.'); }
+  }
+
+  async function transmitir(){
+    sala = ($('sala').value||'').trim().toUpperCase();
+    nombre = ($('nombre').value||'').trim() || 'Cámara';
+    if(!sala){ alert('Pon el código de la sala'); return; }
+    try{
+      const camDev = $('cam').value;
+      stream = await navigator.mediaDevices.getUserMedia({ video: camDev? {deviceId:{exact:camDev}} : {facingMode:'environment'}, audio:false });
+    }catch(e){ alert('No se pudo abrir la cámara: '+(e.message||e)); return; }
+    $('video').srcObject = stream;
+    $('setup').style.display='none'; $('live').style.display='';
+    setupZoom();
+    ch = sb.channel('estudio-'+sala, { config:{ broadcast:{ self:false } } });
+    ch.on('broadcast', { event:'sig' }, ({payload})=>onSig(payload));
+    ch.subscribe((s)=>{ if(s==='SUBSCRIBED'){ send({t:'hello-cam', id:camId, nombre}); setEstado('wait','Buscando estudio…'); } });
+  }
+  function send(p){ if(ch) ch.send({ type:'broadcast', event:'sig', payload:p }); }
+
+  async function onSig(p){
+    if(!p) return;
+    if(p.t==='hello-estudio'){ if(!connected) await offer(); }
+    else if(p.t==='answer' && p.to===camId && pc){ try{ await pc.setRemoteDescription(p.sdp); }catch(e){} }
+    else if(p.t==='ice' && p.to===camId && pc){ try{ await pc.addIceCandidate(p.cand); }catch(e){} }
+  }
+  async function offer(){
+    if(pc){ try{ pc.close(); }catch(e){} }
+    pc = new RTCPeerConnection(ICE);
+    stream.getTracks().forEach(t=>pc.addTrack(t, stream));
+    pc.onicecandidate = e=>{ if(e.candidate) send({t:'ice', from:camId, to:'estudio', cand:e.candidate}); };
+    pc.onconnectionstatechange = ()=>{ const st=pc.connectionState; connected = st==='connected';
+      if(st==='connected') setEstado('on','● EN VIVO — transmitiendo');
+      else if(st==='connecting') setEstado('wait','Conectando…');
+      else if(['failed','disconnected'].includes(st)){ setEstado('','Reconectando…'); connected=false; setTimeout(()=>{ if(!connected) offer(); }, 1500); }
+    };
+    const o = await pc.createOffer(); await pc.setLocalDescription(o);
+    send({t:'offer', from:camId, nombre, sdp:o});
+  }
+  function setEstado(cls,txt){ $('dot').className='dot '+cls; $('st').textContent=txt; }
+
+  function setupZoom(){
+    try{ const track=stream.getVideoTracks()[0]; const caps=track.getCapabilities?track.getCapabilities():{};
+      const z=$('zoom');
+      if(caps.zoom && caps.zoom.max>caps.zoom.min){ z.min=caps.zoom.min; z.max=caps.zoom.max; z.step=caps.zoom.step||0.1; z.value=caps.zoom.min; $('zval').textContent=(+z.value).toFixed(1)+'x'; z.parentElement.style.display='flex'; }
+      else z.parentElement.style.display='none';
+    }catch(e){}
+  }
+  async function setZoom(v){ $('zval').textContent=(+v).toFixed(1)+'x'; try{ await stream.getVideoTracks()[0].applyConstraints({ advanced:[{ zoom:parseFloat(v) }] }); }catch(e){} }
+
+  function cortar(){ try{ if(pc) pc.close(); }catch(e){} try{ if(stream) stream.getTracks().forEach(t=>t.stop()); }catch(e){} try{ if(ch) sb.removeChannel(ch); }catch(e){} location.reload(); }
+</script>
+</body>
+</html>

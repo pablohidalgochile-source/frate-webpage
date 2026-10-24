@@ -1,0 +1,107 @@
+<!doctype html><html lang="es"><head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>Temporada especial · FRATE</title>
+<!-- Estas etiquetas las REESCRIBE /api/temporada con los datos reales de la
+     temporada vigente (nombre, noches, precio, flyer). Lo que queda acá es el
+     respaldo por si la función falla: la página igual se ve bien compartida. -->
+<meta property="og:type" content="website" />
+<meta property="og:site_name" content="FRATE" />
+<meta property="og:title" content="Temporada especial · FRATE" />
+<meta property="og:description" content="Noches temáticas en Fraternidad Campus Central." />
+<meta property="og:url" content="https://www.frate.cl/temporada" />
+<meta property="og:image" content="https://www.frate.cl/assets/og.png" />
+<meta property="og:image:width" content="1200" />
+<meta property="og:image:height" content="630" />
+<meta name="twitter:card" content="summary_large_image" />
+<meta name="twitter:title" content="Temporada especial · FRATE" />
+<meta name="twitter:description" content="Noches temáticas en Fraternidad Campus Central." />
+<meta name="twitter:image" content="https://www.frate.cl/assets/og.png" />
+<meta name="description" content="Noches temáticas en Fraternidad Campus Central.">
+<link rel="icon" href="/icon-frate.svg">
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Anton&family=Barlow+Condensed:wght@500;700;900&family=Inter:wght@400;500;700&display=swap" rel="stylesheet">
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<style>
+:root{--bg:#050506;--rojo:#E8363D;--muted:#8b8b93;--border:rgba(255,255,255,.1);}
+*{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent;}
+body{background:var(--bg);color:#f4f4f5;font-family:'Inter',system-ui,sans-serif;min-height:100vh;overflow-x:hidden;}
+.wrap{max-width:560px;margin:0 auto;padding:22px 16px 60px;}
+.marca{position:fixed;inset:0;opacity:.05;color:var(--rojo);font-family:'Anton',sans-serif;font-size:3.2rem;line-height:1.12;letter-spacing:2px;pointer-events:none;overflow:hidden;z-index:0;}
+.z{position:relative;z-index:1;}
+.kicker{font-size:.6rem;letter-spacing:4px;text-transform:uppercase;color:var(--rojo);text-align:center;}
+.tit{font-family:'Anton',sans-serif;font-size:clamp(2.9rem,13vw,4.6rem);line-height:.9;color:var(--rojo);text-align:center;letter-spacing:1px;margin-top:8px;text-shadow:0 2px 34px rgba(232,54,61,.45);}
+.tit .anio{color:#fff;display:block;}
+.sub{text-align:center;color:var(--muted);font-size:.86rem;margin-top:12px;}
+.flyer{width:100%;border-radius:14px;margin-top:22px;display:block;border:1px solid var(--border);}
+.teaser{width:100%;border-radius:14px;margin-top:14px;display:block;background:#000;border:1px solid var(--border);}
+.intro{color:#c3c3ca;font-size:.92rem;line-height:1.7;margin-top:20px;text-align:center;}
+.sect{font-size:.6rem;letter-spacing:4px;text-transform:uppercase;color:var(--muted);margin:28px 0 12px;display:flex;align-items:center;gap:12px;}
+.sect::after{content:'';flex:1;height:1px;background:var(--border);}
+.n{display:flex;gap:13px;align-items:center;background:rgba(18,18,21,.72);border:1px solid var(--border);border-radius:13px;padding:13px;margin-bottom:10px;text-decoration:none;transition:.2s;}
+.n:hover{border-color:rgba(232,54,61,.55);transform:translateY(-2px);}
+.n .d{background:var(--rojo);border-radius:9px;padding:9px 11px;text-align:center;min-width:60px;}
+.n .dow{font-size:.52rem;letter-spacing:1.5px;color:#2d0508;font-weight:700;}
+.n .day{font-family:'Anton',sans-serif;font-size:1.7rem;color:#2d0508;line-height:.9;}
+.n .nm{color:#fff;font-family:'Barlow Condensed',sans-serif;font-weight:900;font-size:1.25rem;line-height:1.05;text-transform:uppercase;}
+.n .ba{color:var(--muted);font-size:.74rem;margin-top:2px;}
+.n .pr{color:#fff;font-size:.82rem;font-weight:700;white-space:nowrap;}
+.pie{text-align:center;margin-top:30px;}
+.pie a{color:var(--muted);font-size:.74rem;text-decoration:none;letter-spacing:2px;}
+.cargando{text-align:center;color:var(--muted);font-size:.8rem;padding:40px 0;}
+</style></head><body>
+<div class="marca" id="marca"></div>
+<div class="wrap z">
+  <div id="cuerpo"><div class="cargando">Cargando…</div></div>
+  <div class="pie"><a href="/">← VOLVER A FRATE.CL</a></div>
+</div>
+<script>
+const sb = window.supabase.createClient('https://ydwlpraoaaijlfssevoh.supabase.co','sb_publishable_-_7GeDU_h84zf2v--lWQaQ_15ZFxOWt');
+const DOW=['DOM','LUN','MAR','MIÉ','JUE','VIE','SÁB'], MON=['ENE','FEB','MAR','ABR','MAY','JUN','JUL','AGO','SEP','OCT','NOV','DIC'];
+const esc=s=>String(s==null?'':s).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+function enVentana(t){
+  const n=new Date(), d=t.venta_desde?new Date(t.venta_desde):null, h=t.venta_hasta?new Date(t.venta_hasta):null;
+  if(d&&!isNaN(+d)&&n<d) return false;
+  if(h&&!isNaN(+h)&&n>=h) return false;
+  return true;
+}
+(async()=>{
+  try{
+    const [{data:evs},{data:cfg}] = await Promise.all([
+      sb.from('eventos').select('*, tipos_ticket(*)').eq('activo',true).order('fecha'),
+      sb.from('config_valores').select('clave,valor').in('clave',['temporada_texto','temporada_video','temporada_imagen'])
+    ]);
+    const C={}; (cfg||[]).forEach(r=>C[r.clave]=r.valor||'');
+    const noches=(evs||[]).filter(e=>((e.brief||{}).especial)&&((((e.brief||{}).produccion||{}).temporada||{}).nombre));
+    if(noches.length<2){ document.getElementById('cuerpo').innerHTML='<div class="cargando">No hay una temporada activa en este momento.<br><br>Mira las próximas fechas en <a href="/" style="color:var(--rojo)">frate.cl</a></div>'; return; }
+    const nombre=(((noches[0].brief||{}).produccion||{}).temporada||{}).nombre||'';
+    // el rastro del fondo
+    document.getElementById('marca').textContent=(nombre.toUpperCase().replace(/\s+\d{4}$/,'')+' · ').repeat(60);
+    const m=nombre.match(/^(.*?)\s*(\d{4})$/);
+    const tit = m ? esc(m[1].toUpperCase())+'<span class="anio">'+esc(m[2])+'</span>' : esc(nombre.toUpperCase());
+    const dias=noches.map(e=>{const d=new Date(e.fecha+'T12:00:00'); return String(d.getDate());});
+    const mes=(()=>{const d=new Date(noches[0].fecha+'T12:00:00'); return MON[d.getMonth()];})();
+    const cuando = dias.length>1 ? dias.slice(0,-1).join(', ')+' y '+dias[dias.length-1] : dias[0];
+    const filas=noches.map(ev=>{
+      const d=new Date(ev.fecha+'T12:00:00');
+      const act=(ev.tipos_ticket||[]).filter(t=>t.estado==='Activo'&&t.solo_web!==false&&(t.disponible??1)>0&&enVentana(t));
+      const min=act.length?Math.min(...act.map(t=>t.precio)):0;
+      return '<a class="n" href="/e/'+esc(ev.slug||ev.id)+'">'
+        +'<div class="d"><div class="dow">'+DOW[d.getDay()]+'</div><div class="day">'+String(d.getDate()).padStart(2,'0')+'</div></div>'
+        +'<div style="flex:1;min-width:0;"><div class="nm">'+esc(ev.nombre)+'</div>'
+        +(ev.descripcion?'<div class="ba">'+esc(ev.descripcion)+'</div>':'')+'</div>'
+        +'<div class="pr">'+(min?'desde $'+min.toLocaleString('es-CL'):'')+'</div></a>';
+    }).join('');
+    document.getElementById('cuerpo').innerHTML=
+       '<div class="kicker">Temporada especial</div>'
+      +'<h1 class="tit">'+tit+'</h1>'
+      +'<div class="sub">'+noches.length+' noches temáticas · '+esc(cuando)+' de '+esc(mes)+'</div>'
+      +(C.temporada_imagen?'<img class="flyer" src="'+esc(C.temporada_imagen)+'" alt="'+esc(nombre)+'" />':'')
+      +(C.temporada_video?'<video class="teaser" src="'+esc(C.temporada_video)+'" controls playsinline preload="metadata"></video>':'')
+      +(C.temporada_texto?'<div class="intro">'+esc(C.temporada_texto)+'</div>':'')
+      +'<div class="sect">Las noches</div>'+filas;
+    document.title=nombre+' · FRATE';
+  }catch(e){
+    document.getElementById('cuerpo').innerHTML='<div class="cargando">No pudimos cargar la temporada. Mira las fechas en <a href="/" style="color:var(--rojo)">frate.cl</a></div>';
+  }
+})();
+</script></body></html>

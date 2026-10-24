@@ -1,0 +1,905 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+<title>FRATE WEB (TICKETERA) · PASE</title>
+<link rel="icon" href="/icon-frate.svg" />
+<link rel="manifest" href="/pase-manifest.json" />
+<meta name="theme-color" content="#E8363D" />
+<meta name="apple-mobile-web-app-capable" content="yes" />
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+<meta name="apple-mobile-web-app-title" content="FRATE PASE" />
+<link rel="apple-touch-icon" href="/icon-frate.svg" />
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="/frate-supabase.js"></script>
+<style>
+  :root{ --negro:#0a0a0d; --negro2:#141418; --negro3:#1c1c22; --input:#101014; --borde:#2a2a31; --gris:#8f8f98; --rojo:#E8363D; --rojo2:#ff5a60; --dorado:#E6C860; --verde:#4ade80; --azul:#3b82f6; }
+  *{ box-sizing:border-box; margin:0; padding:0; }
+  body{ background:var(--negro); color:#fff; font-family:'Inter',-apple-system,system-ui,sans-serif; min-height:100vh; -webkit-font-smoothing:antialiased; }
+  input,select,button,textarea{ font-family:inherit; }
+  .wrap{ max-width:560px; margin:0 auto; padding:16px 16px calc(30px + env(safe-area-inset-bottom)); }
+  /* Login */
+  #login{ min-height:100vh; display:flex; align-items:center; justify-content:center; padding:20px; }
+  .lbox{ background:var(--negro2); border:1px solid var(--borde); border-radius:20px; padding:34px; width:360px; max-width:94vw; text-align:center; }
+  .fld{ width:100%; background:var(--input); border:1px solid var(--borde); color:#fff; padding:14px 14px; border-radius:12px; font-size:1rem; margin-top:10px; }
+  .fld:focus{ outline:0; border-color:var(--rojo); box-shadow:0 0 0 3px rgba(232,54,61,.18); }
+  .btn{ width:100%; background:var(--rojo); color:#fff; border:0; padding:15px; border-radius:12px; font-weight:800; font-size:1rem; margin-top:14px; cursor:pointer; letter-spacing:.4px; box-shadow:0 8px 22px -8px rgba(232,54,61,.6); }
+  .btn:active{ transform:scale(.98); }
+  .btn.ghost{ background:transparent; border:1px solid var(--borde); color:var(--gris); box-shadow:none; }
+  .btn.gold{ background:var(--dorado); color:#1a1200; box-shadow:none; }
+  .btn.green{ background:var(--verde); color:#04210f; box-shadow:none; }
+  .btn.sm{ width:auto; padding:11px 15px; font-size:.86rem; margin-top:0; }
+  /* Header */
+  .top{ display:flex; align-items:center; justify-content:space-between; gap:12px; margin-bottom:8px; }
+  .brand .b1{ font-size:1.5rem; font-weight:900; letter-spacing:2px; line-height:1; }
+  .brand .b2{ color:var(--dorado); font-size:.62rem; letter-spacing:2px; text-transform:uppercase; font-weight:800; margin-top:2px; }
+  .hbtn{ background:transparent; border:1px solid var(--borde); color:var(--gris); padding:9px 12px; border-radius:10px; cursor:pointer; font-size:.8rem; }
+  .evbar{ background:var(--negro2); border:1px solid var(--borde); border-radius:12px; padding:11px 14px; margin:10px 0 16px; display:flex; align-items:center; gap:10px; }
+  .evbar .k{ font-size:.62rem; letter-spacing:1.5px; text-transform:uppercase; color:var(--gris); font-weight:700; }
+  .evbar .v{ font-weight:800; font-size:1rem; }
+  .evbar select{ margin-left:auto; background:var(--input); border:1px solid var(--borde); color:#fff; border-radius:9px; padding:8px 10px; font-size:.82rem; max-width:56%; }
+  /* Big actions */
+  .acts{ display:flex; flex-direction:column; gap:11px; }
+  .big{ display:flex; align-items:center; gap:14px; background:var(--negro2); border:1px solid var(--borde); border-radius:16px; padding:16px 16px; cursor:pointer; text-align:left; width:100%; color:#fff; }
+  .big:active{ transform:scale(.99); border-color:var(--rojo); }
+  .big .ico{ width:46px; height:46px; border-radius:13px; display:flex; align-items:center; justify-content:center; font-size:22px; background:rgba(232,54,61,.15); flex:none; }
+  .big.gold .ico{ background:rgba(230,200,96,.15); } .big.green .ico{ background:rgba(74,222,128,.15); } .big.blue .ico{ background:rgba(59,130,246,.15); }
+  .big .tt{ font-size:1.05rem; font-weight:800; }
+  .big .ds{ font-size:.78rem; color:var(--gris); margin-top:2px; }
+  .big .n{ margin-left:auto; background:var(--rojo); color:#fff; font-size:.78rem; font-weight:800; border-radius:99px; min-width:24px; height:24px; display:flex; align-items:center; justify-content:center; padding:0 7px; }
+  .big .soon{ margin-left:auto; font-size:.64rem; font-weight:800; letter-spacing:.5px; text-transform:uppercase; color:var(--dorado); background:rgba(230,200,96,.12); border:1px solid rgba(230,200,96,.3); padding:4px 9px; border-radius:99px; }
+  .sec{ margin:22px 0 10px; font-size:.68rem; letter-spacing:2px; text-transform:uppercase; color:var(--gris); font-weight:800; }
+  /* aforo mini */
+  .aforo{ background:var(--negro2); border:1px solid var(--borde); border-radius:16px; padding:16px; text-align:center; color:var(--gris); font-size:.86rem; line-height:1.5; }
+  .aforo b{ color:var(--dorado); }
+  /* Modal */
+  .ov{ position:fixed; inset:0; background:rgba(0,0,0,.74); display:none; align-items:flex-end; justify-content:center; z-index:50; }
+  .ov.on{ display:flex; }
+  @media (min-width:560px){ .ov{ align-items:center; padding:20px; } }
+  .mb{ background:var(--negro2); border:1px solid var(--borde); border-radius:20px 20px 0 0; padding:22px 20px calc(22px + env(safe-area-inset-bottom)); width:100%; max-width:480px; max-height:92vh; overflow:auto; }
+  @media (min-width:560px){ .mb{ border-radius:20px; } }
+  .mb h3{ font-weight:900; font-size:1.4rem; margin-bottom:4px; }
+  .mb .sub{ color:var(--gris); font-size:.82rem; margin-bottom:6px; }
+  .lbl{ font-size:.7rem; color:var(--gris); text-transform:uppercase; letter-spacing:1px; margin:13px 0 5px; display:block; font-weight:700; }
+  .row2{ display:flex; gap:10px; } .row2 > *{ flex:1; }
+  .step{ display:flex; align-items:center; gap:12px; }
+  .step .pm{ width:44px; height:44px; border-radius:12px; background:var(--input); border:1px solid var(--borde); color:#fff; font-size:22px; font-weight:700; cursor:pointer; }
+  .step b{ font-size:26px; font-weight:900; min-width:40px; text-align:center; }
+  .msg{ font-size:.82rem; margin-top:10px; min-height:18px; }
+  .msg.err{ color:var(--rojo2); } .msg.ok{ color:var(--verde); }
+  .result{ text-align:center; }
+  .result .lk{ background:var(--input); border:1px solid var(--borde); border-radius:10px; padding:12px; word-break:break-all; font-family:monospace; font-size:.82rem; color:var(--dorado); margin:12px 0; }
+  .result img{ width:180px; height:180px; background:#fff; border-radius:12px; padding:8px; margin:6px auto; display:block; }
+  .toast{ position:fixed; bottom:calc(22px + env(safe-area-inset-bottom)); left:50%; transform:translateX(-50%); background:var(--verde); color:#04210f; font-weight:800; padding:13px 22px; border-radius:30px; z-index:80; opacity:0; transition:opacity .25s, transform .25s; pointer-events:none; max-width:90vw; text-align:center; }
+  .toast.on{ opacity:1; transform:translateX(-50%) translateY(-6px); }
+  .toast.err{ background:var(--rojo); color:#fff; }
+  .spin{ text-align:center; color:var(--gris); padding:34px; }
+  .listrow{ display:flex; align-items:center; gap:10px; background:var(--input); border:1px solid var(--borde); border-radius:11px; padding:11px 12px; margin-bottom:8px; cursor:pointer; }
+  .listrow:active{ border-color:var(--rojo); }
+  .listrow .nm{ font-weight:700; font-size:.92rem; } .listrow .mt{ font-size:.72rem; color:var(--gris); margin-top:1px; }
+  .listrow .go{ margin-left:auto; color:var(--gris); }
+.opch{background:#151517;border:1px solid var(--borde,#2a2a2e);border-radius:12px;padding:11px 14px;
+  margin-top:12px;cursor:pointer;display:flex;flex-wrap:wrap;align-items:center;gap:6px;font:700 .86rem system-ui;color:#fff}
+.opcr{flex-basis:100%;font-weight:400;font-size:.72rem;color:var(--gris,#8b8b95);margin-top:2px}
+.hgrid{display:flex;flex-wrap:wrap;gap:6px;margin-top:2px}
+.hbtn{background:#151517;border:1px solid var(--borde,#2a2a2e);border-radius:9px;padding:9px 12px;
+  color:#fff;font:700 .82rem system-ui;cursor:pointer}
+.hbtn.on{background:var(--dorado,#E6C860);color:#1a1500;border-color:var(--dorado,#E6C860)}
+.rep{display:flex;align-items:center;gap:8px;padding:7px 0;border-bottom:1px solid var(--borde,#2a2a2e)}
+.rep:last-child{border-bottom:0}
+.rep .rn{flex:1;font-size:.84rem}
+.rep .pm{width:30px;height:30px}
+.zgrid{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:2px}
+.zbtn{background:#151517;border:1px solid var(--borde,#2a2a2e);border-radius:12px;padding:12px 10px;
+  color:#fff;font:600 .86rem system-ui;cursor:pointer;text-align:left;line-height:1.3;transition:all .12s}
+.zbtn .ze{font-size:1.25rem;display:block;margin-bottom:3px}
+.zbtn .zs{display:block;font-size:.68rem;color:var(--gris,#8b8b95);font-weight:400;margin-top:2px}
+.zbtn.on{border-color:currentColor;box-shadow:0 0 0 1px currentColor inset}
+</style>
+<script src="/frate-cedula.js?v=ced1"></script>
+</head>
+<body>
+
+<!-- LOGIN -->
+<div id="login">
+  <div class="lbox">
+    <div style="font-size:2.3rem; font-weight:900; letter-spacing:3px;">FRATE</div>
+    <div style="color:var(--dorado); font-size:.76rem; letter-spacing:2px; text-transform:uppercase; margin-bottom:16px; font-weight:800;">🪪 PASE · acceso</div>
+    <input class="fld" id="l-email" type="email" inputmode="email" autocapitalize="none" autocorrect="off" spellcheck="false" placeholder="correo" style="text-transform:lowercase;" />
+    <input class="fld" id="l-pass" type="password" placeholder="contraseña" onkeydown="if(event.key==='Enter')entrar()" />
+    <button class="btn" onclick="entrar()">ENTRAR</button>
+    <div id="l-err" style="color:var(--rojo2); font-size:.82rem; margin-top:10px; min-height:18px;"></div>
+    <div style="color:var(--gris); font-size:.72rem; margin-top:14px; line-height:1.5;">App de acceso rápido para <b style="color:var(--dorado)">admins y RRPP</b> del local.</div>
+  </div>
+</div>
+
+<!-- APP -->
+<div id="app" class="wrap" style="display:none;">
+  <div class="top">
+    <div class="brand"><div class="b1">FRATE PASE</div><div class="b2" id="hola">—</div></div>
+    <button class="hbtn" onclick="salir()">Salir</button>
+  </div>
+  <div class="evbar">
+    <div><div class="k">Evento activo</div><div class="v" id="ev-nom">—</div></div>
+    <select id="ev-sel" onchange="setEvento(this.value)"></select>
+  </div>
+
+  <div class="acts">
+    <button class="big" onclick="abrirNuevo()"><div class="ico">⚡</div><div><div class="tt">Nuevo pase</div><div class="ds">Crea una lista y comparte el link</div></div></button>
+    <button class="big blue" onclick="abrirCompartir()"><div class="ico">📋</div><div><div class="tt">Mis links</div><div class="ds">Ver, editar cupos, pausar y compartir</div></div></button>
+    <button class="big green" onclick="abrirPegar()"><div class="ico">📥</div><div><div class="tt">Pegar WhatsApp</div><div class="ds">Importa los nombres que te mandan · detecta vetados</div></div></button>
+    <button class="big gold" onclick="abrirFrecuentes()"><div class="ico">⭐</div><div><div class="tt">Frecuentes</div><div class="ds">Agrega VIP conocidos en 1 toque</div></div></button>
+    <button class="big gold" onclick="proximamente('El agente IA de solicitudes llega en la Fase 4 🧠')"><div class="ico">🧠</div><div><div class="tt">Solicitudes</div><div class="ds">La IA las arma por ti</div></div><span class="soon">Pronto</span></button>
+  </div>
+
+  <div class="sec">Aforo y zonas</div>
+  <button class="big gold" onclick="abrirZonas()"><div class="ico">🍾</div><div><div class="tt">Zonas VIP en vivo</div><div class="ds">Aforo real por zona · check-in en la puerta</div></div></button>
+</div>
+
+<!-- MODAL NUEVO PASE -->
+<div class="ov" id="ov-nuevo">
+  <div class="mb">
+    <div id="np-form">
+      <h3>⚡ Nuevo pase</h3>
+      <div class="sub">Crea una lista para el evento y comparte el link al toque.</div>
+      <span class="lbl">Nombre de la lista</span>
+      <input class="fld" id="np-nom" placeholder="Se arma solo…" style="margin-top:0;" oninput="npNomManual()" />
+      <div id="np-nom-hint" style="font-size:.7rem;color:var(--gris);margin-top:4px;">Se escribe solo con lo que elijas. Si lo editas, manda tu texto.</div>
+      <span class="lbl">Evento / día</span>
+      <select class="fld" id="np-ev" style="margin-top:0;"></select>
+      <div class="opch" onclick="opcToggle()">
+        <span style="flex:1">⚙️ Opciones del pase</span><span id="opc-tri">▴</span>
+        <div id="opc-res" class="opcr"></div>
+      </div>
+      <div id="opc-body">
+      <span class="lbl">Tipo de pase · dónde entra</span>
+      <div id="np-zonas" class="zgrid"></div>
+      <div id="np-reparto" style="display:none;margin-top:10px;"></div>
+      <span class="lbl" style="margin-top:14px;">⏰ Hasta qué hora pueden llegar</span>
+      <div id="np-horas" class="hgrid"></div>
+      <span class="lbl" style="margin-top:14px;">¿Trae descuento? (0 = sin descuento)</span>
+      <div class="step" style="margin-top:2px;">
+        <button class="pm" onclick="npDesc(-500)">−</button><b id="np-desc-v">$0</b><button class="pm" onclick="npDesc(500)">+</button>
+        <input type="hidden" id="np-desc" value="0" />
+        <span style="font-size:.76rem;color:var(--gris);margin-left:6px;">por entrada</span>
+      </div>
+      <span class="lbl">Cupos (0 = sin límite)</span>
+      <div class="step" style="margin-top:2px;">
+        <button class="pm" onclick="npCupos(-1)">−</button><b id="np-cupos-v">0</b><button class="pm" onclick="npCupos(1)">+</button>
+        <input type="hidden" id="np-cupos" value="0" />
+        <span style="font-size:.76rem;color:var(--gris);margin-left:6px;">máx. personas</span>
+      </div>
+      </div>
+      <div class="msg" id="np-msg"></div>
+      <div class="row2" style="margin-top:16px;">
+        <button class="btn ghost" onclick="cerrar('ov-nuevo')">Cancelar</button>
+        <button class="btn" id="np-btn" onclick="crearPase()">Crear y compartir</button>
+      </div>
+    </div>
+    <div id="np-result" class="result" style="display:none;">
+      <h3 id="np-ok-t">✅ Lista creada</h3>
+      <div class="sub" id="np-ok-s">Comparte el link o el QR. Los inscritos aparecen en el admin para revisar.</div>
+      <!-- Solo se ve cuando la lista nace esperando aprobación. -->
+      <div id="np-pend" style="display:none;background:#241d06;border:1px solid #e0b53b;border-radius:10px;padding:11px 13px;margin:8px 0;font-size:.82rem;line-height:1.5;">
+        🟡 <b>Esperando aprobación del admin.</b><br>
+        Comparte el link igual: tu gente se anota desde ya.
+        <b>Los QR salen cuando el admin apruebe la lista.</b>
+      </div>
+      <div class="lk" id="np-link"></div>
+      <img id="np-qr" alt="QR" />
+      <div class="row2" style="margin-top:6px;">
+        <button class="btn ghost" onclick="cerrar('ov-nuevo')">Cerrar</button>
+        <button class="btn" id="np-share" onclick="shareLink(window._npLink)">🔗 Compartir</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- MODAL COMPARTIR -->
+<div class="ov" id="ov-compartir">
+  <div class="mb">
+    <h3>📋 Mis links</h3>
+    <div class="sub">Tus listas. Edita cupos/nombre ✏️, pausa ⏸ o comparte 🔗.</div>
+    <div id="comp-list" style="margin-top:14px;"><div class="spin">Cargando…</div></div>
+    <button class="btn ghost" style="margin-top:8px;" onclick="cerrar('ov-compartir')">Cerrar</button>
+  </div>
+</div>
+
+<!-- MODAL PEGAR WHATSAPP -->
+<div class="ov" id="ov-pegar">
+  <div class="mb">
+    <h3>📥 Pegar WhatsApp</h3>
+    <div class="sub">Pega los nombres (uno por línea) y elige a qué lista van.</div>
+    <span class="lbl">Lista destino</span>
+    <select class="fld" id="pg-lista" style="margin-top:0;" onchange="pgCambioLista()"></select>
+    <div id="pg-nueva" style="display:none;">
+      <div class="opch" onclick="pgOpcToggle()">
+        <span style="flex:1">⚙️ Opciones de la lista nueva</span><span id="pgopc-tri">▴</span>
+        <div id="pgopc-res" class="opcr"></div>
+      </div>
+      <div id="pgopc-body">
+        <span class="lbl">Tipo de pase · dónde entra</span>
+        <div id="pg-zonas" class="zgrid"></div>
+        <span class="lbl" style="margin-top:14px;">⏰ Hasta qué hora pueden llegar</span>
+        <div id="pg-horas" class="hgrid"></div>
+      </div>
+      <span class="lbl">Nombre de la lista</span>
+      <input class="fld" id="pg-nom" placeholder="Se arma solo…" style="margin-top:0;" oninput="_pgNomManual=true" />
+    </div>
+    <div id="pg-hereda" style="display:none;font-size:.74rem;color:var(--gris);margin-top:8px;padding:9px 11px;border:1px solid var(--borde);border-radius:9px;"></div>
+    <span class="lbl">Nombres (uno por línea · puede traer RUT)</span>
+    <textarea class="fld" id="pg-txt" rows="7" placeholder="Camila Fuentes  12.345.678-9&#10;Valentina Rojas&#10;Cristóbal Díaz  9.876.543-2" style="margin-top:0; resize:vertical; line-height:1.5;"></textarea>
+    <div id="pg-prev" style="font-size:.76rem;color:var(--gris);margin-top:6px;"></div>
+    <div class="msg" id="pg-msg"></div>
+    <div class="row2" style="margin-top:14px;">
+      <button class="btn ghost" onclick="cerrar('ov-pegar')">Cancelar</button>
+      <button class="btn green" id="pg-btn" onclick="importarPegado()">Importar</button>
+    </div>
+  </div>
+</div>
+
+<div class="ov" id="ov-frec">
+  <div class="mb">
+    <h3>⭐ Frecuentes</h3>
+    <div class="sub">Tus VIP recurrentes (por visitas). Elige la lista y agrégalos en 1 toque.</div>
+    <span class="lbl">Lista destino</span>
+    <select class="fld" id="fr-lista" style="margin-top:0;"></select>
+    <input class="fld" id="fr-q" placeholder="Buscar por nombre…" oninput="_frecBuscar()" style="margin-top:10px;" />
+    <div id="fr-list" style="margin-top:12px;max-height:46vh;overflow:auto;"><div class="spin">Cargando…</div></div>
+    <button class="btn ghost" style="margin-top:10px;" onclick="cerrar('ov-frec')">Cerrar</button>
+  </div>
+</div>
+
+<div class="ov" id="ov-zonas">
+  <div class="mb">
+    <h3>🍾 Zonas VIP en vivo</h3>
+    <div class="sub">Cuánta gente ya entró a cada zona (check-in en la puerta del evento activo).</div>
+    <div id="zn-list" style="margin-top:14px;max-height:52vh;overflow:auto;"><div class="spin">Cargando…</div></div>
+    <div class="row2" style="margin-top:12px;">
+      <button class="btn ghost" onclick="abrirZonas()">↻ Refrescar</button>
+      <button class="btn ghost" onclick="cerrar('ov-zonas')">Cerrar</button>
+    </div>
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
+  <script src="/frate-pegar.js?v=20260801"></script>
+
+<script>
+let P = { nombre:'', rol:'', eventos:[], listas:[], evActivo:null };
+const $ = id => document.getElementById(id);
+const esc = s => String(s==null?'':s).replace(/[&<>"]/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+function toast(t, err){ const el=$('toast'); el.textContent=t; el.className='toast on'+(err?' err':''); setTimeout(()=>el.className='toast', 2400); }
+function cerrar(id){ $(id).classList.remove('on'); }
+function proximamente(t){ toast(t); }
+const fFecha = f => f ? f.split('-').reverse().join('/') : '';
+
+// ── Sesión ──────────────────────────────────────────────
+async function entrar(){
+  const email=($('l-email').value||'').trim().toLowerCase(), pass=$('l-pass').value||'';
+  const err=$('l-err'); err.textContent='';
+  if(!email||!pass){ err.textContent='Pon tu correo y contraseña'; return; }
+  try{ const { error }=await sb.auth.signInWithPassword({ email, password:pass }); if(error) throw error; await arrancar(); }
+  catch(e){ err.textContent='No se pudo entrar: '+(e.message||e); }
+}
+async function salir(){ try{ await sb.auth.signOut(); }catch(e){} location.reload(); }
+
+async function arrancar(){
+  const { data:{ user } }=await sb.auth.getUser(); if(!user) return;
+  let rol=null, nombre='';
+  try{ const r=await sb.from('clientes').select('rol,nombres,username').eq('id',user.id).maybeSingle(); rol=r.data&&r.data.rol; nombre=(r.data&&(r.data.nombres||r.data.username))||''; }catch(e){}
+  if(!['rrpp','admin'].includes(rol)){ $('l-err').textContent='Tu cuenta no es admin ni RRPP. Pide al equipo FRATE que te habilite.'; try{ await sb.auth.signOut(); }catch(e){} return; }
+  P.rol=rol; P.nombre=nombre||'Staff';
+  try{ await cargarZonas(); }catch(_){}
+  $('login').style.display='none'; $('app').style.display='';
+  $('hola').textContent = P.rol==='admin'?'Admin · '+P.nombre : 'RRPP · '+P.nombre;
+  await cargar();
+}
+
+async function cargar(){
+  const [evs, res] = await Promise.allSettled([
+    sb.from('eventos').select('id,nombre,fecha,estado,activo,archivado').eq('archivado',false).order('fecha',{ascending:false}),
+    sb.rpc('rrpp_resumen')
+  ]);
+  const allEv = (evs.status==='fulfilled' && evs.value.data) ? evs.value.data : [];
+  P.eventos = allEv.filter(e=> e.estado!=='cerrado' && (e.activo || e.estado==='planificacion' || e.estado==='publicado'));
+  if(!P.eventos.length) P.eventos = allEv;   // fallback: muestra lo que haya
+  const plan = P.eventos.find(e=>e.estado==='planificacion') || P.eventos[0];
+  P.evActivo = plan ? plan.id : null;
+  const data = (res.status==='fulfilled' && res.value.data && !res.value.data.error) ? res.value.data : null;
+  P.listas = (data && data.listas) ? data.listas : [];
+  pintarEventos();
+}
+function pintarEventos(){
+  const opt = P.eventos.map(e=>`<option value="${e.id}" data-fecha="${e.fecha||''}" ${e.id===P.evActivo?'selected':''}>${(e.estado==='planificacion'?'🗓️ ':'')}${esc(e.nombre)} · ${fFecha(e.fecha)}</option>`).join('');
+  $('ev-sel').innerHTML = opt || '<option value="">Sin eventos</option>';
+  setEvento(P.evActivo);
+}
+function setEvento(id){ P.evActivo = id?parseInt(id):null; const e=P.eventos.find(x=>x.id===P.evActivo); $('ev-nom').textContent = e ? (e.nombre+' · '+fFecha(e.fecha)) : '—'; }
+
+// ── Nuevo pase ──────────────────────────────────────────
+function abrirNuevo(){
+  $('np-form').style.display=''; $('np-result').style.display='none';
+  $('np-nom').value=''; $('np-cupos').value='0'; $('np-cupos-v').textContent='0'; $('np-msg').textContent='';
+  $('np-ev').innerHTML = P.eventos.map(e=>`<option value="${e.id}" data-fecha="${e.fecha||''}" ${e.id===P.evActivo?'selected':''}>${(e.estado==='planificacion'?'🗓️ ':'')}${esc(e.nombre)} · ${fFecha(e.fecha)}</option>`).join('');
+  $('np-desc').value='0'; $('np-desc-v').textContent='$0';
+  _zonaSel = null; _horaSel = null; _mixto = false; _reparto = {}; _nomManual = false;
+  const _h=$('np-nom-hint'); if(_h) _h.textContent='Se escribe solo con lo que elijas. Si lo editas, manda tu texto.';
+  pintarZonas(); pintarHoras(); npNomAuto();
+  const _b=$('opc-body'), _t=$('opc-tri'), _ab=_opcAbrePorDefecto();
+  if(_b) _b.style.display = _ab ? '' : 'none';
+  if(_t) _t.textContent   = _ab ? '▴' : '▾';
+  opcPintarResumen();
+  $('ov-nuevo').classList.add('on');
+}
+// ══ REPARTO · asignar a cada persona su zona ═══════════════════════════
+// Solo tiene sentido en listas MIXTAS: si la lista es de una zona sola, todos
+// van ahí y esta pantalla sobraría.
+async function abrirReparto(listaId, nombreLista){
+  let ov=document.getElementById('ov-reparto');
+  if(!ov){ ov=document.createElement('div'); ov.className='ov'; ov.id='ov-reparto';
+    ov.onclick=e=>{ if(e.target===ov) ov.classList.remove('on'); };
+    document.body.appendChild(ov); }
+  ov.innerHTML='<div class="mb"><h3>🧩 Repartir</h3><div class="sub">Cargando…</div></div>';
+  ov.classList.add('on');
+  try{
+    const [{ data:rep }, { data:ins }] = await Promise.all([
+      sb.rpc('lista_reparto', { p_lista_id: listaId }),
+      sb.from('lista_inscritos').select('id,nombre,rut,zona_id').eq('lista_id', listaId).order('id')
+    ]);
+    if(!rep || rep.ok===false) throw new Error((rep&&rep.error)||'No se pudo leer el reparto');
+    const zonas = rep.reparto || [];
+    if(!zonas.length){
+      ov.innerHTML='<div class="mb"><h3>🧩 Repartir</h3><div class="sub" style="margin-top:8px;">Esta lista no es mixta: todos entran a la misma zona, así que no hay nada que repartir.</div><div class="row2" style="margin-top:14px;"><button class="btn ghost" onclick="cerrar(\'ov-reparto\')">Cerrar</button></div></div>';
+      return;
+    }
+    window._repZonas = zonas; window._repLista = listaId;
+    _repPintar(nombreLista, ins||[]);
+  }catch(e){
+    const msg = /does not exist|function/i.test(String(e.message||'')) ? 'Falta correr frate-listas-mixtas.sql' : (e.message||e);
+    ov.innerHTML='<div class="mb"><h3>🧩 Repartir</h3><div class="msg err">'+esc(String(msg))+'</div><div class="row2" style="margin-top:14px;"><button class="btn ghost" onclick="cerrar(\'ov-reparto\')">Cerrar</button></div></div>';
+  }
+}
+function _repPintar(nombreLista, ins){
+  const ov=document.getElementById('ov-reparto'); if(!ov) return;
+  const zonas=window._repZonas||[];
+  const usados={}; zonas.forEach(z=>usados[z.zona_id]=0);
+  let sinZona=0;
+  ins.forEach(p=>{ if(p.zona_id && usados[p.zona_id]!==undefined) usados[p.zona_id]++; else sinZona++; });
+
+  const barras = zonas.map(z=>{
+    const pct = z.cupos ? Math.min(100, Math.round(usados[z.zona_id]*100/z.cupos)) : 0;
+    const lleno = usados[z.zona_id] >= z.cupos;
+    return `<div style="margin-bottom:8px;">
+      <div style="display:flex;justify-content:space-between;font-size:.82rem;">
+        <span>${z.emoji||'📍'} ${esc(z.nombre)}</span>
+        <b style="color:${lleno?'var(--dorado)':'#fff'}">${usados[z.zona_id]} de ${z.cupos}</b></div>
+      <div style="height:6px;background:#1e1e20;border-radius:4px;margin-top:4px;overflow:hidden;">
+        <div style="height:100%;width:${pct}%;background:${z.color||'#8b8b95'};"></div></div></div>`;
+  }).join('') + (sinZona?`<div style="font-size:.8rem;color:var(--gris);margin-top:6px;">⚪️ Sin asignar: <b>${sinZona}</b></div>`:'');
+
+  const filas = ins.map(p=>{
+    const bts = zonas.map(z=>{
+      const lleno = usados[z.zona_id] >= z.cupos && p.zona_id !== z.zona_id;
+      return `<button type="button" class="hbtn${p.zona_id===z.zona_id?' on':''}" ${lleno?'disabled style="opacity:.3"':''}
+        title="${lleno?'Esa zona ya está llena en esta lista':''}"
+        onclick="_repMover(${p.id},${z.zona_id})">${z.emoji||'📍'}</button>`;
+    }).join('') + `<button type="button" class="hbtn${!p.zona_id?' on':''}" onclick="_repMover(${p.id},null)">⚪️</button>`;
+    return `<div style="display:flex;align-items:center;gap:8px;padding:9px 0;border-bottom:1px solid var(--borde);">
+      <div style="flex:1;min-width:0;"><div style="font-weight:700;font-size:.86rem;">${esc(p.nombre||'—')}</div>
+      ${p.rut?`<div style="font-size:.7rem;color:var(--gris);">${esc(p.rut)}</div>`:''}</div>
+      <div style="display:flex;gap:4px;flex-shrink:0;">${bts}</div></div>`;
+  }).join('') || '<div class="sub" style="margin-top:10px;">Todavía no hay nadie inscrito.</div>';
+
+  ov.innerHTML = `<div class="mb" style="max-height:88vh;overflow-y:auto;">
+    <h3>🧩 Repartir</h3>
+    <div class="sub">${esc(nombreLista||'')}</div>
+    <div style="margin:12px 0;padding:12px;border:1px solid var(--borde);border-radius:12px;">${barras}</div>
+    ${filas}
+    <div class="row2" style="margin-top:14px;"><button class="btn ghost" onclick="cerrar('ov-reparto')">Cerrar</button></div>
+  </div>`;
+}
+async function _repMover(inscritoId, zonaId){
+  try{
+    const { data:r, error } = await sb.rpc('inscrito_mover_zona', { p_inscrito_id: inscritoId, p_zona_id: zonaId });
+    if(error) throw error;
+    if(!r || r.ok===false) throw new Error((r&&r.error)||'No se pudo');
+    const { data:ins } = await sb.from('lista_inscritos').select('id,nombre,rut,zona_id').eq('lista_id', window._repLista).order('id');
+    const { data:rep } = await sb.rpc('lista_reparto', { p_lista_id: window._repLista });
+    if(rep && rep.ok) window._repZonas = rep.reparto||[];
+    _repPintar(document.querySelector('#ov-reparto .sub')?.textContent||'', ins||[]);
+  }catch(e){ alert(e.message||e); }
+}
+
+// ══ BLOQUE DE OPCIONES REUTILIZABLE ════════════════════════════════════
+// Las MISMAS opciones en todos los flujos de PASE. Colapsado muestra un
+// resumen en una línea: eso es lo que se lee de reojo antes de apretar, y
+// pesa más que el detalle. Se abre solo la primera vez del día.
+function _hoyCL(){ const d=new Date(new Date().toLocaleString('en-US',{timeZone:'America/Santiago'}));
+  if(d.getHours()<6) d.setDate(d.getDate()-1);
+  return d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0'); }
+function _opcAbrePorDefecto(){
+  try{ const k='frate_pase_opc_'+_hoyCL();
+    if(!localStorage.getItem(k)){ localStorage.setItem(k,'1'); return true; }
+  }catch(_){}
+  return false;
+}
+function opcResumen(){
+  const desc = parseInt(($('np-desc')||{}).value)||0;
+  const p = [];
+  if(_mixto){
+    const r=_zonas.filter(z=>_reparto[z.id]).map(z=>_reparto[z.id]+' '+z.nombre);
+    p.push('🧩 '+(r.length?r.join(' + '):'mixta'));
+  } else {
+    const z=_zonas.find(x=>x.id===_zonaSel);
+    p.push((z?(z.emoji+' '+z.nombre):'sin zona'));
+  }
+  p.push(_horaSel ? ('hasta '+_horaSel) : 'sin límite de hora');
+  if(desc) p.push('$'+desc.toLocaleString('es-CL')+' desc.');
+  const c = parseInt(($('np-cupos')||{}).value)||0;
+  p.push(c ? (c+' cupos') : 'sin límite');
+  return p.join(' · ');
+}
+function opcToggle(){
+  const b=$('opc-body'), t=$('opc-tri'); if(!b) return;
+  const abierto = b.style.display !== 'none';
+  b.style.display = abierto ? 'none' : '';
+  if(t) t.textContent = abierto ? '▾' : '▴';
+  opcPintarResumen();
+}
+function opcPintarResumen(){
+  const r=$('opc-res'); if(r) r.textContent = opcResumen();
+}
+
+// ══ ZONAS · dónde entra la gente de este pase ══════════════════════════
+// La zona (DÓNDE va) y el descuento (QUÉ trae) son cosas distintas: alguien
+// puede tener descuento Y ser VIP Fuego. Por eso van en dos controles.
+let _zonas = [], _zonaSel = null;
+async function cargarZonas(){
+  try{
+    const { data } = await sb.from('zonas').select('*').eq('activa', true).order('orden').order('id');
+    _zonas = data || [];
+  }catch(_){ _zonas = []; }
+}
+function pintarZonas(){
+  const box = $('np-zonas'); if(!box) return;
+  if(!_zonas.length){
+    box.innerHTML = '<div style="grid-column:1/-1;font-size:.78rem;color:var(--gris);padding:10px;border:1px dashed var(--borde);border-radius:10px;">Sin zonas configuradas. Corre <b>frate-zonas.sql</b> y se activa este paso.</div>';
+    _zonaSel = null; return;
+  }
+  if(_zonaSel === null) _zonaSel = _zonas[0].id;
+  box.innerHTML = _zonas.map(z => {
+    const on = z.id === _zonaSel;
+    const sub = z.asigna_al_llegar ? 'se asigna al llegar'
+              : (z.aforo ? ('cupo ' + z.aforo + (z.aforo_max && z.aforo_max > z.aforo ? ' · hasta ' + z.aforo_max : '')) : 'sin tope');
+    return `<button type="button" class="zbtn${on?' on':''}" style="color:${z.color||'#8b8b95'}" onclick="elegirZona(${z.id})">
+      <span class="ze">${z.emoji||'🎟️'}</span>
+      <span style="color:#fff">${esc(z.nombre)}</span>
+      <span class="zs">${sub}</span></button>`;
+  }).join('')
+    + `<button type="button" class="zbtn${_mixto?' on':''}" style="grid-column:1/-1;color:var(--dorado,#E6C860)" onclick="toggleMixto()">
+        <span class="ze">🧩</span><span style="color:#fff">Lista mixta</span>
+        <span class="zs">reparte los cupos entre varias zonas</span></button>`;
+  pintarReparto();
+}
+function elegirZona(id){
+  _zonaSel = id;
+  // Al elegir una zona sola se limpia el reparto mixto: son dos modos distintos.
+  if(!_mixto) _reparto = {};
+  pintarZonas(); npNomAuto(); opcPintarResumen();
+}
+
+// ══ HORA DE CORTE ══════════════════════════════════════════════════════
+// PASE mandaba `hora_max_llegada: null` SIEMPRE, así que ninguna lista creada
+// desde acá tenía candado de hora. La puerta ya sabía usarlo; le faltaba el dato.
+let _horaSel = null;
+function pintarHoras(){
+  const box = $('np-horas'); if(!box) return;
+  const horas = [];
+  for(let h=23; h<=23; h++){ horas.push('23:00','23:30'); }
+  for(let h=0; h<=3; h++){ horas.push(String(h).padStart(2,'0')+':00', String(h).padStart(2,'0')+':30'); }
+  box.innerHTML = horas.map(h => `<button type="button" class="hbtn${_horaSel===h?' on':''}" onclick="elegirHora('${h}')">${h}</button>`).join('')
+    + `<button type="button" class="hbtn${_horaSel===null?' on':''}" onclick="elegirHora(null)">sin límite</button>`;
+}
+function elegirHora(h){ _horaSel = h; pintarHoras(); npNomAuto(); opcPintarResumen(); }
+
+// ══ LISTAS MIXTAS ══════════════════════════════════════════════════════
+// "10 cupos: 4 VIP y 6 general". El total sigue siendo `cupos`; el reparto
+// dice cuántos de cada zona.
+let _mixto = false, _reparto = {};
+function toggleMixto(){
+  _mixto = !_mixto;
+  if(!_mixto) _reparto = {};
+  pintarReparto(); pintarZonas(); npNomAuto(); opcPintarResumen();
+}
+function repCupo(zid, d){
+  const v = Math.max(0, (_reparto[zid]||0) + d);
+  if(v) _reparto[zid] = v; else delete _reparto[zid];
+  pintarReparto(); npNomAuto();
+}
+function pintarReparto(){
+  const box = $('np-reparto'); if(!box) return;
+  if(!_mixto){ box.style.display='none'; box.innerHTML=''; return; }
+  box.style.display='';
+  const tot = Object.values(_reparto).reduce((a,b)=>a+b,0);
+  box.innerHTML = '<div style="border:1px solid var(--borde);border-radius:12px;padding:10px 12px;">'
+    + '<div style="font-size:.72rem;color:var(--gris);text-transform:uppercase;letter-spacing:1px;margin-bottom:4px;">Reparto por zona</div>'
+    + _zonas.map(z => `<div class="rep">
+        <span style="font-size:1.1rem">${z.emoji||'📍'}</span>
+        <span class="rn">${esc(z.nombre)}</span>
+        <button class="pm" onclick="repCupo(${z.id},-1)">−</button>
+        <b style="min-width:26px;text-align:center;display:inline-block;">${_reparto[z.id]||0}</b>
+        <button class="pm" onclick="repCupo(${z.id},1)">+</button>
+      </div>`).join('')
+    + `<div style="margin-top:8px;font-size:.8rem;color:${tot?'var(--dorado)':'var(--gris)'};">Total repartido: <b>${tot}</b></div>`
+    + '</div>';
+  // El total del reparto manda sobre el contador de cupos
+  if(tot){ $('np-cupos').value = tot; $('np-cupos-v').textContent = tot; }
+}
+
+// ══ EL NOMBRE SE ARMA SOLO ═════════════════════════════════════════════
+// Formato: QUIÉN INVITA · QUÉ ENTRADA ES · HASTA QUÉ HORA
+// Los cupos NO van: cambian durante la noche y el nombre quedaría vencido.
+let _nomManual = false;
+function npNomManual(){ _nomManual = true; const h=$('np-nom-hint'); if(h) h.textContent='Estás escribiendo el nombre a mano.'; }
+function npNomAuto(){
+  if(_nomManual) return;
+  const desc = parseInt($('np-desc').value)||0;
+  let queEs;
+  if(_mixto){
+    const partes = _zonas.filter(z=>_reparto[z.id]).map(z=>_reparto[z.id]+' '+z.nombre.toUpperCase());
+    queEs = partes.length ? ('MIXTA · '+partes.join(' + ')) : 'MIXTA';
+  } else {
+    const z = _zonas.find(x=>x.id===_zonaSel);
+    const zn = z ? z.nombre.toUpperCase() : 'GENERAL';
+    // Con descuento no es cortesía: es una entrada rebajada.
+    queEs = desc ? (zn+' $'+desc.toLocaleString('es-CL')) : ('CORTESÍA '+zn);
+  }
+  const partes = [ (P.nombre||'').toUpperCase(), queEs ];
+  if(_horaSel) partes.push('HASTA '+_horaSel);
+  $('np-nom').value = partes.filter(Boolean).join(' · ');
+}
+function npDesc(d){
+  const v = Math.max(0, (parseInt($('np-desc').value)||0) + d);
+  $('np-desc').value = v;
+  $('np-desc-v').textContent = v ? ('$' + v.toLocaleString('es-CL')) : '$0';
+  npNomAuto(); opcPintarResumen();
+}
+
+function npCupos(d){ const v=Math.max(0,(parseInt($('np-cupos').value)||0)+d); $('np-cupos').value=v; $('np-cupos-v').textContent=v; opcPintarResumen(); }
+async function crearPase(){
+  const nombre=$('np-nom').value.trim(), m=$('np-msg'); m.className='msg';
+  if(!nombre){ m.className='msg err'; m.textContent='Ponle nombre a la lista'; return; }
+  const evOpt=$('np-ev').selectedOptions[0]; const eventoId=parseInt($('np-ev').value)||null;
+  const fecha=(evOpt&&evOpt.dataset.fecha)||new Date().toISOString().slice(0,10);
+  const cupos=parseInt($('np-cupos').value)||0;
+  const zona = _zonas.find(z => z.id === _zonaSel) || null;
+  const descuento = parseInt($('np-desc').value)||0;
+  // `condiciones.zona` se mantiene por compatibilidad con lo que ya lee la
+  // puerta; `zona_id` es el enlace real a la tabla de zonas.
+  const repArr = _mixto ? Object.entries(_reparto).map(([zid,c])=>({zona_id:parseInt(zid),cupos:c})) : null;
+  // La descripción que ve el invitado al abrir el link y el portero al escanear.
+  const linea = [];
+  if(P.nombre) linea.push('Te invita '+P.nombre);
+  if(_mixto && repArr && repArr.length){
+    linea.push('Lista mixta: '+repArr.map(r=>{const z=_zonas.find(x=>x.id===r.zona_id); return r.cupos+' '+((z&&z.nombre)||'zona');}).join(' + '));
+  } else if(zona){ linea.push('Acceso a '+zona.nombre); }
+  if(descuento) linea.push('Descuento de $'+descuento.toLocaleString('es-CL')+' en tu entrada');
+  if(_horaSel) linea.push('Entrada liberada hasta las '+_horaSel+'. Después de esa hora no sirve.');
+  const descripcion = linea.join(' · ');
+
+  const condiciones={ titulo:nombre, transferible:false, zona:(zona&&zona.clave)||'general',
+                      zona_nombre:(zona&&zona.nombre)||null, edad_minima:18,
+                      hora_max_llegada:_horaSel||null,
+                      descuento: descuento||null, invita: P.nombre||null,
+                      mixta: !!_mixto, reparto: repArr, descripcion };
+  const btn=$('np-btn'); btn.disabled=true; btn.textContent='Creando…';
+  try{
+    const { data:sess }=await sb.auth.getSession();
+    const { data:resp, error }=await sb.functions.invoke('crm-solicitud',{ body:{ accion:'crear_lista_abierta', payload:{ nombre, fecha, evento_id:eventoId, cupos, condiciones,
+        zona_id:(_mixto?null:((zona&&zona.id)||null)), descuento_monto:descuento,
+        cupos_zonas:repArr, hora_max_llegada:_horaSel||null, benefit_text:descripcion } }, headers: sess?.session?.access_token?{Authorization:`Bearer ${sess.session.access_token}`}:{} });
+    if(error) throw new Error(error.message||'Error'); if(resp&&resp.error) throw new Error(resp.error);
+    const codigo=resp.codigo; const link=resp.link||(location.origin+'/lista/'+codigo);
+    window._npLink=link;
+    $('np-link').textContent=link;
+    $('np-qr').src='https://ydwlpraoaaijlfssevoh.supabase.co/functions/v1/qr?s=300&d='+encodeURIComponent(link);
+    const _pend = !!(resp && resp.pendiente);
+    $('np-pend').style.display = _pend ? '' : 'none';
+    $('np-ok-t').textContent = _pend ? '✅ Lista creada · por aprobar' : '✅ Lista creada';
+    $('np-ok-s').textContent = _pend
+      ? 'Comparte el link o el QR. Tu gente se anota igual desde ahora.'
+      : 'Comparte el link o el QR. Los inscritos aparecen en el admin para revisar.';
+    $('np-form').style.display='none'; $('np-result').style.display='';
+    cargar();
+  }catch(e){ m.className='msg err'; m.textContent='No se pudo: '+(e.message||e); }
+  finally{ btn.disabled=false; btn.textContent='Crear y compartir'; }
+}
+
+// ── Compartir ───────────────────────────────────────────
+function shareLink(url){
+  if(!url) return;
+  const txt='¡Estás en la lista! Inscríbete acá 👉 '+url;
+  if(navigator.share){ navigator.share({ title:'FRATE · Lista', text:txt, url }).catch(()=>{}); return; }
+  try{ navigator.clipboard.writeText(url); toast('🔗 Link copiado'); }catch(e){ prompt('Copia el link:', url); }
+}
+function abrirCompartir(){
+  const box=$('comp-list');
+  box.innerHTML = P.listas.length ? P.listas.map(l=>{
+    const est=(l.estado||'aprobada');
+    const activa = est==='aprobada';
+    const porAprobar = est==='pendiente' || est==='en_revision';
+    const rech = est==='rechazada';
+    return `<div class="listrow" style="cursor:default;${porAprobar?'border-left:3px solid #e0b53b;':''}${rech?'border-left:3px solid #FF3B3B;':''}">
+      <div style="flex:1;min-width:0;">
+        <div class="nm">${esc(l.nombre||'Lista')} ${activa?'':(porAprobar?'<span style="color:#e0b53b;font-size:.7rem;">🟡</span>':(rech?'<span style="color:#FF3B3B;font-size:.7rem;">✕</span>':'<span style="color:#e0b53b;font-size:.7rem;">⏸</span>'))}</div>
+        <div class="mt">${esc(l.evento_nombre||'—')} · ${(+l.inscritos||0)} inscritos${l.cupos?(' / '+l.cupos):''}</div>
+        ${porAprobar?'<div class="mt" style="color:#e0b53b;">Esperando aprobación · tu gente ya se anota, los QR salen cuando el admin apruebe</div>':''}
+        ${rech?`<div class="mt" style="color:#FF3B3B;">Rechazada${l.rechazo_motivo?(' · '+esc(l.rechazo_motivo)):''}</div>`:''}
+      </div>
+      <div style="display:flex;gap:6px;flex-shrink:0;">
+        ${l.cupos_zonas ? `<button class="pm" onclick="abrirReparto(${l.id},'${esc(l.nombre||'').replace(/'/g,'')}')" title="Repartir por zona">🧩</button>` : ''}
+    <button class="pm" onclick="misEditar('${l.id}')" title="Editar">✏️</button>
+        ${porAprobar||rech ? '' : `<button class="pm" onclick="misPausar('${l.id}','${activa?'pausada':'aprobada'}')" title="${activa?'Pausar':'Reactivar'}">${activa?'⏸':'▶️'}</button>`}
+        <button class="pm" onclick="shareLink(location.origin+'/lista/'+'${esc(l.codigo)}')" title="Compartir">🔗</button>
+      </div>
+    </div>`;
+  }).join('') : '<div class="spin">No tienes listas todavía. Crea una con ⚡ Nuevo pase.</div>';
+  $('ov-compartir').classList.add('on');
+}
+async function _paseEditar(payload){
+  const { data:sess }=await sb.auth.getSession();
+  const { data, error }=await sb.functions.invoke('crm-solicitud',{ body:{ accion:'editar_lista', payload }, headers: sess?.session?.access_token?{Authorization:`Bearer ${sess.session.access_token}`}:{} });
+  if(error) throw new Error(error.message||'Error'); if(data&&data.error) throw new Error(data.error);
+  return data;
+}
+async function misEditar(id){
+  const l=P.listas.find(x=>String(x.id)===String(id)); if(!l) return;
+  const nn=prompt('Nombre del link:', l.nombre||''); if(nn===null) return;
+  const nc=prompt('Cupos (vacío = sin límite):', l.cupos||'');
+  try{ await _paseEditar({ lista_id:id, nombre:nn, cupos:(nc===null?'':nc) }); l.nombre=nn.trim()||l.nombre; if(nc!==null) l.cupos=parseInt(nc)||null; toast('💾 Actualizado'); abrirCompartir(); }
+  catch(e){ toast('No se guardó: '+(e.message||e), true); }
+}
+async function misPausar(id, estado){
+  try{ await _paseEditar({ lista_id:id, estado }); const l=P.listas.find(x=>String(x.id)===String(id)); if(l) l.estado=estado; toast(estado==='pausada'?'⏸ Pausado (el link deja de recibir)':'▶️ Reactivado'); abrirCompartir(); }
+  catch(e){ toast('Error: '+(e.message||e), true); }
+}
+
+// ── Pegar WhatsApp → importar ───────────────────────────
+// ⚠️ Antes: UNA LÍNEA = UNA PERSONA, siempre. Con el formato de WhatsApp
+//    —nombre, RUT y correo en líneas seguidas— una persona salía como tres
+//    filas. Ahora usa el parser compartido (frate-pegar.js), que agrupa por
+//    patrón y además saca el correo, que acá se perdía entero.
+function parseLineas(txt){
+  if(window.FratePegar) return window.FratePegar.leer(txt);
+  // Respaldo por si el archivo no cargó: el comportamiento viejo.
+  return (txt||'').split('\n').map(l=>l.trim()).filter(Boolean).filter(l=>!/^https?:\/\//.test(l)).map(l=>{
+    const rm=l.match(/(\d{1,2}\.?\d{3}\.?\d{3}\s*-?\s*[\dkK])/);
+    const rut=rm?rm[1].replace(/\s+/g,''):null;
+    let nombre=(rm?l.replace(rm[0],''):l).replace(/[,\-–|]+/g,' ').replace(/^\d+[\.\)]\s*/,'').replace(/\s+/g,' ').trim();
+    return { nombre, rut, email:'' };
+  }).filter(p=>p.nombre && p.nombre.length>1);
+}
+// ══ PEGAR WHATSAPP · ahora también crea la lista y se autoconfigura ═════
+// Antes obligaba a tener una lista creada de antes. Ahora: eliges "crear una
+// nueva", el nombre se arma solo y los cupos se ponen en la cantidad de
+// nombres que pegaste. Si eliges una lista que ya existe, se muestra lo que
+// hereda — no se adivina en silencio.
+let _pgZona = null, _pgHora = null, _pgNomManual = false;
+function abrirPegar(){
+  const ops = P.listas.map(l=>`<option value="${l.id}">${esc(l.nombre||'Lista')} · ${esc(l.evento_nombre||'')}</option>`).join('');
+  $('pg-lista').innerHTML = '<option value="__nueva__">➕ Crear una lista nueva</option>' + ops;
+  $('pg-lista').value = P.listas.length ? String(P.listas[0].id) : '__nueva__';
+  $('pg-txt').value=''; $('pg-prev').textContent=''; $('pg-msg').textContent='';
+  _pgZona = (_zonas[0]||{}).id || null; _pgHora = null; _pgNomManual = false;
+  if($('pg-nom')) $('pg-nom').value='';
+  const _b=$('pgopc-body'), _t=$('pgopc-tri'), _ab=_opcAbrePorDefecto();
+  if(_b) _b.style.display = _ab ? '' : 'none';
+  if(_t) _t.textContent   = _ab ? '▴' : '▾';
+  pgCambioLista();
+  $('ov-pegar').classList.add('on');
+}
+function pgOpcToggle(){
+  const b=$('pgopc-body'), t=$('pgopc-tri'); if(!b) return;
+  const ab = b.style.display !== 'none';
+  b.style.display = ab ? 'none' : ''; if(t) t.textContent = ab ? '▾' : '▴';
+  pgResumen();
+}
+function pgCambioLista(){
+  const esNueva = $('pg-lista').value === '__nueva__';
+  $('pg-nueva').style.display  = esNueva ? '' : 'none';
+  $('pg-hereda').style.display = esNueva ? 'none' : '';
+  if(esNueva){ pgZonas(); pgHoras(); pgNomAuto(); }
+  else {
+    // Decir QUÉ hereda, en vez de que sea invisible.
+    const l = P.listas.find(x=>String(x.id)===$('pg-lista').value);
+    const z = l && _zonas.find(x=>x.id===l.zona_id);
+    const partes = [];
+    partes.push(z ? (z.emoji+' '+z.nombre) : 'zona: la que tenga la lista');
+    partes.push(l && l.hora_max_llegada ? ('hasta '+l.hora_max_llegada) : 'sin límite de hora');
+    $('pg-hereda').innerHTML = 'Se agregan a <b>'+esc((l&&l.nombre)||'la lista')+'</b> y heredan: '+partes.join(' · ');
+  }
+}
+function pgZonas(){
+  const box=$('pg-zonas'); if(!box) return;
+  if(!_zonas.length){ box.innerHTML='<div style="grid-column:1/-1;font-size:.76rem;color:var(--gris);">Corre <b>frate-zonas.sql</b> para elegir zona.</div>'; return; }
+  box.innerHTML = _zonas.map(z=>`<button type="button" class="zbtn${z.id===_pgZona?' on':''}" style="color:${z.color||'#8b8b95'}" onclick="pgElegirZona(${z.id})">
+    <span class="ze">${z.emoji||'🎟️'}</span><span style="color:#fff">${esc(z.nombre)}</span>
+    <span class="zs">${z.asigna_al_llegar?'se asigna al llegar':(z.aforo?('cupo '+z.aforo):'sin tope')}</span></button>`).join('');
+}
+function pgElegirZona(id){ _pgZona=id; pgZonas(); pgNomAuto(); }
+function pgHoras(){
+  const box=$('pg-horas'); if(!box) return;
+  const hs=['23:00','23:30']; for(let h=0;h<=3;h++) hs.push(String(h).padStart(2,'0')+':00',String(h).padStart(2,'0')+':30');
+  box.innerHTML = hs.map(h=>`<button type="button" class="hbtn${_pgHora===h?' on':''}" onclick="pgElegirHora('${h}')">${h}</button>`).join('')
+    + `<button type="button" class="hbtn${_pgHora===null?' on':''}" onclick="pgElegirHora(null)">sin límite</button>`;
+}
+function pgElegirHora(h){ _pgHora=h; pgHoras(); pgNomAuto(); }
+function pgNomAuto(){
+  pgResumen();
+  if(_pgNomManual) return;
+  const z=_zonas.find(x=>x.id===_pgZona);
+  const partes=[(P.nombre||'').toUpperCase(), 'CORTESÍA '+((z&&z.nombre.toUpperCase())||'GENERAL')];
+  if(_pgHora) partes.push('HASTA '+_pgHora);
+  if($('pg-nom')) $('pg-nom').value = partes.filter(Boolean).join(' · ');
+}
+function pgResumen(){
+  const r=$('pgopc-res'); if(!r) return;
+  const z=_zonas.find(x=>x.id===_pgZona);
+  const n=parseLineas(($('pg-txt')||{}).value||'').length;
+  r.textContent = [ z?(z.emoji+' '+z.nombre):'sin zona', _pgHora?('hasta '+_pgHora):'sin límite de hora', n?(n+' cupos'):'—' ].join(' · ');
+}
+// La vista previa muestra lo que ENTENDIÓ, no solo cuántos son. Antes decía
+// «2 personas detectadas» y había que adivinar cuáles — el error se veía
+// después de importar, no antes.
+function _pgPreview(txt){
+  const box=$('pg-prev'); if(!box) return;
+  const p=parseLineas(txt);
+  if(!p.length){ box.innerHTML=''; return; }
+  const r=(window.FratePegar&&FratePegar.revisar)?FratePegar.revisar(p):{sinMail:0,sinRut:0,repetidos:0};
+  const esc=s=>String(s==null?'':s).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+  box.innerHTML=`<div style="font-size:.78rem;color:var(--verde);margin-bottom:6px;">
+      ✓ ${p.length} persona${p.length===1?'':'s'} · los cupos se ponen en ${p.length}</div>
+    <div style="max-height:168px;overflow:auto;border:1px solid var(--border);border-radius:8px;">
+      ${p.map(x=>`<div style="display:flex;gap:8px;align-items:baseline;padding:5px 9px;border-bottom:1px solid var(--border);font-size:.74rem;">
+        <span style="flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">${esc(x.nombre)||'<i style="opacity:.5">sin nombre</i>'}</span>
+        <span style="font-family:monospace;opacity:${x.rut?1:.4};">${esc(x.rut)||'sin RUT'}</span>
+        <span style="opacity:${x.email?.75:.4};max-width:150px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">${esc(x.email)||'sin correo'}</span>
+      </div>`).join('')}
+    </div>
+    ${(r.sinMail||r.repetidos)?`<div style="font-size:.72rem;color:var(--dorado);margin-top:5px;line-height:1.5;">
+      ${r.sinMail?`⚠️ ${r.sinMail} sin correo — su QR no les va a llegar.`:''}
+      ${r.repetidos?`⚠️ ${r.repetidos} repetido${r.repetidos>1?'s':''}.`:''}</div>`:''}`;
+}
+$('pg-txt') && $('pg-txt').addEventListener('input', e=>{ _pgPreview(e.target.value); try{ pgResumen(); }catch(_){} });
+// 🧠 Cerebro del pegado: cruza cada nombre/RUT contra baneados (veto) y personas (frecuente)
+async function _paseAnalizar(gente){
+  const norm=s=>String(s||'').toUpperCase().normalize('NFD').replace(/[̀-ͯ]/g,'').replace(/\s+/g,' ').trim();
+  const nrut=r=>String(r||'').replace(/[.\-\s]/g,'').toUpperCase();
+  const banNom=new Set(), banRut=new Set(), banInfo={};
+  try{ const {data}=await sb.from('baneados').select('rut,nombre_norm,motivo').eq('activo',true);
+    (data||[]).forEach(b=>{ if(b.nombre_norm){ banNom.add(b.nombre_norm); banInfo['N'+b.nombre_norm]=b; } const r=nrut(b.rut); if(r){ banRut.add(r); banInfo['R'+r]=b; } }); }catch(_){}
+  const ruts=gente.map(p=>nrut(p.rut)).filter(Boolean);
+  const frec={};
+  if(ruts.length){ try{ const {data}=await sb.from('personas').select('rut,visitas').in('rut',ruts); (data||[]).forEach(p=>{ frec[nrut(p.rut)]=p.visitas||0; }); }catch(_){} }
+  return gente.map(p=>{ const nn=norm(p.nombre), rr=nrut(p.rut);
+    const veto = banNom.has(nn) || (rr && banRut.has(rr));
+    return { ...p, veto, motivo: veto?((banInfo['N'+nn]||banInfo['R'+rr]||{}).motivo||''):'', visitas: rr?(frec[rr]||0):0 };
+  });
+}
+async function importarPegado(){
+  const m=$('pg-msg'); m.className='msg';
+  const gente=parseLineas($('pg-txt').value);
+  if(!gente.length){ m.className='msg err'; m.textContent='No detecté nombres. Pega uno por línea.'; return; }
+  const btn=$('pg-btn'); btn.disabled=true; btn.textContent='Revisando…';
+  let listaId=null;
+  try{
+    // Crear la lista aquí mismo si eligió "nueva": los cupos salen de cuántos
+    // nombres pegó, que es exactamente lo que quiere.
+    if($('pg-lista').value === '__nueva__'){
+      const nombre=($('pg-nom').value||'').trim();
+      if(!nombre){ m.className='msg err'; m.textContent='Ponle nombre a la lista'; btn.disabled=false; btn.textContent='Importar'; return; }
+      const evOpt=P.eventos.find(e=>e.id===P.evActivo)||P.eventos[0];
+      const z=_zonas.find(x=>x.id===_pgZona);
+      const linea=[]; if(P.nombre) linea.push('Te invita '+P.nombre);
+      if(z) linea.push('Acceso a '+z.nombre);
+      if(_pgHora) linea.push('Entrada liberada hasta las '+_pgHora+'. Después de esa hora no sirve.');
+      btn.textContent='Creando la lista…';
+      const { data:sess0 }=await sb.auth.getSession();
+      const { data:resp0, error:e0 }=await sb.functions.invoke('crm-solicitud',{ body:{ accion:'crear_lista_abierta', payload:{
+        nombre, fecha:(evOpt&&evOpt.fecha)||new Date().toISOString().slice(0,10),
+        evento_id:(evOpt&&evOpt.id)||null, cupos:gente.length,
+        condiciones:{ titulo:nombre, transferible:false, zona:(z&&z.clave)||'general', zona_nombre:(z&&z.nombre)||null,
+                      edad_minima:18, hora_max_llegada:_pgHora||null, invita:P.nombre||null, descripcion:linea.join(' · ') },
+        zona_id:(z&&z.id)||null, hora_max_llegada:_pgHora||null, benefit_text:linea.join(' · ')
+      } }, headers: sess0?.session?.access_token?{Authorization:`Bearer ${sess0.session.access_token}`}:{} });
+      if(e0) throw new Error(e0.message||'No se pudo crear la lista');
+      if(resp0&&resp0.error) throw new Error(resp0.error);
+      listaId = resp0.lista_web_id;
+      btn.textContent='Revisando…';
+    } else {
+      listaId = parseInt($('pg-lista').value)||null;
+      if(!listaId){ m.className='msg err'; m.textContent='Elige una lista o crea una nueva'; btn.disabled=false; btn.textContent='Importar'; return; }
+    }
+    const an=await _paseAnalizar(gente);
+    const vetados=an.filter(p=>p.veto), frecuentes=an.filter(p=>!p.veto && p.visitas>=3);
+    if(vetados.length){
+      const nombres=vetados.map(v=>v.nombre+(v.motivo?(' — '+v.motivo):'')).join('\n• ');
+      if(!confirm('🚫 '+vetados.length+' VETADA(S) en la lista:\n• '+nombres+'\n\n¿Importar el resto SIN ellas?')){ btn.disabled=false; btn.textContent='Importar'; return; }
+    }
+    const buenos=an.filter(p=>!p.veto);
+    if(!buenos.length){ m.className='msg err'; m.textContent='Todos estaban vetados. Nada que importar.'; btn.disabled=false; btn.textContent='Importar'; return; }
+    btn.textContent='Importando…';
+    // El correo se guarda: sin él el QR se emite pero no le llega a nadie.
+    const rows=buenos.map(p=>({ lista_id:listaId, nombre:p.nombre, rut:p.rut||null,
+      email:p.email||null, telefono:p.telefono||null, estado:'pendiente', origen:'pase_import' }));
+    const { error }=await sb.from('lista_inscritos').insert(rows);
+    if(error) throw error;
+    cerrar('ov-pegar');
+    let msg='✅ '+buenos.length+' importados';
+    if(vetados.length) msg+=' · 🚫 '+vetados.length+' vetados fuera';
+    if(frecuentes.length) msg+=' · ⭐ '+frecuentes.length+' frecuentes';
+    toast(msg); cargar();
+  }catch(e){ m.className='msg err'; m.textContent='No se pudo: '+(e.message||e); }
+  finally{ btn.disabled=false; btn.textContent='Importar'; }
+}
+
+// ── ⭐ Frecuentes: agregar VIP conocidos en 1 toque (por visitas del CRM) ──
+function abrirFrecuentes(){
+  $('fr-lista').innerHTML = P.listas.length ? P.listas.map(l=>`<option value="${l.id}">${esc(l.nombre||'Lista')} · ${esc(l.evento_nombre||'')}</option>`).join('') : '<option value="">— crea una lista primero —</option>';
+  $('fr-q').value=''; $('fr-list').innerHTML='<div class="spin">Cargando…</div>';
+  $('ov-frec').classList.add('on'); _frecCargar();
+}
+let _frecT=null;
+function _frecBuscar(){ clearTimeout(_frecT); _frecT=setTimeout(_frecCargar, 260); }
+async function _frecCargar(){
+  const box=$('fr-list'); const q=($('fr-q') && $('fr-q').value||'').trim();
+  try{
+    let query=sb.from('personas').select('id,nombre,rut,instagram,visitas').order('visitas',{ascending:false,nullsFirst:false}).limit(40);
+    if(q) query=sb.from('personas').select('id,nombre,rut,instagram,visitas').ilike('nombre','%'+q+'%').order('visitas',{ascending:false,nullsFirst:false}).limit(40);
+    const { data, error }=await query; if(error) throw error;
+    const rows=data||[]; window._frecData=rows;
+    box.innerHTML = rows.length ? rows.map(p=>`
+      <div class="listrow" style="cursor:default;">
+        <div style="flex:1;min-width:0;"><div class="nm">${esc(p.nombre||'—')} ${(p.visitas||0)>=5?'👑':''}</div><div class="mt">${(p.visitas||0)} visita${(p.visitas||0)===1?'':'s'}${p.instagram?(' · @'+esc(String(p.instagram).replace(/^@/,''))):''}</div></div>
+        <button class="pm" style="background:var(--rojo);color:#fff;" onclick="frecAgregar('${p.id}')" title="Agregar a la lista">＋</button>
+      </div>`).join('') : '<div class="spin">Sin frecuentes'+(q?' con ese nombre':' todavía')+'.</div>';
+  }catch(e){ box.innerHTML='<div class="spin">No se pudo cargar: '+esc(e.message||e)+'</div>'; }
+}
+async function frecAgregar(id){
+  const listaId=parseInt($('fr-lista').value)||null;
+  if(!listaId){ toast('Elige una lista primero',true); return; }
+  const p=(window._frecData||[]).find(x=>String(x.id)===String(id)); if(!p) return;
+  try{
+    const { error }=await sb.from('lista_inscritos').insert({ lista_id:listaId, nombre:p.nombre, rut:p.rut||null, estado:'pendiente', origen:'pase_frecuente' });
+    if(error) throw error;
+    toast('⭐ '+(p.nombre||'')+' agregad@ a la lista');
+  }catch(e){ toast('No se pudo: '+(e.message||e),true); }
+}
+// ── 🍾 Zonas VIP en vivo (read-only): aforo por zona = check-ins de sus listas ──
+async function abrirZonas(){
+  $('ov-zonas').classList.add('on'); const box=$('zn-list'); box.innerHTML='<div class="spin">Contando en vivo…</div>';
+  const evId=parseInt(($('ev-sel')&&$('ev-sel').value)||P.evActivo)||null;
+  if(!evId){ box.innerHTML='<div class="spin">Elige un evento activo arriba.</div>'; return; }
+  let zonas=[]; try{ const {data}=await sb.from('config_valores').select('valor').eq('clave','pase_zonas').maybeSingle(); zonas=JSON.parse((data&&data.valor)||'[]'); }catch(_){}
+  if(!Array.isArray(zonas)||!zonas.length){ box.innerHTML='<div class="spin">Aún no hay zonas. Se definen en el admin (⚡ PASE → 🍾 Zonas).</div>'; return; }
+  let listas=[]; try{ const {data}=await sb.from('listas').select('id,condiciones').eq('evento_id',evId); listas=data||[]; }catch(_){}
+  const lz={}; listas.forEach(l=>{ const z=(l.condiciones&&l.condiciones.zona)||''; if(z) lz[l.id]=z; });
+  const ids=Object.keys(lz).map(Number); const zq={};
+  if(ids.length){ try{ const {data}=await sb.from('lista_inscritos').select('lista_id,qr_ids').in('lista_id',ids); (data||[]).forEach(i=>{ const z=lz[i.lista_id]; if(!z) return; const qs=Array.isArray(i.qr_ids)?i.qr_ids:[]; (zq[z]=zq[z]||new Set()); qs.forEach(q=>{ if(q) zq[z].add(String(q)); }); }); }catch(_){} }
+  const all=[...new Set(Object.values(zq).flatMap(s=>[...s]))]; const us=new Set();
+  for(let i=0;i<all.length;i+=200){ try{ const {data}=await sb.from('qr_usados').select('qr_id').in('qr_id',all.slice(i,i+200)); (data||[]).forEach(u=>us.add(String(u.qr_id).toUpperCase())); }catch(_){} }
+  box.innerHTML=zonas.map(z=>{ const set=zq[z.n]||new Set(); let d=0; set.forEach(q=>{ if(us.has(q.toUpperCase())) d++; }); const cap=parseInt(z.c)||0, pct=cap?Math.min(100,Math.round(d/cap*100)):0, col=!cap?'#5b9dff':pct>=100?'#e11d2a':pct>=80?'#e0b53b':'#3dff88';
+    return `<div style="margin-bottom:13px;"><div style="display:flex;justify-content:space-between;font-size:.92rem;margin-bottom:4px;"><b>${esc(z.n)}</b><span style="color:${col};font-weight:800;">${d}${cap?(' / '+cap):''} ${pct>=100?'🔴 LLENA':pct>=80?'🟠':''}</span></div><div style="height:12px;background:var(--input);border-radius:8px;overflow:hidden;"><div style="height:100%;width:${cap?pct:8}%;background:${col};"></div></div></div>`;
+  }).join('');
+}
+// Cierra modales al tocar el fondo
+document.querySelectorAll('.ov').forEach(ov => ov.addEventListener('click', e => { if(e.target===ov) ov.classList.remove('on'); }));
+// PWA
+if('serviceWorker' in navigator){ navigator.serviceWorker.register('/pase-sw.js').catch(()=>{}); }
+// Autologin
+(async ()=>{ try{ const { data:{ session } }=await sb.auth.getSession(); if(session) await arrancar(); }catch(e){} })();
+</script>
+</body>
+</html>

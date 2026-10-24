@@ -1,0 +1,154 @@
+<!DOCTYPE html>
+<html lang="es-CL">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>FRATE Colección · Álbum de figuritas</title>
+<link rel="stylesheet" href="album.css">
+</head>
+<body>
+<div class="al-stage">
+  <div class="al-canvas" id="canvas">
+    <div class="al-pad">
+
+      <!-- CABECERA -->
+      <div class="al-head">
+        <span class="al-badge" data-slot="badge">ÁLBUM OFICIAL FRATE</span>
+        <span class="al-page" data-slot="page">PÁG. 04</span>
+      </div>
+      <div class="al-title">
+        <div class="k" data-slot="coleccion">COLECCIÓN NOCHE 2026</div>
+        <h1 data-slot="title">LA PISTA</h1>
+        <div class="sub" data-slot="sub">¡COMPLETA Y ENTRA GRATIS!</div>
+      </div>
+
+      <!-- GRILLA DE CROMOS -->
+      <div class="al-grid" id="grid"></div>
+
+      <!-- PIE -->
+      <div class="al-foot">
+        <div class="al-progress">
+          <div class="lab"><span data-slot="progLab">TU COLECCIÓN</span><span id="progNum">2 / 5</span></div>
+          <div class="al-bar"><i id="progBar" style="width:40%"></i></div>
+        </div>
+        <div class="al-brand">
+          <div class="fr" data-slot="brand">FRATE</div>
+          <div class="web" data-slot="web">WWW.FRATE.CL</div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div id="tweaks">
+  <h3>Tweaks <button id="tw-close">×</button></h3>
+  <div class="tw-group"><button class="tw-regen" id="tw-regen">⟳ Regenerar (demo)</button></div>
+  <div class="tw-group"><label>Color colección</label><div class="tw-swatches" id="tw-accent"></div></div>
+</div>
+
+<script src="image-slot.js"></script>
+<script>
+const TWEAKS = /*EDITMODE-BEGIN*/{ "accent": "#ff3d7f" }/*EDITMODE-END*/;
+const ACCENTS = ["#ff3d7f", "#2ec4ff", "#ffd23d", "#39ff7d", "#a44bff"];
+const W = 1080, H = 1620;
+
+const EVENT = {
+  badge: "ÁLBUM OFICIAL FRATE", page: "PÁG. 04",
+  coleccion: "COLECCIÓN NOCHE 2026", title: "LA PISTA", sub: "¡COMPLETA Y ENTRA GRATIS!",
+  // 5 cromos: 3 pegados / silueta, 1 vacío destacado; el 5º es el especial holográfico (evento)
+  stickers: [
+    { n: "032", role: "LA SONRISA", state: "empty" },
+    { n: "033", role: "EL PERREO", state: "empty" },
+    { n: "034", role: "EL AFTER", state: "empty" },
+    { n: "035", role: "LA MIRADA", state: "empty" },
+    { n: "036", role: "EL CRUSH", state: "empty" }
+  ],
+  featureKicker: "CROMO ESPECIAL · BRILLANTE",
+  featureTitle: "ME ENCANTA TU SONRISA",
+  featureConcept: "La figurita que todos quieren pegar.",
+  dateNum: "02", dateTxt: "SÁBADO 02 MAYO", time: "11 PM – 05 AM",
+  prizeIc: "1", prize: "BOTELLA PREMIUM", prizeSub: "al completar el álbum",
+  contest: "ETIQUETA", contestSub: "a quien te falta pegar",
+  progLab: "TU COLECCIÓN", collected: 2, total: 5,
+  brand: "FRATE", web: "WWW.FRATE.CL"
+};
+
+function fillData(d) {
+  document.querySelectorAll("[data-slot]").forEach(el => { const k = el.dataset.slot; if (d[k] != null) el.innerHTML = d[k]; });
+
+  const grid = document.getElementById("grid");
+  const cells = d.stickers.map((s, i) => {
+    if (s.state === "empty") {
+      return `<div class="al-slot al-empty"><span class="num">${s.n}</span><div class="ghost"></div><div class="peg">PEGA AQUÍ</div><div class="role">${s.role}</div></div>`;
+    }
+    return `<div class="al-slot"><span class="num">${s.n}</span><image-slot id="al-st-${i + 1}" shape="rect" placeholder="figurita"></image-slot><div class="role">${s.role}</div></div>`;
+  }).join("");
+
+  // cromo especial (foil) = la figurita del evento, ocupa la 6ª celda
+  const foil = `<div class="al-slot foil"><span class="num">037</span><span class="star">★</span><image-slot id="al-foil" shape="rect" placeholder="cromo especial"></image-slot><div class="role">EDICIÓN LIMITADA</div></div>`;
+
+  // barra feature (evento) ocupa fila completa
+  const feature = `
+    <div class="al-feature">
+      <div class="al-feat-l">
+        <div class="k" data-slot="featureKicker">${d.featureKicker}</div>
+        <h2 data-slot="featureTitle">${d.featureTitle}</h2>
+        <div class="concept" data-slot="featureConcept">${d.featureConcept}</div>
+      </div>
+      <div class="al-feat-r">
+        <div class="al-chip"><span class="ic">${d.dateNum}</span><span class="tx">${d.dateTxt}<small>${d.time}</small></span></div>
+        <div class="al-chip"><span class="ic b3">${d.prizeIc}</span><span class="tx">${d.prize}<small>${d.prizeSub}</small></span></div>
+        <div class="al-chip"><span class="ic b2">#</span><span class="tx">${d.contest}<small>${d.contestSub}</small></span></div>
+      </div>
+    </div>`;
+
+  grid.innerHTML = cells + foil + feature;
+
+  const pct = Math.round(100 * d.collected / d.total);
+  document.getElementById("progNum").textContent = `${d.collected} / ${d.total}`;
+  document.getElementById("progBar").style.width = pct + "%";
+}
+function applyTweaks(t) { document.documentElement.style.setProperty("--accent", t.accent || "#ff3d7f"); }
+
+function loadInjected() {
+  try { const raw = new URLSearchParams(location.search).get("data");
+    if (raw) { const d = JSON.parse(decodeURIComponent(escape(atob(raw)))); Object.assign(EVENT, d.event || {}); Object.assign(TWEAKS, d.tweaks || {}); }
+  } catch (e) {}
+  if (window.FRATE_EVENT) Object.assign(EVENT, window.FRATE_EVENT);
+  if (window.FRATE_TWEAKS) Object.assign(TWEAKS, window.FRATE_TWEAKS);
+}
+
+const SAMPLES = [
+  { title: "LA PISTA", featureTitle: "ME ENCANTA TU SONRISA", coleccion: "COLECCIÓN NOCHE 2026", dateTxt: "SÁBADO 02 MAYO", dateNum: "02", collected: 2 },
+  { title: "EL AFTER", featureTitle: "NADIE BAILA COMO TÚ", coleccion: "COLECCIÓN INVIERNO 2026", dateTxt: "VIERNES 15 MAYO", dateNum: "15", collected: 4 },
+  { title: "EL CRUSH", featureTitle: "NO TIENE DUEÑ@", coleccion: "COLECCIÓN LEYENDAS", dateTxt: "SÁBADO 07 JUNIO", dateNum: "07", collected: 1 }
+];
+let si = 0;
+function regenDemo() {
+  si = (si + 1) % SAMPLES.length; Object.assign(EVENT, SAMPLES[si]);
+  TWEAKS.accent = ACCENTS[(ACCENTS.indexOf(TWEAKS.accent) + 1) % ACCENTS.length];
+  fillData(EVENT); applyTweaks(TWEAKS); buildPanel();
+}
+
+function buildPanel() {
+  const acc = document.getElementById("tw-accent");
+  acc.innerHTML = ACCENTS.map(c => `<div class="tw-sw${c === TWEAKS.accent ? ' sel' : ''}" style="background:${c}" data-c="${c}"></div>`).join("");
+  acc.onclick = e => { const sw = e.target.closest(".tw-sw"); if (!sw) return; setTweak("accent", sw.dataset.c); acc.querySelectorAll(".tw-sw").forEach(x => x.classList.toggle("sel", x === sw)); };
+  const rg = document.getElementById("tw-regen"); if (rg) rg.onclick = regenDemo;
+}
+function setTweak(k, v) { TWEAKS[k] = v; applyTweaks(TWEAKS); try { window.parent.postMessage({ type: "__edit_mode_set_keys", edits: { [k]: v } }, "*"); } catch (e) {} }
+
+window.addEventListener("message", e => {
+  if (e.data?.type === "__activate_edit_mode") document.getElementById("tweaks").classList.add("on");
+  if (e.data?.type === "__deactivate_edit_mode") document.getElementById("tweaks").classList.remove("on");
+});
+document.getElementById("tw-close").onclick = () => { document.getElementById("tweaks").classList.remove("on"); try { window.parent.postMessage({ type: "__edit_mode_dismissed" }, "*"); } catch (e) {} };
+
+loadInjected(); fillData(EVENT); applyTweaks(TWEAKS); buildPanel();
+try { window.parent.postMessage({ type: "__edit_mode_available" }, "*"); } catch (e) {}
+
+function scale() { const c = document.getElementById("canvas"); const st = document.querySelector(".al-stage"); const s = window.innerWidth / W; c.style.transform = `scale(${s})`; if (st) st.style.height = (H * s) + "px"; }
+scale(); window.addEventListener("resize", scale);
+</script>
+</body>
+</html>

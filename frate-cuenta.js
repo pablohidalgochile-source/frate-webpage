@@ -131,6 +131,7 @@ function renderCuenta(session) {
   const set = (id, val) => { const el = document.getElementById(id); if (el && val) el.value = val; };
   set('cp-username',  session.username  || '');
   set('cp-nombres',   session.nombres   || '');
+  try { _pintarSexoCuenta(session); } catch (_) {}
   set('cp-apellidos', session.apellidos || '');
   set('cp-email',     session.email     || '');
   set('cp-rut',       session.rut       || '');
@@ -158,6 +159,38 @@ function renderCuenta(session) {
   renderHistorialPuntos(session);
   renderMembresias(session);
   if (typeof checkCumple === 'function') checkCumple(session);
+  renderLoyalty(session);
+}
+
+// ── LOYALTY: nivel de cliente frecuente (visitas reales en puerta) ──
+async function renderLoyalty(session) {
+  if (typeof sb === 'undefined' || !session || !session.id) return;
+  let host = document.getElementById('cuenta-loyalty');
+  if (!host) {
+    const hdr = document.getElementById('cuenta-header');
+    if (!hdr) return;
+    host = document.createElement('div'); host.id = 'cuenta-loyalty';
+    host.style.cssText = 'margin:0 20px 6px;';
+    hdr.insertAdjacentElement('afterend', host);
+  }
+  try {
+    const { data } = await sb.rpc('mi_loyalty');
+    if (!data || data.error) { host.innerHTML = ''; return; }
+    const v = data.visitas || 0, niv = data.nivel || 'nuevo';
+    const META = {
+      nuevo:     { icon:'🎧', label:'Nuevo',     color:'#9a9aa2', ben:`Llevas <b>${v}</b> visita${v===1?'':'s'}. A las <b>${v + (data.faltan_frecuente||5)}</b> te haces Frecuente y ganas beneficios 🔥` },
+      frecuente: { icon:'⭐', label:'Frecuente', color:'#D4A832', ben:'Entrada de cortesía hasta 01:00 · 2x1 en tragos los jueves · invita 3 amig@s sin costo los jueves' },
+      vip:       { icon:'👑', label:'VIP',       color:'#E8363D', ben:'Todo lo Frecuente + VIP de cortesía cada 5 visitas · zona reservada · acceso anticipado a eventos' },
+    };
+    const m = META[niv] || META.nuevo;
+    host.innerHTML = `<div style="background:linear-gradient(135deg,rgba(212,168,50,.12),rgba(232,54,61,.05));border:1px solid ${m.color}55;border-radius:14px;padding:13px 16px;">
+      <div style="display:flex;justify-content:space-between;align-items:center;">
+        <div style="font-weight:800;font-size:0.98rem;color:#fff;">${m.icon} Cliente <span style="color:${m.color};">${m.label}</span></div>
+        <div style="font-size:0.76rem;color:#9a9aa2;">${v} visita${v===1?'':'s'}</div>
+      </div>
+      <div style="font-size:0.8rem;color:#e9e9ee;margin-top:6px;line-height:1.5;">${m.ben}</div>
+    </div>`;
+  } catch (e) { /* sin loyalty (falta correr frate-loyalty.sql) */ }
 }
 
 function calcularPuntos(session) {
@@ -313,34 +346,63 @@ function selectTiendaOpt(el, type) {
 function renderTicketTypes(ev) {
   const container = document.getElementById('ep-ticket-types');
   if (!container || !ev.tiposTicket) return;
+  // Al abrir, los botones vuelven a su estado normal y se saca el aviso de
+  // miembros de la vez anterior.
+  { const bp=document.getElementById('ep-pagar-ahora'), bc=document.getElementById('ep-confirm-tickets'), bg=document.getElementById('ep-reservar-gratis'), av=document.getElementById('ep-aviso-miembros');
+    if (bp) bp.style.display=''; if (bc) bc.style.display=''; if (bg) bg.style.display='none'; if (av) av.remove(); }
 
-  const visibles = ev.tiposTicket.filter(t => t.soloWeb && t.estado !== 'Oculto' && t.estado !== 'Cerrado' && t.estado !== 'Venta solo RRPP');
-
-  container.innerHTML = visibles.map(tt => {
-    const agotado = tt.disponible === 0 || tt.estado === 'Agotado';
-    return `
-    <div class="ticket-type-card ${agotado ? 'agotado' : ''}" data-ttid="${tt.id}" onclick="${agotado ? '' : `selectTicketType('${tt.id}', this)`}">
-      <div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:6px;">
-        <div style="font-family:var(--fuente-display);font-weight:700;font-size:1rem;color:${agotado ? 'var(--gris)' : 'var(--blanco)'};">${tt.nombre}</div>
-        <span style="font-size:0.6rem;letter-spacing:2px;text-transform:uppercase;padding:3px 8px;border-radius:2px;background:${agotado ? 'rgba(113,113,122,0.2)' : 'rgba(34,197,94,0.1)'};color:${agotado ? 'var(--gris)' : '#22c55e'};border:1px solid ${agotado ? '#333' : 'rgba(34,197,94,0.3)'};">${agotado ? 'Agotado' : tt.estado}</span>
-      </div>
-      <div style="font-size:0.75rem;color:var(--gris);margin-bottom:10px;">${tt.descripcion}</div>
-      <div style="display:flex;justify-content:space-between;align-items:center;">
-        <div style="font-family:var(--fuente-display);font-weight:900;font-size:1.4rem;color:${agotado ? 'var(--gris)' : 'var(--dorado)'};">${tt.precio === 0 ? 'Gratis' : formatCLP(tt.precio)}</div>
-        ${!agotado ? `
-        <div class="ticket-qty-inline" style="display:flex;align-items:center;gap:8px;">
-          <button class="qty-btn" onclick="event.stopPropagation();changeTicketTypeQty('${tt.id}',-1)">−</button>
-          <span class="qty-num" id="qty-${tt.id}" style="min-width:24px;text-align:center;">0</span>
-          <button class="qty-btn" onclick="event.stopPropagation();changeTicketTypeQty('${tt.id}',1)">+</button>
-        </div>` : ''}
-      </div>
-      ${!agotado ? `<div style="font-size:0.65rem;color:#555;margin-top:6px;">${tt.disponible} disponibles · máx. ${tt.maxPorCompra} por compra</div>` : ''}
-    </div>`;
-  }).join('');
+  // ⏳ Tramos de preventa: sólo el que está en su ventana AHORA. Sin esto la cabecera
+  //    del popup decía «desde $16.000» (ya filtra) y la lista de abajo ofrecía los cuatro
+  //    tramos a la vez, comprables, y el cliente llenaba nombre y RUT de cada asistente
+  //    antes de que el servidor lo rechazara. El typeof es porque este archivo también lo
+  //    carga comprar.html, que no define enVentana (ahí la lista ya viene filtrada).
+  const visibles = ev.tiposTicket.filter(t => t.soloWeb && t.estado !== 'Oculto' && t.estado !== 'Cerrado' && t.estado !== 'Venta solo RRPP'
+    && (typeof enVentana !== 'function' || enVentana(t)));
 
   if (!visibles.length) {
     container.innerHTML = `<div style="text-align:center;padding:24px;color:var(--gris);">No hay tickets disponibles para este evento</div>`;
+    return;
   }
+
+  // La tarjeta la arma frate-afiche.js — la MISMA que usa /e/... Antes esta
+  // pantalla tenía su propia copia y por eso se quedó atrás en cada rediseño.
+  // Lo único propio de acá es ticketVencido(), que sabe la fecha del evento.
+  if (window.FrateAfiche) {
+    FrateAfiche.estilos();
+    // ¿el local está abierto AHORA? estadoEfectivoEvento() ya resuelve la ventana
+    // 23:00→05:00 y el estado manual; no se recalcula acá para no tener dos
+    // versiones de la misma hora.
+    const _enVivo = (typeof estadoEfectivoEvento === 'function') && estadoEfectivoEvento(ev) === 'en_vivo';
+    container.innerHTML = visibles.map(tt => {
+      const cerrado = (typeof ticketVencido === 'function') && ticketVencido(ev, tt);
+      // ⚠️ se pasa ev.tiposTicket COMPLETO, no `visibles`: `visibles` ya está
+      //    filtrado por ventana y un tramo que abre mañana no estaría, con lo que
+      //    parecería que no queda nada y mandaríamos gente a la puerta de más.
+      const enPuerta = !!(FrateAfiche.enPuertaPara
+                          && FrateAfiche.enPuertaPara(tt, ev.tiposTicket, { enVivo: _enVivo }));
+      return FrateAfiche.entradaHTML(tt, {
+        cerrado, enPuerta,
+        cantidad: (window.ticketTypeQtys || {})[tt.id] || 0,
+        onMenos: `changeTicketTypeQty('${tt.id}',-1)`,
+        onMas:   `changeTicketTypeQty('${tt.id}',1)`,
+        qtyId: 'qty-' + tt.id,          // changeTicketTypeQty busca este id
+        precioTxt: tt.precio === 0 ? 'Gratis' : formatCLP(tt.precio)
+      });
+    }).join('');
+    return;
+  }
+
+  // Respaldo sin el generador: la versión simple de siempre.
+  container.innerHTML = visibles.map(tt => `
+    <div class="ticket-type-card" data-ttid="${tt.id}">
+      <div class="tt-head"><div class="tt-title">${tt.nombre}</div></div>
+      <div class="tt-foot"><div class="tt-price">${tt.precio === 0 ? 'Gratis' : formatCLP(tt.precio)}</div>
+        <div class="ticket-qty-inline" style="display:flex;align-items:center;gap:8px;">
+          <button class="qty-btn" onclick="changeTicketTypeQty('${tt.id}',-1)">−</button>
+          <span class="qty-num" id="qty-${tt.id}">0</span>
+          <button class="qty-btn" onclick="changeTicketTypeQty('${tt.id}',1)">+</button>
+        </div></div>
+    </div>`).join('');
 }
 
 // ticketTypeQtys se almacena en window para que el listener de index.html
@@ -354,8 +416,22 @@ function changeTicketTypeQty(ttId, delta) {
   const ev = FRATE_EVENTOS.find(e => e.tiposTicket?.some(t => String(t.id) === sid));
   const tt = ev?.tiposTicket?.find(t => String(t.id) === sid);
   if (!tt) return;
+  // 🎁 Entrada solo para miembros: sin sesión no se suma. Se avisa AL TOCAR,
+  // no al final: antes la persona llenaba todo y chocaba recién al pagar.
+  if (delta > 0 && tt.solo_miembros) {
+    if (!Storage.get('frate_session')) { _avisoMiembros(ev, tt); return; }
+    // Con sesión: se revisa el perfil EN VIVO (nombre, RUT, sexo, institución)
+    // antes de sumar. Si falta algo se pide ahí mismo.
+    if (window.FratePerfil) { _sumarMiembro(ev, tt, sid); return; }
+  }
+  _aplicarQty(ev, tt, sid, delta);
+}
+
+function _aplicarQty(ev, tt, sid, delta) {
   window.ticketTypeQtys[sid] = window.ticketTypeQtys[sid] || 0;
-  window.ticketTypeQtys[sid] = Math.min(tt.maxPorCompra, Math.max(0, window.ticketTypeQtys[sid] + delta));
+  // La entrada de miembro va a nombre del dueño de la cuenta: una sola.
+  const tope = tt.solo_miembros ? 1 : tt.maxPorCompra;
+  window.ticketTypeQtys[sid] = Math.min(tope, Math.max(0, window.ticketTypeQtys[sid] + delta));
   const el = document.getElementById('qty-' + sid);
   if (el) el.textContent = window.ticketTypeQtys[sid];
   // Actualizar total + formularios de personas
@@ -374,10 +450,44 @@ function updateTicketTotal(ev) {
     qty += q;
   });
   const totalEl = document.getElementById('ep-ticket-total');
-  if (totalEl) totalEl.textContent = qty > 0 ? `Total: ${formatCLP(total)} · ${qty} entrada${qty > 1 ? 's' : ''}` : '';
+  if (totalEl) totalEl.textContent = qty > 0 ? `Total: ${total === 0 ? 'Gratis' : formatCLP(total)} · ${qty} entrada${qty > 1 ? 's' : ''}` : '';
+  // Todo lo elegido es gratis → un solo botón «Reservar gratis», sin carrito
+  // ni pago. Si se mezcla con una pagada, van juntas al pago como siempre.
+  const soloGratis = qty > 0 && total === 0;
+  const bPagar = document.getElementById('ep-pagar-ahora');
+  const bCarro = document.getElementById('ep-confirm-tickets');
+  const bGratis = document.getElementById('ep-reservar-gratis');
+  if (bPagar) bPagar.style.display = soloGratis ? 'none' : '';
+  if (bCarro) bCarro.style.display = soloGratis ? 'none' : '';
+  if (bGratis) bGratis.style.display = soloGratis ? '' : 'none';
+  if (qty > 0) { const av = document.getElementById('ep-aviso-miembros'); if (av) av.remove(); }
+  _avisoMezcla(ev);
+}
+
+// La cortesía de miembro se reserva sola: si se elige junto a otra entrada,
+// se avisa apenas pasa (el servidor igual lo rechaza con NO_MEZCLAR).
+function _esCortesiaMiembro(tt) { return !!tt.solo_miembros && !(tt.precio > 0); }
+function _hayMezcla(ev) {
+  const q = window.ticketTypeQtys || {};
+  const sel = (ev.tiposTicket || []).filter(t => (q[String(t.id)] || 0) > 0);
+  return sel.some(_esCortesiaMiembro) && sel.some(t => !_esCortesiaMiembro(t));
+}
+function _avisoMezcla(ev) {
+  const viejo = document.getElementById('ep-aviso-mezcla');
+  if (!_hayMezcla(ev)) { if (viejo) viejo.remove(); return; }
+  if (viejo) return;
+  const total = document.getElementById('ep-ticket-total');
+  if (!total) return;
+  const av = document.createElement('div');
+  av.id = 'ep-aviso-mezcla';
+  av.style.cssText = 'background:#241d06;border:1px solid #e0b53b;border-radius:10px;padding:12px;margin:0 0 12px;text-align:center;color:#f0e2b0;font-size:0.82rem;line-height:1.45;';
+  av.innerHTML = '<b>🎁 Tu cortesía se reserva sola</b><br>Primero resérvala con 🎁 RESERVAR GRATIS (deja en 0 las demás) y después compra el resto.';
+  total.parentNode.insertBefore(av, total.nextSibling);
 }
 
 function selectTicketType(ttId, el) { /* visual selection handled via qty */ }
+// Despliega/oculta las condiciones de una entrada (tap en móvil; en compu también se ve al hover)
+function _ttToggle(headEl){ const card = headEl && headEl.closest('.ticket-type-card'); if(card) card.classList.toggle('open'); }
 
 // Override ep-confirm-tickets to handle multi-type
 function confirmMultiTickets() {
@@ -385,10 +495,16 @@ function confirmMultiTickets() {
   const evId = parseInt(popup?.dataset.evid);
   const ev = FRATE_EVENTOS.find(e => e.id === evId);
   if (!ev) return;
+  // "Pagar ahora" pone este flag para saltar directo al checkout tras validar.
+  const irAPagar = !!window._irAPagar; window._irAPagar = false;
+  const reservarGratis = !!window._reservarGratis; window._reservarGratis = false;
 
   const qtys = window.ticketTypeQtys || {};
   const selected = (ev.tiposTicket || []).filter(tt => (qtys[String(tt.id)] || 0) > 0);
   if (!selected.length) { showToast('Selecciona al menos 1 entrada.'); return; }
+  if (_hayMezcla(ev)) { _avisoMezcla(ev); showToast('🎁 Tu cortesía se reserva sola: deja en 0 las demás entradas.'); return; }
+  const esMiembroIdx = [...document.querySelectorAll('.persona-nombre')].map(inp => inp.dataset.miembro === '1');
+  const _pm = (window.FratePerfil && window.FratePerfil.persona()) || null;
 
   const totalQty = selected.reduce((s, tt) => s + qtys[String(tt.id)], 0);
   const personas = [...document.querySelectorAll('.persona-nombre')].map((inp, i) => ({
@@ -397,13 +513,29 @@ function confirmMultiTickets() {
     email: document.querySelectorAll('.persona-email')[i]?.value.trim() || ''
   }));
 
-  // Validar que cada entrada tenga nombre
-  if (personas.some(p => !p.nombre)) { showToast('⚠️ Asigna nombre a cada entrada.'); return; }
+  // TICKETS NOMINATIVOS: debe existir un formulario por cada entrada,
+  // y TODAS deben llevar nombre + RUT válido (regla de la casa).
+  if (personas.length < totalQty) {
+    if (typeof renderPersonalizacionFormsV3 === 'function') renderPersonalizacionFormsV3(totalQty);
+    showToast('⚠️ Completa nombre y RUT de cada entrada (todas son nominativas).');
+    return;
+  }
+  if (personas.some(p => !p.nombre)) { showToast('⚠️ Asigna nombre a cada entrada — todas son nominativas.'); return; }
+  if (personas.some(p => !p.rut)) {
+    const idxSin = personas.findIndex(p => !p.rut);
+    showToast(`⚠️ Falta el RUT en la entrada #${idxSin + 1}. Todas las entradas llevan nombre y RUT.`);
+    const rutInputs2 = [...document.querySelectorAll('.persona-rut')];
+    if (rutInputs2[idxSin]) { rutInputs2[idxSin].style.borderColor = '#ef4444'; rutInputs2[idxSin].focus(); setTimeout(() => { rutInputs2[idxSin].style.borderColor = '#333'; }, 3000); }
+    return;
+  }
 
-  // Validar RUTs — si se ingresó un RUT debe ser válido
-  const rutsInvalidos = personas.filter(p => p.rut && !validarRut(p.rut));
+  // Validar RUTs — deben ser válidos (dígito verificador)
+  // Filas de miembro: el RUT viene de la cuenta (ya revisado al elegir). Un
+  // extranjero usa documento, que no tiene dígito verificador.
+  const _rutMalo = (p, i) => p.rut && !(esMiembroIdx[i] && _pm && _pm.extranjero) && !validarRut(p.rut);
+  const rutsInvalidos = personas.filter(_rutMalo);
   if (rutsInvalidos.length) {
-    const idx = personas.findIndex(p => p.rut && !validarRut(p.rut));
+    const idx = personas.findIndex(_rutMalo);
     showToast(`⚠️ RUT inválido en la entrada #${idx + 1}. Revisa el dígito verificador.`);
     // Resaltar el campo con error
     const rutInputs = [...document.querySelectorAll('.persona-rut')];
@@ -412,6 +544,24 @@ function confirmMultiTickets() {
       rutInputs[idx].focus();
       setTimeout(() => { rutInputs[idx].style.borderColor = '#333'; }, 3000);
     }
+    return;
+  }
+
+  // Las filas de miembro se pisan con los datos de la cuenta (el servidor
+  // igual usa los de la cuenta; esto es para que el carrito muestre lo mismo).
+  if (_pm) esMiembroIdx.forEach((m, i) => { if (m && personas[i]) { personas[i].nombre = _pm.nombre; personas[i].rut = _pm.rut; personas[i].email = _pm.email; } });
+
+  // 🎁 «Reservar gratis»: mismo armado de entradas, pero va directo a
+  // reservar, sin pasar por el carrito ni por el checkout.
+  if (reservarGratis) {
+    let pi = 0;
+    const items = selected.map(tt => {
+      const qty = qtys[String(tt.id)];
+      const ps = personas.slice(pi, pi + qty); pi += qty;
+      return { eventoId: evId, tipo: tt.nombre, cantidad: qty, precio: tt.precio, nombre: ev.nombre,
+               fecha: ev.fecha, hora: ev.hora, ambiente: ev.ambiente, ttId: tt.id, personas: ps };
+    });
+    _reservarGratisDirecto(ev, items);
     return;
   }
 
@@ -440,7 +590,143 @@ function confirmMultiTickets() {
   saveCart(); updateCartBadge(); renderCartItems();
   window.ticketTypeQtys = {};
   closeEventPopup();
-  showToast(`🎟️ ${totalQty} entrada${totalQty > 1 ? 's' : ''} agregada${totalQty > 1 ? 's' : ''} al carrito`);
+  if (irAPagar && typeof openCheckout === 'function') {
+    openCheckout();   // Pagar ahora → directo al checkout, sin pasar por el carrito
+  } else {
+    showToast(`🎟️ ${totalQty} entrada${totalQty > 1 ? 's' : ''} agregada${totalQty > 1 ? 's' : ''} al carrito`);
+  }
+}
+
+// "Pagar ahora": valida + agrega al carrito + abre el checkout de una.
+function pagarAhora() { window._irAPagar = true; confirmMultiTickets(); }
+window.pagarAhora = pagarAhora;
+
+// ── 🎁 ENTRADAS GRATIS PARA MIEMBROS ─────────────────────────────
+function reservarGratis() { window._reservarGratis = true; confirmMultiTickets(); }
+window.reservarGratis = reservarGratis;
+
+// El aviso sale dentro de la misma ventana del evento, donde se tocó el ＋.
+function _avisoMiembros(ev, tt) {
+  const total = document.getElementById('ep-ticket-total');
+  if (!total) { showToast('🔒 Esta entrada es solo para miembros: crea tu cuenta para adquirirla.'); return; }
+  let av = document.getElementById('ep-aviso-miembros');
+  if (!av) { av = document.createElement('div'); av.id = 'ep-aviso-miembros'; total.parentNode.insertBefore(av, total); }
+  av.style.cssText = 'background:#241d06;border:1px solid #e0b53b;border-radius:10px;padding:14px;margin:0 0 14px;text-align:center;';
+  const gratis = !(tt.precio > 0);
+  const nom = String(tt.nombre || '').replace(/</g, '&lt;');
+  av.innerHTML = '<div style="font-size:1.4rem;">🔒</div>'
+    + '<div style="color:#f0e2b0;font-weight:700;margin-top:4px;">' + (gratis ? 'Crea tu cuenta para adquirir tu entrada gratis' : 'Esta entrada es solo para miembros') + '</div>'
+    + '<div style="color:#b4a870;font-size:0.8rem;margin-top:4px;line-height:1.45;">«' + nom + '» es exclusiva para miembros de FRATE. Te toma un minuto y vuelves directo acá.</div>'
+    + '<div style="display:flex;gap:8px;margin-top:12px;flex-wrap:wrap;">'
+    + '<button type="button" onclick="_irACuentaDesdeEvento(' + ev.id + ',\'' + tt.id + '\',\'register\')" style="flex:1;min-width:140px;background:#E8363D;color:#fff;border:none;border-radius:8px;padding:11px;font-weight:800;cursor:pointer;">CREAR MI CUENTA</button>'
+    + '<button type="button" onclick="_irACuentaDesdeEvento(' + ev.id + ',\'' + tt.id + '\',\'login\')" style="flex:1;min-width:140px;background:transparent;color:#E6C860;border:1px solid #E6C860;border-radius:8px;padding:11px;font-weight:700;cursor:pointer;">YA TENGO CUENTA</button>'
+    + '</div>';
+  try { av.scrollIntoView({ behavior: 'smooth', block: 'center' }); } catch (_) {}
+}
+async function _sumarMiembro(ev, tt, sid) {
+  if (window._gateMiembroEnCurso) return;           // doble toque
+  window._gateMiembroEnCurso = true;
+  try {
+    const r = await window.FratePerfil.exigir(tt);
+    if (r.ok) { _aplicarQty(ev, tt, sid, 1); return; }
+    if (r.motivo === 'SIN_SESION') { _avisoMiembros(ev, tt); return; }
+    if (r.motivo === 'NO_CORRESPONDE') _avisoEnVentana('🚫', 'Esta entrada no es para tu perfil', r.texto);
+  } catch (e) {
+    showToast('⚠️ No pudimos revisar tu cuenta. Intenta de nuevo.');
+  } finally { window._gateMiembroEnCurso = false; }
+}
+function _avisoEnVentana(icono, titulo, texto) {
+  const total = document.getElementById('ep-ticket-total');
+  if (!total) { showToast(icono + ' ' + titulo); return; }
+  let av = document.getElementById('ep-aviso-miembros');
+  if (!av) { av = document.createElement('div'); av.id = 'ep-aviso-miembros'; total.parentNode.insertBefore(av, total); }
+  av.style.cssText = 'background:#2a1214;border:1px solid #E24B4A;border-radius:10px;padding:14px;margin:0 0 14px;text-align:center;';
+  const e = v => String(v || '').replace(/</g, '&lt;');
+  av.innerHTML = '<div style="font-size:1.3rem;">' + icono + '</div><div style="color:#f7c1c1;font-weight:700;margin-top:4px;">' + e(titulo) + '</div>'
+    + '<div style="color:#f09595;font-size:0.8rem;margin-top:4px;line-height:1.45;">' + e(texto) + '</div>';
+  try { av.scrollIntoView({ behavior: 'smooth', block: 'center' }); } catch (_) {}
+}
+function _irACuentaDesdeEvento(evId, ttId, tab) {
+  try { sessionStorage.setItem('frate_volver_evento', evId + '|' + ttId); } catch (_) {}
+  if (typeof closeEventPopup === 'function') closeEventPopup();
+  if (typeof openAuthModal === 'function') openAuthModal(tab === 'login' ? 'login' : 'register');
+}
+// Al entrar o crear la cuenta, vuelve al mismo evento con la entrada ya elegida.
+window.addEventListener('frate:sesion', () => {
+  try { window.FratePerfil && window.FratePerfil.limpiar(); } catch (_) {}
+  let v = null;
+  try { v = sessionStorage.getItem('frate_volver_evento'); sessionStorage.removeItem('frate_volver_evento'); } catch (_) {}
+  if (!v) return;
+  const partes = v.split('|');
+  setTimeout(() => {
+    try { if (typeof closeAuthModal === 'function') closeAuthModal(); } catch (_) {}
+    if (typeof openEventPopup !== 'function') return;
+    openEventPopup(parseInt(partes[0]));
+    setTimeout(() => { try { changeTicketTypeQty(partes[1], 1); } catch (_) {} }, 250);
+  }, 400);
+});
+
+async function _reservarGratisDirecto(ev, items) {
+  const s = Storage.get('frate_session');
+  const btn = document.getElementById('ep-reservar-gratis');
+  // Gratis pero sin sesión (una entrada gratis que NO es de miembros): va al
+  // checkout normal, que con total $0 ya no muestra nada de pago.
+  if (!s) {
+    items.forEach(it => { const i = cart.findIndex(c => c.eventoId === it.eventoId && c.tipo === it.tipo); if (i >= 0) cart.splice(i, 1); cart.push(it); });
+    saveCart(); updateCartBadge(); renderCartItems();
+    window.ticketTypeQtys = {}; closeEventPopup();
+    if (typeof openCheckout === 'function') openCheckout();
+    return;
+  }
+  const p0 = (items[0] && items[0].personas && items[0].personas[0]) || {};
+  const pm = (window.FratePerfil && window.FratePerfil.persona()) || null;
+  const comprador = {
+    nombre: (pm && pm.nombre) || ((s.nombres || '') + ' ' + (s.apellidos || '')).trim() || s.nombre || p0.nombre || '',
+    email:  s.email || (pm && pm.email) || p0.email || '',
+    tel:    s.telefono || '',
+    rut:    (pm && pm.rut) || s.rut || p0.rut || '',
+  };
+  const txt = btn ? btn.textContent : '';
+  if (btn) { btn.disabled = true; btn.textContent = 'RESERVANDO…'; }
+  try {
+    const { data, error } = await sb.functions.invoke('crear-pago', { body: { items, comprador, medio: 'mercadopago' } });
+    if (error) {
+      let m = error.message || 'No se pudo reservar.', code = null, faltan = null;
+      try { const c = await error.context?.json?.(); if (c?.error) m = c.error; code = c?.code || null; faltan = c?.faltan || null; } catch (_) {}
+      if (code === 'REQUIERE_CUENTA') {
+        // La sesión guardada en el navegador venció: se pide entrar de nuevo
+        // y al entrar vuelve a este mismo evento.
+        _irACuentaDesdeEvento(ev.id, items[0] && items[0].ttId, 'login');
+        showToast('🔒 Tu sesión venció. Entra de nuevo para reservar tu entrada gratis.');
+        return;
+      }
+      // Faltan datos del perfil o la entrada no corresponde: se pide o se avisa
+      // ahí mismo. No se reintenta solo, para no crear dos pedidos.
+      if (code && window.FratePerfil && window.FratePerfil.esCodigo(code)) {
+        const ttM = (ev.tiposTicket || []).find(t => t.solo_miembros && items.some(i => String(i.ttId) === String(t.id)));
+        const listo = await window.FratePerfil.manejarCodigo(code, m, faltan, ttM);
+        if (listo) {
+          renderPersonalizacionFormsV3(items.reduce((n, i) => n + (i.cantidad || 0), 0));
+          showToast('✅ Datos guardados. Aprieta 🎁 RESERVAR GRATIS otra vez.');
+        }
+        return;
+      }
+      throw new Error(m);
+    }
+    if (data?.error) throw new Error(data.error);
+    if (data?.freeOrder) {
+      window.ticketTypeQtys = {};
+      window.location.href = '/pago-exitoso.html?external_reference=' + data.pedidoId;
+      return;
+    }
+    // No debería pasar: el botón solo aparece con total $0. Si el servidor
+    // calculó un cobro, no se manda a pagar a escondidas.
+    throw new Error('Esta reserva no salió gratis. Revisa las entradas elegidas.');
+  } catch (err) {
+    showToast('⚠️ ' + (err?.message || 'No se pudo reservar.'));
+  } finally {
+    if (btn) { btn.disabled = false; btn.textContent = txt || '🎁 RESERVAR GRATIS'; }
+  }
 }
 
 // Renderiza un formulario de nombre+RUT por cada entrada seleccionada,
@@ -448,6 +734,14 @@ function confirmMultiTickets() {
 function renderPersonalizacionFormsV3(qty) {
   const container = document.getElementById('ep-personas-list');
   if (!container) return;
+
+  // Conservar lo que la persona YA escribió antes de re-dibujar
+  // (al cambiar la cantidad no se pierde ningún dato ingresado)
+  const prev = [...container.querySelectorAll('.persona-nombre')].map((inp, i) => ({
+    nombre: inp.value,
+    rut:    container.querySelectorAll('.persona-rut')[i]?.value || '',
+    email:  container.querySelectorAll('.persona-email')[i]?.value || ''
+  }));
 
   // Si no hay entradas, limpiar y salir
   if (!qty || qty === 0) { container.innerHTML = ''; return; }
@@ -465,14 +759,18 @@ function renderPersonalizacionFormsV3(qty) {
 
   let html = '';
   let globalIdx = 0; // índice global de ticket (para "Ticket #N" y para saber quién es el dueño)
+  const perM = (window.FratePerfil && window.FratePerfil.persona()) || null;
+  const hayMiembro = !!session && (ev?.tiposTicket || []).some(t => t.solo_miembros && (qtys[String(t.id)] || 0) > 0);
 
   if (ev && ev.tiposTicket) {
     // Recorrer cada tipo de ticket en el mismo orden que se renderizaron las cards
     ev.tiposTicket.forEach(tt => {
       const count = qtys[String(tt.id)] || 0;
       for (let i = 0; i < count; i++) {
-        const isOwn = globalIdx === 0 && !!session;
-        html += buildPersonaForm(globalIdx, tt.nombre, isOwn, session, nombreCompleto);
+        const esM = !!session && !!tt.solo_miembros;
+        const isOwn = hayMiembro ? esM : (globalIdx === 0 && !!session);
+        html += buildPersonaForm(globalIdx, tt.nombre, isOwn, session, nombreCompleto,
+          esM ? (perM || { nombre: nombreCompleto, rut: session.rut || '', email: session.email || '' }) : null);
         globalIdx++;
       }
     });
@@ -485,10 +783,43 @@ function renderPersonalizacionFormsV3(qty) {
   }
 
   container.innerHTML = html;
+
+  // Restaurar lo que ya se había escrito (por índice de ticket)
+  if (prev.length) {
+    const nombres = container.querySelectorAll('.persona-nombre');
+    const ruts    = container.querySelectorAll('.persona-rut');
+    const emails  = container.querySelectorAll('.persona-email');
+    prev.forEach((p, i) => {
+      if (nombres[i] && p.nombre && !nombres[i].readOnly) nombres[i].value = p.nombre;
+      if (ruts[i]    && p.rut    && !ruts[i].readOnly)    ruts[i].value    = p.rut;
+      if (emails[i]  && p.email)  emails[i].value  = p.email;
+    });
+  }
+
   document.querySelectorAll('.persona-rut.rut-field').forEach(applyRUTFormat);
 }
 
-function buildPersonaForm(idx, tipoNombre, isOwn, session, nombreCompleto) {
+function buildPersonaForm(idx, tipoNombre, isOwn, session, nombreCompleto, miembro) {
+  if (miembro) {
+    // Entrada de miembro: va a nombre del dueño de la cuenta y no se regala.
+    const e = v => String(v || '').replace(/"/g, '&quot;').replace(/</g, '&lt;');
+    const inp = 'background:var(--negro);border:1px solid #333;color:var(--blanco);padding:10px 12px;font-family:var(--fuente-body);font-size:0.9rem;border-radius:var(--radius);width:100%;outline:none;opacity:.75;';
+    return `
+  <div style="background:var(--negro-3);border:1px solid #6b5a1e;border-radius:var(--radius);padding:16px;margin-bottom:10px;">
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px;gap:8px;">
+      <div style="font-size:0.62rem;letter-spacing:2px;text-transform:uppercase;color:var(--rojo);font-weight:700;">Ticket #${idx + 1}${tipoNombre ? ' — ' + e(tipoNombre) : ''}</div>
+      <span style="font-size:0.62rem;color:#E6C860;letter-spacing:1px;white-space:nowrap;">🔒 Esta entrada es para ti</span>
+    </div>
+    <div class="form-row">
+      <div class="form-group"><label>Nombre completo</label>
+        <input type="text" class="persona-nombre" data-miembro="1" readonly value="${e(miembro.nombre)}" style="${inp}" /></div>
+      <div class="form-group"><label>RUT</label>
+        <input type="text" class="persona-rut" data-miembro="1" readonly value="${e(miembro.rut)}" style="${inp}" /></div>
+    </div>
+    <input type="hidden" class="persona-email" value="${e(miembro.email || session?.email || '')}" />
+    <div style="font-size:0.72rem;color:#b4a870;margin-top:8px;line-height:1.45;">Va a nombre de tu cuenta y no se puede regalar. Si tu nombre o RUT está mal, corrígelo en Mi cuenta.</div>
+  </div>`;
+  }
   const etiqueta = tipoNombre
     ? `Ticket #${idx + 1} — ${tipoNombre}${isOwn ? ' — Tu entrada' : ''}`
     : `Ticket #${idx + 1}${isOwn ? ' — Tu entrada' : ''}`;
@@ -590,3 +921,24 @@ function initCuentaModule() {
 }
 
 document.addEventListener('DOMContentLoaded', initCuentaModule);
+
+// Mi cuenta · sexo: si ya está, queda fijo (solo lo corrige un admin). Se lee
+// en vivo desde clientes porque la sesión del navegador puede estar vieja.
+function _pintarSexoCuenta(session) {
+  const sel = document.getElementById('cp-sexo'), nota = document.getElementById('cp-sexo-nota');
+  if (!sel || !session) return;
+  const pintar = v => {
+    sel.value = v || '';
+    sel.disabled = !!v;
+    sel.style.opacity = v ? '0.6' : '';
+    if (nota) nota.textContent = v ? 'fijo · lo corrige un admin' : 'se guarda una sola vez';
+  };
+  pintar(session.sexo);
+  if (typeof sb === 'undefined' || !session.id) return;
+  sb.from('clientes').select('sexo').eq('id', session.id).maybeSingle().then(r => {
+    if (r.error) { if (/sexo/i.test(r.error.message || '')) { const w = sel.closest('.profile-field'); if (w) w.style.display = 'none'; } return; }
+    const v = (r.data && r.data.sexo) || null;
+    if (v !== (session.sexo || null)) { session.sexo = v; try { Storage.set('frate_session', session); } catch (_) {} }
+    pintar(v);
+  }).catch(() => {});
+}

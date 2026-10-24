@@ -1,0 +1,280 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+<title>FRATE WEB (TICKETERA) · PUERTA EN VIVO</title>
+<link rel="icon" href="/icon-frate.svg" />
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="/frate-supabase.js"></script>
+<style>
+  :root{ --negro:#0a0a0b; --negro2:#141416; --borde:#26262b; --gris:#8a8a92; --rojo:#E8363D; --dorado:#D4A832; --verde:#22c55e; --azul:#3b82f6; }
+  *{ box-sizing:border-box; margin:0; padding:0; }
+  body{ background:var(--negro); color:#fff; font-family:'Inter',-apple-system,system-ui,sans-serif; min-height:100vh; -webkit-font-smoothing:antialiased; }
+  .disp{ font-family:'Barlow Condensed','Arial Narrow',sans-serif; }
+  .wrap{ max-width:1400px; margin:0 auto; padding:18px; }
+  /* Login */
+  #login{ min-height:100vh; display:flex; align-items:center; justify-content:center; padding:20px; }
+  .lbox{ background:var(--negro2); border:1px solid var(--borde); border-radius:16px; padding:34px; width:360px; max-width:94vw; text-align:center; }
+  input,select,button{ font-family:inherit; }
+  .fld{ width:100%; background:#0e0e10; border:1px solid var(--borde); color:#fff; padding:13px 14px; border-radius:10px; font-size:1rem; margin-top:10px; }
+  .btn{ width:100%; background:var(--rojo); color:#fff; border:0; padding:14px; border-radius:10px; font-weight:800; font-size:1rem; margin-top:14px; cursor:pointer; letter-spacing:.5px; }
+  .btn.ghost{ background:transparent; border:1px solid var(--borde); color:var(--gris); }
+  /* Header */
+  .top{ display:flex; align-items:center; justify-content:space-between; gap:12px; flex-wrap:wrap; margin-bottom:16px; }
+  .top .live{ display:inline-flex; align-items:center; gap:8px; font-weight:800; letter-spacing:1px; font-size:.86rem; color:var(--rojo); text-transform:uppercase; }
+  .dot{ width:11px; height:11px; border-radius:50%; background:var(--rojo); box-shadow:0 0 0 0 rgba(232,54,61,.7); animation:pulse 1.6s infinite; }
+  @keyframes pulse{ 0%{box-shadow:0 0 0 0 rgba(232,54,61,.6);} 70%{box-shadow:0 0 0 14px rgba(232,54,61,0);} 100%{box-shadow:0 0 0 0 rgba(232,54,61,0);} }
+  .evsel{ background:#0e0e10; border:1px solid var(--borde); color:#fff; padding:9px 12px; border-radius:9px; font-size:.92rem; font-weight:600; }
+  .hbtn{ background:transparent; border:1px solid var(--borde); color:var(--gris); padding:9px 12px; border-radius:9px; cursor:pointer; font-size:.85rem; }
+  /* Grid */
+  .grid{ display:grid; grid-template-columns: 1.15fr 1fr; gap:16px; }
+  @media (max-width:900px){ .grid{ grid-template-columns:1fr; } }
+  .card{ background:var(--negro2); border:1px solid var(--borde); border-radius:16px; padding:20px; }
+  .big-lbl{ font-size:.82rem; letter-spacing:2px; color:var(--gris); text-transform:uppercase; font-weight:700; }
+  .big-num{ font-weight:900; line-height:.9; font-size:clamp(78px,17vw,200px); letter-spacing:-2px; }
+  .bn-verde{ color:var(--verde); }
+  .row2{ display:flex; gap:14px; margin-top:14px; }
+  .mini{ flex:1; background:#0e0e10; border:1px solid var(--borde); border-radius:12px; padding:12px 14px; }
+  .mini .v{ font-weight:900; font-size:2.1rem; line-height:1; }
+  .mini .l{ font-size:.72rem; color:var(--gris); text-transform:uppercase; letter-spacing:1px; margin-top:4px; }
+  /* Aforo bar */
+  .afo{ margin-top:16px; }
+  .afo-track{ height:20px; background:#0e0e10; border:1px solid var(--borde); border-radius:20px; overflow:hidden; }
+  .afo-fill{ height:100%; background:linear-gradient(90deg,var(--verde),var(--dorado)); border-radius:20px; transition:width .5s ease; min-width:2px; }
+  .afo-fill.full{ background:linear-gradient(90deg,var(--dorado),var(--rojo)); }
+  /* Desglose */
+  .dg{ margin-top:8px; }
+  .dg-row{ display:flex; align-items:center; gap:10px; margin-bottom:8px; }
+  .dg-bar{ flex:1; height:12px; background:#0e0e10; border-radius:8px; overflow:hidden; }
+  .dg-bar i{ display:block; height:100%; background:var(--azul); border-radius:8px; }
+  .dg-lbl{ font-size:.82rem; color:#d4d4d8; min-width:120px; max-width:180px; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
+  .dg-n{ font-weight:800; font-size:.9rem; min-width:96px; text-align:right; white-space:nowrap; }
+  /* Feed */
+  .feed-h{ display:flex; align-items:center; justify-content:space-between; margin-bottom:6px; }
+  .feed{ max-height:62vh; overflow:auto; }
+  .fitem{ display:flex; align-items:center; gap:12px; padding:12px 6px; border-bottom:1px solid var(--borde); animation:slidein .35s ease; }
+  .fitem.nuevo{ background:rgba(34,197,94,.09); border-radius:10px; }
+  @keyframes slidein{ from{ opacity:0; transform:translateY(-8px);} to{ opacity:1; transform:none;} }
+  .fav{ width:44px; height:44px; border-radius:50%; background:#0e0e10; border:1px solid var(--borde); display:flex; align-items:center; justify-content:center; font-weight:800; color:var(--verde); flex-shrink:0; }
+  .fname{ font-weight:800; font-size:1.06rem; line-height:1.15; }
+  .fsub{ font-size:.8rem; color:var(--gris); }
+  .fhora{ margin-left:auto; font-family:monospace; font-weight:800; color:var(--verde); flex-shrink:0; }
+  .fitem.inc .fav{ color:var(--rojo); } .fitem.inc .fhora{ color:var(--rojo); }
+  .alert{ background:rgba(232,54,61,.12); border:1px solid var(--rojo); color:#fff; border-radius:12px; padding:12px 16px; margin-bottom:14px; font-weight:700; display:none; }
+  .muted{ color:var(--gris); text-align:center; padding:26px; }
+</style>
+</head>
+<body>
+
+<!-- LOGIN -->
+<div id="login">
+  <div class="lbox">
+    <div class="disp" style="font-size:2.4rem; font-weight:900; letter-spacing:3px;">FRATE</div>
+    <div style="color:var(--gris); font-size:.82rem; letter-spacing:2px; text-transform:uppercase; margin-bottom:14px;">📺 Puerta en vivo</div>
+    <input class="fld" id="l-email" type="email" inputmode="email" autocapitalize="none" autocorrect="off" spellcheck="false" placeholder="correo" style="text-transform:lowercase;" />
+    <input class="fld" id="l-pass" type="password" placeholder="contraseña" onkeydown="if(event.key==='Enter')entrar()" />
+    <button class="btn" onclick="entrar()">ENTRAR</button>
+    <div id="l-err" style="color:var(--rojo); font-size:.82rem; margin-top:10px; min-height:18px;"></div>
+  </div>
+</div>
+
+<!-- TABLERO -->
+<div id="app" class="wrap" style="display:none;">
+  <div class="top">
+    <div class="live"><span class="dot"></span> En vivo · <span id="ev-name">—</span></div>
+    <div style="display:flex; gap:8px; align-items:center; flex-wrap:wrap;">
+      <select class="evsel" id="ev-sel" onchange="elegir(this.value)"></select>
+      <button class="hbtn" onclick="pantalla()">⛶ Pantalla completa</button>
+      <button class="hbtn" onclick="salir()">Salir</button>
+    </div>
+  </div>
+
+  <div id="alerta" class="alert"></div>
+
+  <div class="grid">
+    <!-- Números -->
+    <div class="card">
+      <div class="big-lbl">🚪 Entraron</div>
+      <div class="big-num bn-verde" id="n-entraron">0</div>
+      <div class="afo" id="afo-wrap" style="display:none;">
+        <div style="display:flex; justify-content:space-between; font-size:.82rem; color:var(--gris); margin-bottom:6px;">
+          <span>Aforo</span><span id="afo-txt">—</span>
+        </div>
+        <div class="afo-track"><div class="afo-fill" id="afo-fill" style="width:0%"></div></div>
+      </div>
+      <div class="row2">
+        <div class="mini"><div class="v" id="n-emitidas" style="color:var(--dorado)">0</div><div class="l">Emitidas</div></div>
+        <div class="mini"><div class="v" id="n-ritmo" style="color:var(--azul)">0</div><div class="l">Últimos 10 min</div></div>
+        <div class="mini"><div class="v" id="n-inc" style="color:var(--rojo)">0</div><div class="l">Incidencias</div></div>
+      </div>
+      <div class="dg" id="desglose" style="margin-top:18px;"></div>
+    </div>
+
+    <!-- Feed -->
+    <div class="card">
+      <div class="feed-h">
+        <div class="big-lbl">⬆️ Últimos en entrar</div>
+        <div style="font-size:.76rem; color:var(--gris);" id="feed-upd">—</div>
+      </div>
+      <div class="feed" id="feed"><div class="muted">Cargando…</div></div>
+    </div>
+  </div>
+</div>
+
+<script>
+let VEvs = [], VSel = null, VTimer = null, VChan = null, VPrevTop = null, VErr = 0;
+
+async function entrar(){
+  const email = (document.getElementById('l-email').value||'').trim().toLowerCase();
+  const pass  = document.getElementById('l-pass').value||'';
+  const err = document.getElementById('l-err'); err.textContent = '';
+  if(!email || !pass){ err.textContent = 'Pon tu correo y contraseña'; return; }
+  try{
+    const { error } = await sb.auth.signInWithPassword({ email, password: pass });
+    if(error) throw error;
+    await arrancar();
+  }catch(e){ err.textContent = 'No se pudo entrar: ' + (e.message||e); }
+}
+async function salir(){ try{ await sb.auth.signOut(); }catch(e){} location.reload(); }
+
+async function arrancar(){
+  document.getElementById('login').style.display = 'none';
+  document.getElementById('app').style.display = '';
+  let evs = [];
+  try{
+    const r = await sb.from('eventos').select('id,nombre,fecha,hora,hora_termino,aforo,activo,archivado').eq('archivado', false).order('fecha', { ascending:false });
+    if(r.error) throw r.error;
+    evs = r.data || [];
+  }catch(e){ mostrarAlerta('⚠️ No pude cargar eventos: '+String(e.message||e)); }
+  VEvs = evs;   // TODOS los no archivados (el evento en curso puede estar activo=false)
+  const sel = document.getElementById('ev-sel');
+  if(!VEvs.length){ document.getElementById('ev-name').textContent='(sin eventos)'; if(sel) sel.innerHTML='<option>Sin eventos</option>'; mostrarAlerta('No hay eventos para mostrar. Crea o publica uno en el admin.'); return; }
+  sel.innerHTML = VEvs.map(e => `<option value="${e.id}">${(e.nombre||'Evento').replace(/</g,'&lt;')}${e.fecha?' · '+e.fecha:''}</option>`).join('');
+  // Noche operativa (America/Santiago): antes de las 06:00 la noche pertenece al día ANTERIOR,
+  // porque las fiestas van 23:00 → 04/05:00. Así el evento en vivo no se pierde tras medianoche.
+  const _cl = new Date(new Date().toLocaleString('en-US',{timeZone:'America/Santiago'}));
+  const _fmtCL = d => d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0');
+  const _noche = new Date(_cl); if(_noche.getHours()<6) _noche.setDate(_noche.getDate()-1);
+  const noche = _fmtCL(_noche), today = _fmtCL(_cl);
+  VSel = VEvs.find(e=>String(e.fecha)===noche) || VEvs.find(e=>String(e.fecha)===today) || VEvs[0];
+  elegir(VSel.id);
+}
+function elegir(id){
+  VSel = VEvs.find(e => String(e.id) === String(id)) || VSel;
+  if(!VSel) return;
+  document.getElementById('ev-name').textContent = VSel.nombre || '—';
+  document.getElementById('ev-sel').value = VSel.id;
+  VPrevTop = null;
+  suscribir();
+  refrescar();
+  clearInterval(VTimer);
+  VTimer = setInterval(refrescar, 4000);  // respaldo por si el realtime falla
+}
+
+function suscribir(){
+  try{ if(VChan) sb.removeChannel(VChan); }catch(e){}
+  VChan = sb.channel('vivo-'+VSel.id)
+    .on('postgres_changes', { event:'INSERT', schema:'public', table:'qr_usados' }, () => refrescar())
+    .subscribe();
+}
+
+async function refrescar(){
+  if(!VSel) return;
+  try{
+    const { data, error } = await sb.rpc('evento_vivo', { p_evento: VSel.id });
+    if(error) throw error;
+    if(data && data.error) throw new Error(data.error);
+    pintar(data || {});
+    VErr = 0; mostrarAlerta('');
+  }catch(e){
+    VErr++;
+    const msg = String((e&&e.message)||e);
+    try{ console.error('[vivo] evento_vivo error:', e); }catch(_){}
+    const u = document.getElementById('feed-upd'); if(u) u.textContent = '⚠️ error';
+    mostrarAlerta('⚠️ ' + (/permiso/i.test(msg) ? 'Tu cuenta no tiene permiso de puerta — entra con la cuenta del validador (admin/portero).' : /evento_vivo|function|does not exist|schema/i.test(msg) ? 'Falta correr frate-evento-vivo.sql en la WEB.' : ('Error del servidor: ' + msg)));
+    const f = document.getElementById('feed'); if(f) f.innerHTML = '<div class="muted" style="color:#ff8a8a;white-space:pre-wrap;">No se pudo cargar:\n' + msg.replace(/</g,'&lt;') + '</div>';
+  }
+}
+
+function inic(n){ const p = String(n||'?').trim().split(/\s+/); return ((p[0]||'?')[0] + (p[1]? p[1][0] : '')).toUpperCase(); }
+function hhmm(t){ try{ return new Date(t).toLocaleTimeString('es-CL',{hour:'2-digit',minute:'2-digit'}); }catch(e){ return ''; } }
+
+function pintar(d){
+  const entraron = d.entraron||0, emit = d.emitidas||0, aforo = d.aforo||null;
+  animNum('n-entraron', entraron);
+  document.getElementById('n-emitidas').textContent = emit;
+  document.getElementById('n-ritmo').textContent = d.ritmo_10min||0;
+  document.getElementById('n-inc').textContent = d.incidencias||0;
+  document.getElementById('feed-upd').textContent = 'actualizado ' + hhmm(Date.now());
+
+  // Aforo (si el evento tiene capacidad)
+  const wrap = document.getElementById('afo-wrap');
+  if(aforo && aforo > 0){
+    wrap.style.display = '';
+    const pct = Math.min(100, Math.round(entraron / aforo * 100));
+    const fill = document.getElementById('afo-fill');
+    fill.style.width = pct + '%';
+    fill.classList.toggle('full', pct >= 85);
+    document.getElementById('afo-txt').textContent = entraron + ' / ' + aforo + ' · ' + pct + '%';
+    mostrarAlerta(pct >= 90 ? `⚠️ Aforo al ${pct}% — ${entraron} de ${aforo}` : '');
+  } else {
+    wrap.style.display = 'none';
+    mostrarAlerta('');
+  }
+
+  // Desglose por lista/tipo: LLEGARON / TOTAL (%)
+  const dg = document.getElementById('desglose');
+  const arr = Array.isArray(d.desglose) ? d.desglose : [];
+  // Resumen por categoría (preventa/cortesía/puerta) — usa x.cat si viene de la RPC, si no lo deduce de la etiqueta
+  const catLabel = l => { l=String(l||''); if(/(^|\s)ingreso\b|puerta/i.test(l)) return 'puerta'; if(/pre-?\s*venta/i.test(l)) return 'preventa'; return 'cortesia'; };
+  const cats={preventa:{d:0,e:0},cortesia:{d:0,e:0},puerta:{d:0,e:0}};
+  arr.forEach(x=>{ const c=cats[x.cat]?x.cat:catLabel(x.label); cats[c].d+=x.llegaron||0; cats[c].e+=x.total||0; });
+  const splCard=(emoji,tit,o,col)=> o.e? `<div style="flex:1;min-width:150px;background:#0e0e10;border:1px solid var(--borde);border-left:4px solid ${col};border-radius:14px;padding:13px 16px;">
+    <div style="font-size:.72rem;color:var(--gris);text-transform:uppercase;letter-spacing:.5px;">${emoji} ${tit}</div>
+    <div style="font-weight:800;font-size:2rem;line-height:1.15;"><span style="color:${col};">${o.d}</span><span style="color:var(--gris);font-size:1.1rem;">/${o.e}</span></div>
+    <div style="font-size:.78rem;color:var(--gris);">${o.e?Math.round(o.d*100/o.e):0}% llegó${o.e>o.d?` · faltan ${o.e-o.d}`:''}</div></div>`:'';
+  const splHtml = (cats.preventa.e||cats.cortesia.e||cats.puerta.e) ? `<div class="big-lbl" style="margin-bottom:10px;">✅ Sin mezclar</div><div style="display:flex;gap:12px;flex-wrap:wrap;margin-bottom:20px;">${splCard('💰','Preventa · pagaron',cats.preventa,'var(--verde)')}${splCard('🎁','Cortesía · gratis',cats.cortesia,'var(--azul)')}${splCard('🚪','Puerta · VIP',cats.puerta,'#c4b5fd')}</div>` : '';
+  dg.innerHTML = splHtml + (arr.length ? ('<div class="big-lbl" style="margin-bottom:10px;">📋 Por lista / tipo — llegaron / total</div>' + arr.map(x => {
+    const lleg = x.llegaron||0, tot = x.total||0, pct = tot>0 ? Math.round(lleg/tot*100) : 0;
+    return `<div class="dg-row">
+      <div class="dg-lbl">${(x.label||'—').replace(/</g,'&lt;')}</div>
+      <div class="dg-bar"><i style="width:${pct}%;${pct>=100?'background:var(--verde);':''}"></i></div>
+      <div class="dg-n"><b style="color:var(--verde);">${lleg}</b><span style="color:var(--gris);">/${tot}</span> <span style="color:var(--gris);font-size:.75rem;">${pct}%</span></div>
+    </div>`;
+  }).join('')) : '');
+
+  // Feed (último arriba)
+  const feed = document.getElementById('feed');
+  const items = Array.isArray(d.feed) ? d.feed : [];
+  const topKey = items[0] ? (items[0].nombre + '|' + items[0].hora) : null;
+  const hayNuevo = topKey && topKey !== VPrevTop;
+  feed.innerHTML = items.length ? items.map((x,i) => `
+    <div class="fitem ${x.incidencia?'inc':''} ${(hayNuevo && i===0)?'nuevo':''}">
+      <div class="fav">${x.incidencia ? '🚫' : inic(x.nombre)}</div>
+      <div style="min-width:0;">
+        <div class="fname">${(x.nombre||'—').replace(/</g,'&lt;')}${x.incidencia?' <span style="color:var(--rojo);font-size:.7rem;">incidencia</span>':''}</div>
+        <div class="fsub">${(x.nombre_ticket||'').replace(/</g,'&lt;')}${x.rut? ' · '+x.rut : ''}</div>
+      </div>
+      <div class="fhora">${hhmm(x.hora)}</div>
+    </div>`).join('') : '<div class="muted">Aún no entra nadie 👀</div>';
+  if(hayNuevo){ try{ if(navigator.vibrate) navigator.vibrate(30); }catch(e){} }
+  VPrevTop = topKey;
+}
+
+function animNum(id, val){
+  const el = document.getElementById(id); if(!el) return;
+  const cur = parseInt(el.textContent) || 0;
+  if(cur === val){ el.textContent = val; return; }
+  el.textContent = val;
+  el.style.transform = 'scale(1.14)'; el.style.transition = 'transform .18s ease';
+  setTimeout(()=>{ el.style.transform = 'scale(1)'; }, 190);
+}
+function mostrarAlerta(msg){ const a = document.getElementById('alerta'); if(!a) return; a.style.display = msg ? 'block' : 'none'; a.textContent = msg || ''; }
+function pantalla(){ const el = document.documentElement; if(!document.fullscreenElement){ (el.requestFullscreen||el.webkitRequestFullscreen||(()=>{})).call(el); } else { (document.exitFullscreen||(()=>{})).call(document); } }
+
+// Sesión ya iniciada (admin/puerta en el mismo navegador)
+(async ()=>{ try{ const { data } = await sb.auth.getSession(); if(data && data.session){ await arrancar(); } }catch(e){} })();
+</script>
+</body>
+</html>

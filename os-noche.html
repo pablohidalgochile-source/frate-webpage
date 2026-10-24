@@ -1,0 +1,139 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>FRATE WEB (TICKETERA) · OS 04 LA NOCHE</title>
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🌙</text></svg>">
+<link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@600;800;900&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="/os-manual.css">
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<style>
+  .reloj{display:flex;gap:0;flex-wrap:wrap;margin-top:14px}
+  .hora{flex:1;min-width:120px;background:var(--neg2);border:1px solid var(--bor);padding:14px 12px}
+  .hora:first-child{border-radius:12px 0 0 12px} .hora:last-child{border-radius:0 12px 12px 0}
+  .hora+.hora{border-left:0}
+  @media(max-width:760px){.hora{border-radius:12px!important;border-left:1px solid var(--bor)!important;margin-bottom:6px;flex:1 1 100%}}
+  .hora .h{font-family:var(--disp);font-weight:900;font-size:1.4rem;color:var(--rojo)}
+  .hora h4{font-size:.82rem;font-weight:800;margin:3px 0}
+  .hora p{font-size:.73rem;color:var(--gris)}
+</style>
+</head>
+<body>
+<div id="bar"></div>
+<div class="wrap">
+
+  <div class="hero">
+    <div class="eyebrow">Manual 04</div>
+    <h1>La <em>noche</em></h1>
+    <p class="sub">Del jueves en la tarde al viernes de madrugada: cómo se prepara, cómo se opera la puerta y cómo se cierra.</p>
+    <div class="meta"><span>Puerta · Producción</span><span>·</span><span>12 minutos</span></div>
+  </div>
+
+  <section>
+    <div class="stag">Capítulo 1</div>
+    <h2>El reloj de la noche</h2>
+    <div class="reloj">
+      <div class="hora"><div class="h">16:00</div><h4>Revisión de listas</h4><p>Se revisan y se emiten las cortesías. Salen los correos con los QR.</p></div>
+      <div class="hora"><div class="h">20:00</div><h4>Preparar la puerta</h4><p>Se descarga la lista al validador por si falla internet. Se cargan pulseras.</p></div>
+      <div class="hora"><div class="h">23:00</div><h4>Abren las puertas</h4><p>Empieza el escaneo. El aforo corre en vivo.</p></div>
+      <div class="hora"><div class="h">00:30</div><h4>Peak</h4><p>La hora de más flujo. La fila tiene que avanzar.</p></div>
+      <div class="hora"><div class="h">02:30</div><h4>Cortes de validez</h4><p>Muchos tickets dejan de servir. Aparecen "fuera de horario".</p></div>
+      <div class="hora"><div class="h">05:00</div><h4>Cierre</h4><p>Se sincroniza todo y se revisan las incidencias.</p></div>
+    </div>
+    <div class="oro"><b>El evento del jueves es "del jueves" aunque termine el viernes.</b> Todo lo que ocurre antes de las 06:00 cuenta para la noche anterior. Por eso a las 2 AM el panel sigue mostrando el evento del jueves — es a propósito.</div>
+  </section>
+
+  <section>
+    <div class="stag">Capítulo 2</div>
+    <h2>Antes de abrir</h2>
+    <h3>Revisar las listas — el paso que no se salta</h3>
+    <p>Antes de emitir una sola cortesía, el sistema revisa toda la lista y marca:</p>
+    <div class="tw"><table class="tabla">
+      <thead><tr><th>Señal</th><th>Qué significa</th><th>Qué hacer</th></tr></thead>
+      <tbody>
+        <tr><td style="color:var(--rojo)"><b>🚫 Vetado</b></td><td>Esa persona no puede entrar.</td><td>Sacarla de la lista. No se emite.</td></tr>
+        <tr><td style="color:var(--rojo)"><b>Menor de edad</b></td><td>Menos de 18.</td><td>Sacarla. El local es +18.</td></tr>
+        <tr><td style="color:var(--oro)"><b>RUT inválido</b></td><td>El dígito verificador no calza.</td><td>Corregir o emitir sin RUT (se valida por nombre).</td></tr>
+        <tr><td style="color:var(--oro)"><b>Duplicado</b></td><td>Está dos veces, o ya está en otra lista.</td><td>Dejar una sola. Si no, ocupa dos cupos.</td></tr>
+        <tr><td style="color:var(--verde)"><b>⭐ Frecuente</b></td><td>Ya viene hace tiempo.</td><td>Nada, pero es bueno saberlo.</td></tr>
+      </tbody>
+    </table></div>
+    <div class="peligro"><b>Emitir sin revisar es el error más caro.</b> Una vez emitido, cada QR es una entrada válida: si se coló un vetado o un duplicado, ya está en la puerta.</div>
+
+    <h3>Preparar el validador</h3>
+    <ul>
+      <li><b>Descargar la lista</b> al teléfono/lector: si se cae internet, sigue funcionando.</li>
+      <li><b>Elegir modo</b>: cámara o lector láser (en las Sunmi son excluyentes).</li>
+      <li><b>Verificar el evento</b> seleccionado. Suena obvio; es el error más común.</li>
+    </ul>
+  </section>
+
+  <section>
+    <div class="stag">Capítulo 3</div>
+    <h2>Operando la puerta</h2>
+    <p class="lead">La regla es una: <b>verde entra, rojo no</b>. Todo lo demás es ruido.</p>
+    <div class="tw"><table class="tabla">
+      <thead><tr><th>Herramienta</th><th>Cuándo se usa</th></tr></thead>
+      <tbody>
+        <tr><td><b>📷 Escanear QR</b></td><td>El 95% de la gente. Muestra el QR, se escanea, entra.</td></tr>
+        <tr><td><b>🔎 Buscar por RUT</b></td><td>Perdió el correo o no le carga el QR. Se busca por su RUT o cédula.</td></tr>
+        <tr><td><b>➕ Nuevo</b></td><td>VIP, artista, prensa o conocido que no está en ninguna lista. <b>Se registra igual.</b></td></tr>
+        <tr><td><b>⚠️ Incidencia</b></td><td>Algo raro: se quemó y no entró, discusión, sospecha. Queda anotado.</td></tr>
+        <tr><td><b>🎟️ Pulso / pulseras</b></td><td>Conteo por color de pulsera para cuadrar con el aforo.</td></tr>
+      </tbody>
+    </table></div>
+    <div class="peligro"><b>Nunca dejar entrar a alguien sin registrarlo.</b> Si entra una persona y no queda en el sistema, el aforo miente y el cierre no cuadra. Para eso existe <b>➕ Nuevo</b>: toma 15 segundos y deja todo derecho.</div>
+
+    <h3>Si se cae internet</h3>
+    <ol>
+      <li>El validador <b>sigue funcionando</b> con la lista descargada. Escanea normal.</li>
+      <li>Las entradas quedan guardadas en el teléfono.</li>
+      <li>Cuando vuelve la señal, aprietas <b>🔄 Sincronizar</b> y se suben todas.</li>
+    </ol>
+    <div class="oro"><b>Ojo con dos puertas sin internet:</b> si el mismo QR se escanea en dos lectores distintos mientras no hay señal, los dos van a decir "autorizado" — ninguno sabe del otro. Al sincronizar se detecta y <b>queda registrado como posible doble ingreso</b> para que el admin lo revise. Por eso, si hay dos accesos, conviene que <b>solo uno</b> opere sin conexión.</div>
+  </section>
+
+  <section>
+    <div class="stag">Capítulo 4</div>
+    <h2>El aforo en vivo</h2>
+    <p class="lead">Mientras la puerta escanea, el panel muestra la noche en tiempo real. Se proyecta en una pantalla del local.</p>
+    <div class="kpis">
+      <div class="kpi v"><b>366</b><span>Adentro ahora</span></div>
+      <div class="kpi"><b>614</b><span>Emitidas</span></div>
+      <div class="kpi o"><b>60%</b><span>Llegó</span></div>
+      <div class="kpi r"><b>0</b><span>Incidencias</span></div>
+    </div>
+    <p style="margin-top:16px">Y separado por tipo, para no confundirse:</p>
+    <div class="tw"><table class="tabla">
+      <thead><tr><th>Tipo</th><th>Llegaron / emitidas</th><th>Cómo leerlo</th></tr></thead>
+      <tbody>
+        <tr><td><b>💰 Preventa</b></td><td class="num"><b>110</b> / 116 · 95%</td><td>Los que pagan, llegan. Casi siempre.</td></tr>
+        <tr><td><b>🎁 Cortesía</b></td><td class="num"><b>244</b> / 486 · 50%</td><td>La mitad no aparece. Es lo normal.</td></tr>
+        <tr><td><b>🚪 Puerta</b></td><td class="num"><b>12</b> / 12 · 100%</td><td>Se registran al entrar.</td></tr>
+      </tbody>
+    </table></div>
+    <div class="bien"><b>Cómo saber si el número es confiable:</b> los tres tipos tienen que sumar el total (110+244+12 = 366). Si ves un porcentaje sobre 100%, están mezclando cortesías con ventas — avisa.</div>
+  </section>
+
+  <section>
+    <div class="stag">Capítulo 5</div>
+    <h2>El cierre</h2>
+    <p class="lead">Al otro día, antes de cerrar la semana:</p>
+    <ol>
+      <li><b>Sincronizar</b> los validadores que hayan quedado con datos pendientes.</li>
+      <li><b>Revisar incidencias</b> y posibles dobles ingresos.</li>
+      <li><b>Ver el rendimiento por lista</b>: cuántos llegaron de cada una. Esto define cuántas cortesías emitir la próxima vez.</li>
+      <li><b>Resolver órdenes con problema</b>: que no quede ninguna en "requiere reembolso".</li>
+      <li><b>Revisar correos rebotados</b> y contactar a esa gente.</li>
+    </ol>
+    <div class="oro"><b>La pregunta del cierre:</b> ¿los números cuentan la misma historia que viviste anoche? Si el sistema dice 366 y tú sentiste 500, algo no se registró. Eso se revisa <b>al día siguiente</b>, no el jueves próximo.</div>
+  </section>
+
+  <div class="pie">FRATE OS · Manual 04 · <a href="/os-persona">← La persona</a> · <a href="/os-panel">Siguiente: el panel →</a></div>
+</div>
+
+<script src="/os-guard.js"></script>
+<script>document.getElementById('bar').innerHTML = osBarra('04'); osProteger();</script>
+</body>
+</html>

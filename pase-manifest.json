@@ -1,0 +1,14 @@
+{
+  "name": "FRATE · PASE",
+  "short_name": "PASE",
+  "description": "Acceso rápido para admins del local: crear listas, compartir link e importar en segundos.",
+  "start_url": "/pase",
+  "scope": "/pase",
+  "display": "standalone",
+  "orientation": "portrait",
+  "background_color": "#0a0a0d",
+  "theme_color": "#E8363D",
+  "icons": [
+    { "src": "/icon-frate.svg", "sizes": "any", "type": "image/svg+xml", "purpose": "any" }
+  ]
+}

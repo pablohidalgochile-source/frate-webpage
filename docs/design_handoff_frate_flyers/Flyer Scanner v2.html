@@ -1,0 +1,212 @@
+<!DOCTYPE html>
+<html lang="es-CL">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>FRATE · Scanner v2</title>
+<link rel="stylesheet" href="styles.css">
+<link rel="stylesheet" href="scanner2.css">
+</head>
+<body>
+<div class="fr-stage">
+  <div class="fr-canvas" id="canvas">
+
+    <!-- FONDO -->
+    <div class="fr-photo s2-photo">
+      <image-slot id="s2-face" shape="rect" placeholder="ARRASTRA EL ROSTRO AQUÍ · FULL-BLEED"></image-slot>
+    </div>
+
+    <div class="s2">
+      <div class="s2-border"></div>
+
+      <!-- Crosshair sobre el rostro -->
+      <div class="s2-cross"><i class="r1"></i><i class="r2"></i><i class="r3"></i><span class="h"></span><span class="v"></span></div>
+      <div class="s2-objetivo" data-slot="objetivo">OBJETIVO IDENTIFICADO</div>
+
+      <div class="s2-pad">
+        <!-- TOP -->
+        <div class="s2-brand">
+          <div class="n" data-slot="venue">FRATERNIDAD</div>
+          <div class="s" data-slot="venueSub">CAMPUS CENTRAL</div>
+        </div>
+        <div class="s2-date frm">
+          <div class="d" data-slot="dateDay">SÁBADO</div>
+          <div class="n" data-slot="dateNum">02</div>
+          <div class="m" data-slot="dateMonth">MAYO</div>
+        </div>
+        <div class="s2-time" data-slot="time">11 PM – 05 AM</div>
+
+        <!-- ARCHIVO -->
+        <div class="s2-file frm">
+          <div class="hd" data-slot="fileTitle">ARCHIVO ENCONTRADO</div>
+          <div class="bd">
+            <div class="s2-row">CASO: <b data-slot="caso">MIRADA 7.2B</b></div>
+            <div class="s2-row">UBICACIÓN: <span data-slot="ubic">PISTA PRINCIPAL</span></div>
+            <div class="s2-row">HORA: <span data-slot="hora">02:13 AM</span></div>
+            <div class="s2-imp-l">NIVEL DE IMPACTO:</div>
+            <div class="s2-imp"><div class="s2-hatch"><i id="hatch"></i></div><b data-slot="impactoNum">99%</b></div>
+            <div class="s2-danger" data-slot="peligro">PELIGROSIDAD: <em>ALTA</em></div>
+          </div>
+        </div>
+
+        <!-- CHAT -->
+        <div class="s2-chat">
+          <div class="s2-bubble frm">
+            <div class="hd"><span class="av">◉</span><span class="who" data-slot="chatWho">Tú</span><span class="t" data-slot="chatTime">02:13 AM</span></div>
+            <div class="msg" data-slot="chatMsg">ME ENCANTA TU SONRISA</div>
+            <div class="seen"><span data-slot="chatSeen">VISTO</span> <b>✓✓</b></div>
+          </div>
+          <div class="s2-typing frm"><span data-slot="typing">ESTÁ ESCRIBIENDO…</span> <i></i><i></i><i></i></div>
+        </div>
+
+        <!-- SELLO -->
+        <div class="s2-seal">
+          <svg class="ring" viewBox="0 0 116 116"><defs><path id="s2ring" d="M58,10 a48,48 0 1,1 -0.1,0"></path></defs>
+            <text><textPath href="#s2ring" startOffset="0">FRATERNIDAD · CAMPUS CENTRAL · </textPath></text></svg>
+          <b>F</b>
+        </div>
+
+        <!-- LETTERING -->
+        <div class="s2-title" id="title">
+          <div class="s2-l1" data-slot="titleLine1">ME ENCANTA</div>
+          <div class="s2-l2"><span data-slot="titleTu">TU</span> <span data-slot="titleKeyword">SONRISA</span><span class="heart">♡</span></div>
+          <div class="s2-concept" data-slot="concept">PERO ME ENAMORA MÁS <em>COMO BAILAS</em>.</div>
+        </div>
+
+        <!-- POLAROIDS -->
+        <div class="s2-polas" id="polas"></div>
+
+        <!-- CONCURSO -->
+        <div class="s2-concurso frm">
+          <div class="h"><span class="ic"></span><b data-slot="concursoTitle">CONCURSO</b></div>
+          <p data-slot="concursoText">Etiqueta a quien te roba la sonrisa y gánate:</p>
+          <ul id="prizes"></ul>
+        </div>
+
+        <!-- FRATE -->
+        <div class="s2-frate">
+          <div class="w">FRAT<em>E</em></div>
+          <div class="s">CAMPUS CENTRAL</div>
+        </div>
+
+        <!-- ENTRADAS -->
+        <div class="s2-tickets">
+          <div class="lab"><span class="globe"></span> <span data-slot="entLabel">ENTRADAS EN</span></div>
+          <div class="url" data-slot="entUrl">WWW.FRATE.CL</div>
+          <div class="s2-barcode" id="barcode"></div>
+          <div class="meta"><span data-slot="metaAcceso">ACCESO +18</span> · <b>DRESS CODE:</b> <span data-slot="metaDress">TU MEJOR VERSIÓN</span></div>
+        </div>
+
+        <!-- PILL -->
+        <div class="s2-pill frm" id="pill"></div>
+      </div>
+    </div>
+
+    <div class="fr-scan"></div>
+    <div class="fr-grain"></div>
+  </div>
+</div>
+
+<div id="tweaks">
+  <h3>Tweaks <button id="tw-close">×</button></h3>
+  <div class="tw-group"><button class="tw-regen" id="tw-regen">⟳ Regenerar (demo)</button></div>
+  <div class="tw-group"><label>Paleta (3 colores)</label><div class="tw-swatches" id="tw-accent"></div></div>
+  <div class="tw-group"><label>Fuente palabra clave</label><div class="tw-seg" id="tw-kw"></div></div>
+</div>
+
+<script src="image-slot.js"></script>
+<script>
+const TWEAKS = /*EDITMODE-BEGIN*/{ "palette": "rec", "keywordFont": "spray" }/*EDITMODE-END*/;
+const PALETTES = {
+  rec:     { name: "Rosa",    colors: ["#ff2d78", "#00e5ff", "#b14bff"] },
+  violeta: { name: "Violeta", colors: ["#b14bff", "#00e5ff", "#ff2d78"] },
+  cyan:    { name: "Cyan",    colors: ["#00e5ff", "#ff2d78", "#b14bff"] },
+  coral:   { name: "Coral",   colors: ["#ff6a3d", "#ffd23d", "#ff2d78"] },
+  verde:   { name: "Verde",   colors: ["#39ff7d", "#00e5ff", "#f5ff3d"] }
+};
+const KW_FONTS = { bungee: "'Bungee',cursive", marker: "'Permanent Marker',cursive", spray: "'Rubik Wet Paint',cursive", wet: "'Rubik Wet Paint',cursive" };
+const W = 1080, H = 1620;
+
+const EVENT = {
+  venue: "FRATERNIDAD", venueSub: "CAMPUS CENTRAL",
+  dateDay: "SÁBADO", dateNum: "02", dateMonth: "MAYO", time: "11 PM – 05 AM",
+  fileTitle: "ARCHIVO ENCONTRADO", caso: "MIRADA 7.2B", ubic: "PISTA PRINCIPAL", hora: "02:13 AM",
+  impactPct: 99, impactoNum: "99%", peligro: "PELIGROSIDAD: <em>ALTA</em>",
+  chatWho: "Tú", chatTime: "02:13 AM", chatMsg: "ME ENCANTA TU SONRISA", chatSeen: "VISTO",
+  typing: "ESTÁ ESCRIBIENDO…", objetivo: "OBJETIVO IDENTIFICADO",
+  titleLine1: "ME ENCANTA", titleTu: "TU", titleKeyword: "SONRISA",
+  concept: "PERO ME ENAMORA MÁS <em>COMO BAILAS</em>.",
+  polas: ["#REC", "#02A", "#02B", "#EC"],
+  concursoTitle: "CONCURSO", concursoText: "Etiqueta a quien te roba la sonrisa y gánate:",
+  prizes: ["1 BOTELLA PREMIUM", "4 ENTRADAS VIP", "+ SHOTS PARA TU MESA"],
+  entLabel: "ENTRADAS EN", entUrl: "WWW.FRATE.CL",
+  metaAcceso: "ACCESO +18", metaDress: "TU MEJOR VERSIÓN",
+  tags: ["PERREO", "AMIGOS", "FLOW", "LIBERTAD", "HISTORIAS"]
+};
+
+function fillData(d) {
+  document.querySelectorAll("[data-slot]").forEach(el => { const k = el.dataset.slot; if (d[k] != null) el.innerHTML = d[k]; });
+  document.getElementById("hatch").style.width = (d.impactPct || 99) + "%";
+  document.getElementById("prizes").innerHTML = d.prizes.map(p => `<li>${p}</li>`).join("");
+  document.getElementById("polas").innerHTML = d.polas.map((cap, i) =>
+    `<div class="s2-pola frm"><image-slot id="s2-pola-${i + 1}" shape="rect" placeholder="foto"></image-slot><div class="cap">${cap}</div></div>`).join("");
+  document.getElementById("pill").innerHTML = d.tags.map(t => `<span>${t}</span>`).join('<s>•</s>');
+  // barcode determinista
+  let seed = 9; const rnd = () => (seed = (seed * 1103515245 + 12345) & 0x7fffffff) / 0x7fffffff;
+  document.getElementById("barcode").innerHTML = Array.from({ length: 46 }, () =>
+    `<i style="width:${(rnd() * 3 + 1).toFixed(1)}px;opacity:${rnd() > .5 ? 1 : .8}"></i>`).join("");
+}
+
+function applyTweaks(t) {
+  const pal = Array.isArray(t.palette) ? t.palette : (PALETTES[t.palette] || PALETTES.rec).colors;
+  const r = document.documentElement.style;
+  r.setProperty("--accent", pal[0]); r.setProperty("--accent-2", pal[1]); r.setProperty("--accent-3", pal[2]);
+  r.setProperty("--f-drip", KW_FONTS[t.keywordFont] || KW_FONTS.spray);
+}
+
+function loadInjected() {
+  try { const raw = new URLSearchParams(location.search).get("data");
+    if (raw) { const d = JSON.parse(decodeURIComponent(escape(atob(raw)))); Object.assign(EVENT, d.event || {}); Object.assign(TWEAKS, d.tweaks || {}); }
+  } catch (e) {}
+  if (window.FRATE_EVENT) Object.assign(EVENT, window.FRATE_EVENT);
+  if (window.FRATE_TWEAKS) Object.assign(TWEAKS, window.FRATE_TWEAKS);
+}
+
+const SAMPLES = [
+  { dateDay: "SÁBADO", dateNum: "02", dateMonth: "MAYO", caso: "MIRADA 7.2B", titleLine1: "ME ENCANTA", titleTu: "TU", titleKeyword: "SONRISA", concept: "PERO ME ENAMORA MÁS <em>COMO BAILAS</em>.", peligro: "PELIGROSIDAD: <em>ALTA</em>", chatMsg: "ME ENCANTA TU SONRISA" },
+  { dateDay: "VIERNES", dateNum: "19", dateMonth: "JUNIO", caso: "MIRADA 3.9X", titleLine1: "ME PIERDO EN", titleTu: "TU", titleKeyword: "MIRADA", concept: "Y NO PUEDO <em>DEJAR DE VERTE</em>.", peligro: "PELIGROSIDAD: <em>EXTREMA</em>", chatMsg: "NO PUEDO DEJAR DE VERTE" },
+  { dateDay: "JUEVES", dateNum: "11", dateMonth: "JULIO", caso: "PISTA 5.5C", titleLine1: "ME ENCANTA", titleTu: "TU", titleKeyword: "CAOS", concept: "Y CÓMO <em>LO BAILAS TODO</em>.", peligro: "PELIGROSIDAD: <em>ALTA</em>", chatMsg: "ME ENCANTA TU CAOS" }
+];
+let si = 0;
+function regenDemo() {
+  si = (si + 1) % SAMPLES.length; Object.assign(EVENT, SAMPLES[si]);
+  const keys = Object.keys(PALETTES); TWEAKS.palette = keys[(keys.indexOf(TWEAKS.palette) + 1) % keys.length];
+  fillData(EVENT); applyTweaks(TWEAKS); buildPanel();
+}
+
+function buildPanel() {
+  const pal = document.getElementById("tw-accent");
+  pal.innerHTML = Object.entries(PALETTES).map(([k, p]) =>
+    `<div class="tw-pal${k === TWEAKS.palette ? ' sel' : ''}" data-k="${k}">${p.colors.map(c => `<i style="background:${c}"></i>`).join("")}</div>`).join("");
+  pal.onclick = e => { const el = e.target.closest(".tw-pal"); if (!el) return; setTweak("palette", el.dataset.k); pal.querySelectorAll(".tw-pal").forEach(x => x.classList.toggle("sel", x === el)); };
+  const kw = document.getElementById("tw-kw"); const labels = { bungee: "Urbano", marker: "Marcador", spray: "Pintado" };
+  kw.innerHTML = Object.keys(labels).map(k => `<button class="${k === TWEAKS.keywordFont ? 'sel' : ''}" data-k="${k}">${labels[k]}</button>`).join("");
+  kw.onclick = e => { const b = e.target.closest("button"); if (!b) return; setTweak("keywordFont", b.dataset.k); kw.querySelectorAll("button").forEach(x => x.classList.toggle("sel", x === b)); };
+  const rg = document.getElementById("tw-regen"); if (rg) rg.onclick = regenDemo;
+}
+function setTweak(k, v) { TWEAKS[k] = v; applyTweaks(TWEAKS); try { window.parent.postMessage({ type: "__edit_mode_set_keys", edits: { [k]: v } }, "*"); } catch (e) {} }
+
+window.addEventListener("message", e => {
+  if (e.data?.type === "__activate_edit_mode") document.getElementById("tweaks").classList.add("on");
+  if (e.data?.type === "__deactivate_edit_mode") document.getElementById("tweaks").classList.remove("on");
+});
+document.getElementById("tw-close").onclick = () => { document.getElementById("tweaks").classList.remove("on"); try { window.parent.postMessage({ type: "__edit_mode_dismissed" }, "*"); } catch (e) {} };
+
+loadInjected(); fillData(EVENT); applyTweaks(TWEAKS); buildPanel();
+try { window.parent.postMessage({ type: "__edit_mode_available" }, "*"); } catch (e) {}
+
+function scale() { const c = document.getElementById("canvas"); const st = document.querySelector(".fr-stage"); const s = window.innerWidth / W; c.style.transform = `scale(${s})`; if (st) st.style.height = (H * s) + "px"; }
+scale(); window.addEventListener("resize", scale);
+</script>
+</body>
+</html>

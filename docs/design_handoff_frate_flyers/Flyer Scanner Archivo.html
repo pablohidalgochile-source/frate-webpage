@@ -1,0 +1,280 @@
+<!DOCTYPE html>
+<html lang="es-CL">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>FRATE · Flyer Scanner / Archivo</title>
+<link rel="stylesheet" href="styles.css">
+<link rel="stylesheet" href="scanner.css">
+</head>
+<body>
+<div class="fr-stage">
+  <div class="fr-canvas" id="canvas">
+
+    <!-- FONDO -->
+    <div class="fr-photo">
+      <image-slot id="scan-face" shape="rounded" radius="0" placeholder="ARRASTRA EL ROSTRO AQUÍ · FULL-BLEED"></image-slot>
+    </div>
+    <div class="fr-flare"></div>
+
+    <!-- ===== HUD superpuesto ===== -->
+    <div class="sc-datebadge">
+      <div class="sc-db-day" data-slot="dateDay">SÁBADO</div>
+      <div class="sc-db-num" data-slot="dateNum">02</div>
+      <div class="sc-db-month" data-slot="dateMonth">MAYO</div>
+    </div>
+    <div class="sc-time" data-slot="time">11 PM – 05 AM</div>
+    <div class="sc-seal"><b>F</b></div>
+
+    <div class="sc-file">
+      <div class="sc-file-h" data-slot="fileTitle">ARCHIVO ENCONTRADO</div>
+      <div class="sc-file-body">
+        <div class="sc-row"><em>CASO:</em> <b data-slot="caso">MIRADA 7.2B</b></div>
+        <div class="sc-row"><em>UBICACIÓN:</em> <span data-slot="ubic">PISTA PRINCIPAL</span></div>
+        <div class="sc-row"><em>HORA:</em> <span data-slot="hora">02:13 AM</span></div>
+        <div class="sc-row"><em>NIVEL DE IMPACTO:</em></div>
+        <div class="fr-bar" id="scbar"></div>
+        <div class="sc-danger" data-slot="peligro">PELIGROSIDAD: <em>—</em></div>
+      </div>
+    </div>
+
+    <div class="sc-chat">
+      <div class="fr-song" id="song"></div>
+    </div>
+
+    <div class="sc-cross"><i class="r1"></i><i class="r2"></i><i class="r3"></i><span class="h"></span><span class="v"></span></div>
+    <div class="fr-tag-float" id="objetivo" style="left:560px;top:566px" data-slot="objetivo">OBJETIVO IDENTIFICADO</div>
+
+    <!-- ===== CONTENIDO EN FLUJO ===== -->
+    <div class="sc-content">
+      <div class="sc-top"><div class="fr-logo-top"><img src="assets/logo-fraternidad.png" alt="Fraternidad Campus Central"></div></div>
+      <div class="sc-spacer"></div>
+
+      <div class="sc-lower">
+        <div class="sc-title" id="title">
+          <div class="fr-title-1" data-slot="titleLine1">ME ENCANTA</div>
+          <div class="sc-tline2"><div class="sc-kw-wrap"><span class="fr-title-tu" data-slot="titleTu">TU</span><span class="fr-title-2"><span data-slot="titleKeyword">SONRISA</span><span class="fr-title-heart">♡</span></span></div></div>
+          <div class="sc-concept" data-slot="concept">PERO ME ENAMORA MÁS <em>COMO BAILAS</em>.</div>
+        </div>
+
+        <div class="sc-polas" id="polas"></div>
+
+        <div class="sc-bottom">
+          <div class="sc-concurso">
+            <h4 data-slot="concursoTitle">CONCURSO</h4>
+            <p data-slot="concursoText">Etiqueta a quien te roba la sonrisa y gánate:</p>
+            <ul class="sc-prizelist" id="prizes"></ul>
+          </div>
+          <div class="sc-logo-frate">
+            <image-slot id="scan-frate-logo" shape="rounded" radius="6" placeholder="LOGO FRATE"></image-slot>
+            <div class="sc-logo-sub">CAMPUS CENTRAL</div>
+          </div>
+          <div class="sc-entradas">
+            <div class="sc-ent-label" data-slot="entLabel">ENTRADAS EN</div>
+            <div class="sc-ent-url" data-slot="entUrl">WWW.FRATE.CL</div>
+            <div class="fr-qr" id="qr"></div>
+          </div>
+        </div>
+
+        <div class="sc-meta"><span data-slot="metaAcceso">ACCESO +18</span> · <b>DRESS CODE:</b> <span data-slot="metaDress">TU MEJOR VERSIÓN</span></div>
+
+        <div class="sc-tagrow" id="tagrow"></div>
+      </div>
+    </div>
+
+    <!-- overlays -->
+    <div class="fr-corners"><i></i><i></i><i></i><i></i></div>
+    <div class="fr-scan"></div>
+    <div class="fr-grain"></div>
+  </div>
+</div>
+
+<!-- TWEAKS -->
+<div id="tweaks">
+  <h3>Tweaks <button id="tw-close">×</button></h3>
+  <div class="tw-group"><button class="tw-regen" id="tw-regen">⟳ Regenerar (demo)</button></div>
+  <div class="tw-group"><label>Formato Instagram</label><div class="tw-seg" id="tw-format"></div></div>
+  <div class="tw-group"><label>Paleta (3 colores)</label><div class="tw-swatches" id="tw-accent"></div></div>
+  <div class="tw-group"><label>Fuente palabra clave</label><div class="tw-seg" id="tw-kw"></div></div>
+  <div class="tw-group">
+    <div class="tw-row"><span>Mostrar canción</span><div class="tw-toggle" data-k="showChat"></div></div>
+    <div class="tw-row"><span>Mostrar polaroids</span><div class="tw-toggle" data-k="showPolas"></div></div>
+  </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/qrcode-generator@1.4.4/qrcode.js"></script>
+<script src="image-slot.js"></script>
+<script>
+const TWEAKS = /*EDITMODE-BEGIN*/{
+  "palette": "violeta",
+  "format": "story",
+  "keywordFont": "bungee",
+  "showChat": true,
+  "showPolas": true
+}/*EDITMODE-END*/;
+
+const PALETTES = {
+  rec:     { name: "Rosa",    colors: ["#ff2d78", "#00e5ff", "#b14bff"] },
+  violeta: { name: "Violeta", colors: ["#b14bff", "#00e5ff", "#ff2d78"] },
+  cyan:    { name: "Cyan",    colors: ["#00e5ff", "#ff2d78", "#b14bff"] },
+  coral:   { name: "Coral",   colors: ["#ff6a3d", "#ffd23d", "#ff2d78"] },
+  verde:   { name: "Verde",   colors: ["#39ff7d", "#00e5ff", "#f5ff3d"] }
+};
+const KW_FONTS = { bungee: "'Bungee', cursive", marker: "'Permanent Marker', cursive", spray: "'Rubik Spray Paint', cursive" };
+const FORMATS = { story: [1080,1920], carousel: [1080,1350], poster: [1080,1620] };
+
+/* ---- DATOS DEL EVENTO (ver MAPEO-DATOS.md) ---- */
+const EVENT = {
+  dateDay: "SÁBADO", dateNum: "02", dateMonth: "MAYO", time: "11 PM – 05 AM",
+  fileTitle: "ARCHIVO ENCONTRADO",
+  caso: "MIRADA 7.2B", ubic: "PISTA PRINCIPAL", hora: "02:13 AM",
+  impactPct: 99, peligro: "PELIGROSIDAD: <em>ALTA</em>",
+  chatWho: "Tú", chatTime: "02:13 AM", chatMsg: "ME ENCANTA TU SONRISA", chatSeen: "VISTO",
+  typing: "ESTÁ ESCRIBIENDO…", objetivo: "OBJETIVO IDENTIFICADO",
+  titleLine1: "ME ENCANTA", titleTu: "TU", titleKeyword: "SONRISA",
+  concept: "PERO ME ENAMORA MÁS <em>COMO BAILAS</em>.",
+  polas: ["#REC", "#02A", "#02B", "#EC"],
+  concursoTitle: "CONCURSO",
+  concursoText: "Etiqueta a quien te roba la sonrisa y gánate:",
+  prizes: ["1 BOTELLA PREMIUM", "4 ENTRADAS VIP", "+ SHOTS PARA TU MESA"],
+  entLabel: "ENTRADAS EN", entUrl: "WWW.FRATE.CL", qrUrl: "https://www.frate.cl",
+  songTitle: "SI ANTES TE HUBIERA CONOCIDO", songArtist: "KAROL G",
+  metaAcceso: "ACCESO +18", metaDress: "TU MEJOR VERSIÓN",
+  tags: ["PERREO", "AMIGOS", "FLOW", "LIBERTAD", "HISTORIAS"],
+};
+
+function fillData(d) {
+  document.querySelectorAll("[data-slot]").forEach(el => { const k = el.dataset.slot; if (d[k] != null) el.innerHTML = d[k]; });
+
+  // barra de impacto
+  const bar = document.getElementById("scbar");
+  const total = 22, on = Math.round(total * d.impactPct / 100);
+  bar.innerHTML = Array.from({length: total}, (_,i) => `<span class="seg${i<on?'':' off'}"></span>`).join("") + `<span class="pct">${d.impactPct}%</span>`;
+
+  // premios (lista)
+  document.getElementById("prizes").innerHTML = d.prizes.map(p => `<li>${p}</li>`).join("");
+
+  // polaroids
+  document.getElementById("polas").innerHTML = d.polas.map((cap,i) =>
+    `<div class="sc-pola"><image-slot id="scan-pola-${i+1}" shape="rect" placeholder="foto"></image-slot><div class="cap">${cap}</div></div>`).join("");
+
+  // fila de tags
+  document.getElementById("tagrow").innerHTML = d.tags.map(t => `<span>${t}</span>`).join('<s>•</s>');
+
+  renderSong(d);
+  renderQR(d.qrUrl);
+}
+
+function renderSong(d) {
+  const el = document.getElementById("song");
+  if (!el) return;
+  el.innerHTML = `<div class="song-player"><div class="sp-play">▶</div><div class="sp-info"><div class="sp-kicker">SONANDO EN LA PISTA</div><div class="sp-title">${d.songTitle}</div><div class="sp-artist">${d.songArtist}</div><div class="sp-bar"><i></i></div></div></div>`;
+}
+
+/* ---- Inyección de datos por la app (regeneración) ---- */
+function loadInjected() {
+  try {
+    const raw = new URLSearchParams(location.search).get("data");
+    if (raw) { const d = JSON.parse(decodeURIComponent(escape(atob(raw)))); Object.assign(EVENT, d.event || {}); Object.assign(TWEAKS, d.tweaks || {}); }
+  } catch (e) { console.warn("data param inválido", e); }
+  if (window.FRATE_EVENT)  Object.assign(EVENT, window.FRATE_EVENT);
+  if (window.FRATE_TWEAKS) Object.assign(TWEAKS, window.FRATE_TWEAKS);
+}
+
+const SAMPLES = [
+  { dateDay:"SÁBADO", dateNum:"02", dateMonth:"MAYO", caso:"MIRADA 7.2B", titleKeyword:"SONRISA", concept:"PERO ME ENAMORA MÁS <em>COMO BAILAS</em>.", songTitle:"SI ANTES TE HUBIERA CONOCIDO", songArtist:"KAROL G", concursoText:"Etiqueta a quien te roba la sonrisa y gánate:", peligro:"PELIGROSIDAD: <em>ALTA</em>" },
+  { dateDay:"VIERNES", dateNum:"19", dateMonth:"JUNIO", caso:"MIRADA 3.9X", titleKeyword:"MIRADA", concept:"Y NO PUEDO <em>DEJAR DE VERTE</em>.", songTitle:"CLASSY 101", songArtist:"FEID, YOUNG MIKO", concursoText:"Etiqueta a quien te descontrola y gánate:", peligro:"PELIGROSIDAD: <em>EXTREMA</em>" },
+  { dateDay:"JUEVES", dateNum:"11", dateMonth:"JULIO", caso:"PISTA 5.5C", titleKeyword:"CAOS", concept:"Y ME ENCANTA <em>TU DESORDEN</em>.", songTitle:"FERXXO 151", songArtist:"FEID", concursoText:"Etiqueta a tu cómplice de pista y gánate:", peligro:"PELIGROSIDAD: <em>ALTA</em>" }
+];
+let sampleIdx = 0;
+function regenDemo() {
+  sampleIdx = (sampleIdx + 1) % SAMPLES.length;
+  Object.assign(EVENT, SAMPLES[sampleIdx]);
+  const keys = Object.keys(PALETTES);
+  TWEAKS.palette = keys[(keys.indexOf(TWEAKS.palette) + 1 + Math.floor(Math.random()*(keys.length-1))) % keys.length];
+  fillData(EVENT); applyTweaks(TWEAKS); buildPanel();
+}
+
+function renderQR(url) {
+  const host = document.getElementById("qr");
+  try {
+    const qr = qrcode(0, "M"); qr.addData(url); qr.make();
+    const n = qr.getModuleCount(), s = 100 / n;
+    let rects = "";
+    for (let r = 0; r < n; r++) for (let c = 0; c < n; c++)
+      if (qr.isDark(r,c)) rects += `<rect x="${(c*s).toFixed(2)}" y="${(r*s).toFixed(2)}" width="${s.toFixed(2)}" height="${s.toFixed(2)}"/>`;
+    host.innerHTML = `<svg viewBox="0 0 100 100" shape-rendering="crispEdges"><g fill="#0a0a0a">${rects}</g></svg>`;
+  } catch(e) { host.innerHTML = ""; }
+}
+
+function applyTweaks(t) {
+  const pal = (Array.isArray(t.palette) ? t.palette : (PALETTES[t.palette] || PALETTES.violeta).colors);
+  document.documentElement.style.setProperty("--accent", pal[0]);
+  document.documentElement.style.setProperty("--accent-2", pal[1]);
+  document.documentElement.style.setProperty("--accent-3", pal[2]);
+  document.documentElement.style.setProperty("--f-keyword", KW_FONTS[t.keywordFont] || KW_FONTS.bungee);
+  const cv = document.getElementById("canvas");
+  const [w, h] = FORMATS[t.format] || FORMATS.story;
+  cv.style.width = w + "px"; cv.style.height = h + "px";
+  cv.className = "fr-canvas fmt-" + (t.format || "story") + " kw-" + t.keywordFont +
+    (t.showChat ? "" : " hide-chat") + (t.showPolas ? "" : " hide-polas");
+  scale();
+}
+
+function buildPanel() {
+  const pal = document.getElementById("tw-accent");
+  pal.innerHTML = Object.entries(PALETTES).map(([k,p]) =>
+    `<div class="tw-pal${k===TWEAKS.palette?' sel':''}" data-k="${k}" title="${p.name}">${p.colors.map(c=>`<i style="background:${c}"></i>`).join("")}</div>`).join("");
+  pal.onclick = e => { const el = e.target.closest(".tw-pal"); if(!el) return;
+    setTweak("palette", el.dataset.k);
+    pal.querySelectorAll(".tw-pal").forEach(x => x.classList.toggle("sel", x===el)); };
+
+  const fm = document.getElementById("tw-format");
+  const fmLabels = { story:"Historia 9:16", carousel:"Carrusel 4:5", poster:"Afiche 2:3" };
+  fm.innerHTML = Object.keys(fmLabels).map(k => `<button class="${k===TWEAKS.format?'sel':''}" data-k="${k}">${fmLabels[k]}</button>`).join("");
+  fm.onclick = e => { const b = e.target.closest("button"); if(!b) return; setTweak("format", b.dataset.k); fm.querySelectorAll("button").forEach(x => x.classList.toggle("sel", x===b)); };
+
+  const kw = document.getElementById("tw-kw");
+  const labels = { bungee:"Urbano", marker:"Marcador", spray:"Spray" };
+  kw.innerHTML = Object.keys(KW_FONTS).map(k => `<button class="${k===TWEAKS.keywordFont?'sel':''}" data-k="${k}">${labels[k]}</button>`).join("");
+  kw.onclick = e => { const b = e.target.closest("button"); if(!b) return; setTweak("keywordFont", b.dataset.k); kw.querySelectorAll("button").forEach(x => x.classList.toggle("sel", x===b)); };
+
+  document.querySelectorAll("#tweaks .tw-toggle").forEach(tg => {
+    tg.classList.toggle("on", TWEAKS[tg.dataset.k]);
+    tg.onclick = () => { const v = !TWEAKS[tg.dataset.k]; tg.classList.toggle("on", v); setTweak(tg.dataset.k, v); };
+  });
+  const rg = document.getElementById("tw-regen"); if (rg) rg.onclick = regenDemo;
+}
+function setTweak(k, v) {
+  TWEAKS[k] = v; applyTweaks(TWEAKS);
+  try { window.parent.postMessage({ type: "__edit_mode_set_keys", edits: { [k]: v } }, "*"); } catch(e){}
+}
+
+window.addEventListener("message", e => {
+  if (e.data?.type === "__activate_edit_mode") document.getElementById("tweaks").classList.add("on");
+  if (e.data?.type === "__deactivate_edit_mode") document.getElementById("tweaks").classList.remove("on");
+});
+document.getElementById("tw-close").onclick = () => {
+  document.getElementById("tweaks").classList.remove("on");
+  try { window.parent.postMessage({ type: "__edit_mode_dismissed" }, "*"); } catch(e){}
+};
+
+/* init */
+loadInjected();
+fillData(EVENT);
+applyTweaks(TWEAKS);
+buildPanel();
+try { window.parent.postMessage({ type: "__edit_mode_available" }, "*"); } catch(e){}
+
+function scale() {
+  const c = document.getElementById("canvas");
+  const stage = document.querySelector(".fr-stage");
+  const [w, h] = FORMATS[TWEAKS.format] || FORMATS.story;
+  const s = window.innerWidth / w;
+  c.style.transform = `scale(${s})`;
+  if (stage) stage.style.height = (h * s) + "px";
+}
+scale(); window.addEventListener("resize", scale);
+</script>
+</body>
+</html>

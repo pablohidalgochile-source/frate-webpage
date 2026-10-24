@@ -2,9 +2,9 @@
   "version": "0.0.1",
   "configurations": [
     {
-      "name": "frate-webpage",
+      "name": "frate-web",
       "runtimeExecutable": "npx",
-      "runtimeArgs": ["serve", "-p", "3456", "."],
+      "runtimeArgs": ["serve", "-p", "3456", "/Users/n3/Desktop/FRATE 2026/FRATE ERP APP/FRATE WEBPAGE"],
       "port": 3456
     }
   ]

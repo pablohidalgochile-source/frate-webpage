@@ -1,0 +1,57 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>FRATE OS · POS · El manual</title>
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>💵</text></svg>">
+<link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@600;800;900&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="/os-manual.css">
+<link rel="stylesheet" href="/os-pos.css">
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+</head>
+<body>
+<div id="bar"></div>
+<div class="wrap">
+
+  <div class="hero">
+    <div class="eyebrow">FRATE OS · POS</div>
+    <h1>El manual<br>del <em>POS</em></h1>
+    <p class="sub">Siete recorridos para entender cómo el POS cobra la noche, más tres herramientas para montarlo y salvarlo. Si entiendes esto, cualquier pantalla se te explica sola.</p>
+    <div class="meta"><span>Para todo el equipo</span><span>·</span><span>10 manuales</span><span>·</span><span>morado = POS</span></div>
+  </div>
+
+  <section>
+    <div class="stag">La serie</div>
+    <h2>El recorrido · los 7 esenciales</h2>
+    <div class="serie">
+      <a class="mn" href="/os-pos-mapa"><span class="num2">00</span><div><h4>El mapa</h4><p>Dónde vive el POS entre los cuatro cerebros y de qué datos manda.</p><span class="tag">Empieza acá</span></div></a>
+      <a class="mn" href="/os-pos-turno"><span class="num2">01</span><div><h4>El turno</h4><p>Abrir con el cotejo, vender, cortar y cerrar la caja cuadrada.</p></div></a>
+      <a class="mn" href="/os-pos-venta"><span class="num2">02</span><div><h4>La venta</h4><p>De tocar un producto a entregar el comprobante, sin errores caros.</p></div></a>
+      <a class="mn" href="/os-pos-dinero"><span class="num2">03</span><div><h4>El dinero</h4><p>Por qué el cajón calza o no calza, y cómo saberlo sin pelear.</p></div></a>
+      <a class="mn" href="/os-pos-puerta"><span class="num2">04</span><div><h4>Puerta y barra</h4><p>Validar un QR, entrada contra cover, y no dejar entrar dos veces.</p></div></a>
+      <a class="mn" href="/os-pos-catalogo"><span class="num2">05</span><div><h4>El catálogo</h4><p>De un producto suelto a la carta de la noche, con combos y promos.</p></div></a>
+      <a class="mn" href="/os-pos-reglas"><span class="num2">06</span><div><h4>Reglas de oro</h4><p>Lo que nunca se hace y lo que el POS no hace todavía.</p><span class="tag">Cierra la serie</span></div></a>
+    </div>
+  </section>
+
+  <section>
+    <div class="stag">Herramientas y respaldo</div>
+    <h2>Para montarlo y para cuando algo pasa</h2>
+    <div class="serie">
+      <a class="mn" href="/os-pos-vincular"><span class="num2">07</span><div><h4>🛠 Vincular Sunmi</h4><p>Dar de alta un equipo: activar la caja y amarrarla al aparato.</p></div></a>
+      <a class="mn" href="/os-pos-covers"><span class="num2">08</span><div><h4>Covers</h4><p>Escanear, imprimir y quemar covers desde la barra.</p></div></a>
+      <a class="mn" href="/os-pos-noche"><span class="num2">09</span><div><h4>El sábado real</h4><p>Una noche de verdad, con números: el susto de las diferencias y cómo cuadró.</p><span class="tag">Caso real</span></div></a>
+    </div>
+  </section>
+
+  <div class="pie">FRATE OS · POS · <a href="/os-libro">📖 El libro</a> · <a href="/os-pos-mapa">Empezar por el mapa →</a></div>
+</div>
+
+<script src="/os-guard.js"></script>
+<script>
+  document.getElementById('bar').innerHTML = osBarra('', 'pos');
+  osProteger();
+</script>
+</body>
+</html>

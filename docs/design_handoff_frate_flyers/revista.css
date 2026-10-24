@@ -1,0 +1,119 @@
+/* ============================================================
+   PROHIBIDA — Revista universitaria (portada premium editorial)
+   Look: Vogue / i-D. Masthead didone, coverlines, foil, censura.
+   Base 1080×1620 (2:3). Autoescala por ancho.
+   ============================================================ */
+@import url('https://fonts.googleapis.com/css2?family=Bodoni+Moda:ital,opsz,wght@0,6..96,400..900;1,6..96,400..900&family=Oswald:wght@200;300;400;500;600;700&family=Archivo+Expanded:wght@600;700;800;900&display=swap');
+
+:root {
+  --bg:     #0b0a0c;
+  --ink:    #f6f3ee;      /* crema */
+  --ink-dim:#b7b1a8;
+  --accent: #d9b46a;      /* @kind color — foil dorado */
+  --accent2:#ff2f6d;      /* @kind color — secundario */
+  --censor: #0b0a0c;
+}
+* { box-sizing: border-box; margin: 0; padding: 0; }
+html, body { height: 100%; }
+
+.rv-stage { position: relative; width: 100%; display: flex; justify-content: center; align-items: flex-start;
+  background: #050406; overflow: hidden; }
+.rv-canvas { width: 1080px; height: 1620px; position: relative; transform-origin: top center; flex: none;
+  background: var(--bg); color: var(--ink); overflow: hidden; font-family: 'Oswald', sans-serif;
+  box-shadow: 0 40px 120px rgba(0,0,0,.75); }
+
+/* ---- Foto full-bleed + grade editorial ---- */
+.rv-photo { position: absolute; inset: 0; z-index: 1; }
+.rv-photo image-slot { display: block; width: 100%; height: 100%;
+  filter: grayscale(.35) contrast(1.08) brightness(.94); }
+.rv-photo::after { content: ""; position: absolute; inset: 0;
+  background:
+    linear-gradient(180deg, rgba(6,5,8,.62) 0%, transparent 22%, transparent 52%, rgba(6,5,8,.78) 88%, #050406 100%),
+    radial-gradient(90% 60% at 50% 42%, transparent 55%, rgba(6,5,8,.5) 100%); }
+.rv-grain { position: absolute; inset: 0; z-index: 6; pointer-events: none; mix-blend-mode: overlay; opacity: .16;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='150' height='150'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='2'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.5'/%3E%3C/svg%3E"); }
+
+.rv-ui { position: absolute; inset: 0; z-index: 5; }
+
+/* ---- Top: banda de servicio ---- */
+.rv-top { position: absolute; top: 40px; left: 54px; right: 54px; display: flex; justify-content: space-between;
+  align-items: center; font-weight: 400; font-size: 15px; letter-spacing: .26em; text-transform: uppercase;
+  color: var(--ink-dim); }
+.rv-top .mid { letter-spacing: .3em; }
+.rv-hair { position: absolute; top: 74px; left: 54px; right: 54px; height: 1px; background: rgba(246,243,238,.32); }
+
+/* ---- Masthead ---- */
+.rv-mast { position: absolute; top: 88px; left: 0; right: 0; text-align: center; z-index: 4; }
+.rv-mast h1 { font-family: 'Bodoni Moda', serif; font-weight: 900; font-size: 146px; line-height: .8;
+  letter-spacing: -.005em; color: var(--ink); text-shadow: 0 8px 40px rgba(0,0,0,.5); white-space: nowrap; }
+.rv-mast .tagline { font-weight: 300; font-size: 18px; letter-spacing: .52em; text-transform: uppercase;
+  color: var(--ink); margin-top: 6px; padding-left: .52em; }
+
+/* ---- Coverlines laterales ---- */
+.rv-side { position: absolute; width: 268px; z-index: 5; }
+.rv-side.l { left: 54px; top: 470px; text-align: left; }
+.rv-side.r { right: 54px; top: 470px; text-align: right; }
+.rv-cl { margin-bottom: 30px; }
+.rv-cl .k { font-weight: 700; font-size: 13px; letter-spacing: .18em; text-transform: uppercase; color: var(--accent); margin-bottom: 5px; }
+.rv-cl h3 { font-family: 'Bodoni Moda', serif; font-weight: 700; font-size: 27px; line-height: 1.02; color: var(--ink); }
+.rv-cl p { font-weight: 300; font-size: 14px; letter-spacing: .04em; line-height: 1.35; color: var(--ink-dim); margin-top: 5px; text-transform: uppercase; }
+.rv-side.r .rv-cl .k { color: var(--accent2); }
+
+/* número de tapa grande, marca de agua */
+.rv-issue { position: absolute; right: 54px; top: 656px; z-index: 4; font-family: 'Bodoni Moda', serif;
+  font-style: italic; font-weight: 400; font-size: 104px; color: transparent; -webkit-text-stroke: 1px rgba(246,243,238,.42); line-height: 1; }
+
+/* ---- Coverline principal (abajo) ---- */
+.rv-hero { position: absolute; left: 54px; right: 54px; bottom: 236px; z-index: 5; }
+.rv-hero .over { font-family: 'Archivo Expanded', sans-serif; font-weight: 800; font-size: 20px; letter-spacing: .12em;
+  text-transform: uppercase; color: var(--accent); margin-bottom: 8px; }
+.rv-hero h2 { font-family: 'Bodoni Moda', serif; font-weight: 900; font-size: 112px; line-height: .86; letter-spacing: -.01em; }
+.rv-hero h2 em { font-style: italic; font-weight: 700; color: var(--accent); }
+.rv-hero .sub { font-weight: 300; font-size: 20px; letter-spacing: .04em; line-height: 1.35; color: var(--ink);
+  margin-top: 14px; max-width: 660px; text-transform: uppercase; }
+.rv-hero .credit { font-weight: 600; font-size: 13px; letter-spacing: .16em; text-transform: uppercase; color: var(--ink-dim); margin-top: 12px; }
+
+/* ---- Sticker "PROHIBIDA" rotado ---- */
+.rv-seal { position: absolute; right: 64px; top: 928px; z-index: 6; width: 172px; height: 172px; border-radius: 50%;
+  border: 2px solid var(--accent2); display: grid; place-items: center; text-align: center;
+  transform: rotate(-13deg); background: rgba(11,10,12,.34); backdrop-filter: blur(2px); }
+.rv-seal::before { content: ""; position: absolute; inset: 8px; border: 1px solid var(--accent2); border-radius: 50%; }
+.rv-seal .in { color: var(--ink); }
+.rv-seal .big { font-family: 'Archivo Expanded', sans-serif; font-weight: 900; font-size: 24px; letter-spacing: .04em; color: var(--accent2); line-height: .95; }
+.rv-seal .sm { font-weight: 500; font-size: 10.5px; letter-spacing: .16em; text-transform: uppercase; margin-top: 5px; }
+.rv-seal .ring text { font-family: 'Oswald', sans-serif; font-weight: 600; font-size: 8.5px; letter-spacing: .1em; fill: var(--ink-dim); }
+
+/* barra de censura sobre una coverline (detalle "prohibida") */
+.rv-censor { display: inline-block; background: var(--censor); color: transparent; padding: 0 8px;
+  box-shadow: 0 0 0 1px rgba(246,243,238,.25) inset; user-select: none; }
+
+/* ---- Footer: barcode + edición ---- */
+.rv-foot { position: absolute; left: 54px; right: 54px; bottom: 54px; z-index: 5;
+  display: flex; justify-content: space-between; align-items: flex-end; }
+.rv-foot .info { font-weight: 400; font-size: 13px; letter-spacing: .16em; text-transform: uppercase; color: var(--ink-dim); line-height: 1.7; }
+.rv-foot .info b { color: var(--ink); font-weight: 600; }
+.rv-barcode { display: flex; gap: 1.6px; height: 52px; align-items: stretch; }
+.rv-barcode i { background: var(--ink); display: block; }
+.rv-barcode + .lbl { font-family: 'Oswald', sans-serif; font-weight: 400; font-size: 11px; letter-spacing: .3em; color: var(--ink-dim); text-align: center; margin-top: 5px; }
+.rv-price { text-align: right; }
+.rv-price .n { font-family: 'Bodoni Moda', serif; font-weight: 700; font-size: 30px; color: var(--ink); }
+
+/* borde interior sutil premium */
+.rv-frame { position: absolute; inset: 30px; z-index: 5; border: 1px solid rgba(246,243,238,.14); pointer-events: none; }
+
+/* ---- Tweaks ---- */
+#tweaks { position: fixed; top: 16px; right: 16px; width: 236px; background: #14121a; color: #f6f3ee;
+  border: 1px solid #2a2733; border-radius: 12px; padding: 14px; font-family: 'Oswald', sans-serif; z-index: 999; display: none; }
+#tweaks.on { display: block; }
+#tweaks h3 { font-size: 13px; letter-spacing: .1em; text-transform: uppercase; margin-bottom: 12px; display: flex; justify-content: space-between; }
+#tweaks h3 button { background: none; border: 0; color: #8a8692; font-size: 18px; cursor: pointer; }
+.tw-group { margin-bottom: 14px; }
+.tw-group > label { display: block; font-size: 11px; letter-spacing: .08em; text-transform: uppercase; color: #8a8692; margin-bottom: 7px; }
+.tw-swatches { display: flex; flex-wrap: wrap; gap: 8px; }
+.tw-sw { width: 26px; height: 26px; border-radius: 6px; cursor: pointer; border: 2px solid transparent; }
+.tw-sw.sel { border-color: #fff; }
+.tw-seg { display: flex; gap: 4px; background: #0d0c12; border: 1px solid #2a2733; border-radius: 9px; padding: 3px; }
+.tw-seg button { flex: 1; border: 0; background: transparent; color: #b7b1c0; padding: 7px 4px; border-radius: 6px; font-family: 'Oswald', sans-serif; font-size: 12px; cursor: pointer; }
+.tw-seg button.sel { background: var(--accent); color: #0b0a0c; }
+.tw-regen { width: 100%; padding: 10px; border: 1px solid var(--accent); background: transparent; color: #f6f3ee;
+  border-radius: 8px; font-family: 'Oswald', sans-serif; font-weight: 600; font-size: 12px; letter-spacing: .08em; cursor: pointer; text-transform: uppercase; }

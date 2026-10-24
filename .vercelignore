@@ -1,0 +1,28 @@
+# ============================================================
+# FRATE · qué NO se sube al sitio público
+#
+# `vercel --prod` publica la CARPETA, no el commit: todo lo que
+# esté acá queda descargable desde frate.cl si no se excluye.
+# Se detectó que los .sql estaban públicos (incluido el esquema
+# completo de la base y los parches de seguridad) → un plano del
+# sistema para cualquiera. Esto lo cierra.
+# ============================================================
+
+# Migraciones y parches: exponen tablas, columnas, políticas y RPC
+*.sql
+
+# Documentos internos: contratos, handoffs, prompts, diagnósticos
+*.md
+
+# Edge functions (se despliegan con la CLI de Supabase, no con Vercel)
+supabase/
+
+# Config local de herramientas
+.claude/
+.vscode/
+.DS_Store
+
+# Planillas y fuentes de datos
+*.numbers
+*.xlsx
+*.csv

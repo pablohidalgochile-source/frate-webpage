@@ -1,0 +1,182 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>FRATE WEB (TICKETERA) · OS 10 GUÍA DEL CLIENTE</title>
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>📱</text></svg>">
+<link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@600;800;900&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="/os-manual.css">
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+</head>
+<body>
+<div id="bar"></div>
+<div class="wrap">
+
+  <div class="hero">
+    <div class="eyebrow">Manual 10 · recetas</div>
+    <h1>Guía del<br><em>cliente</em></h1>
+    <p class="sub">Todo lo que hace la persona del otro lado, pantalla por pantalla. Para que puedas guiarla por teléfono sabiendo exactamente dónde está.</p>
+    <div class="meta"><span>Todo el equipo</span><span>·</span><span>5 recetas</span></div>
+  </div>
+
+  <section>
+    <div class="stag">Para qué sirve este manual</div>
+    <h2>"No me deja comprar"</h2>
+    <p class="lead">Ese mensaje llega todas las semanas. Si conoces las pantallas que ve el cliente, en 30 segundos sabes qué le está pasando en vez de adivinar.</p>
+    <div class="oro"><b>La primera pregunta siempre es la misma:</b> <i>"¿qué dice exactamente en la pantalla?"</i> El sistema no falla en silencio — cuando algo no se puede, lo dice con todas sus letras. Ese texto te lleva directo a la solución.</div>
+  </section>
+
+  <!-- U1 -->
+  <section>
+    <div class="receta">
+      <div class="rcab"><span class="cod">U1</span><h3>Hacerse socio</h3><span class="quien">Lo que ve el cliente</span></div>
+      <div class="rbody">
+        <div class="cuando"><b>Ojo:</b> hacerse socio <b>no es necesario para comprar</b>. Sirve para acumular crédito, tener beneficios y que quede su historial.</div>
+        <div class="paso"><span class="n">1</span><div class="c"><div class="t">En frate.cl aprieta "Crear cuenta"</div>
+          <div class="pant">
+            <div class="barra">Crear cuenta en FRATE</div>
+            <div class="campo"><label>Nombres</label><div class="inp ph">Tus nombres</div></div>
+            <div class="campo"><label>Apellidos</label><div class="inp ph">Tus apellidos</div></div>
+            <div class="campo"><label>Usuario</label><div class="inp ph">ej: pablofrate · sin espacios</div></div>
+            <div class="campo"><label>Email *</label><div class="inp ph">tu@email.com</div></div>
+            <div class="campo"><label>RUT *</label><div class="inp ph">12.345.678-9</div></div>
+            <div class="campo"><label>Teléfono</label><div class="inp ph">+569 xxxx xxxx</div></div>
+            <span class="bt">Crear mi cuenta</span>
+          </div></div></div>
+        <div class="paso"><span class="n">2</span><div class="c"><div class="t">El RUT se valida de verdad</div>
+          <div class="d">Si el dígito verificador no calza, no lo deja seguir. Si es extranjer@, hay una casilla y el campo pasa a pasaporte.</div></div></div>
+        <div class="paso"><span class="n">3</span><div class="c"><div class="t">Le llega el correo de bienvenida</div>
+          <div class="d">Automático.</div></div></div>
+        <div class="ok"><b>Si dice "ese correo ya está registrado":</b> ya tiene cuenta. Que use <b>"¿Olvidaste tu clave?"</b> en vez de crear otra — si crea una segunda, se le parte el historial en dos.</div>
+        <div class="no"><b>Si no le llega la bienvenida:</b> primero spam. Si no está, el correo quedó mal escrito → se ve en <b>Devol. &amp; React. → 📧 Correos que rebotaron</b>.</div>
+      </div>
+    </div>
+  </section>
+
+  <!-- U2 -->
+  <section>
+    <div class="receta">
+      <div class="rcab"><span class="cod">U2</span><h3>Comprar una entrada</h3><span class="quien">Lo que ve el cliente</span></div>
+      <div class="rbody">
+        <div class="cuando"><b>Hay dos caminos</b> y conviene saber cuál está usando: el <b>link directo del flyer</b> (frate.cl/e/besucona) o el <b>carrito</b> de frate.cl.</div>
+
+        <div class="paso"><span class="n">1</span><div class="c"><div class="t">Elige cuántas entradas</div>
+          <div class="d">Con los + y −. Acá pasa algo importante: <b>el cupo le queda reservado 15 minutos</b>. Si se agotó, se lo dice <b>ahora</b> — no después de pagar.</div></div></div>
+
+        <div class="paso"><span class="n">2</span><div class="c"><div class="t">Escribe el nombre y RUT de cada asistente</div>
+          <div class="d">Las entradas son <b>nominativas</b>: una por persona, con su nombre. Es lo que el portero compara con el carnet.</div>
+          <div class="pant">
+            <div class="barra">Entrada 1 de 2 · Pre-Venta PRO Mujer</div>
+            <div class="campo"><label>Nombre completo</label><div class="inp ph">Nombre y apellido</div></div>
+            <div class="campo"><label>RUT</label><div class="inp ph">12.345.678-9</div></div>
+          </div></div></div>
+
+        <div class="paso"><span class="n">3</span><div class="c"><div class="t">Sus datos de contacto</div>
+          <div class="d">Acá el sistema lo cuida: si escribe <b>gmial.com</b> le sugiere el correcto, le pide <b>confirmar el correo</b> escribiéndolo dos veces, y si el dominio no existe <b>no lo deja pagar</b>.</div>
+          <div class="pant">
+            <div class="barra">Tus datos</div>
+            <div class="campo"><label>Correo (ahí llega el QR)</label><div class="inp">ana@gmial.com</div>
+              <div style="font-size:.72rem;color:var(--oro);margin-top:4px">¿Quisiste decir <b style="text-decoration:underline">ana@gmail.com</b>?</div></div>
+            <div class="campo"><label>Confirma tu correo</label><div class="inp ph">Repite tu correo</div></div>
+          </div></div></div>
+
+        <div class="paso"><span class="n">4</span><div class="c"><div class="t">Paga</div>
+          <div class="d">MercadoPago (tarjeta) o transferencia por Khipu. Al total se le suma el <b>4% de servicio</b>.</div>
+          <span class="bt">Pagar con MercadoPago</span></div></div>
+
+        <div class="paso"><span class="n">5</span><div class="c"><div class="t">Le llega el correo con su QR</div>
+          <div class="d">Un QR por asistente, con su nombre, el horario y hasta qué hora puede entrar.</div></div></div>
+
+        <div class="ok"><b>Los mensajes más comunes y qué significan:</b><br>
+          <b>"se acaba de agotar, no se te cobró nada"</b> → se acabó el cupo mientras compraba. No pagó.<br>
+          <b>"Ese correo no existe"</b> → el dominio está mal escrito.<br>
+          <b>"Los correos no coinciden"</b> → escribió distinto arriba y abajo.<br>
+          <b>"Ingresa un RUT válido"</b> → el dígito verificador no calza.</div>
+        <div class="oro"><b>Si abandona a mitad de camino:</b> el cupo se libera solo a los 15 minutos y le queda una orden <b>pendiente</b>. Le llega un recordatorio con un link para retomarla — y si lo abre desde otro dispositivo, le va a pedir confirmar su correo.</div>
+      </div>
+    </div>
+  </section>
+
+  <!-- U3 -->
+  <section>
+    <div class="receta">
+      <div class="rcab"><span class="cod">U3</span><h3>Inscribirse en una lista</h3><span class="quien">Lo que ve el cliente</span></div>
+      <div class="rbody">
+        <div class="cuando"><b>Cuándo:</b> una embajadora o el local le pasó un link de cortesía (frate.cl/lista/CÓDIGO).</div>
+        <div class="paso"><span class="n">1</span><div class="c"><div class="t">Abre el link y llena sus datos</div>
+          <div class="d">Nombre, RUT y contacto. El RUT se valida ahí mismo.</div></div></div>
+        <div class="paso"><span class="n">2</span><div class="c"><div class="t">Queda inscrito — pero todavía sin QR</div>
+          <div class="d">Ve un mensaje tipo <b>"Ya estás inscrito"</b>. <b>La entrada llega después</b>, cuando el equipo revisa y emite la lista.</div></div></div>
+        <div class="paso"><span class="n">3</span><div class="c"><div class="t">El día del evento le llega el QR</div>
+          <div class="d">Cuando se emite la lista.</div></div></div>
+        <div class="no"><b>La confusión más común:</b> el cliente cree que ya tiene entrada porque se inscribió. <b>Inscribirse no es tener entrada.</b> Si pregunta, explícale que el QR llega el día del evento cuando se revisa la lista.</div>
+        <div class="ok"><b>Si el link no funciona:</b> puede que la lista esté <b>llena</b> (sin cupos), <b>cerrada</b>, o que el código esté mal copiado. Los tres casos muestran un mensaje distinto — pregúntale cuál ve.</div>
+      </div>
+    </div>
+  </section>
+
+  <!-- U4 -->
+  <section>
+    <div class="receta">
+      <div class="rcab"><span class="cod">U4</span><h3>Pedir una devolución</h3><span class="quien">Lo que ve el cliente</span></div>
+      <div class="rbody">
+        <div class="cuando"><b>Ojo:</b> el link público de devoluciones (<b>frate.cl/devolución</b>) puede estar <b>apagado</b>. Cuando está apagado, la persona ve "no están habilitadas ahora, escríbenos por WhatsApp" — y ahí lo resuelves tú con las recetas del <a href="/os-entradas">manual 12</a>.</div>
+        <div class="paso"><span class="n">1</span><div class="c"><div class="t">Busca su compra</div>
+          <div class="d">Con su <b>correo</b> y el <b>N° de orden</b> (está en el correo de compra). Así solo ve lo suyo.</div></div></div>
+        <div class="paso"><span class="n">2</span><div class="c"><div class="t">Elige qué entradas</div>
+          <div class="d">Las usadas y las ya solicitadas salen bloqueadas.</div></div></div>
+        <div class="paso"><span class="n">3</span><div class="c"><div class="t">Elige qué prefiere</div>
+          <div class="d"><b>💵 Dinero</b> (con 10% de retención) · <b>🎟️ Crédito FRATE</b> (sin retención) · <b>🔄 Cambiar de día</b> (sin retención).</div></div></div>
+        <div class="paso"><span class="n">4</span><div class="c"><div class="t">Acepta las condiciones y envía</div>
+          <div class="d">Le queda un folio <b>DEV-###</b>. <b>No es automático</b> — el equipo lo revisa y le avisa.</div></div></div>
+        <div class="ok"><b>A ti te llega al instante:</b> WhatsApp, correo y un banner dorado en el panel. Se resuelve en <b>Órdenes → ↩️ Devoluciones</b>.</div>
+      </div>
+    </div>
+  </section>
+
+  <!-- U5 -->
+  <section>
+    <div class="receta">
+      <div class="rcab"><span class="cod">U5</span><h3>Qué le llega por correo</h3><span class="quien">Referencia</span></div>
+      <div class="rbody">
+        <div class="cuando"><b>Para qué sirve:</b> cuando dice "no me llegó nada", saber qué debería haberle llegado.</div>
+        <div class="tw"><table class="tabla">
+          <thead><tr><th>Cuándo</th><th>Qué recibe</th><th>De</th></tr></thead>
+          <tbody>
+            <tr><td>Al crear su cuenta</td><td>Bienvenida</td><td>hola@frate.cl</td></tr>
+            <tr><td>Al pagar</td><td><b>Su QR</b> (uno por asistente) con horario y condiciones</td><td>tickets@frate.cl</td></tr>
+            <tr><td>Al emitirse su cortesía</td><td>Su QR de cortesía</td><td>tickets@frate.cl</td></tr>
+            <tr><td>Si dejó una compra a medias</td><td>Recordatorio con link para retomar</td><td>tickets@frate.cl</td></tr>
+            <tr><td>Si cambió de día</td><td>QR nuevo para la fecha nueva</td><td>tickets@frate.cl</td></tr>
+          </tbody>
+        </table></div>
+        <div class="oro"><b>Todos los correos salen de frate.cl</b>, nunca del correo personal de nadie del equipo. Si un cliente dice que le escribieron de otra dirección pidiéndole plata, <b>no somos nosotros</b> — avisa de inmediato.</div>
+        <div class="ok"><b>Si no llegó:</b> 1) revisar spam · 2) revisar si el correo está bien escrito en la orden · 3) mirar <b>📧 Correos que rebotaron</b> · 4) corregir y reenviar (receta <b>A10</b>).</div>
+      </div>
+    </div>
+  </section>
+
+  <section>
+    <div class="stag">Cierre</div>
+    <h2>Guía rápida de teléfono</h2>
+    <div class="tw"><table class="tabla">
+      <thead><tr><th>El cliente dice…</th><th>Preguntas…</th><th>Vas a…</th></tr></thead>
+      <tbody>
+        <tr><td>"No me deja comprar"</td><td>"¿Qué dice en la pantalla?"</td><td>El mensaje te dice si es cupo, correo o RUT</td></tr>
+        <tr><td>"No me llegó el QR"</td><td>"¿Cuál es tu correo?" (léelo tú)</td><td>Receta <b>A10</b></td></tr>
+        <tr><td>"Me inscribí y no tengo nada"</td><td>"¿Compraste o te inscribiste en una lista?"</td><td>Si fue lista: llega el día del evento</td></tr>
+        <tr><td>"Ya tengo cuenta pero no entro"</td><td>"¿Probaste 'olvidé mi clave'?"</td><td>Que recupere, no que cree otra</td></tr>
+        <tr><td>"Quiero cambiar mi entrada"</td><td>"¿Para otro día o quieres tu plata?"</td><td>Recetas <b>A6</b>, <b>A7</b> o <b>A8</b></td></tr>
+      </tbody>
+    </table></div>
+    <div class="bien"><b>Regla de oro al teléfono:</b> pide siempre el <b>N° de orden</b> o el <b>correo</b>. Con cualquiera de los dos llegas a su caso en el buscador del panel en cinco segundos.</div>
+  </section>
+
+  <div class="pie">FRATE OS · Manual 10 · <a href="/os-cliente">← Conocer a un cliente</a> · <a href="/os-listas">Siguiente: listas y cortesías →</a></div>
+</div>
+
+<script src="/os-guard.js"></script>
+<script>document.getElementById('bar').innerHTML = osBarra('10'); osProteger();</script>
+</body>
+</html>

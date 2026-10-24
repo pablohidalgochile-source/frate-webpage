@@ -1,0 +1,70 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>FRATE OS · POS 07 Vincular Sunmi</title>
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>📱</text></svg>">
+<link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@600;800;900&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="/os-manual.css">
+<link rel="stylesheet" href="/os-pos.css">
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<style>
+  .dos{display:grid;grid-template-columns:repeat(auto-fit,minmax(260px,1fr));gap:12px;margin-top:14px}
+  .via{background:var(--neg2);border:1px solid var(--bor);border-radius:13px;padding:16px 18px}
+  .via h4{font-family:var(--disp);font-weight:800;font-size:1.05rem;text-transform:uppercase;margin-bottom:4px}
+  .via .c{font-size:.68rem;letter-spacing:1.3px;text-transform:uppercase;color:var(--gris2);margin-bottom:9px}
+  .via p{font-size:.83rem;color:var(--gris)}
+  .via .paso-n{font-family:var(--disp);font-weight:900;font-size:1.6rem;color:var(--acc);line-height:1}
+</style>
+</head>
+<body>
+<div id="bar"></div>
+<div class="wrap">
+
+  <div class="hero">
+    <div class="eyebrow">POS · Manual 07 · Herramientas</div>
+    <h1>Vincular una <em>Sunmi</em></h1>
+    <p class="sub">Cómo un aparato cualquiera se convierte en «Puerta 1» para la noche: activar la caja y amarrarla al equipo.</p>
+    <div class="meta"><span>🛠 Admin + operador</span><span>·</span><span>5 minutos</span><span>·</span><span>Antes de abrir</span></div>
+  </div>
+
+  <section>
+    <div class="stag">Cómo funciona</div>
+    <h2>De un aparato a una caja con nombre</h2>
+    <p class="lead">Una Sunmi de fábrica no es nada. Se vuelve «Puerta 1» o «Caja Schop» en dos pasos: el admin crea la caja con su código, y el operador escribe ese código en el aparato.</p>
+    <div class="dos">
+      <div class="via"><div class="paso-n">01</div><h4>🛠 Admin arma las cajas</h4><p>En el evento del panel creas cada caja —Puerta 1, Puerta 2, Caja Schop— y cada una nace con su <b>código</b>. Es la lista de máquinas de la noche.</p></div>
+      <div class="via"><div class="paso-n">02</div><h4>👤 Operador la activa</h4><p>Abre el POS en la Sunmi, escribe el código de su caja, y ese aparato <b>se vuelve</b> esa caja. Listo para abrir turno y vender.</p></div>
+    </div>
+  </section>
+
+  <section>
+    <div class="stag">Seguridad</div>
+    <h2>La caja queda amarrada al aparato</h2>
+    <p class="lead">Activar no es solo escribir un código: la caja se <strong>amarra</strong> a ese equipo. El mismo código no abre la caja en otro teléfono. Es a propósito.</p>
+    <div class="oro"><b>El código de activación es también el código de cierre.</b> Es la misma llave para abrir y para cerrar la caja. <strong>Guárdalo.</strong> Sin él, esa máquina no cierra su turno.</div>
+    <div class="bien"><b>Apenas queda activa, reporta sola.</b> La máquina le manda al panel su <strong>latido</strong>: aparece «online» y con su batería. Desde el panel ves las cajas vivas sin preguntar por radio.</div>
+    <div class="peligro"><b>Amarre = anti-fraude.</b> Como la caja vive en <strong>ese</strong> aparato, nadie clona la Puerta 1 en otro teléfono con el mismo código. Si de verdad hay que mover una caja de equipo, se libera y se vuelve a activar — no se «copia».</div>
+  </section>
+
+  <section>
+    <div class="stag">Casos reales</div>
+    <h2>Cómo lo vives tú</h2>
+    <div class="dos">
+      <div class="via"><h4>👤 Operador · en la Sunmi</h4><div class="c">Llegaste a tu puesto</div><p>Abres el POS, escribes el código de <b>Puerta 1</b>, y ya eres Puerta 1. Cuentas tu sencillo, abres el turno y empiezas a cobrar. No configuraste nada más: el aparato quedó amarrado a tu caja por toda la noche.</p></div>
+      <div class="via"><h4>🛠 Admin · en el panel</h4><div class="c">Antes de que llegue la gente</div><p>Creaste las 3 cajas con su código y las repartes. En el panel las ves aparecer <b>una a una</b> a medida que cada operador activa la suya: online, con batería, cada una en su aparato.</p></div>
+    </div>
+    <div class="peligro"><b>Ojo con el atajo.</b> Si activas una caja por el <b>menú rápido</b>, el código de cierre puede quedar sin registrar — y a las 4 AM nadie sabe cómo cerrar. <strong>Antes de la noche, revisa que cada caja tenga su código.</strong></div>
+  </section>
+
+  <div class="pie">FRATE OS · POS · Manual 07 · <a href="/os-pos-reglas">← Reglas de oro</a> · <a href="/os-pos-covers">Siguiente: covers →</a> · <a href="/os-pos">↑ índice</a></div>
+</div>
+
+<script src="/os-guard.js"></script>
+<script>
+  document.getElementById('bar').innerHTML = osBarra('07', 'pos');
+  osProteger();
+</script>
+</body>
+</html>

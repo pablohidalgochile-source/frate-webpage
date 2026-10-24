@@ -1,0 +1,466 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+<title>FRATE · Formulario</title>
+<meta property="og:title" content="FRATE · Cuéntanos qué necesitas" />
+<meta property="og:description" content="Cumpleaños, reservas y convenios. Te respondemos por WhatsApp." />
+<meta property="og:image" content="https://www.frate.cl/assets/og-lista.png" />
+<meta property="og:image:width" content="1200" />
+<meta property="og:image:height" content="630" />
+<meta property="og:type" content="website" />
+<meta property="og:site_name" content="FRATE" />
+<meta name="twitter:card" content="summary_large_image" />
+<meta name="twitter:image" content="https://www.frate.cl/assets/og-lista.png" />
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;500;600;700;800&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet" />
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="/frate-plano.js"></script>
+<script src="/frate-cedula.js?v=ced1"></script>
+<script src="/frate-format.js?v=fmt3"></script>
+<script src="/frate-instituciones.js?v=inst1"></script>
+<script src="/frate-email.js?v=fe1"></script>
+<style>
+  :root{
+    --page:#050506; --ink:#f0ede8; --dim:#9a97a2; --faint:#6a6770;
+    --card:#111114; --line:rgba(255,255,255,.11); --line2:rgba(255,255,255,.17);
+    --ac:#f0c84a; --ac-ink:#12100a; --ac-soft:rgba(240,200,74,.16);
+    --mono:'DM Mono',ui-monospace,monospace;
+  }
+  *{box-sizing:border-box}
+  html,body{margin:0;background:var(--page);color:var(--ink);font-family:'Outfit',system-ui,sans-serif;-webkit-font-smoothing:antialiased}
+  body{min-height:100vh;background:
+    radial-gradient(120% 70% at 85% -10%,rgba(176,107,255,.08),transparent 55%),
+    radial-gradient(120% 70% at 5% 0%,var(--ac-soft),transparent 52%),var(--page);
+    padding:26px 16px 60px;display:flex;justify-content:center}
+  .wrap{width:100%;max-width:460px}
+  .brand{display:flex;align-items:center;gap:12px;margin-bottom:20px}
+  .disc{width:42px;height:42px;border-radius:99px;flex:0 0 auto;position:relative;
+    background:repeating-radial-gradient(circle at 50% 50%,#191919 0 1px,#0b0b0b 1px 3px);
+    box-shadow:0 8px 22px -10px #000, inset 0 0 0 1px rgba(255,255,255,.06)}
+  .disc::after{content:"";position:absolute;inset:37%;border-radius:99px;
+    background:radial-gradient(circle at 38% 32%,#ff8fbb,#ff2d78 60%,#a01050);box-shadow:0 0 0 3px var(--page)}
+  .brand b{font-weight:800;letter-spacing:-.01em;font-size:15px}
+  .brand small{display:block;color:var(--faint);font-size:11px;font-weight:500}
+  .card{background:linear-gradient(180deg,#141418,#0e0e11);border:1px solid var(--line2);border-radius:22px;overflow:hidden;box-shadow:0 40px 80px -44px #000}
+  .head{padding:22px 20px 6px;border-top:3px solid var(--ac)}
+  .eyebrow{font-family:var(--mono);font-size:10.5px;letter-spacing:.2em;text-transform:uppercase;color:var(--ac)}
+  h1{margin:7px 0 5px;font-size:22px;font-weight:800;letter-spacing:-.02em;display:flex;align-items:center;gap:9px}
+  .tag{margin:0;color:var(--dim);font-size:13px;line-height:1.45}
+  form{padding:16px 20px 22px;display:flex;flex-direction:column;gap:14px}
+  .field{display:flex;flex-direction:column;gap:6px}
+  .field label{font-size:12.5px;font-weight:600;color:#cfccd6;display:flex;gap:6px;align-items:center}
+  .field label .req{color:var(--ac)}
+  .field .hint{font-size:10.5px;color:var(--faint);line-height:1.35}
+  .row2{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+  @media (max-width:420px){.row2{grid-template-columns:1fr}}
+  input,select,textarea{width:100%;font-family:inherit;font-size:14px;color:var(--ink);background:#0c0c0f;
+    border:1px solid var(--line2);border-radius:11px;padding:12px;outline:none;transition:border-color .15s,box-shadow .15s}
+  textarea{resize:vertical;min-height:70px}
+  input::placeholder,textarea::placeholder{color:#5a5760}
+  input:focus,select:focus,textarea:focus{border-color:var(--ac);box-shadow:0 0 0 3px var(--ac-soft)}
+  select{appearance:none;background-image:linear-gradient(45deg,transparent 50%,var(--dim) 50%),linear-gradient(135deg,var(--dim) 50%,transparent 50%);
+    background-position:calc(100% - 18px) 19px,calc(100% - 13px) 19px;background-size:5px 5px,5px 5px;background-repeat:no-repeat}
+  .ig{position:relative}.ig input{padding-left:27px}
+  .ig::before{content:"@";position:absolute;left:12px;top:50%;transform:translateY(-50%);color:var(--faint);font-size:14px}
+  .check{display:flex;gap:9px;align-items:flex-start;cursor:pointer;font-size:12.5px;color:#c6c3cd;line-height:1.4}
+  .check input{width:18px;height:18px;margin:1px 0 0;accent-color:var(--ac);flex:0 0 auto}
+  .hp{position:absolute;left:-9999px;width:1px;height:1px;opacity:0}
+  .err{display:none;background:rgba(232,54,61,.12);border:1px solid rgba(232,54,61,.35);color:#ff9aa2;font-size:12.5px;border-radius:10px;padding:9px 12px}
+  .err.on{display:block}
+  .submit{margin-top:4px;cursor:pointer;font-family:inherit;font-weight:800;font-size:15px;color:var(--ac-ink);
+    background:var(--ac);border:none;border-radius:12px;padding:14px;box-shadow:0 12px 26px -14px var(--ac);transition:filter .14s,transform .12s}
+  .submit:hover{filter:brightness(1.06)}.submit:active{transform:scale(.99)}
+  .submit[disabled]{opacity:.6;cursor:default}
+  .safe{display:flex;gap:7px;justify-content:center;align-items:center;font-size:10.5px;color:var(--faint);margin-top:2px}
+  .done{padding:52px 26px;text-align:center;display:none;flex-direction:column;align-items:center;gap:13px}
+  .done.on{display:flex}
+  .tick{width:60px;height:60px;border-radius:99px;background:var(--ac-soft);border:1px solid var(--ac);display:flex;align-items:center;justify-content:center;font-size:28px;color:var(--ac)}
+  .done h2{margin:0;font-size:20px;font-weight:800}
+  .done p{margin:0;color:var(--dim);font-size:14px;max-width:30ch;line-height:1.5}
+  .foot{text-align:center;color:var(--faint);font-size:11px;margin-top:16px}
+  .foot a{color:var(--dim)}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <div class="brand">
+    <div class="disc"></div>
+    <div><b>FRATE</b><small>Fraternidad Campus Central</small></div>
+  </div>
+  <div class="card">
+    <div id="view">
+      <div class="head">
+        <div class="eyebrow" id="eyebrow"></div>
+        <h1><span id="icon">🎂</span> <span id="title"></span></h1>
+        <p class="tag" id="tag"></p>
+      </div>
+      <form id="form" novalidate autocomplete="on">
+        <div id="fields"></div>
+        <div class="err" id="err"></div>
+        <input class="hp" tabindex="-1" autocomplete="off" id="hp" placeholder="No llenar" />
+        <button type="submit" class="submit" id="submit">Enviar</button>
+        <div class="safe">🔒 Tus datos van directo al equipo. Nadie más los ve.</div>
+      </form>
+    </div>
+    <div class="done" id="done">
+      <div class="tick">✓</div>
+      <h2 id="donetitle">¡Recibido! 🎧</h2>
+      <p id="donemsg"></p>
+      <a id="done-wa" href="#" target="_blank" rel="noopener" style="display:none;margin-top:16px;background:#25D366;color:#0a1e12;font-weight:800;padding:14px 20px;border-radius:14px;text-decoration:none;font-size:1.02rem;box-shadow:0 6px 18px rgba(37,211,102,.35);">🟢 Continúa por WhatsApp</a>
+      <div id="done-wa-hint" style="display:none;color:#8b8b93;font-size:.78rem;margin-top:10px;">Toca el botón para hablar con FRATE al instante 👆</div>
+
+      <!-- Hazte socia/o. Quien llena un formulario ya te dio sus datos: es el
+           mejor momento para que quede en la base con cuenta propia, y así
+           su cumpleaños o su reserva no vive solo en un correo suelto.
+           Se oculta si la persona ya tiene sesión iniciada. -->
+      <div id="done-socio" style="display:none;margin-top:22px;padding-top:20px;border-top:1px solid rgba(255,255,255,.08);">
+        <div style="font-size:1.6rem;">⭐</div>
+        <div style="font-weight:800;font-size:1.02rem;margin-top:6px;">Hazte socio de FRATE</div>
+        <div style="color:#8b8b93;font-size:.8rem;line-height:1.6;margin-top:8px;max-width:330px;margin-left:auto;margin-right:auto;">
+          Con tu cuenta sigues tu solicitud, guardas tus entradas en un solo lugar
+          y te enteras primero de cada jueves. Se te pegan también tus compras
+          anteriores, aunque las hayas hecho sin cuenta.</div>
+        <a href="/mi-entrada" style="display:inline-block;margin-top:14px;background:#E8363D;color:#fff;font-weight:800;padding:13px 26px;border-radius:12px;text-decoration:none;font-size:.92rem;">Crear mi cuenta</a>
+        <div style="color:#5a5a62;font-size:.72rem;margin-top:9px;">Toma 30 segundos.</div>
+      </div>
+    </div>
+  </div>
+  <div class="foot">¿Otra cosa? <a href="https://www.frate.cl">frate.cl</a></div>
+</div>
+
+<script>
+const SUPABASE_URL='https://ydwlpraoaaijlfssevoh.supabase.co';
+const SUPABASE_ANON='sb_publishable_-_7GeDU_h84zf2v--lWQaQ_15ZFxOWt';
+const sb=window.supabase.createClient(SUPABASE_URL,SUPABASE_ANON);
+
+const FORMS={
+  cumple:{ icon:'🎂', title:'Cumpleaños', eyebrow:'Agenda de cumpleaños', ac:'#f0c84a', ink:'#12100a', soft:'rgba(240,200,74,.16)',
+    tag:'Reserva previa. Celebras un día de evento de la semana de tu cumple 🎉',
+    done:'Recibimos tu solicitud de cumpleaños. Te escribimos por WhatsApp para cerrar el día y los detalles.',
+    fields:[
+      {k:'email',l:'Correo oficial (para enviarte la info)',t:'email',req:1,ph:'tu@correo.cl'},
+      {k:'nombre',l:'Nombre completo del/la cumpleañer@',t:'text',up:1,req:1,words2:1,ph:'Nombre y apellido'},
+      {k:'instagram',l:'Instagram del/la cumpleañer@',t:'ig',req:1,ph:'usuario'},
+      {row:[{k:'fecha_nac',l:'Fecha de nacimiento del/la cumpleañer@',t:'date',req:1,minAge:18},{k:'fecha_celebrar',l:'Fecha que desea celebrar',t:'date',req:1,hint:'Un día de evento de tu semana.'}]},
+      {k:'quien_agenda',l:'¿Quién hace la gestión?',t:'select',o:['Selecciona…','El/la cumpleañer@','Otra persona'],req:1},
+      {k:'gestor',l:'Nombre completo de quien hace la gestión',t:'text',up:1,req:1,words2:1,ph:'Nombre y apellido',showIf:{k:'quien_agenda',eq:'Otra persona'}},
+      {k:'gestor_instagram',l:'Instagram de quien hace la gestión',t:'ig',req:1,ph:'usuario',showIf:{k:'quien_agenda',eq:'Otra persona'}},
+      {k:'gestor_whatsapp',l:'WhatsApp de quien hace la gestión',t:'tel',req:1,ph:'+56 9 ...',showIf:{k:'quien_agenda',eq:'Otra persona'}},
+      {row:[{k:'whatsapp',l:'WhatsApp de contacto',t:'tel',req:1,ph:'+56 9 ...'},{k:'invitados',l:'N° de invitad@s',t:'number',ph:'aprox.'}]},
+      {k:'educacion_superior',l:'¿El/la cumpleañer@ estudia educación superior?',t:'select',o:['Selecciona…','Sí','No'],req:1},
+      {k:'institucion',l:'¿En qué institución?',t:'inst',req:1,showIf:{k:'educacion_superior',eq:'Sí'}},
+      {k:'mensaje',l:'Información adicional',t:'textarea',req:1,ph:'Ej: somos 20, llegamos 00:30, queremos torta y decoración 🎂'}
+    ]},
+  reserva:{ icon:'🍾', title:'Reserva', eyebrow:'Reserva de mesa / sector', ac:'#ff2d78', ink:'#fff', soft:'rgba(255,45,120,.15)',
+    tag:'Coordinamos sector, cover y botellas para tu grupo 🍾',
+    done:'Recibimos tu reserva. Te contactamos para confirmar sector, cover y disponibilidad.',
+    fields:[
+      {k:'nombre',l:'Nombre completo de quien reserva',t:'text',up:1,req:1,words2:1,ph:'Nombre y apellido'},
+      {row:[{k:'email',l:'Correo',t:'email',req:1,ph:'tu@correo.cl'},{k:'whatsapp',l:'WhatsApp de contacto',t:'tel',req:1,ph:'+56 9 ...'}]},
+      {k:'instagram',l:'Instagram de quien reserva',t:'ig',ph:'usuario'},
+      {k:'quien_agenda',l:'¿Quién hace la gestión?',t:'select',o:['Selecciona…','Quien reserva','Otra persona'],req:1},
+      {k:'gestor',l:'Nombre completo de quien hace la gestión',t:'text',up:1,req:1,words2:1,ph:'Nombre y apellido',showIf:{k:'quien_agenda',eq:'Otra persona'}},
+      {k:'gestor_instagram',l:'Instagram de quien hace la gestión',t:'ig',req:1,ph:'usuario',showIf:{k:'quien_agenda',eq:'Otra persona'}},
+      {k:'gestor_whatsapp',l:'WhatsApp de quien hace la gestión',t:'tel',req:1,ph:'+56 9 ...',showIf:{k:'quien_agenda',eq:'Otra persona'}},
+      {row:[{k:'fecha_evento',l:'Fecha del evento',t:'date',req:1},{k:'personas',l:'N° de personas',t:'number',req:1,ph:'ej. 8'}]},
+      {k:'sector',l:'Sector',t:'select',o:['Selecciona…','General','VIP','Terraza','Que me recomienden'],req:1},
+      {k:'ocasion',l:'Ocasión',t:'select',o:['Selecciona…','Salida','Cumpleaños','Despedida de solter@','Empresa / curso','Otra']},
+      {k:'botellas',l:'Botellas de interés',t:'text',ph:'Escríbelas o pide el menú'},
+      {k:'mensaje',l:'Cuéntanos qué necesitas',t:'textarea',req:1,ph:'Ej: sector, horario de llegada, presupuesto por persona…'}
+    ]},
+  frecuente:{ icon:'⭐', title:'Cliente frecuente', eyebrow:'Club FRATE · beneficios', ac:'#3dff88', ink:'#08110c', soft:'rgba(61,255,136,.14)',
+    tag:'Beneficios, prioridad y sorpresa de cumpleaños 🎁',
+    done:'¡Bienvenid@ al Club FRATE! Te llegan los beneficios a tu correo y WhatsApp.',
+    fields:[
+      {k:'nombre',l:'Nombre completo',t:'text',up:1,req:1,words2:1,ph:'Nombre y apellido'},
+      {k:'extranjero',l:'Soy extranjer@ (no tengo RUT chileno)',t:'check'},
+      {row:[{k:'rut',l:'RUT',t:'rut',req:1,ph:'12.345.678-9'},{k:'fecha_nac',l:'Fecha de nacimiento',t:'date',req:1,hint:'Para tu beneficio de cumple.'}]},
+      {row:[{k:'email',l:'Correo',t:'email',req:1,ph:'tu@correo.cl'},{k:'whatsapp',l:'WhatsApp',t:'tel',req:1,ph:'+56 9 ...'}]},
+      {k:'instagram',l:'Instagram',t:'ig',ph:'usuario'},
+      {k:'quien_agenda',l:'¿Te registras tú o te inscribe alguien?',t:'select',o:['Selecciona…','Yo mismo/a','Otra persona (RRPP/amig@)'],req:1},
+      {k:'gestor',l:'Nombre completo de quien te inscribe',t:'text',up:1,req:1,words2:1,ph:'Nombre y apellido',showIf:{k:'quien_agenda',eq:'Otra persona (RRPP/amig@)'}},
+      {k:'gestor_instagram',l:'Instagram de quien te inscribe',t:'ig',req:1,ph:'usuario',showIf:{k:'quien_agenda',eq:'Otra persona (RRPP/amig@)'}},
+      {k:'gestor_whatsapp',l:'WhatsApp de quien te inscribe',t:'tel',req:1,ph:'+56 9 ...',showIf:{k:'quien_agenda',eq:'Otra persona (RRPP/amig@)'}},
+      {row:[{k:'estudia_trabaja',l:'Universidad o centro de estudios',t:'inst'},{k:'como_conocio',l:'¿Cómo nos conociste?',t:'select',o:['Selecciona…','Amig@s','Instagram','RRPP','En un evento','Otro']}]},
+      {k:'novedades',l:'Quiero recibir beneficios y novedades por correo/WhatsApp.',t:'check'},
+      {k:'terminos',l:'Acepto los términos y el uso de mis datos.',t:'check',req:1}
+    ]}
+};
+
+function fmtRut(v){ const raw=String(v).trim(); const c=raw.toUpperCase().replace(/[.\-\s]/g,''); return /^\d{7,8}[0-9K]$/.test(c)?c.slice(0,-1)+'-'+c.slice(-1):raw; }
+const PAISES=[['🇨🇱 +56','+56'],['🇦🇷 +54','+54'],['🇵🇪 +51','+51'],['🇧🇴 +591','+591'],['🇨🇴 +57','+57'],['🇻🇪 +58','+58'],['🇪🇨 +593','+593'],['🇧🇷 +55','+55'],['🇲🇽 +52','+52'],['🇺🇸 +1','+1'],['🇪🇸 +34','+34']];
+function fmtTelLocal(v,cc){ let n=String(v).replace(/[^\d]/g,''); if(cc==='+56'){ if(n.startsWith('56'))n=n.slice(2); if(n.length===9&&n[0]==='9') return n.slice(0,1)+' '+n.slice(1,5)+' '+n.slice(5); } return v; }
+
+function _e(s){ return String(s==null?'':s).replace(/&/g,'&amp;').replace(/"/g,'&quot;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/'/g,'&#39;'); }
+function _sif(f){ return f.showIf ? " data-showif='"+_e(JSON.stringify(f.showIf))+"'" : ''; }
+function fieldHTML(f){
+  if(f.row) return '<div class="row2">'+f.row.map(fieldHTML).join('')+'</div>';
+  const k=_e(f.k), ph=_e(f.ph||''), lbl=_e(f.l||''), type=_e(f.t||'text');
+  const req=f.req?'<span class="req">*</span>':'';
+  const hint=f.hint?'<span class="hint">'+_e(f.hint)+'</span>':'';
+  if(f.t==='check') return '<label class="check"'+_sif(f)+'><input type="checkbox" data-k="'+k+'"'+(f.req?' data-req':'')+'/><span>'+lbl+(f.req?' <span class="req">*</span>':'')+'</span></label>';
+  if(f.t==='mapa') return '<div class="field" id="mapa-field" style="display:none;"><label>'+lbl+'</label><input type="hidden" data-k="'+k+'"/><div id="form-mapa"></div><div id="form-mapa-sel" style="font-size:.82rem;color:var(--ac);margin-top:7px;font-weight:600;"></div></div>';
+  let ctrl;
+  const dk='data-k="'+k+'"'+(f.req?' data-req':'')+(f.up?' data-up':'')+(f.words2?' data-words2':'')+(f.minAge?' data-minage="'+_e(f.minAge)+'"':'');
+  if(f.t==='textarea') ctrl='<textarea '+dk+' placeholder="'+ph+'"></textarea>';
+  else if(f.t==='select') ctrl='<select '+dk+'>'+(f.o||[]).map((o,i)=>'<option'+(i===0?' value=""':'')+'>'+_e(o)+'</option>').join('')+'</select>';
+  else if(f.t==='ig') ctrl='<div class="ig"><input type="text" '+dk+' placeholder="'+(ph||'usuario')+'"/></div>';
+  else if(f.t==='inst') ctrl='<select '+dk+' data-inst></select>';
+  else if(f.t==='rut') ctrl='<input type="text" '+dk+' data-rut placeholder="'+ph+'"/>';
+  else if(f.t==='tel') ctrl='<div style="display:flex;gap:6px;"><select data-cc style="width:106px;flex:0 0 auto;">'+PAISES.map(p=>'<option value="'+p[1]+'"'+(p[1]==='+56'?' selected':'')+'>'+p[0]+'</option>').join('')+'</select><input type="tel" '+dk+' style="flex:1;" placeholder="'+(ph||'9 1234 5678')+'"/></div>';
+  else ctrl='<input type="'+type+'" '+dk+' placeholder="'+ph+'"/>';
+  return '<div class="field"'+_sif(f)+'><label>'+lbl+' '+req+'</label>'+ctrl+hint+'</div>';
+}
+// Arma el HTML de los campos: agrupa pares consecutivos con {half:1} en una fila de 2 (y respeta {row:[…]} legado).
+function buildFieldsHTML(fields){
+  const a=Array.isArray(fields)?fields:[]; let out='';
+  for(let i=0;i<a.length;i++){
+    const f=a[i];
+    if(f && !f.row && f.half && a[i+1] && a[i+1].half){ out+='<div class="row2">'+fieldHTML(f)+fieldHTML(a[i+1])+'</div>'; i++; }
+    else out+=fieldHTML(f);
+  }
+  return out;
+}
+
+const params=new URLSearchParams(location.search);
+let tipo=params.get('t');
+if(!tipo){ const p=location.pathname.toLowerCase();
+  if(p.includes('frecuente')) tipo='frecuente';
+  else if(p.includes('reserva')) tipo='reserva';
+  else if(p.includes('cumple')) tipo='cumple'; }
+if(!tipo) tipo='cumple';
+// Slugs nuevos (creados desde el constructor) no están en FORMS: cfg mínimo y el loader de form_defs lo llena.
+let cfg=FORMS[tipo] || { icon:'📝', title:'Solicitud', eyebrow:'', tag:'', done:'¡Recibido! Te contactamos pronto.', fields:[] };
+const $=s=>document.querySelector(s);
+
+// ── Link de auto-completado ──────────────────────────────────────────────
+// `?r=TOKEN` abre la ficha que YA existe para que la persona la complete.
+// Nació para las fichas del bot de WhatsApp: entran con cuatro datos y sin
+// fecha, y hasta ahora sólo un admin podía arreglarlas una por una.
+// El `t=` del link sólo elige qué campos dibujar; quien manda es el token.
+const REABRIR = params.get('r') || '';
+window._reDatos = null;
+function _rePrefill(){
+  if(!REABRIR || !window._reDatos) return;
+  const d = window._reDatos;
+  document.querySelectorAll('[data-k]').forEach(function(el){
+    const k = el.dataset.k;
+    let v = d[k];
+    // La misma cosa viaja con dos nombres según de dónde nació la ficha:
+    // el bot guarda `telefono`, el formulario `whatsapp`.
+    if(v==null || v===''){ if(k==='whatsapp') v=d.telefono; else if(k==='email') v=d.correo; else if(k==='telefono') v=d.whatsapp; }
+    if(v==null || v==='') return;
+    if(el.type==='checkbox') el.checked = !!v; else el.value = String(v);
+  });
+}
+
+function aplicarCfg(){
+  document.documentElement.style.setProperty('--ac',cfg.ac||'#f0c84a');
+  document.documentElement.style.setProperty('--ac-ink',cfg.ink||'#12100a');
+  document.documentElement.style.setProperty('--ac-soft',cfg.soft||'rgba(240,200,74,.16)');
+  document.title='FRATE · '+(cfg.title||'Solicitud');
+  $('#icon').textContent=cfg.icon||'📝'; $('#title').textContent=cfg.title||'Solicitud';
+  $('#eyebrow').textContent=cfg.eyebrow||''; $('#tag').textContent=cfg.tag||'';
+  $('#donemsg').textContent=cfg.done||'¡Recibido! Te contactamos pronto.';
+  $('#fields').innerHTML=buildFieldsHTML(cfg.fields);
+  postRender();
+}
+function postRender(){
+  setTimeout(_rePrefill, 0);   // después de que el render deje los campos en el DOM
+  document.querySelectorAll('[data-inst]').forEach(function(s){ if(window.poblarInstituciones) poblarInstituciones(s, ''); });
+  _wireExtranjero();
+  loadPlanoForm();
+  _wireShowIf();
+  // Verificación de correo: confirmar correo + sugerencia de typo + dominio real
+  try{ const em=document.querySelector('[data-k="email"]');
+    if(em && !em._feAttached){
+      let cf=document.getElementById('email-confirm');
+      if(!cf){ cf=document.createElement('input'); cf.type='email'; cf.id='email-confirm'; cf.placeholder='✅ Confirma tu correo'; cf.autocomplete='off'; cf.className=em.className; cf.style.cssText='margin-top:8px;width:100%;';
+        const host=em.closest('.row2')||em.closest('.field')||em; host.insertAdjacentElement('afterend', cf); }
+      if(window.FrateEmail) FrateEmail.attach(em, {confirm: cf});
+    }
+  }catch(e){}
+}
+// "Soy extranjer@": el RUT pasa a Pasaporte/ID y deja de exigir formato chileno
+function _wireExtranjero(){
+  const ex=document.querySelector('[data-k="extranjero"]');
+  const rutIn=document.querySelector('[data-rut]');
+  if(!ex||!rutIn) return;
+  const field=rutIn.closest('.field'), lbl=field&&field.querySelector('label'), req=lbl&&lbl.querySelector('.req');
+  ex.addEventListener('change',()=>{
+    if(ex.checked){ rutIn.placeholder='N° de pasaporte / ID'; if(lbl){ lbl.textContent='Pasaporte / ID '; if(req) lbl.appendChild(req); } }
+    else{ rutIn.placeholder='12.345.678-9'; if(lbl){ lbl.textContent='RUT '; if(req) lbl.appendChild(req); } rutIn.value=fmtRut(rutIn.value); }
+  });
+}
+// Lógica condicional: muestra/oculta un campo según el valor de otro (data-showif = {k, eq|in})
+function _wireShowIf(){
+  document.querySelectorAll('[data-showif]').forEach(function(wrap){
+    let cond; try{ cond=JSON.parse(wrap.getAttribute('data-showif')); }catch(_){ return; }
+    if(!cond||!cond.k) return;
+    const ctrl=document.querySelector('[data-k="'+cond.k+'"]');
+    if(!ctrl) return;
+    const ev=function(){
+      const v=ctrl.type==='checkbox'?(ctrl.checked?'true':'false'):String(ctrl.value||'');
+      const ok = Array.isArray(cond.in) ? cond.in.map(String).includes(v) : (v===String(cond.eq));
+      wrap.style.display=ok?'':'none';
+    };
+    ctrl.addEventListener('change',ev); ctrl.addEventListener('input',ev); ev();
+  });
+}
+// Mapa referencial: carga el plano activo y deja elegir zona/mesa (setea zona_mapa)
+async function loadPlanoForm(){
+  const host=document.getElementById('form-mapa'), field=document.getElementById('mapa-field');
+  if(!host||!field||!window.FratePlano) return;
+  try{
+    const { data } = await sb.from('planos').select('data').eq('activo',true).order('orden').limit(1);
+    const plano = data && data[0] && data[0].data;
+    if(!plano || !Array.isArray(plano.espacios) || !plano.espacios.length){ field.style.display='none'; return; }
+    field.style.display='';
+    let selNombre=null;
+    const draw=()=>{
+      FratePlano.render(host, plano, { selectable:true, selected:selNombre, maxHeight:360, onPick:(sp)=>{
+        selNombre=sp.nombre;
+        const hid=field.querySelector('input[data-k]'); if(hid) hid.value=sp.nombre;
+        const lab=document.getElementById('form-mapa-sel');
+        if(lab) lab.textContent='📍 Elegiste: '+sp.nombre+(sp.cap?(' · hasta '+sp.cap+' personas'):'')+(sp.precio?(' · '+FratePlano.clp(sp.precio)):'');
+        draw();
+      }});
+      const tip=document.createElement('div'); tip.style.cssText='font-size:.62rem;color:#8b8b93;margin-top:6px;letter-spacing:.5px;'; tip.textContent='Toca tu zona o mesa preferida en el plano';
+      host.appendChild(tip);
+    };
+    draw();
+  }catch(e){ field.style.display='none'; }
+}
+
+aplicarCfg();   // render inmediato con el fallback interno
+
+// Definición configurable desde el admin (tabla form_defs). Si existe y trae campos, re-render con ella.
+(async function(){
+  try{
+    const { data } = await sb.from('form_defs').select('config,activo').eq('slug',tipo).maybeSingle();
+    if(data && data.activo!==false && data.config && Array.isArray(data.config.fields) && data.config.fields.length){
+      cfg=Object.assign({}, FORMS[tipo]||{}, data.config);
+      aplicarCfg();
+    }
+  }catch(_){}
+})();
+
+// Si viene `?r=`, se trae la ficha y se prellena. Un token falso o vencido
+// responde 404 igual, y entonces la página se comporta como un formulario
+// normal: nunca se queda en blanco ni delata qué tokens existieron.
+if(REABRIR){ (async function(){
+  try{
+    const r = await fetch(SUPABASE_URL+'/functions/v1/form-reabrir?t='+encodeURIComponent(REABRIR), { headers:{ apikey: SUPABASE_ANON } });
+    if(!r.ok) return;
+    const j = await r.json();
+    if(!j || !j.ok) return;
+    window._reDatos = j.datos || {};
+    _rePrefill();
+    const t0=document.getElementById('donetitle'); if(t0) t0.textContent='¡Gracias! 🙌';
+    const m0=document.getElementById('donemsg');   if(m0) m0.textContent='Listo, ya quedaron tus datos. Nos vemos pronto.';
+    const sub=document.getElementById('submit');   if(sub) sub.textContent='Guardar mis datos';
+  }catch(_){}
+})(); }
+
+// Mensaje de éxito editable desde el admin (config_valores msg_form_<tipo>_tit / _txt)
+(async function(){
+  try{
+    const { data } = await sb.from('config_valores').select('clave,valor').in('clave',['msg_form_'+tipo+'_tit','msg_form_'+tipo+'_txt']);
+    const m={}; (data||[]).forEach(function(r){ m[r.clave]=r.valor; });
+    const t=m['msg_form_'+tipo+'_tit'], x=m['msg_form_'+tipo+'_txt'];
+    if(t) $('#donetitle').textContent=t;
+    if(x) $('#donemsg').textContent=x;
+  }catch(e){}
+})();
+
+// Autoformato al salir de cada campo
+$('#form').addEventListener('blur',e=>{
+  const el=e.target; if(!el.dataset) return;
+  if(el.type==='email') el.value=el.value.trim().toLowerCase();
+  else if(el.type==='tel'){ const cc=el.parentElement&&el.parentElement.querySelector('select[data-cc]'); el.value=fmtTelLocal(el.value, cc?cc.value:'+56'); }
+  else if('rut' in el.dataset){ const ex=document.querySelector('[data-k="extranjero"]'); if(!(ex&&ex.checked)) el.value=fmtRut(el.value); }
+  else if('up' in el.dataset) el.value=el.value.trim().replace(/\s+/g,' ').toUpperCase();
+},true);
+
+// Edad (años cumplidos) desde una fecha YYYY-MM-DD, o null si no parsea
+function _edad(iso){ const m=String(iso).match(/^(\d{4})-(\d{2})-(\d{2})/); if(!m) return null; const b=new Date(+m[1],+m[2]-1,+m[3]); if(isNaN(b.getTime())) return null; const n=new Date(); let a=n.getFullYear()-b.getFullYear(); const mo=n.getMonth()-b.getMonth(); if(mo<0||(mo===0&&n.getDate()<b.getDate())) a--; return a; }
+$('#form').addEventListener('submit',async ev=>{
+  ev.preventDefault();
+  if(window._fEnviando) return; window._fEnviando=true;   // anti doble-envío (bloquea reclics durante validación+red)
+  const err=$('#err'); err.classList.remove('on');
+  const datos={}; let falta=null, faltaApellido=null, faltaEdad=null;
+  document.querySelectorAll('[data-k]').forEach(el=>{
+    const k=el.dataset.k;
+    const oculto = el.type!=='hidden' && el.offsetParent===null;   // campo escondido por lógica condicional: no se valida
+    let val=el.type==='checkbox'?el.checked:String(el.value||'').trim();
+    if(el.type==='tel' && val){ const cc=el.parentElement&&el.parentElement.querySelector('select[data-cc]'); if(cc) val=cc.value+' '+val; }
+    if(!oculto && el.hasAttribute('data-req') && !val) falta=falta||k;
+    if(!oculto && el.hasAttribute('data-words2') && val && String(val).split(/\s+/).filter(Boolean).length<2) faltaApellido=faltaApellido||k;
+    if(!oculto && el.hasAttribute('data-minage') && val){ const ed=_edad(val); if(ed!=null && ed<Number(el.getAttribute('data-minage'))) faltaEdad=faltaEdad||{k:k, min:el.getAttribute('data-minage')}; }
+    datos[k]=val;
+  });
+  if(falta){ window._fEnviando=false; err.textContent='Falta completar un campo obligatorio (marcado con *).'; err.classList.add('on'); return; }
+  if(faltaApellido){ window._fEnviando=false; err.textContent='Escribe nombre y apellido (ej: María Pérez).'; err.classList.add('on'); const el=document.querySelector('[data-k="'+faltaApellido+'"]'); if(el){ try{ el.focus(); }catch(_){} } return; }
+  if(faltaEdad){ window._fEnviando=false; err.textContent='Debe ser mayor de '+faltaEdad.min+' años — FRATE es un local +18.'; err.classList.add('on'); const el=document.querySelector('[data-k="'+faltaEdad.k+'"]'); if(el){ try{ el.focus(); }catch(_){} } return; }
+  // Verificación de correo (formato + coinciden + dominio real)
+  const emEl=document.querySelector('[data-k="email"]'), cfEl=document.getElementById('email-confirm');
+  if(emEl && emEl.offsetParent!==null && window.FrateEmail){
+    const ev2=FrateEmail.validate(emEl, cfEl); if(!ev2.ok){ window._fEnviando=false; err.textContent=ev2.msg; err.classList.add('on'); try{ emEl.focus(); }catch(_){} return; }
+    try{ const chk=await FrateEmail.checkMX(String(emEl.value||'').trim()); if(chk && chk.mx===false){ window._fEnviando=false; err.textContent='Ese correo no existe. Corrígelo para recibir tu info.'; err.classList.add('on'); try{ emEl.focus(); }catch(_){} return; } }catch(_){}
+  }
+  const btn=$('#submit'); btn.disabled=true; btn.textContent='Enviando…';
+  try{
+    let data, error;
+    if(REABRIR){
+      // Completar la ficha que ya existe. NO se crea otra: por eso este camino
+      // no pasa por form-submit ni por su anti-duplicado.
+      const rr = await fetch(SUPABASE_URL+'/functions/v1/form-reabrir', {
+        method:'POST', headers:{ 'Content-Type':'application/json', apikey: SUPABASE_ANON },
+        body: JSON.stringify({ t: REABRIR, datos })
+      });
+      const jj = await rr.json().catch(function(){ return {}; });
+      if(!rr.ok || !jj.ok) throw new Error(jj.error==='correo_invalido' ? 'Revisa el correo.' : 'Ese link ya no sirve. Pídenos uno nuevo por WhatsApp.');
+      data = jj;
+    } else {
+      ({ data, error } = await sb.functions.invoke('form-submit',{ body:{ tipo, datos, hp:$('#hp').value } }));
+    }
+    if(error) throw error;
+    if(data && data.error) throw new Error(data.error);
+    // Botón "Continúa por WhatsApp": abre el chat con FRATE con el contexto ya escrito
+    try{
+      const WA_NUM='56981311548';
+      const nom=(datos.nombre||'').trim();
+      const msg=(datos.mensaje||datos.comentarios||'').trim();
+      const pre='Hola FRATE 👋 Acabo de enviar una solicitud de '+cfg.title+'.'+(nom?(' Soy '+nom+'.'):'')+(msg?(' '+msg):'');
+      const wa=document.getElementById('done-wa');
+      if(wa){ wa.href='https://wa.me/'+WA_NUM+'?text='+encodeURIComponent(pre); wa.style.display='inline-block'; const h=document.getElementById('done-wa-hint'); if(h) h.style.display='block'; }
+    }catch(_e){}
+    // ⚠️ `ok:true` NO significa «se guardó». Cuando ya hay una solicitud abierta
+    //    de esta persona para esa misma noche, el servidor responde ok:true con
+    //    `ya:true` y NO crea ninguna ficha. Antes esto caía derecho a la pantalla
+    //    de «¡Recibido!» y la persona se iba creyendo que estaba inscrita: así es
+    //    como terminó gente en listas de puerta sin ficha en el CRM, y nadie se
+    //    enteró nunca porque del lado del servidor también se veía como un éxito.
+    if(data && data.ya){
+      const _t=document.getElementById('donetitle'), _m=document.getElementById('donemsg');
+      if(_t) _t.textContent='Ya te teníamos 👋';
+      if(_m) _m.textContent = data.msg || 'Ya tenemos tu solicitud y la estamos viendo. Si necesitas cambiar algo, escríbenos por WhatsApp.';
+    }
+    $('#view').style.display='none'; $('#done').classList.add('on');
+  // Solo a quien todavía no tiene cuenta: a un socio ofrecerle hacerse socio
+  // se lee como que el sistema no lo reconoce.
+  try{
+    const _ses = JSON.parse(localStorage.getItem('frate_session')||'null');
+    if(!_ses || !_ses.id){ const _s=document.getElementById('done-socio'); if(_s) _s.style.display=''; }
+  }catch(e){ const _s=document.getElementById('done-socio'); if(_s) _s.style.display=''; }
+  }catch(e){
+    window._fEnviando=false;
+    err.textContent='No pudimos enviarlo. Revisa tu conexión e inténtalo de nuevo.'; err.classList.add('on');
+    btn.disabled=false; btn.textContent='Enviar';
+  }
+});
+</script>
+</body>
+</html>

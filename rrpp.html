@@ -1,0 +1,559 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+<title>FRATE WEB (TICKETERA) · PORTAL RRPP</title>
+<link rel="icon" href="/icon-frate.svg" />
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="/frate-supabase.js"></script>
+<style>
+  :root{ --negro:#0a0a0b; --negro2:#141416; --input:#0e0e12; --borde:#26262b; --gris:#8a8a92; --rojo:#E8363D; --dorado:#D4A832; --verde:#22c55e; --azul:#3b82f6; }
+  *{ box-sizing:border-box; margin:0; padding:0; }
+  body{ background:var(--negro); color:#fff; font-family:'Inter',-apple-system,system-ui,sans-serif; min-height:100vh; -webkit-font-smoothing:antialiased; }
+  .disp{ font-family:'Barlow Condensed','Arial Narrow',sans-serif; }
+  .wrap{ max-width:760px; margin:0 auto; padding:16px 16px 60px; }
+  input,select,button,textarea{ font-family:inherit; }
+  /* Login */
+  #login{ min-height:100vh; display:flex; align-items:center; justify-content:center; padding:20px; }
+  .lbox{ background:var(--negro2); border:1px solid var(--borde); border-radius:16px; padding:34px; width:360px; max-width:94vw; text-align:center; }
+  .fld{ width:100%; background:var(--input); border:1px solid var(--borde); color:#fff; padding:13px 14px; border-radius:10px; font-size:1rem; margin-top:10px; }
+  .btn{ width:100%; background:var(--rojo); color:#fff; border:0; padding:14px; border-radius:10px; font-weight:800; font-size:1rem; margin-top:14px; cursor:pointer; letter-spacing:.5px; }
+  .btn.ghost{ background:transparent; border:1px solid var(--borde); color:var(--gris); }
+  .btn.gold{ background:var(--dorado); color:#1a1200; }
+  .btn.green{ background:var(--verde); color:#04210f; }
+  .btn.sm{ width:auto; padding:9px 14px; font-size:.82rem; margin-top:0; border-radius:9px; }
+  /* Header */
+  .top{ display:flex; align-items:center; justify-content:space-between; gap:12px; margin-bottom:18px; }
+  .brand .disp{ font-size:1.7rem; font-weight:900; letter-spacing:2px; line-height:1; }
+  .brand .sub{ color:var(--dorado); font-size:.68rem; letter-spacing:2px; text-transform:uppercase; font-weight:700; margin-top:2px; }
+  .hbtn{ background:transparent; border:1px solid var(--borde); color:var(--gris); padding:9px 12px; border-radius:9px; cursor:pointer; font-size:.82rem; }
+  .hola{ color:var(--gris); font-size:.9rem; }
+  .hola b{ color:#fff; }
+  /* Stats */
+  .stats{ display:grid; grid-template-columns:repeat(4,1fr); gap:10px; margin-bottom:16px; }
+  @media (max-width:560px){ .stats{ grid-template-columns:repeat(2,1fr); } }
+  .st{ background:var(--negro2); border:1px solid var(--borde); border-radius:14px; padding:14px; text-align:center; }
+  .st .v{ font-weight:900; font-size:1.9rem; line-height:1; }
+  .st .l{ font-size:.66rem; color:var(--gris); text-transform:uppercase; letter-spacing:1px; margin-top:5px; }
+  .st.verde .v{ color:var(--verde); } .st.dorado .v{ color:var(--dorado); } .st.rojo .v{ color:var(--rojo); }
+  /* Section head */
+  .sh{ display:flex; align-items:center; justify-content:space-between; margin:22px 0 12px; }
+  .sh h2{ font-family:var(--disp); font-weight:900; font-size:1.5rem; letter-spacing:.5px; }
+  /* Lista card */
+  .lc{ background:var(--negro2); border:1px solid var(--borde); border-radius:16px; padding:16px; margin-bottom:12px; }
+  .lc-h{ display:flex; align-items:flex-start; justify-content:space-between; gap:10px; }
+  .lc-nom{ font-weight:800; font-size:1.12rem; line-height:1.2; }
+  .lc-ev{ color:var(--gris); font-size:.82rem; margin-top:3px; }
+  .badge{ font-size:.66rem; font-weight:800; text-transform:uppercase; letter-spacing:.5px; padding:4px 9px; border-radius:20px; white-space:nowrap; }
+  .b-ap{ background:rgba(34,197,94,.15); color:var(--verde); }
+  .b-pe{ background:rgba(212,168,50,.15); color:var(--dorado); }
+  .b-rj{ background:rgba(232,54,61,.15); color:var(--rojo); }
+  .b-gr{ background:#1c1c22; color:var(--gris); }
+  .lc-nums{ display:flex; gap:18px; margin:12px 0; }
+  .lc-num{ } .lc-num .n{ font-weight:900; font-size:1.4rem; } .lc-num .t{ font-size:.66rem; color:var(--gris); text-transform:uppercase; letter-spacing:1px; }
+  .lc-num.verde .n{ color:var(--verde); }
+  .lc-acts{ display:flex; gap:8px; flex-wrap:wrap; }
+  /* Detalle inscritos */
+  .det{ margin-top:14px; border-top:1px solid var(--borde); padding-top:12px; }
+  .ins{ display:flex; align-items:center; gap:10px; padding:9px 4px; border-bottom:1px solid #1c1c22; }
+  .ins:last-child{ border-bottom:0; }
+  .ins .dot{ width:9px; height:9px; border-radius:50%; flex-shrink:0; }
+  .ins.in .dot{ background:var(--verde); box-shadow:0 0 8px rgba(34,197,94,.6); }
+  .ins.out .dot{ background:#3a3a42; }
+  .ins .nm{ font-size:.94rem; } .ins.out .nm{ color:var(--gris); }
+  .ins .rt{ font-size:.74rem; color:var(--gris); margin-left:auto; font-family:monospace; }
+  .ins .st2{ font-size:.66rem; text-transform:uppercase; letter-spacing:.5px; }
+  .ins.in .st2{ color:var(--verde); } .ins.out .st2{ color:var(--gris); }
+  .det-hint{ font-size:.74rem; color:var(--gris); margin-bottom:10px; }
+  /* Ventas */
+  .vrow{ display:flex; align-items:center; justify-content:space-between; background:var(--negro2); border:1px solid var(--borde); border-radius:12px; padding:12px 14px; margin-bottom:8px; }
+  .vrow .cod{ font-weight:800; font-family:monospace; letter-spacing:1px; }
+  .vrow .vv{ text-align:right; } .vrow .vv .m{ font-weight:900; color:var(--dorado); } .vrow .vv .u{ font-size:.72rem; color:var(--gris); }
+  /* Modal */
+  .ov{ position:fixed; inset:0; background:rgba(0,0,0,.72); display:none; align-items:flex-end; justify-content:center; z-index:50; padding:0; }
+  .ov.on{ display:flex; }
+  @media (min-width:560px){ .ov{ align-items:center; padding:20px; } }
+  .mb{ background:var(--negro2); border:1px solid var(--borde); border-radius:18px 18px 0 0; padding:22px; width:100%; max-width:460px; max-height:92vh; overflow:auto; }
+  @media (min-width:560px){ .mb{ border-radius:18px; } }
+  .mb h3{ font-family:var(--disp); font-weight:900; font-size:1.5rem; margin-bottom:4px; }
+  .mb .lbl{ font-size:.74rem; color:var(--gris); text-transform:uppercase; letter-spacing:1px; margin:12px 0 5px; display:block; }
+  .msg{ font-size:.82rem; margin-top:10px; min-height:18px; }
+  .msg.err{ color:var(--rojo); } .msg.ok{ color:var(--verde); }
+  .empty{ text-align:center; color:var(--gris); padding:34px 16px; }
+  .toast{ position:fixed; bottom:22px; left:50%; transform:translateX(-50%); background:var(--verde); color:#04210f; font-weight:800; padding:12px 20px; border-radius:30px; z-index:80; opacity:0; transition:opacity .25s, transform .25s; pointer-events:none; }
+  .toast.on{ opacity:1; transform:translateX(-50%) translateY(-6px); }
+  .spin{ text-align:center; color:var(--gris); padding:40px; }
+
+  /* ── Mi rendimiento ── */
+  .rd-per{ display:inline-flex; background:var(--input); border:1px solid var(--borde); border-radius:999px; padding:2px; }
+  .rd-p{ background:none; border:none; color:var(--gris); font:inherit; font-size:.74rem; padding:5px 13px; border-radius:999px; cursor:pointer; }
+  .rd-p.on{ background:var(--rojo); color:#fff; }
+  .rd-nav{ display:flex; justify-content:space-between; align-items:center; background:var(--negro2); border:1px solid var(--borde); border-radius:12px; padding:9px 12px; margin-bottom:10px; font-size:.86rem; }
+  .rd-fl{ background:none; border:none; color:var(--gris); font-size:1.2rem; line-height:1; cursor:pointer; padding:0 8px; }
+  .rd-fl:disabled{ opacity:.25; cursor:default; }
+  .rd-hero{ background:linear-gradient(135deg, rgba(34,197,94,.13), rgba(212,168,50,.06)); border:1px solid var(--borde); border-radius:14px; padding:16px; margin-bottom:10px; }
+  .rd-hero .k{ font-size:.62rem; letter-spacing:1.6px; color:var(--gris); text-transform:uppercase; }
+  .rd-hero .big{ font-size:2.1rem; font-weight:800; color:var(--verde); letter-spacing:-1px; line-height:1.1; }
+  .rd-hero .sub{ font-size:.76rem; color:var(--gris); margin-top:2px; }
+  .rd-dos{ display:flex; gap:8px; margin-top:12px; }
+  .rd-dos > div{ flex:1; border-radius:10px; padding:8px 10px; }
+  .rd-ok{ background:rgba(34,197,94,.12); border:1px solid rgba(34,197,94,.3); }
+  .rd-pe{ background:rgba(212,168,50,.1);  border:1px solid rgba(212,168,50,.3); }
+  .rd-dos .kk{ font-size:.64rem; color:var(--gris); }
+  .rd-dos .vv{ font-size:.98rem; font-weight:700; }
+  .rd-caja{ background:var(--negro2); border:1px solid var(--borde); border-radius:12px; padding:13px 14px; margin-bottom:10px; }
+  .rd-caja h3{ font-size:.62rem; letter-spacing:1.6px; color:var(--gris); text-transform:uppercase; margin:0 0 9px; font-weight:600; }
+  .rd-fila{ display:flex; justify-content:space-between; align-items:center; font-size:.82rem; padding:2px 0 4px; }
+  .rd-bar{ height:5px; background:var(--input); border-radius:3px; overflow:hidden; margin-bottom:9px; }
+  .rd-bar i{ display:block; height:100%; border-radius:3px; }
+  .rd-n{ background:var(--negro2); border:1px solid var(--borde); border-radius:10px; padding:9px 11px; display:flex; justify-content:space-between; align-items:center; margin-bottom:6px; }
+  .rd-n .d{ font-size:.72rem; color:var(--gris); }
+  .rd-hist{ font-size:.6rem; background:rgba(212,168,50,.14); color:var(--dorado); border-radius:999px; padding:1px 7px; margin-left:5px; }
+  .rd-nota{ background:rgba(232,54,61,.07); border:1px solid rgba(232,54,61,.26); border-radius:10px; padding:9px 11px; font-size:.74rem; color:#ff9aa4; line-height:1.5; }
+</style>
+<script src="/frate-cedula.js?v=ced1"></script>
+</head>
+<body>
+
+<!-- LOGIN -->
+<div id="login">
+  <div class="lbox">
+    <div class="disp" style="font-size:2.4rem; font-weight:900; letter-spacing:3px;">FRATE</div>
+    <div style="color:var(--dorado); font-size:.78rem; letter-spacing:2px; text-transform:uppercase; margin-bottom:14px;">👤 Portal RRPP</div>
+    <input class="fld" id="l-email" type="email" inputmode="email" autocapitalize="none" autocorrect="off" spellcheck="false" placeholder="correo" style="text-transform:lowercase;" />
+    <input class="fld" id="l-pass" type="password" placeholder="contraseña" onkeydown="if(event.key==='Enter')entrar()" />
+    <button class="btn" onclick="entrar()">ENTRAR</button>
+    <div id="l-err" style="color:var(--rojo); font-size:.82rem; margin-top:10px; min-height:18px;"></div>
+    <div style="color:var(--gris); font-size:.72rem; margin-top:14px; line-height:1.5;">Tu cuenta debe estar marcada como <b style="color:var(--dorado)">RRPP</b> por el equipo FRATE.</div>
+  </div>
+</div>
+
+<!-- APP -->
+<div id="app" class="wrap" style="display:none;">
+  <div class="top">
+    <div class="brand">
+      <div class="disp">FRATE</div>
+      <div class="sub">Portal RRPP</div>
+    </div>
+    <div style="text-align:right;">
+      <div class="hola" id="hola">—</div>
+      <button class="hbtn" style="margin-top:6px;" onclick="salir()">Salir</button>
+    </div>
+  </div>
+
+  <div class="stats">
+    <div class="st"><div class="v" id="s-listas">0</div><div class="l">Listas</div></div>
+    <div class="st"><div class="v" id="s-inv">0</div><div class="l">Invitados</div></div>
+    <div class="st verde"><div class="v" id="s-lleg">0</div><div class="l">Llegaron</div></div>
+    <div class="st dorado"><div class="v" id="s-vend">$0</div><div class="l">Vendido</div></div>
+  </div>
+
+  <!-- ── MI RENDIMIENTO ──────────────────────────────────────────
+       Lo que se te paga. Solo cuenta la gente a la que le escanearon
+       el QR en la puerta: inscribirse no paga. -->
+  <div class="sh">
+    <h2>Mi rendimiento</h2>
+    <div class="rd-per">
+      <button class="rd-p on" id="rd-mes"    onclick="_rendModo('mes')">Mes</button>
+      <button class="rd-p"    id="rd-semana" onclick="_rendModo('semana')">Semana</button>
+    </div>
+  </div>
+  <div class="rd-nav">
+    <button class="rd-fl" onclick="_rendMover(-1)">‹</button>
+    <span id="rd-titulo">—</span>
+    <button class="rd-fl" id="rd-next" onclick="_rendMover(1)">›</button>
+  </div>
+  <div id="rend"><div class="spin">Cargando…</div></div>
+
+  <div class="sh">
+    <h2>Mis listas</h2>
+    <button class="btn gold sm" onclick="abrirCrear()">➕ Crear lista</button>
+  </div>
+  <div id="listas"><div class="spin">Cargando…</div></div>
+
+  <div id="ventas-wrap" style="display:none;">
+    <div class="sh"><h2>Mis ventas</h2></div>
+    <div id="ventas"></div>
+  </div>
+</div>
+
+<!-- MODAL crear lista -->
+<div class="ov" id="ov-crear">
+  <div class="mb">
+    <h3>➕ Nueva lista</h3>
+    <div style="color:var(--gris); font-size:.82rem;">Crea tu lista para un evento. El equipo emite las cortesías cuando la revise.</div>
+    <span class="lbl">Evento</span>
+    <select class="fld" id="c-ev" style="margin-top:0;"></select>
+    <span class="lbl">Nombre de la lista</span>
+    <input class="fld" id="c-nom" placeholder="Ej: Lista Cotty" style="margin-top:0;" />
+    <span class="lbl">Cupos (opcional — vacío = sin tope)</span>
+    <input class="fld" id="c-cupos" type="number" inputmode="numeric" placeholder="Ej: 40" style="margin-top:0;" />
+    <div class="msg" id="c-msg"></div>
+    <div style="display:flex; gap:10px; margin-top:16px;">
+      <button class="btn ghost" onclick="cerrar('ov-crear')">Cancelar</button>
+      <button class="btn gold" id="c-btn" onclick="crearLista()">Crear lista</button>
+    </div>
+  </div>
+</div>
+
+<!-- MODAL agregar invitado -->
+<div class="ov" id="ov-inv">
+  <div class="mb">
+    <h3>➕ Agregar invitado</h3>
+    <div style="color:var(--gris); font-size:.82rem;" id="i-lista">—</div>
+    <span class="lbl">Nombre completo *</span>
+    <input class="fld" id="i-nom" placeholder="Nombre y apellido" style="margin-top:0;" />
+    <span class="lbl">RUT (opcional)</span>
+    <input class="fld" id="i-rut" placeholder="12.345.678-9" style="margin-top:0;" />
+    <span class="lbl">Correo (opcional)</span>
+    <input class="fld" id="i-email" type="email" autocapitalize="none" placeholder="correo@…" style="margin-top:0; text-transform:lowercase;" />
+    <span class="lbl">Teléfono (opcional)</span>
+    <input class="fld" id="i-tel" inputmode="tel" placeholder="+56 9 …" style="margin-top:0;" />
+    <div class="msg" id="i-msg"></div>
+    <div style="display:flex; gap:10px; margin-top:16px;">
+      <button class="btn ghost" onclick="cerrar('ov-inv')">Cancelar</button>
+      <button class="btn green" id="i-btn" onclick="agregarInvitado()">Agregar</button>
+    </div>
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+let R = { listas:[], ventas:[], eventos:[], nombre:'', abierta:null, invLista:null };
+const $ = id => document.getElementById(id);
+const esc = s => String(s==null?'':s).replace(/[&<>"]/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+const money = n => '$' + (Number(n)||0).toLocaleString('es-CL');
+function toast(t){ const el=$('toast'); el.textContent=t; el.classList.add('on'); setTimeout(()=>el.classList.remove('on'), 2200); }
+function cerrar(id){ $(id).classList.remove('on'); }
+
+// ── Sesión ───────────────────────────────────────────────────
+async function entrar(){
+  const email = ($('l-email').value||'').trim().toLowerCase();
+  const pass  = $('l-pass').value||'';
+  const err = $('l-err'); err.textContent='';
+  if(!email || !pass){ err.textContent='Pon tu correo y contraseña'; return; }
+  try{
+    const { error } = await sb.auth.signInWithPassword({ email, password: pass });
+    if(error) throw error;
+    await arrancar();
+  }catch(e){ err.textContent = 'No se pudo entrar: ' + (e.message||e); }
+}
+async function salir(){ try{ await sb.auth.signOut(); }catch(e){} location.reload(); }
+
+async function arrancar(){
+  // Verifica rol
+  const { data:{ user } } = await sb.auth.getUser();
+  if(!user){ return; }
+  let rol=null;
+  try{ const r = await sb.from('clientes').select('rol').eq('id', user.id).maybeSingle(); rol = r.data && r.data.rol; }catch(e){}
+  if(!['rrpp','admin'].includes(rol)){
+    $('l-err').textContent = 'Tu cuenta no es RRPP. Pídele al equipo FRATE que te habilite.';
+    try{ await sb.auth.signOut(); }catch(e){}
+    return;
+  }
+  $('login').style.display='none';
+  $('app').style.display='';
+  await cargar();
+}
+
+// ── Carga ────────────────────────────────────────────────────
+async function cargar(){
+  $('listas').innerHTML = '<div class="spin">Cargando…</div>';
+  // resumen (listas) + ventas (stats_codigos) + eventos en paralelo
+  const [res, ven, evs] = await Promise.allSettled([
+    sb.rpc('rrpp_resumen'),
+    sb.rpc('stats_codigos'),
+    sb.from('eventos').select('id,nombre,fecha,estado,archivado').eq('archivado', false).order('fecha', { ascending:false })
+  ]);
+
+  let data = res.status==='fulfilled' && res.value.data;
+  if(res.status==='fulfilled' && res.value.error){ data = null; }
+  if(!data || data.error){
+    $('listas').innerHTML = '<div class="empty">⚠️ '+esc((data&&data.error)||'No pude cargar tus listas. ¿Corriste frate-rrpp-portal.sql?')+'</div>';
+    return;
+  }
+  R.nombre  = data.nombre || 'RRPP';
+  R.listas  = data.listas || [];
+  R.ventas  = (ven.status==='fulfilled' && Array.isArray(ven.value.data)) ? ven.value.data : [];
+  R.eventos = (evs.status==='fulfilled' && evs.value.data) ? evs.value.data : [];
+
+  $('hola').innerHTML = 'Hola, <b>'+esc(R.nombre)+'</b>';
+  pintar();
+  _rendCargar();   // su plata, aparte: no depende de que carguen las listas
+}
+
+function pintar(){
+  // Stats
+  const totInv  = R.listas.reduce((a,l)=>a+(+l.inscritos||0),0);
+  const totLleg = R.listas.reduce((a,l)=>a+(+l.llegaron||0),0);
+  const totVend = R.ventas.reduce((a,v)=>a+(+v.monto||0),0);
+  $('s-listas').textContent = R.listas.length;
+  $('s-inv').textContent = totInv;
+  $('s-lleg').textContent = totLleg;
+  $('s-vend').textContent = money(totVend);
+
+  // Listas
+  if(!R.listas.length){
+    $('listas').innerHTML = '<div class="empty">Todavía no tienes listas.<br>Toca <b style="color:var(--dorado)">➕ Crear lista</b> para armar la primera.</div>';
+  } else {
+    $('listas').innerHTML = R.listas.map(cardLista).join('');
+  }
+
+  // Ventas
+  if(R.ventas.length){
+    $('ventas-wrap').style.display='';
+    $('ventas').innerHTML = R.ventas.map(v => `
+      <div class="vrow">
+        <div><div class="cod">${esc(v.codigo)}</div><div style="font-size:.72rem;color:var(--gris);">${esc(v.evento_nombre||'Todos los eventos')}</div></div>
+        <div class="vv"><div class="m">${money(v.monto)}</div><div class="u">${(+v.ventas||0)} venta${(+v.ventas===1)?'':'s'}</div></div>
+      </div>`).join('');
+  } else { $('ventas-wrap').style.display='none'; }
+}
+
+const estBadge = e => ({aprobada:['b-ap','Aprobada'], pendiente:['b-pe','Pendiente'], rechazada:['b-rj','Rechazada'], cerrada:['b-gr','Cerrada']}[e] || ['b-gr', e||'—']);
+
+// ═══════════════════════════════════════════════════════════════
+// MI RENDIMIENTO — lo que se te paga
+// Solo cuenta quien pasó por la puerta y le escanearon el QR.
+// Los montos los calcula el servidor con la clave de auth.uid():
+// acá nunca se manda un id, así que nadie puede pedir lo de otra.
+// ═══════════════════════════════════════════════════════════════
+let RD = { modo:'mes', off:0 };
+const _MES = ['enero','febrero','marzo','abril','mayo','junio','julio',
+              'agosto','septiembre','octubre','noviembre','diciembre'];
+
+function _dISO(d){ return d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0'); }
+
+function _rendRango(){
+  const hoy = new Date();
+  if(RD.modo === 'mes'){
+    const a = new Date(hoy.getFullYear(), hoy.getMonth() + RD.off, 1);
+    const b = new Date(a.getFullYear(), a.getMonth() + 1, 0);
+    return { desde:_dISO(a), hasta:_dISO(b), titulo:_MES[a.getMonth()][0].toUpperCase()+_MES[a.getMonth()].slice(1)+' '+a.getFullYear() };
+  }
+  // Semana de lunes a domingo.
+  const base = new Date(hoy.getFullYear(), hoy.getMonth(), hoy.getDate() + RD.off*7);
+  const dow  = (base.getDay() + 6) % 7;            // 0 = lunes
+  const a = new Date(base.getFullYear(), base.getMonth(), base.getDate() - dow);
+  const b = new Date(a.getFullYear(), a.getMonth(), a.getDate() + 6);
+  const f = d => d.getDate()+' '+_MES[d.getMonth()].slice(0,3);
+  return { desde:_dISO(a), hasta:_dISO(b), titulo:f(a)+' — '+f(b) };
+}
+
+function _rendModo(m){
+  RD.modo = m; RD.off = 0;
+  $('rd-mes').classList.toggle('on', m==='mes');
+  $('rd-semana').classList.toggle('on', m==='semana');
+  _rendCargar();
+}
+function _rendMover(n){ if(n>0 && RD.off>=0) return; RD.off += n; _rendCargar(); }
+
+async function _rendCargar(){
+  const r = _rendRango();
+  $('rd-titulo').textContent = r.titulo;
+  $('rd-next').disabled = RD.off >= 0;
+  $('rend').innerHTML = '<div class="spin">Cargando…</div>';
+  let d = null;
+  try{
+    const res = await sb.rpc('rrpp_mi_rendimiento', { p_desde:r.desde, p_hasta:r.hasta });
+    if(res.error) throw res.error;
+    d = res.data;
+  }catch(e){
+    $('rend').innerHTML = '<div class="empty">⚠️ No pude cargar tu rendimiento.<br><span style="font-size:.76rem">'+esc(e.message||String(e))+'</span></div>';
+    return;
+  }
+  if(!d || d.ok === false){
+    $('rend').innerHTML = '<div class="empty">⚠️ '+esc((d&&d.error)||'Sin datos')+'</div>';
+    return;
+  }
+  _rendPintar(d);
+}
+
+function _rendPintar(d){
+  const t = d.total || {}, pg = d.pagos || {};
+  const tipos = d.por_tipo || [], noches = d.por_noche || [];
+  const tarifa = +d.tarifa || 500;
+
+  if(!(+t.entraron) && !(+t.inscritos)){
+    $('rend').innerHTML = '<div class="empty">Sin movimiento en este período.<br><span style="font-size:.78rem">Prueba con otro mes o cambia a Semana.</span></div>';
+    return;
+  }
+
+  const COL = ['#E8363D','#3b82f6','#D4A832','#22c55e','#c4b5fd','#f472b6'];
+  const maxT = Math.max(1, ...tipos.map(x => +x.entraron||0));
+
+  // Quien no cobra —el equipo de la casa— no ve «Te corresponde $0», que se
+  // lee como si le debieran y no le hubieran pagado. Ve su gente, que es lo
+  // que sí es suyo. `cobra` lo dice el servidor; si no viene, se deduce de
+  // la tarifa para que el portal viejo siga andando igual.
+  const cobra = (d.cobra !== undefined) ? !!d.cobra : (tarifa > 0);
+  const hero = cobra ? `<div class="rd-hero">
+    <div class="k">Te corresponde</div>
+    <div class="big">${money(+t.a_pagar||0)}</div>
+    <div class="sub">${(+t.entraron||0)} persona${(+t.entraron===1)?'':'s'} escaneada${(+t.entraron===1)?'':'s'} × ${money(tarifa)}</div>
+    <div class="rd-dos">
+      <div class="rd-ok"><div class="kk">Ya te pagaron</div><div class="vv" style="color:var(--verde)">${money(+pg.pagado||0)}</div></div>
+      <div class="rd-pe"><div class="kk">Pendiente</div><div class="vv" style="color:var(--dorado)">${money(+pg.pendiente||0)}</div></div>
+    </div></div>` : `<div class="rd-hero">
+    <div class="k">Llegaron por ti</div>
+    <div class="big">${(+t.entraron||0)}</div>
+    <div class="sub">de ${(+t.inscritos||0)} que se inscribieron${(+t.pct) ? ' · '+(+t.pct)+'%' : ''}</div>
+    </div>`;
+
+  const stats = `<div class="stats" style="margin-bottom:10px">
+    <div class="st"><div class="v">${+t.listas||0}</div><div class="l">Listas</div></div>
+    <div class="st"><div class="v">${+t.inscritos||0}</div><div class="l">Se inscribieron</div></div>
+    <div class="st verde"><div class="v">${+t.entraron||0}</div><div class="l">Llegaron · ${+t.pct||0}%</div></div>
+  </div>`;
+
+  const cajaTipos = !tipos.length ? '' : `<div class="rd-caja"><h3>Por tipo de lista</h3>${
+    tipos.map((x,i) => `<div class="rd-fila"><span>${esc(x.tipo)}</span>
+        <span style="color:var(--verde)">${+x.entraron||0} · ${money(+x.monto||0)}</span></div>
+      <div class="rd-bar"><i style="width:${Math.round(100*(+x.entraron||0)/maxT)}%;background:${COL[i%COL.length]}"></i></div>`).join('')
+  }</div>`;
+
+  const cajaNoches = !noches.length ? '' : `<div class="rd-caja"><h3>Noche por noche</h3>${
+    noches.map(n => `<div class="rd-n">
+        <div><div>${esc(n.evento || _fechaLinda(n.fecha))}${n.historico?'<span class="rd-hist">✍️ histórico</span>':''}</div>
+          <div class="d">${_fechaLinda(n.fecha)} · ${+n.listas||0} lista${(+n.listas===1)?'':'s'} · ${+n.inscritos||0} inscritos</div></div>
+        <div style="text-align:right">
+          <div style="color:var(--verde);font-weight:700">${money(+n.monto||0)}</div>
+          <div class="d">${+n.entraron||0} llegaron${n.pago==='pagado'?' · ✅ pagado':''}</div></div>
+      </div>`).join('')
+  }</div>`;
+
+  $('rend').innerHTML = hero + stats + cajaTipos + cajaNoches +
+    '<div class="rd-nota">💡 Solo se paga a quien <b>pasó por la puerta y le escanearon el QR</b>. Inscribirse no cuenta.</div>';
+}
+
+function _fechaLinda(f){
+  if(!f) return 'Sin fecha';
+  const p = String(f).split('-');
+  if(p.length < 3) return esc(f);
+  const d = new Date(+p[0], +p[1]-1, +p[2]);
+  const dias = ['domingo','lunes','martes','miércoles','jueves','viernes','sábado'];
+  return dias[d.getDay()][0].toUpperCase()+dias[d.getDay()].slice(1)+' '+d.getDate()+' de '+_MES[d.getMonth()];
+}
+
+function cardLista(l){
+  const [bc,bt] = estBadge(l.estado);
+  const cupTxt = (l.cupos ? (l.inscritos+' / '+l.cupos) : String(l.inscritos));
+  const fecha = l.fecha ? l.fecha.split('-').reverse().join('/') : '';
+  const abierta = R.abierta===l.id;
+  return `
+  <div class="lc" id="lc-${l.id}">
+    <div class="lc-h">
+      <div>
+        <div class="lc-nom">${esc(l.nombre||'Lista')}</div>
+        <div class="lc-ev">${esc(l.evento_nombre||'Sin evento')}${fecha?' · '+fecha:''}</div>
+      </div>
+      <span class="badge ${bc}">${esc(bt)}</span>
+    </div>
+    <div class="lc-nums">
+      <div class="lc-num"><div class="n">${cupTxt}</div><div class="t">Invitados</div></div>
+      <div class="lc-num verde"><div class="n">${(+l.llegaron||0)}</div><div class="t">Llegaron</div></div>
+    </div>
+    <div class="lc-acts">
+      <button class="btn ghost sm" onclick="compartir('${esc(l.codigo)}')">🔗 Compartir</button>
+      <button class="btn ghost sm" onclick="abrirInv(${l.id})">➕ Invitado</button>
+      <button class="btn ghost sm" onclick="verLista(${l.id})">${abierta?'▲ Ocultar':'👁 Ver'}</button>
+    </div>
+    <div class="det" id="det-${l.id}" style="display:${abierta?'block':'none'}"></div>
+  </div>`;
+}
+
+// ── Compartir link público ───────────────────────────────────
+function compartir(codigo){
+  const url = location.origin + '/lista/' + codigo;
+  const txt = '¡Estás en mi lista! Inscríbete acá 👉 ' + url;
+  if(navigator.share){ navigator.share({ title:'FRATE · Mi lista', text:'¡Inscríbete en mi lista!', url }).catch(()=>{}); return; }
+  try{ navigator.clipboard.writeText(url); toast('🔗 Link copiado'); }
+  catch(e){ prompt('Copia tu link:', url); }
+}
+
+// ── Ver detalle ──────────────────────────────────────────────
+async function verLista(id){
+  if(R.abierta===id){ R.abierta=null; const d=$('det-'+id); if(d) d.style.display='none'; refrescarBtns(id,false); return; }
+  R.abierta=id;
+  const d=$('det-'+id); if(!d) return;
+  d.style.display='block'; d.innerHTML='<div class="spin" style="padding:18px;">Cargando…</div>'; refrescarBtns(id,true);
+  const { data, error } = await sb.rpc('rrpp_lista_detalle', { p_lista_id:id });
+  if(error || !data || data.error){ d.innerHTML='<div class="det-hint">⚠️ '+esc((data&&data.error)||'No pude cargar el detalle')+'</div>'; return; }
+  const ins = data.inscritos||[];
+  const llegaron = ins.filter(i=>i.entered).length;
+  d.innerHTML =
+    `<div class="det-hint">✅ ${llegaron} entraron · ⏳ ${ins.length-llegaron} por llegar${data.cupos?(' · cupo '+data.cupos):''}</div>` +
+    (ins.length ? ins.map(i => `
+      <div class="ins ${i.entered?'in':'out'}">
+        <span class="dot"></span>
+        <span class="nm">${esc(i.nombre)}</span>
+        <span class="rt">${esc(i.rut||'')}</span>
+        <span class="st2">${i.entered?'entró':(i.estado==='pendiente'?'sin emitir':esc(i.estado))}</span>
+      </div>`).join('') : '<div class="det-hint">Sin invitados todavía. Comparte tu link o toca ➕ Invitado.</div>');
+}
+function refrescarBtns(id, abierta){
+  const lc=$('lc-'+id); if(!lc) return;
+  const b=[...lc.querySelectorAll('.lc-acts .btn')].find(x=>/Ver|Ocultar/.test(x.textContent));
+  if(b) b.textContent = abierta?'▲ Ocultar':'👁 Ver';
+}
+
+// ── Crear lista ──────────────────────────────────────────────
+function abrirCrear(){
+  if(!R.eventos.length){ toast('No hay eventos disponibles'); return; }
+  $('c-ev').innerHTML = R.eventos.map(e=>`<option value="${e.id}">${esc(e.nombre||'Evento')}${e.fecha?' · '+e.fecha.split('-').reverse().join('/'):''}</option>`).join('');
+  $('c-nom').value=''; $('c-cupos').value=''; $('c-msg').textContent=''; $('c-msg').className='msg';
+  $('ov-crear').classList.add('on');
+}
+async function crearLista(){
+  const ev = +$('c-ev').value, nom = $('c-nom').value.trim(), cupos = parseInt($('c-cupos').value)||null;
+  const m=$('c-msg'); m.className='msg';
+  if(!nom){ m.className='msg err'; m.textContent='Ponle un nombre a la lista'; return; }
+  const btn=$('c-btn'); btn.disabled=true; btn.textContent='Creando…';
+  try{
+    const { data, error } = await sb.rpc('rrpp_crear_lista', { p_evento_id:ev, p_nombre:nom, p_cupos:cupos });
+    if(error) throw error;
+    if(data && data.error) throw new Error(data.error);
+    cerrar('ov-crear'); toast('✅ Lista creada'); await cargar();
+  }catch(e){ m.className='msg err'; m.textContent = 'No se pudo: ' + (e.message||e); }
+  finally{ btn.disabled=false; btn.textContent='Crear lista'; }
+}
+
+// ── Agregar invitado ─────────────────────────────────────────
+function abrirInv(listaId){
+  R.invLista = listaId;
+  const l = R.listas.find(x=>x.id===listaId);
+  $('i-lista').textContent = l ? ('a: '+(l.nombre||'lista')) : '';
+  $('i-nom').value=''; $('i-rut').value=''; $('i-email').value=''; $('i-tel').value='';
+  $('i-msg').textContent=''; $('i-msg').className='msg';
+  $('ov-inv').classList.add('on');
+}
+async function agregarInvitado(){
+  const m=$('i-msg'); m.className='msg';
+  const nom=$('i-nom').value.trim();
+  if(!nom){ m.className='msg err'; m.textContent='Falta el nombre'; return; }
+  const btn=$('i-btn'); btn.disabled=true; btn.textContent='Agregando…';
+  try{
+    const { data, error } = await sb.rpc('rrpp_agregar_inscrito', {
+      p_lista_id:R.invLista, p_nombre:nom, p_rut:$('i-rut').value.trim()||null,
+      p_email:$('i-email').value.trim().toLowerCase()||null, p_telefono:$('i-tel').value.trim()||null });
+    if(error) throw error;
+    if(data && data.error) throw new Error(data.error);
+    // actualiza el contador local y refresca
+    const l = R.listas.find(x=>x.id===R.invLista); if(l && data.inscritos!=null) l.inscritos = data.inscritos;
+    cerrar('ov-inv'); toast('✅ Invitado agregado');
+    pintar();
+    if(R.abierta===R.invLista){ R.abierta=null; verLista(l.id); }
+  }catch(e){ m.className='msg err'; m.textContent='No se pudo: '+(e.message||e); }
+  finally{ btn.disabled=false; btn.textContent='Agregar'; }
+}
+
+// Cierra modales al tocar el fondo
+document.querySelectorAll('.ov').forEach(ov => ov.addEventListener('click', e => { if(e.target===ov) ov.classList.remove('on'); }));
+
+// ── Autologin si ya hay sesión ───────────────────────────────
+(async ()=>{ try{ const { data:{ session } } = await sb.auth.getSession(); if(session) await arrancar(); }catch(e){} })();
+</script>
+</body>
+</html>

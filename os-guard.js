@@ -19,7 +19,13 @@
     { id: '06', url: '/os-reglas',  t: 'Reglas de oro' },
     { id: '07', url: '/os-besucona', t: 'BESUCONA' },
     { id: '08', url: '/os-comparar', t: 'Dos noches' },
-    { id: '09', url: '/os-cliente',  t: 'Un cliente' }
+    { id: '09', url: '/os-cliente',  t: 'Un cliente' },
+    { id: '10', url: '/os-usuario',  t: '🛠 Cliente' },
+    { id: '11', url: '/os-listas',   t: '🛠 Listas' },
+    { id: '12', url: '/os-entradas', t: '🛠 Entradas' },
+    { id: '13', url: '/os-eventos',  t: '🛠 Eventos' },
+    { id: '14', url: '/os-datos',    t: '🔍 Datos' },
+    { id: '15', url: '/os-accesos',  t: '🔑 Accesos' }
   ];
   window.OS_MANUALES = MANUALES;
 
@@ -45,14 +51,35 @@
     { id: '03', url: '/os-flyer-reel',   t: 'Un reel' },
     { id: '04', url: '/os-flyer-brief',  t: 'El brief' },
     { id: '05', url: '/os-flyer-mesa',   t: 'La mesa' },
-    { id: '06', url: '/os-flyer-reglas', t: 'Reglas de oro' }
+    { id: '06', url: '/os-flyer-reglas', t: 'Reglas de oro' },
+    { id: '07', url: '/os-flyer-id',     t: 'FRATE ID' },
+    { id: '08', url: '/os-flyer-nube',   t: 'La nube' },
+    { id: '09', url: '/os-flyer-export', t: 'La exportación' }
   ];
   window.OS_MANUALES_FLY = MANUALES_FLY;
+
+  // Serie del POS. Vive en su propia carpeta (os-pos/) con identidad morada
+  // y enlaces relativos; acá solo se listan sus rutas limpias.
+  var MANUALES_POS = [
+    { id: '00', url: '/os-pos-mapa',     t: 'El mapa' },
+    { id: '01', url: '/os-pos-turno',    t: 'El turno' },
+    { id: '02', url: '/os-pos-venta',    t: 'La venta' },
+    { id: '03', url: '/os-pos-dinero',   t: 'El dinero' },
+    { id: '04', url: '/os-pos-puerta',   t: 'Puerta y barra' },
+    { id: '05', url: '/os-pos-catalogo', t: 'El catálogo' },
+    { id: '06', url: '/os-pos-reglas',   t: 'Reglas de oro' },
+    // Un capítulo se engancha SOLO cuando su HTML ya existe. Si hay que dejarlo
+    // anunciado antes, ponle `pend: 1` y sale apagado en vez de dar 404.
+    { id: '07', url: '/os-pos-vincular', t: '🛠 Vincular Sunmi' },
+    { id: '08', url: '/os-pos-covers',   t: 'Covers' },
+    { id: '09', url: '/os-pos-noche',    t: 'El sábado real' }
+  ];
+  window.OS_MANUALES_POS = MANUALES_POS;
 
   var SERIES = {
     web: { k: 'web', l: 'Web',   home: '/os',       lista: MANUALES },
     erp: { k: 'erp', l: 'ERP',   home: '/os-erp',   lista: MANUALES_ERP },
-    pos: { k: 'pos', l: 'POS',   home: null,        lista: [] },
+    pos: { k: 'pos', l: 'POS',   home: '/os-pos',   lista: MANUALES_POS },
     fly: { k: 'fly', l: 'Flyer', home: '/os-flyer', lista: MANUALES_FLY }
   };
 
@@ -68,13 +95,18 @@
       return '<a href="' + o.home + '" class="' + cls + '">' + o.l + '</a>';
     }).join('');
     var links = s.lista.map(function (m) {
+      if (m.pend) return '<span class="pend" title="Todavía no está escrito">' +
+             m.id + ' · ' + m.t + '</span>';
       return '<a href="' + m.url + '"' + (m.id === actual ? ' class="on"' : '') + '>' +
              m.id + ' · ' + m.t + '</a>';
     }).join('');
     return '<div class="topbar"><div class="in">' +
-      '<span class="mark">F<em>R</em>ATE <span style="color:var(--gris2);font-size:.72rem;letter-spacing:3px;">OS</span></span>' +
+      '<a href="/os-inicio" class="mark" style="text-decoration:none;color:inherit" title="Portada · por qué existe esto">' +
+        'F<em>R</em>ATE <span style="color:var(--gris2);font-size:.72rem;letter-spacing:3px;">OS</span></a>' +
       '<span class="sysw">' + sw + '</span>' +
-      '<nav class="navman">' + links + '<a href="/admin" style="color:var(--gris2)">← Panel</a></nav>' +
+      '<nav class="navman">' + links +
+        '<a href="/os-libro" style="color:var(--gris2)" title="Todas las series">📖 El libro</a>' +
+        '<a href="/admin" style="color:var(--gris2)">← Panel</a></nav>' +
       '</div></div>';
   };
 

@@ -1,0 +1,212 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+<title>FRATE — Te toca un giro</title>
+<meta name="description" content="Gira la ruleta de FRATE. Todos ganan algo." />
+<meta property="og:title" content="Te toca un giro · FRATE" />
+<meta property="og:description" content="Todos ganan algo. Un giro por persona." />
+<meta property="og:image" content="https://www.frate.cl/assets/og-lista.png" />
+<meta property="og:image:width" content="1200" />
+<meta property="og:image:height" content="630" />
+<meta property="og:type" content="website" />
+<meta property="og:site_name" content="FRATE" />
+<meta name="twitter:card" content="summary_large_image" />
+<meta name="twitter:image" content="https://www.frate.cl/assets/og-lista.png" />
+<link rel="icon" href="/icon-frate.svg" />
+<link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@700;800&display=swap" rel="stylesheet" />
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<style>
+  :root{--bg:#0a0a0b;--card:#141416;--card2:#1b1b1f;--input:#0e0e12;--line:#26262b;
+        --line2:#33333a;--txt:#f2f0f4;--dim:#8b8892;--faint:#5a5862;
+        --rojo:#E8363D;--rojo2:#f2555b;--gold:#D4A832;--verde:#22c55e;
+        --disp:'Barlow Condensed',Impact,sans-serif;}
+  *{box-sizing:border-box}
+  body{margin:0;background:var(--bg);color:var(--txt);
+       font:400 15px/1.6 -apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;}
+  .wrap{max-width:460px;margin:0 auto;min-height:100vh;padding-bottom:40px;}
+  .top{position:relative;padding:26px 18px 20px;text-align:center;
+       background:linear-gradient(180deg,#1a0d10,var(--bg));border-bottom:1px solid var(--line);}
+  .mark{color:var(--gold);font-size:.58rem;letter-spacing:.28em;font-weight:700;}
+  .tit{font-family:var(--disp);font-weight:800;font-size:2.1rem;text-transform:uppercase;
+       line-height:.95;margin-top:8px;}
+  .body{padding:20px 18px;}
+  .msg{color:var(--dim);font-size:.9rem;line-height:1.65;}
+  .msg b{color:var(--txt);}
+  .redes{display:flex;gap:7px;margin:16px 0 10px;}
+  .red{flex:1;background:var(--card);border:1px solid var(--line2);color:var(--dim);
+       border-radius:9px;padding:10px;text-align:center;font-size:.82rem;cursor:pointer;
+       font-family:inherit;font-weight:600;}
+  .red.on{background:var(--rojo);border-color:var(--rojo);color:#fff;}
+  .cuenta{display:flex;align-items:center;gap:8px;background:var(--input);
+          border:1px solid var(--line);border-radius:10px;padding:12px 13px;}
+  .cuenta span{color:var(--faint);font-size:.95rem;}
+  .cuenta input{flex:1;background:none;border:0;color:var(--txt);font-size:.95rem;
+                outline:none;font-family:inherit;min-width:0;}
+  .btn{width:100%;border:0;border-radius:11px;padding:14px;font-family:var(--disp);
+       font-weight:800;font-size:1.2rem;letter-spacing:.05em;text-transform:uppercase;
+       cursor:pointer;margin-top:15px;}
+  .btn-gold{background:var(--gold);color:var(--bg);}
+  .btn-rojo{background:var(--rojo);color:#fff;}
+  .btn:disabled{opacity:.5;cursor:default;}
+  .btn-link{display:block;text-align:center;text-decoration:none;}
+  .ruedabox{position:relative;display:flex;align-items:center;justify-content:center;
+            padding:24px 0 10px;}
+  .ruedabox::before{content:'';position:absolute;inset:0;
+    background:radial-gradient(circle at 50% 45%,rgba(212,168,50,.13),transparent 62%);}
+  .rueda{position:relative;transition:transform 4.6s cubic-bezier(.12,.72,.11,1);}
+  .aguja{position:absolute;top:8px;left:50%;transform:translateX(-50%);z-index:2;}
+  .premio{background:var(--card);border:1px dashed var(--gold);border-radius:12px;
+          padding:15px;text-align:center;margin-top:4px;}
+  .premio .lbl{color:var(--faint);font-size:.58rem;letter-spacing:.16em;}
+  .premio .cod{font-family:ui-monospace,monospace;font-size:1.3rem;letter-spacing:.1em;
+               margin-top:6px;}
+  .bolson{background:var(--card);border:1px solid var(--line);border-radius:11px;
+          padding:13px 14px;margin-top:16px;}
+  .bolson .lbl{color:var(--faint);font-size:.58rem;letter-spacing:.16em;}
+  .bolson .fila{display:flex;justify-content:space-between;font-size:.85rem;
+                padding:7px 0;border-top:1px solid var(--line);}
+  .bolson .fila:first-of-type{border-top:0;}
+  .err{color:var(--rojo2);font-size:.84rem;margin-top:10px;}
+  .pie{text-align:center;color:var(--faint);font-size:.72rem;margin-top:22px;line-height:1.6;}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <div class="top">
+    <div class="mark">FRATE · FRATERNIDAD CAMPUS CENTRAL</div>
+    <div class="tit" id="tit">Te toca<br>un giro</div>
+  </div>
+  <div class="body" id="app">
+    <div class="msg">Cargando…</div>
+  </div>
+</div>
+
+<script>
+const SB_URL='https://ydwlpraoaaijlfssevoh.supabase.co', SB_ANON='sb_publishable_-_7GeDU_h84zf2v--lWQaQ_15ZFxOWt';
+const sb=window.supabase.createClient(SB_URL,SB_ANON);
+const $=id=>document.getElementById(id);
+function esc(s){ return String(s==null?'':s).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c])); }
+let RED='instagram', CONC=null;
+
+// La rueda se dibuja acá y no como imagen: pesa nada y se ve nítida en
+// cualquier pantalla. Seis gajos con los colores de la casa.
+function ruedaSVG(){
+  return `<div class="ruedabox">
+    <svg class="aguja" width="20" height="16" viewBox="0 0 20 16"><path d="M10 16 L2 0 L18 0 Z" fill="#f2f0f4"/></svg>
+    <svg class="rueda" id="rueda" viewBox="0 0 200 200" width="196" height="196">
+      <circle cx="100" cy="100" r="94" fill="none" stroke="#D4A832" stroke-width="1.5" opacity=".35"/>
+      <path d="M100 100 L100 12 A88 88 0 0 1 176 56 Z" fill="#E8363D" opacity=".92"/>
+      <path d="M100 100 L176 56 A88 88 0 0 1 176 144 Z" fill="#1b1b1f"/>
+      <path d="M100 100 L176 144 A88 88 0 0 1 100 188 Z" fill="#D4A832" opacity=".92"/>
+      <path d="M100 100 L100 188 A88 88 0 0 1 24 144 Z" fill="#1b1b1f"/>
+      <path d="M100 100 L24 144 A88 88 0 0 1 24 56 Z" fill="#E8363D" opacity=".55"/>
+      <path d="M100 100 L24 56 A88 88 0 0 1 100 12 Z" fill="#1b1b1f"/>
+      <circle cx="100" cy="100" r="28" fill="#0a0a0b" stroke="#D4A832" stroke-width="2"/>
+      <text x="100" y="109" text-anchor="middle" font-family="Barlow Condensed,sans-serif"
+            font-weight="800" font-size="21" fill="#D4A832">FR</text>
+    </svg></div>`;
+}
+
+function estado(titulo, texto, boton){
+  $('tit').innerHTML = titulo;
+  $('app').innerHTML = '<div class="msg">'+texto+'</div>'
+    + (boton||'<a class="btn btn-rojo btn-link" href="/">Ir a frate.cl</a>');
+}
+
+async function cargar(){
+  const { data:{ session } } = await sb.auth.getSession();
+  if(!session){
+    return estado('Entra a tu<br>cuenta',
+      'Para que el premio quede <b>a tu nombre</b> necesitas tu cuenta FRATE. Es un minuto.',
+      '<a class="btn btn-rojo btn-link" href="/?volver=' + encodeURIComponent('/girar') + '">Entrar o crear mi cuenta</a>');
+  }
+  let d=null, err=null;
+  try{ const r = await sb.rpc('concurso_mio'); if(r.error) err=r.error.message; else d=r.data; }
+  catch(e){ err=String(e&&e.message||e); }
+  if(err) return estado('Ups', 'No pudimos abrir la ruleta. Inténtalo en un rato.');
+  if(!d || !d.ok){
+    if(d && d.motivo==='ya_jugaste'){
+      return estado('Ya giraste',
+        'Tu premio está guardado' + (d.codigo?' con el código <b>'+esc(d.codigo)+'</b>':'') + '. Un giro por persona.',
+        '<a class="btn btn-gold btn-link" href="/mi-entrada">Ver mi premio</a>');
+    }
+    if(d && d.motivo==='no_te_toca') return estado('Este no es<br>para ti',
+      'Este sorteo es para otro grupo. Estate atento — vienen más.');
+    return estado('Sin sorteo<br>ahora', 'No hay ningún sorteo abierto en este momento.');
+  }
+  CONC = d;
+  pintarInicio();
+}
+
+function pintarInicio(){
+  const prem = Array.isArray(CONC.premios) ? CONC.premios : [];
+  const bolson = prem.length ? `<div class="bolson">
+      <div class="lbl">LO QUE HAY EN LA RULETA</div>
+      ${prem.map(p=>`<div class="fila"><span>${esc(p.detalle||p.tipo)}</span></div>`).join('')}
+    </div>` : '';
+  $('app').innerHTML =
+      '<div class="msg">Compraste con nosotros y todavía no nos dejas tu red. Déjala y gira: <b>todos ganan algo</b>.</div>'
+    + (CONC.pide_red ? `
+      <div class="redes">
+        <button class="red on" id="r-ig" onclick="setRed('instagram')">Instagram</button>
+        <button class="red" id="r-tt" onclick="setRed('tiktok')">TikTok</button>
+      </div>
+      <div class="cuenta"><span>@</span><input id="i-user" placeholder="tuusuario"
+        autocapitalize="off" autocorrect="off" spellcheck="false" /></div>` : '')
+    + bolson
+    + '<button class="btn btn-gold" id="btn-girar" onclick="girar()">Girar</button>'
+    + '<div id="err"></div>'
+    + '<div class="pie">Un giro por persona · tu premio dura '+(CONC.vence_dias||7)+' días</div>';
+}
+
+function setRed(r){
+  RED=r;
+  $('r-ig').className = 'red' + (r==='instagram'?' on':'');
+  $('r-tt').className = 'red' + (r==='tiktok'?' on':'');
+}
+
+async function girar(){
+  const b=$('btn-girar'), e=$('err');
+  const u = ($('i-user') && $('i-user').value || '').trim().replace(/^@+/,'');
+  if(CONC.pide_red && !u){ e.innerHTML='<div class="err">Escribe tu usuario para girar.</div>'; return; }
+  b.disabled=true; b.textContent='Girando…'; e.innerHTML='';
+
+  // La rueda gira mientras el servidor decide. El premio ya está definido
+  // cuando la animación termina — nunca al revés.
+  $('app').insertAdjacentHTML('afterbegin', ruedaSVG());
+  const vueltas = 5 + Math.floor(Math.random()*3), grados = vueltas*360 + Math.floor(Math.random()*360);
+  setTimeout(()=>{ const r=$('rueda'); if(r) r.style.transform='rotate('+grados+'deg)'; }, 60);
+
+  let d=null, err=null;
+  try{ const res = await sb.rpc('concurso_girar', { p_usuario: u || null });
+       if(res.error) err=res.error.message; else d=res.data; }
+  catch(ex){ err=String(ex&&ex.message||ex); }
+
+  // Se espera a que la rueda termine aunque la respuesta llegue antes:
+  // ver el premio mientras todavía gira arruina el momento.
+  setTimeout(()=>{
+    if(err || !d || !d.ok){
+      const m = (d && d.motivo)==='falta_red' ? 'Escribe tu usuario para girar.'
+              : (d && d.motivo)==='ya_jugaste' ? 'Ya habías girado.'
+              : (d && d.motivo)==='sin_premios' ? 'Se acabaron los premios de este sorteo.'
+              : 'No se pudo girar. Inténtalo de nuevo.';
+      const rb=document.querySelector('.ruedabox'); if(rb) rb.remove();
+      b.disabled=false; b.textContent='Girar';
+      $('err').innerHTML='<div class="err">'+esc(m)+'</div>';
+      return;
+    }
+    $('tit').innerHTML='Ganaste';
+    $('app').innerHTML =
+        '<div class="tit" style="font-size:2.4rem;text-align:center;margin-bottom:4px;">'+esc(d.detalle||d.tipo)+'</div>'
+      + '<div class="premio"><div class="lbl">TU CÓDIGO</div><div class="cod">'+esc(d.codigo)+'</div></div>'
+      + '<div class="msg" style="text-align:center;margin-top:12px;font-size:.82rem;">'
+      + 'Vence en '+(d.vence_dias||7)+' días. Está a tu nombre — nadie más lo puede usar.</div>'
+      + '<a class="btn btn-rojo btn-link" href="/premio?c='+encodeURIComponent(d.codigo)+'">Ver mi premio</a>';
+  }, 4800);
+}
+cargar();
+</script>
+</body>
+</html>

@@ -1,0 +1,173 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>FRATE WEB (TICKETERA) · OS POR QUÉ EXISTE ESTO</title>
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>💜</text></svg>">
+<link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@600;800;900&family=Fraunces:ital,opsz,wght@0,9..144,400;1,9..144,400&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="/os-manual.css">
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<style>
+  .serif{font-family:'Fraunces',Georgia,serif;font-weight:400}
+  .em{font-style:italic}
+
+  /* ── Portada a pantalla completa ── */
+  .front{min-height:94vh;display:flex;flex-direction:column;justify-content:center;position:relative;overflow:hidden;border-bottom:1px solid var(--bor)}
+  .front .g{position:absolute;border-radius:50%;pointer-events:none;filter:blur(30px)}
+  .g1{width:520px;height:520px;background:radial-gradient(circle,rgba(255,45,139,.30),transparent 66%);top:-170px;left:-150px}
+  .g2{width:440px;height:440px;background:radial-gradient(circle,rgba(6,229,176,.22),transparent 66%);top:-90px;right:-150px}
+  .g3{width:520px;height:520px;background:radial-gradient(circle,rgba(168,85,247,.24),transparent 68%);bottom:-230px;left:34%}
+  .front h1{font-family:'Fraunces',Georgia,serif;font-weight:400;text-transform:none;letter-spacing:-.02em;
+    font-size:clamp(3rem,9vw,6.6rem);line-height:.98;margin:18px 0 0}
+  .front h1 .b{color:var(--gris2)}
+  .front .sub2{max-width:560px;color:var(--gris);font-size:1.12rem;margin-top:24px}
+  .down{margin-top:46px;display:flex;align-items:center;gap:10px;font-family:var(--disp);font-size:.74rem;letter-spacing:3px;color:var(--gris2)}
+  .down i{width:7px;height:7px;border-radius:50%;background:var(--rojo);display:inline-block;animation:lat 2s infinite}
+  @keyframes lat{0%,100%{opacity:.35}50%{opacity:1}}
+
+  /* ── Manifiesto ── */
+  .mani .big{font-family:'Fraunces',Georgia,serif;font-weight:400;font-size:clamp(1.5rem,3.6vw,2.5rem);
+    line-height:1.3;letter-spacing:-.01em;text-transform:none;color:var(--gris);max-width:780px}
+  .mani .big b{color:var(--txt);font-weight:400}
+  .mani p{color:var(--gris);max-width:680px;margin-top:18px;font-size:1.02rem}
+  .mani p.fuerte{color:var(--txt);font-size:1.12rem}
+
+  /* ── Prueba en el código ── */
+  .prueba{border-top:1px solid var(--bor);padding:26px 4px;display:flex;gap:22px;align-items:flex-start}
+  .prueba:last-of-type{border-bottom:1px solid var(--bor)}
+  .prueba .q{font-family:var(--disp);font-weight:800;font-size:.76rem;letter-spacing:2px;min-width:96px;padding-top:4px}
+  .prueba .t{font-size:1.04rem;color:var(--txt);max-width:640px}
+  .prueba .t span{color:var(--gris)}
+
+  /* ── Puertas ── */
+  .puertas{display:grid;grid-template-columns:repeat(2,1fr);gap:12px;margin-top:12px}
+  @media(max-width:680px){.puertas{grid-template-columns:1fr}}
+  .pu{background:var(--neg2);border:1px solid var(--bor);border-radius:16px;padding:20px;text-decoration:none;color:inherit;
+    display:block;transition:border-color .18s,transform .18s}
+  .pu:hover{transform:translateY(-2px)}
+  .pu .ic{width:46px;height:46px;border-radius:13px;display:flex;align-items:center;justify-content:center;font-size:1.5rem}
+  .pu h4{font-family:var(--disp);font-weight:800;font-size:1.3rem;text-transform:uppercase;margin:14px 0 2px}
+  .pu .rol{font-size:.8rem;color:var(--gris2)}
+  .pu .n{font-size:.72rem;font-family:var(--disp);letter-spacing:1.5px;text-transform:uppercase;margin-top:12px;display:block}
+  .pu.f-fly:hover{border-color:var(--sys-fly)} .pu.f-fly .n{color:var(--sys-fly)}
+  .pu.f-web:hover{border-color:var(--sys-web)} .pu.f-web .n{color:var(--sys-web)}
+  .pu.f-pos:hover{border-color:var(--sys-pos)} .pu.f-pos .n{color:var(--sys-pos)}
+  .pu.f-erp:hover{border-color:var(--sys-erp)} .pu.f-erp .n{color:var(--sys-erp)}
+
+  /* ── Holding ── */
+  .cos{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin-top:16px}
+  @media(max-width:820px){.cos{grid-template-columns:repeat(2,1fr)}}
+  .co{background:var(--neg2);border:1px solid var(--bor);border-radius:12px;padding:14px;
+    display:block;text-decoration:none;color:inherit;transition:border-color .2s,transform .2s}
+  .co:hover{border-color:var(--bor2);transform:translateY(-2px)}
+  .co .ver{font-size:.68rem;color:var(--gris2);margin-top:8px;font-family:var(--disp);letter-spacing:1.2px;text-transform:uppercase}
+  .co:hover .ver{color:var(--txt)}
+  .co .d{width:20px;height:20px;border-radius:6px;margin-bottom:9px}
+  .co b{display:block;font-family:var(--disp);text-transform:uppercase;font-size:.98rem;letter-spacing:.4px}
+  .co span{font-size:.68rem;color:var(--gris2);text-transform:uppercase;letter-spacing:1px}
+
+  /* ── Cierre ── */
+  .fin{text-align:center;padding:110px 0 90px}
+  .fin .big{font-family:'Fraunces',Georgia,serif;font-weight:400;text-transform:none;letter-spacing:-.02em;
+    font-size:clamp(2rem,5.4vw,3.6rem);line-height:1.14}
+  .fin p{color:var(--gris);margin-top:22px;font-size:1.06rem}
+  .fin .firma{font-family:'Fraunces',Georgia,serif;font-style:italic;color:var(--gris2);margin-top:34px;font-size:1.1rem}
+  .cta{display:inline-block;margin-top:30px;background:var(--rojo);color:#fff;font-family:var(--disp);font-weight:800;
+    letter-spacing:2px;text-transform:uppercase;font-size:.92rem;padding:15px 30px;border-radius:10px;text-decoration:none}
+</style>
+</head>
+<body>
+
+<!-- ═══════ PORTADA ═══════ -->
+<section class="front">
+  <div class="g g1"></div><div class="g g2"></div><div class="g g3"></div>
+  <div class="wrap" style="position:relative">
+    <div class="eyebrow">Fraternidad Campus Central · Grupo Familiar</div>
+    <h1>Primero la idea.<br><span class="b">Nunca el monto.</span></h1>
+    <p class="sub2">Hace 13 años que hacemos fiestas por una sola razón: nos gusta hacer sentir bien a la gente. Esto es el cerebro que le da forma a eso — sin quitarle el alma.</p>
+    <div class="down"><i></i>BAJA PARA ENTRAR</div>
+  </div>
+</section>
+
+<div class="wrap">
+
+  <!-- ═══════ EL PORQUÉ ═══════ -->
+  <section class="mani">
+    <div class="stag">Por qué existe esto</div>
+    <div class="big">Durante 13 años funcionamos por inercia. Y funcionó — porque tenemos talento, porque somos familia, <b>porque nadie hace sentir a la gente como la hacemos sentir nosotros.</b></div>
+    <p class="fuerte">Pero el talento sin orden se cansa. Se repite. Se pierde.</p>
+    <p>Así que decidimos ponerle mente a lo que siempre hicimos con el corazón. No para volvernos fríos — para poder crecer sin dejar de ser nosotros.</p>
+    <p>Nunca elegimos una fiesta por lo que va a recaudar. Elegimos una idea que nos emociona, y después elegimos a las personas que la van a hacer posible. En ese orden. <b style="color:var(--txt)">Siempre en ese orden.</b></p>
+    <p class="fuerte">Estos sistemas son eso: nuestra forma de pensar la fiesta, hecha para durar. Para convertirnos en la mejor familia de hacer fiestas de Latinoamérica. <span class="serif em" style="color:#fff">Sin dejar de ser familia.</span></p>
+  </section>
+
+  <!-- ═══════ ESTÁ EN EL CÓDIGO ═══════ -->
+  <section>
+    <div class="stag">No es un discurso</div>
+    <h2>Está en el código</h2>
+    <p class="lead">Cada decisión del sistema es una decisión sobre cómo tratamos a la gente. Míralo:</p>
+    <div class="prueba"><div class="q" style="color:var(--sys-fly)">FLYER</div><div class="t">El evento no nace en una planilla de plata. Nace en el Flyer — en una idea, una canción, unas ganas. <span>Recién después se vuelve número.</span></div></div>
+    <div class="prueba"><div class="q" style="color:var(--sys-erp)">ERP</div><div class="t">Lo primero que ordena el sistema no son las ventas: es la gente. Sus turnos, su colación, su propina entregada como corresponde. <span>Las personas primero, incluso en la base de datos.</span></div></div>
+    <div class="prueba"><div class="q" style="color:var(--sys-pos)">POS</div><div class="t">Se puede vender en $0. <span>Porque a veces regalar una entrada es la mejor decisión de la noche.</span></div></div>
+    <div class="prueba"><div class="q" style="color:var(--sys-web)">WEB</div><div class="t">Al cliente lo recibe un Anfitrión, no un formulario. <span>Porque llegar a Fraternidad tiene que sentirse como llegar a casa.</span></div></div>
+  </section>
+
+  <!-- ═══════ LAS 4 PUERTAS ═══════ -->
+  <section>
+    <div class="stag">Los manuales</div>
+    <h2>Cuatro cerebros, una forma de pensar</h2>
+    <p class="lead">Cada sistema es dueño de una parte de la verdad. Cuando dos no coinciden, no se discute: manda el dueño del dato. Entra a cada uno para entender su lógica.</p>
+    <div class="puertas">
+      <a class="pu f-fly" href="/os-flyer">
+        <div class="ic" style="background:rgba(6,229,176,.13);border:1px solid rgba(6,229,176,.4)">🎨</div>
+        <h4>Flyer</h4><div class="rol">Acá nace el evento</div><span class="n">7 manuales →</span>
+      </a>
+      <a class="pu f-web" href="/os">
+        <div class="ic" style="background:rgba(255,59,59,.13);border:1px solid rgba(255,59,59,.4)">🌐</div>
+        <h4>Web · Ticketera</h4><div class="rol">Vende y registra</div><span class="n">15 manuales →</span>
+      </a>
+      <a class="pu f-pos" href="/os-pos">
+        <div class="ic" style="background:rgba(168,85,247,.13);border:1px solid rgba(168,85,247,.4)">💵</div>
+        <h4>POS</h4><div class="rol">Cobra adentro</div><span class="n">7 manuales →</span>
+      </a>
+      <a class="pu f-erp" href="/os-erp">
+        <div class="ic" style="background:rgba(255,45,139,.13);border:1px solid rgba(255,45,139,.4)">🧠</div>
+        <h4>ERP</h4><div class="rol">Consolida todo</div><span class="n">7 manuales →</span>
+      </a>
+    </div>
+    <div class="oro"><b>Los dos hilos.</b> Una persona es <strong>una sola ficha</strong> en los cuatro sistemas, y el hilo que la amarra es el <strong>RUT</strong>. Un evento es <strong>uno solo</strong>, y el hilo es el <strong>event_uid</strong> (<span class="num">FCC-2026-07-25</span>). Si esos dos hilos están bien, todo lo demás calza.</div>
+  </section>
+
+  <!-- ═══════ EL HOLDING ═══════ -->
+  <section>
+    <div class="stag">Y esto recién empieza</div>
+    <h2>De una empresa a una familia de empresas</h2>
+    <p class="lead">Lo que hoy hace Magnus Pro sola, mañana lo hará una familia de empresas — cada una experta en lo suyo, todas cuidándose entre sí, prestándose servicios reales.</p>
+    <div class="cos">
+      <a class="co" href="/os-empresas#magnus"><div class="d" style="background:#D4A62A"></div><b>Magnus Pro</b><span>El dinero</span><div class="ver">Conocerla →</div></a>
+      <a class="co" href="/os-empresas#campus"><div class="d" style="background:#4A9EFF"></div><b>Campus Central</b><span>Sistemas</span><div class="ver">Conocerla →</div></a>
+      <a class="co" href="/os-empresas#fraternidad"><div class="d" style="background:#FF2D8B"></div><b>Fraternidad</b><span>Personas · ERP</span><div class="ver">Conocerla →</div></a>
+      <a class="co" href="/os-empresas#fratv"><div class="d" style="background:#FF6B3D"></div><b>FRATV</b><span>Audiovisual</span><div class="ver">Conocerla →</div></a>
+      <a class="co" href="/os-empresas#company"><div class="d" style="background:#A855F7"></div><b>FRAT Company</b><span>Artístico</span><div class="ver">Conocerla →</div></a>
+      <a class="co" href="/os-empresas#express"><div class="d" style="background:#F5C518"></div><b>FRATEXPRESS</b><span>Transporte</span><div class="ver">Conocerla →</div></a>
+      <a class="co" href="/os-empresas#opus"><div class="d" style="background:#14D4C0"></div><b>OPUS</b><span>Música</span><div class="ver">Conocerla →</div></a>
+      <a class="co" href="/os-empresas#grupo" style="border-style:dashed"><div class="d" style="background:#E9E4D8"></div><b>Grupo Familiar</b><span>La casa matriz</span><div class="ver">Conocerlo →</div></a>
+    </div>
+  </section>
+
+  <!-- ═══════ CIERRE ═══════ -->
+  <section class="fin" style="border-bottom:0">
+    <div class="big">Fraternidad no es una discoteca.<br><span class="serif em" style="color:var(--sys-erp)">Es la gente que la hace.</span></div>
+    <p>Bienvenido al cerebro. Bienvenido a la nueva etapa.</p>
+    <a class="cta" href="/os-libro">Abrir el libro completo →</a>
+    <div class="firma">— La familia.</div>
+  </section>
+
+  <div class="pie">FRATE OS · Portada · <a href="/os-libro">El libro</a> · <a href="/admin">← Panel</a></div>
+</div>
+
+<script src="/os-guard.js"></script>
+<script>osProteger();</script>
+</body>
+</html>

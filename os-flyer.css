@@ -1,36 +1,36 @@
 /* ============================================================
    FRATE OS · serie de FLYER — solo el acento.
    Hereda todo de os-manual.css. Acá únicamente se cambia el color
-   de acción, de rojo (Web) a morado (Flyer), para que en la reunión
+   de acción a verde/cyan, para que en la reunión
    se sepa de un vistazo qué sistema estás leyendo.
 
    El rojo NO se toca: sigue significando "esto lo manda la Web"
    (.s-web, .cer.web) y "peligro" (.peligro, .err).
    ============================================================ */
-:root{ --acc:var(--mor); }
+:root{ --acc:var(--sys-fly); }
 
 a{color:var(--acc)}
 .mark em{color:var(--acc)}
 .navman a.on{background:var(--acc);color:#08080a}
 .eyebrow{color:var(--acc)}
 .hero h1 em{color:var(--acc)}
-.hero::after{background:radial-gradient(circle,rgba(196,181,253,.16),transparent 68%)}
+.hero::after{background:radial-gradient(circle,rgba(6,229,176,.16),transparent 68%)}
 .stag{color:var(--acc)}
 .paso .n{color:var(--acc)}
 .btn{background:var(--acc);color:#08080a}
 .mn:hover{border-color:var(--acc)}
 .mn .num2{color:var(--acc)}
-.cer.fly{border-color:rgba(196,181,253,.45)}
-.cer .yo{background:var(--mor);color:#08080a}
+.cer.fly{border-color:rgba(6,229,176,.45)}
+.cer .yo{background:var(--sys-fly);color:#08080a}
 
-/* Tarjeta de contradicción: algo que dos sistemas creen suyo. */
+/* Tarjeta de contradicciÃ³n: algo que dos sistemas creen suyo. */
 .choque{background:rgba(230,200,96,.05);border:1px dashed var(--bor2);border-left:4px solid var(--oro);
   border-radius:12px;padding:15px 18px;margin-top:14px}
 .choque b{color:var(--oro)}
 .choque .quien{font-family:var(--disp);font-size:.66rem;letter-spacing:2px;text-transform:uppercase;color:var(--gris2);margin-bottom:6px}
 
-/* Fila de "así viaja en el brief": bloque de datos crudos. */
+/* Fila de "asÃ­ se ve en la app": bloque de datos crudos. */
 .dato{font-family:ui-monospace,SFMono-Regular,Menlo,monospace;font-size:.82rem;background:var(--neg);
   border:1px solid var(--bor);border-radius:10px;padding:12px 15px;margin-top:12px;color:var(--gris);
   overflow-x:auto;white-space:pre;line-height:1.7}
-.dato b{color:var(--txt)} .dato .v{color:var(--verde)} .dato .r{color:var(--rojo)} .dato .o{color:var(--oro)} .dato .m{color:var(--mor)}
+.dato b{color:var(--txt)} .dato .v{color:var(--verde)} .dato .r{color:var(--rojo)} .dato .o{color:var(--oro)} .dato .m{color:var(--sys-fly)}

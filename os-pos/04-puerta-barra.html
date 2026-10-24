@@ -1,0 +1,106 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>FRATE OS · POS 04 Puerta y barra</title>
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🎫</text></svg>">
+<link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@600;800;900&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="/os-manual.css">
+<link rel="stylesheet" href="/os-pos.css">
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<style>
+  .dos{display:grid;grid-template-columns:repeat(auto-fit,minmax(260px,1fr));gap:12px;margin-top:14px}
+  .via{background:var(--neg2);border:1px solid var(--bor);border-radius:13px;padding:16px 18px}
+  .via h4{font-family:var(--disp);font-weight:800;font-size:1.05rem;text-transform:uppercase;margin-bottom:4px}
+  .via .c{font-size:.68rem;letter-spacing:1.3px;text-transform:uppercase;color:var(--gris2);margin-bottom:9px}
+  .via p{font-size:.83rem;color:var(--gris)}
+  .qrbox{margin-top:14px;border:2px solid var(--bor2);border-radius:14px;padding:20px;text-align:center;background:var(--neg)}
+  .qrbox .cod{font-family:ui-monospace,SFMono-Regular,Menlo,monospace;font-size:.82rem;color:var(--gris2);letter-spacing:1px}
+  .qrbox .est{font-family:var(--disp);font-weight:900;font-size:2rem;line-height:1;margin:8px 0 2px;color:var(--gris2)}
+  .qrbox .who{font-size:.8rem;color:var(--gris);min-height:18px}
+  .qrbtns{display:flex;gap:10px;justify-content:center;flex-wrap:wrap;margin-top:14px}
+  .qrlog{font-size:.82rem;color:var(--gris);text-align:center;min-height:22px;margin-top:12px}
+</style>
+</head>
+<body>
+<div id="bar"></div>
+<div class="wrap">
+
+  <div class="hero">
+    <div class="eyebrow">POS · Manual 04</div>
+    <h1>Puerta y <em>barra</em></h1>
+    <p class="sub">Validar un QR, distinguir entrada de cover, y no dejar entrar dos veces con el mismo.</p>
+    <div class="meta"><span>Para puerta y barra</span><span>·</span><span>6 minutos</span></div>
+  </div>
+
+  <section>
+    <div class="stag">Capítulo 1</div>
+    <h2>Entrada en la puerta, cover en la barra</h2>
+    <div class="dos">
+      <div class="via"><h4>🚪 Puerta</h4><div class="c">Solo entradas</div><p>Si escaneas un cover, lo rechaza <b>sin quemarlo</b>: "esto es un cover, canjéalo en la barra". Así no se pierde.</p></div>
+      <div class="via"><h4>🍺 Barra</h4><div class="c">Solo covers</div><p>Cada cover se quema una vez. El segundo intento avisa que ya se usó, con la hora en que se ocupó.</p></div>
+    </div>
+    <div class="choque">
+      <div class="quien">💵 POS &nbsp;vs&nbsp; 🌐 Web — la misma entrada, sin pisarse (R35)</div>
+      Un QR es un token de <b>namespace compartido</b>. Ambos venden y ambos queman, y cada uno lee el código del otro. Quemar es <b>idempotente cruzado</b>: el ERP concilia y gana el primer quemado. Los covers que vende la Web entran al POS para leerse igual que los propios.
+    </div>
+  </section>
+
+  <section>
+    <div class="stag">Capítulo 2</div>
+    <h2>Un QR = un ingreso</h2>
+    <p class="lead">Aprieta "Escanear" las veces que quieras. El primero entra; del segundo en adelante, no. Da igual si el scan viene del POS o de la Web.</p>
+    <div class="qrbox">
+      <div class="cod">QR &nbsp;FRATE-CV-9F3A</div>
+      <div class="est" id="qrEst">Sin escanear</div>
+      <div class="who" id="qrWho">&nbsp;</div>
+      <div class="qrbtns">
+        <button class="btn" id="scanPos">📷 Escanear en POS</button>
+        <button class="btn" id="scanWeb" style="background:var(--rojo);color:#08080a">📷 Escanear en Web</button>
+        <button class="btn" id="scanReset" style="background:transparent;border:1px solid var(--bor2);color:var(--txt)">Reiniciar</button>
+      </div>
+      <div class="qrlog" id="qrLog"></div>
+    </div>
+  </section>
+
+  <section>
+    <div class="stag">Capítulo 3</div>
+    <h2>Cómo lo vives tú</h2>
+    <div class="dos">
+      <div class="via"><h4>👤 Operador · en la barra</h4><div class="c">Canjear un cover</div><p>Escaneas el cover: <b style="color:var(--verde)">ACEPTADO</b>, se quema y le pasas su trago. Más tarde, el mismo QR: <b style="color:var(--oro)">YA UTILIZADO</b>. No entra dos veces, y da lo mismo si el primero lo escaneó la Web.</p></div>
+      <div class="via"><h4>🛠 Admin · en el panel</h4><div class="c">Configurar los puntos</div><p>Puerta = solo entradas, Barra = solo covers. Un cover escaneado por error en la puerta se rechaza <b>sin quemarse</b> y se manda a la barra. Y revisas la conciliación de QR con la Web para cerrar la noche.</p></div>
+    </div>
+  </section>
+
+  <div class="pie">FRATE OS · POS · Manual 04 · <a href="/os-pos-dinero">← El dinero</a> · <a href="/os-pos-catalogo">Siguiente: el catálogo →</a></div>
+</div>
+
+<script src="/os-guard.js"></script>
+<script>
+  document.getElementById('bar').innerHTML = osBarra('04', 'pos');
+  osProteger();
+
+  (function(){
+    var burned = null;
+    var est = document.getElementById('qrEst'), who = document.getElementById('qrWho'), log = document.getElementById('qrLog');
+    function scan(sistema){
+      if(!burned){
+        burned = sistema;
+        est.textContent = 'ACEPTADO'; est.style.color = 'var(--verde)';
+        who.textContent = 'Quemado por ' + sistema + ' · ' + new Date().toLocaleTimeString('es-CL',{hour:'2-digit',minute:'2-digit',second:'2-digit'});
+        log.innerHTML = '<b style="color:var(--verde)">✓ Primer scan: entra.</b>';
+      } else {
+        est.textContent = 'YA UTILIZADO'; est.style.color = 'var(--oro)';
+        log.innerHTML = '<b style="color:var(--oro)">✕ Ya lo quemó ' + burned + '.</b> Un QR = un ingreso, no importa desde dónde se escanee.';
+      }
+    }
+    document.getElementById('scanPos').addEventListener('click', function(){ scan('POS'); });
+    document.getElementById('scanWeb').addEventListener('click', function(){ scan('Web'); });
+    document.getElementById('scanReset').addEventListener('click', function(){
+      burned = null; est.textContent = 'Sin escanear'; est.style.color = 'var(--gris2)'; who.innerHTML = '&nbsp;'; log.textContent = '';
+    });
+  })();
+</script>
+</body>
+</html>

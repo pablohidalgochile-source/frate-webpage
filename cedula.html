@@ -1,0 +1,128 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>FRATE WEB (TICKETERA) · LECTOR DE CÉDULA (DIAGNÓSTICO)</title>
+<script src="https://unpkg.com/html5-qrcode@2.3.8/html5-qrcode.min.js"></script>
+<style>
+  :root{--bg:#0a0a0b;--card:#141416;--borde:#26262b;--gris:#8a8a92;--verde:#22c55e;--dorado:#D4A832;--rojo:#E8363D;}
+  *{box-sizing:border-box;margin:0;padding:0;}
+  body{background:var(--bg);color:#fff;font-family:'Inter',system-ui,sans-serif;min-height:100vh;padding:18px;}
+  .wrap{max-width:560px;margin:0 auto;}
+  h1{font-size:1.3rem;font-weight:900;}
+  .sub{color:var(--gris);font-size:.86rem;margin:4px 0 14px;}
+  .card{background:var(--card);border:1px solid var(--borde);border-radius:14px;padding:16px;margin-bottom:14px;}
+  #reader{border-radius:12px;overflow:hidden;}
+  button{font-family:inherit;font-weight:800;border:0;border-radius:10px;padding:13px;cursor:pointer;width:100%;font-size:1rem;}
+  .b-v{background:var(--verde);color:#04120a;}
+  .b-g{background:transparent;border:1px solid var(--borde);color:var(--gris);}
+  .run{font-size:1.5rem;font-weight:900;color:var(--verde);letter-spacing:1px;}
+  .raw{background:#0d0d0e;border:1px solid var(--borde);border-radius:10px;padding:12px;font-family:ui-monospace,monospace;font-size:.78rem;color:#c9c9d1;white-space:pre-wrap;word-break:break-all;max-height:240px;overflow:auto;margin-top:8px;}
+  ol{padding-left:20px;color:var(--gris);font-size:.86rem;} li{margin:4px 0;}
+</style>
+<script src="/frate-cedula.js?v=ced1"></script>
+</head>
+<body>
+<div class="wrap">
+  <h1>🪪 Lector de cédula · diagnóstico</h1>
+  <div class="sub">Herramienta para capturar el texto crudo que devuelve una cédula chilena y afinar la lectura del nombre. No guarda nada.</div>
+
+  <div class="card">
+    <div style="font-weight:700;margin-bottom:6px;">Cómo usarlo</div>
+    <ol>
+      <li>Toca <b>Iniciar cámara</b> y permite el acceso.</li>
+      <li>Muestra el <b>REVERSO</b> de la cédula (el lado del <b>código de barras grande</b>, no la foto) a la webcam.</li>
+      <li>Acércalo a ~15–20 cm, con buena luz y firme, hasta que lea.</li>
+      <li>Toca <b>Copiar texto crudo</b> y pégamelo en el chat.</li>
+    </ol>
+  </div>
+
+  <div class="card">
+    <div style="font-weight:700;margin-bottom:6px;">📷 Cámara</div>
+    <div class="sub" style="margin:0 0 8px;">Para usar el iPhone en el Mac: acércalo desbloqueado (mismo Apple ID, Bluetooth/Wi-Fi on), toca <b>Detectar</b> y elígelo en la lista (aparece como “iPhone”).</div>
+    <div style="display:flex;gap:8px;margin-bottom:10px;">
+      <select id="cam" style="flex:1;background:#0d0d0e;border:1px solid var(--borde);color:#fff;padding:11px;border-radius:10px;font-family:inherit;"><option value="">— cámara por defecto —</option></select>
+      <button class="b-g" style="width:auto;padding:11px 14px;white-space:nowrap;" onclick="detectar()">🎥 Detectar</button>
+    </div>
+    <div id="reader"></div>
+    <div id="zoomrow" style="display:none;align-items:center;gap:10px;margin-top:10px;">
+      <span style="font-size:.82rem;color:var(--gris);white-space:nowrap;">🔍 Zoom</span>
+      <input type="range" id="zoom" min="1" max="5" step="0.1" value="1" style="flex:1;accent-color:var(--verde);" oninput="setZoom(this.value)" />
+      <span id="zoomval" style="font-size:.82rem;color:var(--verde);width:38px;text-align:right;">1x</span>
+    </div>
+    <button class="b-v" id="btn" style="margin-top:10px;" onclick="toggle()">▶ Iniciar cámara</button>
+  </div>
+
+  <div class="card" id="out" style="display:none;">
+    <div style="color:var(--dorado);font-weight:800;margin-bottom:6px;">✅ Leído</div>
+    <div>RUN detectado: <span class="run" id="run">—</span></div>
+    <div class="sub" style="margin-top:12px;">Texto CRUDO (esto es lo que necesito):</div>
+    <div class="raw" id="raw"></div>
+    <button class="b-v" id="copy" style="margin-top:10px;" onclick="copiar()">📋 Copiar texto crudo</button>
+    <button class="b-g" style="margin-top:8px;" onclick="seguir()">🔁 Leer otra</button>
+  </div>
+</div>
+
+<script>
+  let scanner=null, on=false, lastRaw='';
+  function rutLimpio(r){ return String(r||'').replace(/[.\s]/g,'').replace(/-/g,'').toUpperCase(); }
+  function rutValido(r){ const c=rutLimpio(r); if(!/^\d{7,8}[0-9K]$/.test(c)) return false; const cu=c.slice(0,-1),dv=c.slice(-1); let s=0,m=2; for(let i=cu.length-1;i>=0;i--){ s+=parseInt(cu[i],10)*m; m=m===7?2:m+1; } const res=11-(s%11); const d=res===11?'0':res===10?'K':String(res); return d===dv; }
+  function fmtRut(r){ const c=rutLimpio(r); if(c.length<2) return r; return c.slice(0,-1).replace(/\B(?=(\d{3})+(?!\d))/g,'.')+'-'+c.slice(-1); }
+  function extraerRun(s){ s=String(s||''); const m=s.match(/RUN\s*=\s*([0-9.\-]+[0-9kK])/i); if(m&&rutValido(m[1])) return rutLimpio(m[1]); const c=s.match(/\d{1,2}\.?\d{3}\.?\d{3}-?[0-9kK]/gi)||[]; const v=c.find(x=>rutValido(x)); return v?rutLimpio(v):null; }
+  function extraerNombre(s){ s=String(s||''); const m=s.match(/[?&]name=([^&]+)/i); if(!m) return null; let v=m[1].replace(/\+/g,' ').replace(/%([0-9A-Fa-f]{2})/g,(_,h)=>String.fromCharCode(parseInt(h,16))); return v.replace(/\s+/g,' ').trim()||null; }
+  async function detectar(){
+    try{
+      const cams = await Html5Qrcode.getCameras();
+      const sel = document.getElementById('cam');
+      if(!cams || !cams.length){ alert('No se detectaron cámaras. Permite el acceso y vuelve a intentar.'); return; }
+      sel.innerHTML = '<option value="">— cámara por defecto —</option>' + cams.map(c=>`<option value="${c.id}">${(c.label||'Cámara').replace(/</g,'&lt;')}</option>`).join('');
+      // Auto-elige el iPhone si aparece
+      const ip = cams.find(c=>/iphone|continuity|ios/i.test(c.label||''));
+      if(ip){ sel.value = ip.id; }
+      alert('Cámaras detectadas: '+cams.length+(ip?'\nElegí tu iPhone automáticamente ✅':'\nElige la cámara del iPhone en la lista.'));
+    }catch(e){ alert('No pude listar cámaras: '+(e.message||e)+'\n(Permite el acceso a la cámara primero.)'); }
+  }
+  async function toggle(){
+    const btn=document.getElementById('btn');
+    if(on){ try{ await scanner.stop(); }catch(e){} on=false; btn.textContent='▶ Iniciar cámara'; document.getElementById('zoomrow').style.display='none'; return; }
+    scanner=new Html5Qrcode('reader',{ experimentalFeatures:{useBarCodeDetectorIfSupported:true}, verbose:false, formatsToSupport:(window.Html5QrcodeSupportedFormats?[Html5QrcodeSupportedFormats.QR_CODE,Html5QrcodeSupportedFormats.PDF_417]:undefined) });
+    const camId = document.getElementById('cam').value;
+    const source = camId ? { deviceId: { exact: camId } } : { facingMode: 'environment' };
+    try{
+      await scanner.start(source, { fps:12, qrbox:(w,h)=>{ const W=Math.min(w*0.9,420), H=Math.min(h*0.6,260); return {width:Math.floor(W),height:Math.floor(H)}; } }, onScan, ()=>{});
+      on=true; btn.textContent='⏹ Detener';
+      setupZoom();
+    }catch(e){ alert('No se pudo abrir la cámara: '+(e.message||e)); }
+  }
+  function setupZoom(){
+    const row=document.getElementById('zoomrow'), z=document.getElementById('zoom');
+    try{
+      const caps = scanner.getRunningTrackCapabilities ? scanner.getRunningTrackCapabilities() : null;
+      if(caps && caps.zoom && (caps.zoom.max||1) > (caps.zoom.min||1)){
+        z.min = caps.zoom.min || 1; z.max = caps.zoom.max; z.step = caps.zoom.step || 0.1;
+        z.value = caps.zoom.min || 1;
+        document.getElementById('zoomval').textContent = (+z.value).toFixed(1)+'x';
+        row.style.display='flex';
+      } else { row.style.display='none'; }
+    }catch(e){ row.style.display='none'; }
+  }
+  async function setZoom(v){
+    document.getElementById('zoomval').textContent = (+v).toFixed(1)+'x';
+    try{ await scanner.applyVideoConstraints({ advanced:[{ zoom: parseFloat(v) }] }); }catch(e){}
+  }
+  function onScan(texto){
+    lastRaw=String(texto||'');
+    const run=extraerRun(lastRaw), nom=extraerNombre(lastRaw);
+    document.getElementById('run').textContent = (nom?nom.toUpperCase()+' · ':'') + (run?fmtRut(run):'— no detectado —');
+    document.getElementById('raw').textContent = lastRaw;
+    document.getElementById('out').style.display='';
+    try{ if(navigator.vibrate) navigator.vibrate(60); }catch(e){}
+    document.getElementById('out').scrollIntoView({behavior:'smooth'});
+  }
+  function copiar(){ const t=lastRaw; const fb=()=>{ const ta=document.createElement('textarea'); ta.value=t; document.body.appendChild(ta); ta.select(); try{document.execCommand('copy');}catch(e){} ta.remove(); };
+    if(navigator.clipboard&&navigator.clipboard.writeText){ navigator.clipboard.writeText(t).then(()=>{ document.getElementById('copy').textContent='✅ Copiado'; }).catch(fb); } else { fb(); document.getElementById('copy').textContent='✅ Copiado'; } }
+  function seguir(){ document.getElementById('out').style.display='none'; document.getElementById('copy').textContent='📋 Copiar texto crudo'; }
+</script>
+</body>
+</html>

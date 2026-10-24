@@ -1,0 +1,139 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>FRATE WEB (TICKETERA) · OS FLYER 08 LA NUBE</title>
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>☁️</text></svg>">
+<link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@600;800;900&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="/os-manual.css">
+<link rel="stylesheet" href="/os-flyer.css">
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<style>
+  .fases{display:flex;flex-wrap:wrap;gap:8px;margin-top:8px}
+  .fase{flex:1;min-width:120px;background:var(--neg2);border:1px solid var(--bor);border-radius:11px;padding:13px 14px;transition:border-color .2s,background .2s}
+  .fase.on{border-color:var(--acc);background:linear-gradient(160deg,rgba(6,229,176,.08),transparent)}
+  .fase.done{opacity:.55}
+  .fase .n{font-family:var(--disp);font-weight:900;font-size:1.3rem;color:var(--acc);line-height:1}
+  .fase h4{font-family:var(--disp);font-weight:800;font-size:.92rem;text-transform:uppercase;margin:5px 0 2px}
+  .fase p{font-size:.72rem;color:var(--gris)}
+  .barra{height:8px;background:var(--neg);border:1px solid var(--bor);border-radius:99px;overflow:hidden;margin-top:14px}
+  .barra i{display:block;height:100%;width:0;background:var(--acc);transition:width .5s}
+  .estado{font-family:var(--disp);font-weight:800;letter-spacing:1px;text-transform:uppercase;font-size:.85rem;margin-top:12px;color:var(--gris)}
+</style>
+</head>
+<body>
+<div id="bar"></div>
+<div class="wrap">
+
+  <div class="hero">
+    <div class="eyebrow">FLYER · Manual 08</div>
+    <h1>El reel se<br>cocina <em>afuera</em></h1>
+    <p class="sub">El Studio de video te muestra el reel al toque, pero el MP4 final —el de verdad, con todos los efectos— no lo arma tu computador: lo arma la nube. Este manual explica ese viaje: por qué, cómo se dispara y qué hacer si algo se cae.</p>
+    <div class="meta"><span>Para quien arma reels</span><span>·</span><span>6 minutos</span></div>
+  </div>
+
+  <section>
+    <div class="stag">Capítulo 1</div>
+    <h2>Por qué no lo hace tu compu</h2>
+    <p class="lead">En el Studio ves el reel moverse en vivo: es un <b>preview liviano</b>, hecho para iterar rápido. Pero un video vertical de 1080×1920 con glow, grano y mezclas es pesado — el navegador no lo exporta bien.</p>
+    <p style="color:var(--gris)">Por eso el MP4 final se <b>renderiza en la nube</b>: una máquina afuera toma tu configuración, arma cada cuadro con alta fidelidad y te devuelve el archivo listo para subir a Instagram. Tú aprietas un botón; el trabajo pesado pasa lejos.</p>
+    <div class="oro"><b>Regla de oro.</b> Lo que ves en el Studio es el <strong>borrador fiel</strong>; lo que baja de la nube es el <strong>máster</strong>. Si un efecto no se ve idéntico en el preview, en la nube sí sale bien — está hecha para eso.</div>
+  </section>
+
+  <section>
+    <div class="stag">Capítulo 2 · Tócalo</div>
+    <h2>El viaje de un render</h2>
+    <p class="lead">Aprietas <b>«Generar en la nube»</b> y el trabajo pasa por cuatro momentos. Míralos correr.</p>
+    <div class="demo">
+      <div class="dl">Demo · las cuatro fases</div>
+      <div class="fases">
+        <div class="fase" id="f0"><div class="n">1</div><h4>Subir</h4><p>Se empaquetan y suben tus insumos: fondo, audio, configuración.</p></div>
+        <div class="fase" id="f1"><div class="n">2</div><h4>Disparar</h4><p>Se enciende la corrida afuera. Queda un trabajo con su número.</p></div>
+        <div class="fase" id="f2"><div class="n">3</div><h4>Renderizar</h4><p>La máquina arma el MP4 cuadro por cuadro. Es el paso lento.</p></div>
+        <div class="fase" id="f3"><div class="n">4</div><h4>Listo</h4><p>El MP4 queda guardado y aparece para descargar.</p></div>
+      </div>
+      <div class="barra"><i id="bar2"></i></div>
+      <div class="estado" id="est">Aprieta para simular la corrida</div>
+      <button class="btn" id="go">▶ Generar en la nube</button>
+      <button class="btn g" id="reset" style="margin-left:8px">Reiniciar</button>
+    </div>
+    <div class="bien"><b>Bien resuelto.</b> El render es un trabajo aparte, con su propio número. Mientras cocina, tú puedes seguir en otra cosa: no tienes que quedarte mirando la pantalla.</div>
+  </section>
+
+  <section>
+    <div class="stag">Capítulo 3</div>
+    <h2>Si recargas, no lo pierdes</h2>
+    <p class="lead">Un render puede tardar. Si cierras sin querer la pestaña o recargas, FLYER <b>se reconecta solo</b> al trabajo que estaba corriendo.</p>
+    <p style="color:var(--gris)">El número del trabajo activo queda guardado en el navegador. Al volver, el Studio pregunta «¿cómo va lo mío?» y retoma el estado real —subiendo, renderizando o listo— sin empezar de cero.</p>
+    <div class="oro"><b>Regla de oro.</b> Una sola corrida a la vez por reel. Si ves que ya hay un render en curso, espera ese: disparar otro encima solo gasta el doble y confunde cuál es el bueno.</div>
+  </section>
+
+  <section>
+    <div class="stag">Capítulo 4</div>
+    <h2>Cuando falla</h2>
+    <p class="lead">A veces la nube se cae o el render se rompe. No se queda pegado en silencio: te avisa y te da el <b>log</b>.</p>
+    <p style="color:var(--gris)">Si el estado queda en <b style="color:var(--rojo)">error</b> («El render falló en la nube»), hay un enlace para <b>abrir el log</b> y ver en qué paso murió. Casi siempre es un insumo pesado —un video de fondo enorme— o un corte de la nube. Se vuelve a intentar; rara vez es tu configuración.</p>
+    <div class="peligro"><b>No confundas «lento» con «caído».</b> El paso de renderizar es el largo por naturaleza. Antes de darlo por muerto, mira el estado: si dice «renderizando», está trabajando. Solo es falla cuando dice error.</div>
+  </section>
+
+  <section>
+    <div class="stag">Capítulo 5</div>
+    <h2>Lo que todavía no hace</h2>
+    <ul>
+      <li><b>No hay galería de renders todavía.</b> Bajas el MP4 de la corrida actual; aún no hay un historial de reels anteriores para volver a descargar. Está en la lista.</li>
+      <li><b>Una corrida a la vez.</b> No se encolan varios reels en paralelo: es de a uno.</li>
+      <li><b>El tiempo depende del peso.</b> Un fondo de video largo y en alta tarda más. Si tienes apuro, un fondo más liviano rinde igual y baja antes.</li>
+    </ul>
+    <div class="bien"><b>Bien resuelto.</b> El MP4 no vive en tu computador: queda guardado en la nube con su enlace. Aunque cierres todo, el archivo terminado sigue ahí para descargarlo.</div>
+  </section>
+
+  <section>
+    <div class="stag">La serie completa</div>
+    <h2>Manual de FLYER</h2>
+    <div class="serie">
+      <a class="mn" href="/os-flyer"><span class="num2">00</span><div><h4>El mapa</h4><p>Los cuatro cerebros y de qué es dueño FLYER.</p></div></a>
+      <a class="mn" href="/os-flyer-evento"><span class="num2">01</span><div><h4>Un evento</h4><p>De una fecha y una canción a una campaña completa.</p></div></a>
+      <a class="mn" href="/os-flyer-diseno"><span class="num2">02</span><div><h4>Un flyer</h4><p>Studio: de los datos a la gráfica final.</p></div></a>
+      <a class="mn" href="/os-flyer-reel"><span class="num2">03</span><div><h4>Un reel</h4><p>El mini-estudio de video: de un evento a un MP4.</p></div></a>
+      <a class="mn" href="/os-flyer-brief"><span class="num2">04</span><div><h4>El brief</h4><p>El documento que despierta a los otros tres sistemas.</p></div></a>
+      <a class="mn" href="/os-flyer-mesa"><span class="num2">05</span><div><h4>La mesa</h4><p>El flujo guiado: evento, diseño, video y descarga.</p></div></a>
+      <a class="mn" href="/os-flyer-reglas"><span class="num2">06</span><div><h4>Reglas de oro</h4><p>Lo que FLYER hace, lo que nunca hace y por qué.</p></div></a>
+      <a class="mn" href="/os-flyer-id"><span class="num2">07</span><div><h4>FRATE ID</h4><p>Quién entra: las dos puertas, los roles y la firma.</p></div></a>
+      <a class="mn" href="/os-flyer-nube"><span class="num2">08</span><div><h4>La nube</h4><p>El reel se cocina afuera: subir, renderizar, esperar el MP4.</p><span class="tag">Estás aquí</span></div></a>
+      <a class="mn" href="/os-flyer-export"><span class="num2">09</span><div><h4>La exportación</h4><p>El paquete del evento: flyer, reel y caption.</p></div></a>
+    </div>
+  </section>
+
+  <div class="pie">
+    <p><b>FRATE OS · Manual de FLYER 08.</b> <a href="/os-flyer-id">← FRATE ID</a> · Siguiente: <a href="/os-flyer-export">09 · La exportación →</a></p>
+  </div>
+
+</div>
+
+<script src="/os-guard.js"></script>
+<script>
+  document.getElementById('bar').innerHTML = osBarra('08','fly');
+  osProteger();
+
+  (function(){
+    var fases=[document.getElementById('f0'),document.getElementById('f1'),document.getElementById('f2'),document.getElementById('f3')];
+    var barra=document.getElementById('bar2'),est=document.getElementById('est'),go=document.getElementById('go'),reset=document.getElementById('reset');
+    var txt=['Subiendo insumos…','Disparando la corrida…','Renderizando el MP4… (el paso largo)','✓ MP4 listo para descargar'];
+    var t=null;
+    function limpia(){ if(t){clearInterval(t);t=null;} fases.forEach(function(f){f.classList.remove('on','done')}); barra.style.width='0'; est.textContent='Aprieta para simular la corrida'; }
+    reset.addEventListener('click',limpia);
+    go.addEventListener('click',function(){
+      limpia(); var i=0;
+      function paso(){
+        fases.forEach(function(f,k){ f.classList.toggle('on',k===i); f.classList.toggle('done',k<i); });
+        est.textContent=txt[i]; est.style.color = i===3?'var(--acc)':'var(--gris)';
+        barra.style.width=((i+1)/4*100)+'%';
+        i++; if(i>=4){ clearInterval(t); t=null; }
+      }
+      paso(); t=setInterval(paso, 1100);
+    });
+  })();
+</script>
+</body>
+</html>

@@ -384,8 +384,83 @@ deno_version = 2
 [functions.mp-webhook]
 verify_jwt = false
 
+# Webhook de Khipu (transferencia). Khipu no manda apikey de Supabase.
+[functions.khipu-webhook]
+verify_jwt = false
+
+# Rebotes de correo: Resend tampoco manda apikey de Supabase.
+# Sin esta línea, cada aviso de rebote se rechazaba con 401 ANTES de que
+# corriera la función — por eso email_rebotes estaba en cero y parecía que
+# nunca había rebotado un correo. La función verifica la firma de Svix si
+# existe RESEND_WEBHOOK_SECRET, así que abrirla no la deja sin protección.
+[functions.resend-webhook]
+verify_jwt = false
+
+# Auto-sync 24/7: lo llama un cron. Protegido por CRON_SECRET (opcional).
+[functions.mp-conciliar]
+verify_jwt = false
+
+[functions.sync-erp]
+verify_jwt = false
+
+# WhatsApp Cloud API: webhook de Meta (Meta no manda apikey de Supabase).
+[functions.whatsapp]
+verify_jwt = false
+
+# Generador de QR propio (imagen pública; el token viaja solo a nuestra infra).
+[functions.qr]
+verify_jwt = false
+
 # La API del ERP se autentica con su propia clave (x-api-key), no con JWT.
 [functions.api-evento]
+verify_jwt = false
+
+# La app de flyers/contenido crea o actualiza eventos con esta API (x-api-key).
+[functions.api-evento-ingest]
+verify_jwt = false
+
+# El Anfitrión (chatbot): visitantes sin cuenta también pueden chatear.
+[functions.anfitrion]
+verify_jwt = false
+
+# El Anfitrión con conversación persistente + handoff a humano (Fase 4).
+[functions.anfitrion-conversar]
+verify_jwt = false
+
+# Recordatorios de carritos: la llama el cron (pg_cron) sin JWT.
+# Auto-limitada: un solo correo por orden (recordatorio_at).
+[functions.recordar-pendientes]
+verify_jwt = false
+
+# CRM: el cliente crea solicitudes (invitados sin cuenta incluidos).
+[functions.form-submit]
+verify_jwt = false
+
+# Público por token: la persona completa su propia ficha (link que manda un admin).
+[functions.form-reabrir]
+verify_jwt = false
+
+# Público por enlace firmado: quien ya compró suma su vaso.
+[functions.mi-vaso]
+verify_jwt = false
+
+[functions.crm-solicitud]
+verify_jwt = false
+
+# CRM: puerta dedicada del ERP (x-api-key).
+[functions.api-crm]
+verify_jwt = false
+
+# CRM: drenaje de la cola de webhooks (cron cada 5 min).
+[functions.crm-reintentos]
+verify_jwt = false
+
+# Pre-análisis IA de listas de cortesía (infiere género). Candado propio: exige JWT admin/rrpp.
+[functions.lista-precheck]
+verify_jwt = false
+
+# Cobro por-orden del CRM (MercadoPago). Candado propio: exige JWT admin/rrpp.
+[functions.crm-pago]
 verify_jwt = false
 
 [analytics]
@@ -414,3 +489,19 @@ s3_secret_key = "env(S3_SECRET_KEY)"
 # declarative_schema_path = "./database"
 # JSON string passed through to pg-delta SQL formatting.
 # format_options = "{\"keywordCase\":\"upper\",\"indent\":2,\"maxWidth\":80,\"commaStyle\":\"trailing\"}"
+
+# El POS cobra los tickets de diferencia. NO usa JWT de Supabase: manda su
+# propia llave de estación (pos_<code>_<secreto>) que la función verifica
+# adentro contra el hash. Por eso verify_jwt tiene que ir en false.
+[functions.api-diferencia]
+verify_jwt = false
+
+# El POS llega con llave de estación, no con sesión de usuario.
+[functions.api-puerta]
+verify_jwt = false
+
+[functions.correo-baja]
+verify_jwt = false
+
+[functions.send-campana]
+verify_jwt = false

@@ -1,0 +1,128 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>FRATE WEB (TICKETERA) · OS 07 BESUCONA, UNA NOCHE REAL</title>
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>💋</text></svg>">
+<link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@600;800;900&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="/os-manual.css">
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<style>
+  .barras{display:flex;align-items:flex-end;gap:10px;height:190px;background:var(--neg2);border:1px solid var(--bor);border-radius:14px;padding:18px 20px;margin-top:14px}
+  .bcol{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:flex-end;height:100%}
+  .bcol .v{font-family:var(--disp);font-weight:900;font-size:1.1rem;color:var(--verde);margin-bottom:4px}
+  .bcol .b{width:100%;max-width:56px;background:linear-gradient(180deg,var(--rojo),#8a1220);border-radius:5px 5px 0 0}
+  .bcol .h{font-size:.7rem;color:var(--gris2);margin-top:6px;font-variant-numeric:tabular-nums}
+  .barra-lin{display:flex;align-items:center;gap:10px;margin-bottom:7px}
+  .barra-lin .et{flex:0 0 250px;font-size:.8rem}
+  @media(max-width:640px){.barra-lin .et{flex:0 0 140px;font-size:.72rem}}
+  .barra-lin .tr{flex:1;height:20px;background:#0c0c0f;border:1px solid var(--bor);border-radius:6px;overflow:hidden}
+  .barra-lin .tr i{display:block;height:100%;border-radius:5px}
+  .barra-lin .nu{flex:0 0 106px;text-align:right;font-size:.78rem;font-variant-numeric:tabular-nums}
+</style>
+</head>
+<body>
+<div id="bar"></div>
+<div class="wrap">
+
+  <div class="hero">
+    <div class="eyebrow">Manual 07 · datos reales</div>
+    <h1><em>BESUCONA</em><br>una noche<br>por dentro</h1>
+    <p class="sub">Sábado 25 de julio de 2026. La noche completa contada por el sistema, número por número — y qué nos enseñó cada uno.</p>
+    <div class="meta"><span>Todos</span><span>·</span><span>Datos reales</span><span>·</span><span>10 minutos</span></div>
+  </div>
+
+  <section>
+    <div class="stag">La noche en cuatro números</div>
+    <h2>Lo que pasó</h2>
+    <div class="kpis">
+      <div class="kpi v"><b>393</b><span>Personas adentro</span></div>
+      <div class="kpi"><b>448</b><span>Entradas emitidas</span></div>
+      <div class="kpi o"><b>$1.879.000</b><span>Recaudado</span></div>
+      <div class="kpi a"><b>88%</b><span>De lo emitido llegó</span></div>
+    </div>
+    <div class="bien"><b>88% de eficiencia es altísimo.</b> Significa que de cada 100 entradas que se emitieron, llegaron 88 personas. Casi no se desperdició nada. Guarda ese número: en el <a href="/os-comparar">manual 08</a> vas a ver por qué es tan bueno.</div>
+  </section>
+
+  <section>
+    <div class="stag">Capítulo 1</div>
+    <h2>Sin mezclar: las tres categorías</h2>
+    <p class="lead">Lo primero que hay que separar siempre: quién pagó, quién vino gratis y quién se registró en la puerta.</p>
+    <div class="tw"><table class="tabla">
+      <thead><tr><th>Categoría</th><th>Llegaron</th><th>Emitidas</th><th>%</th><th>Recaudó</th></tr></thead>
+      <tbody>
+        <tr><td><b>💰 Preventa</b></td><td class="num"><b>207</b></td><td class="num">213</td><td class="num" style="color:var(--verde)"><b>97%</b></td><td class="num" style="color:var(--oro)"><b>$1.879.000</b></td></tr>
+        <tr><td><b>🎁 Cortesía</b></td><td class="num"><b>166</b></td><td class="num">215</td><td class="num" style="color:var(--verde)"><b>77%</b></td><td class="num">—</td></tr>
+        <tr><td><b>🚪 Puerta</b></td><td class="num"><b>20</b></td><td class="num">20</td><td class="num" style="color:var(--verde)"><b>100%</b></td><td class="num">—</td></tr>
+        <tr style="background:var(--neg3)"><td><b>TOTAL</b></td><td class="num"><b>393</b></td><td class="num"><b>448</b></td><td class="num"><b>88%</b></td><td class="num"><b>$1.879.000</b></td></tr>
+      </tbody>
+    </table></div>
+    <div class="bien"><b>Los números cuadran:</b> 207 + 166 + 20 = <b>393</b>. Siempre haz esta suma: si no da, alguien está mezclando categorías.</div>
+    <div class="oro"><b>El dato clave de esta noche:</b> las cortesías rindieron <b>77%</b>. Lo normal en FRATE es ~50%. Y de la gente que entró, <b>más de la mitad pagó</b> (207 de 393). Eso es una noche sana.</div>
+  </section>
+
+  <section>
+    <div class="stag">Capítulo 2</div>
+    <h2>Qué vendió cada tipo de entrada</h2>
+    <div class="tw"><table class="tabla">
+      <thead><tr><th>Tipo</th><th>Precio</th><th>Vendidas</th><th>Llegaron</th><th>%</th><th>Recaudó</th></tr></thead>
+      <tbody>
+        <tr><td><b>Pre-Venta PRO Hombre Universitario</b></td><td class="num">$10.000</td><td class="num">60</td><td class="num">60</td><td class="num" style="color:var(--verde)">100%</td><td class="num" style="color:var(--oro)">$600.000</td></tr>
+        <tr><td><b>Pre-Venta PRO Mujer</b></td><td class="num">$9.000</td><td class="num">56</td><td class="num">56</td><td class="num" style="color:var(--verde)">100%</td><td class="num" style="color:var(--oro)">$504.000</td></tr>
+        <tr><td><b>Pre-Venta GRAL. Mujer</b></td><td class="num">$8.000</td><td class="num">36</td><td class="num">33</td><td class="num" style="color:var(--verde)">92%</td><td class="num" style="color:var(--oro)">$288.000</td></tr>
+        <tr><td><b>Pre-Venta REBAJADA Mujer</b></td><td class="num">$7.000</td><td class="num">31</td><td class="num">31</td><td class="num" style="color:var(--verde)">100%</td><td class="num" style="color:var(--oro)">$217.000</td></tr>
+        <tr><td><b>Pre-Venta GRAL. Hombre Univ.</b></td><td class="num">$9.000</td><td class="num">30</td><td class="num">27</td><td class="num" style="color:var(--verde)">90%</td><td class="num" style="color:var(--oro)">$270.000</td></tr>
+      </tbody>
+    </table></div>
+    <div class="bien"><b>Tres tipos llegaron al 100%.</b> Nadie que compró una PRO Hombre, una PRO Mujer o una REBAJADA se quedó en la casa. <b>Cuando alguien paga, viene.</b> Esa es la regla más confiable del negocio.</div>
+  </section>
+
+  <section>
+    <div class="stag">Capítulo 3</div>
+    <h2>Qué lista trajo gente</h2>
+    <p class="lead">Acá está la sorpresa de la noche.</p>
+    <div style="margin-top:14px">
+      <div class="barra-lin"><span class="et">🎂 Cumpleaños Invitad@</span><span class="tr"><i style="width:91%;background:var(--verde)"></i></span><span class="nu">107 / 117 · <b>91%</b></span></div>
+      <div class="barra-lin"><span class="et">🍾 Lista VIP Fuego</span><span class="tr"><i style="width:69%;background:var(--oro)"></i></span><span class="nu">37 / 54 · <b>69%</b></span></div>
+      <div class="barra-lin"><span class="et">👥 Staff &amp; Amig@s</span><span class="tr"><i style="width:92%;background:var(--verde)"></i></span><span class="nu">11 / 12 · <b>92%</b></span></div>
+      <div class="barra-lin"><span class="et">📸 Cortesía Instagram</span><span class="tr"><i style="width:34%;background:var(--rojo)"></i></span><span class="nu">11 / 32 · <b>34%</b></span></div>
+    </div>
+    <div class="oro"><b>Los cumpleaños fueron el motor de la noche.</b> 117 invitados de cumpleaños y llegaron 107 — un <b>91%</b>. Es la lista de cortesía que mejor rinde de todas, por lejos. Cuando alguien celebra su cumpleaños acá, sus amigos <b>sí vienen</b>.</div>
+    <div class="peligro"><b>Y la que no funcionó: Cortesía Instagram, 34%.</b> De 32 entradas regaladas por Instagram, llegaron 11. Dos tercios se perdieron. No significa que esté mal hacerlo — significa que hay que <b>emitir el triple</b> de lo que quieres que llegue, o cambiar cómo se entrega.</div>
+  </section>
+
+  <section>
+    <div class="stag">Capítulo 4</div>
+    <h2>A qué hora llegó la gente</h2>
+    <div class="barras">
+      <div class="bcol"><span class="v">70</span><span class="b" style="height:37%"></span><span class="h">23h</span></div>
+      <div class="bcol"><span class="v">187</span><span class="b" style="height:100%"></span><span class="h">00h</span></div>
+      <div class="bcol"><span class="v">97</span><span class="b" style="height:52%"></span><span class="h">01h</span></div>
+      <div class="bcol"><span class="v">38</span><span class="b" style="height:20%"></span><span class="h">02h</span></div>
+      <div class="bcol"><span class="v">1</span><span class="b" style="height:3%"></span><span class="h">03h</span></div>
+    </div>
+    <p style="margin-top:14px">El peak fue entre <b>medianoche y la 1</b>: entraron 187 personas en una hora. Casi la mitad de la noche en 60 minutos.</p>
+    <div class="oro"><b>Para qué sirve esto:</b> es la hora en que la fila se hace larga y la puerta se satura. Ahí es donde hay que tener <b>más gente escaneando</b>. Y a las 23:00, con solo 70 personas entrando, no se necesita el equipo completo.</div>
+    <div class="bien"><b>Ojo con la cola larga:</b> el 20% de la gente entró después de las 02:00. Por eso importan las <b>horas máximas de ingreso</b> de cada ticket — la Lista VIP Fuego valía hasta las 02:30, y eso ordena el flujo.</div>
+  </section>
+
+  <section>
+    <div class="stag">Capítulo 5</div>
+    <h2>Qué nos enseñó esta noche</h2>
+    <ol>
+      <li><b>Los cumpleaños llenan.</b> 107 personas llegaron por cumpleaños: es el 27% de toda la noche, y con el mejor rendimiento de todas las listas.</li>
+      <li><b>La preventa no falla.</b> 97% de los que pagaron llegaron. Tres tipos al 100%.</li>
+      <li><b>Instagram regala mucho y trae poco.</b> 34%. Hay que ajustar la expectativa o el mecanismo.</li>
+      <li><b>Con menos cortesías se llenó más.</b> Esto es lo más importante y tiene su propio manual: <a href="/os-comparar">08 · Dos noches</a>.</li>
+    </ol>
+    <div class="oro"><b>La pregunta que hay que hacerse siempre:</b> ¿cuántas entradas emití y cuántas personas entraron? Si emites 448 y entran 393, vas bien. Si emites 614 y entran 368, hay algo que revisar.</div>
+  </section>
+
+  <div class="pie">FRATE OS · Manual 07 · <a href="/os">← El mapa</a> · <a href="/os-comparar">Siguiente: las dos noches comparadas →</a></div>
+</div>
+
+<script src="/os-guard.js"></script>
+<script>document.getElementById('bar').innerHTML = osBarra('07'); osProteger();</script>
+</body>
+</html>

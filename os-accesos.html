@@ -1,0 +1,191 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>FRATE WEB (TICKETERA) · OS 15 QUIÉN ENTRA DÓNDE</title>
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🔑</text></svg>">
+<link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@600;800;900&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="/os-manual.css">
+<style>
+  .puertas{width:100%;border-collapse:collapse;margin-top:16px;font-size:.84rem}
+  .puertas th{background:var(--neg3);padding:9px 8px;font-family:var(--disp);font-size:.7rem;
+    letter-spacing:1.2px;text-transform:uppercase;color:var(--gris2);border-bottom:1px solid var(--bor)}
+  .puertas th:first-child{text-align:left;min-width:150px}
+  .puertas td{padding:9px 8px;border-bottom:1px solid var(--bor);text-align:center;font-size:1rem}
+  .puertas td:first-child{text-align:left;color:var(--txt);font-size:.84rem}
+  .puertas td:first-child span{display:block;color:var(--gris2);font-size:.7rem;font-family:ui-monospace,monospace}
+  .puertas tr:last-child td{border-bottom:0}
+  .puertas .p{font-size:.62rem;color:var(--gris2);display:block;text-transform:none;letter-spacing:0;margin-top:2px}
+  .capas{display:grid;gap:10px;margin-top:16px}
+  .capa{display:flex;gap:14px;align-items:flex-start;background:var(--neg2);border:1px solid var(--bor);
+    border-radius:12px;padding:14px 16px}
+  .capa .nn{font-family:var(--disp);font-weight:900;font-size:1.6rem;line-height:1;flex-shrink:0;width:28px}
+  .capa.mal{border-left:3px solid var(--rojo)} .capa.mal .nn{color:var(--rojo)}
+  .capa.bien{border-left:3px solid var(--verde)} .capa.bien .nn{color:var(--verde)}
+  .capa h4{margin:0 0 3px;font-size:.95rem;color:var(--txt)}
+  .capa p{margin:0;color:var(--gris);font-size:.84rem}
+  .llaves{counter-reset:l;margin-top:14px;padding:0;list-style:none}
+  .llaves li{position:relative;padding:11px 0 11px 44px;border-bottom:1px solid var(--bor);color:var(--gris);font-size:.9rem}
+  .llaves li:last-child{border-bottom:0}
+  .llaves li::before{counter-increment:l;content:counter(l);position:absolute;left:0;top:9px;width:28px;height:28px;
+    border-radius:50%;background:var(--neg3);border:1px solid var(--bor2);color:var(--oro);
+    font-family:var(--disp);font-weight:900;display:flex;align-items:center;justify-content:center;font-size:.88rem}
+  .llaves li b{color:var(--txt)}
+  @media(max-width:640px){ .puertas{font-size:.72rem} .puertas th:first-child{min-width:110px} }
+</style>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+</head>
+<body>
+<div id="bar"></div>
+<div class="wrap">
+
+  <div class="hero">
+    <div class="eyebrow">Manual 15 · identidad</div>
+    <h1>Quién entra<br><em>dónde</em></h1>
+    <p class="sub">Cuatro identidades, diez puertas y tres capas de seguridad. Este capítulo explica cómo el sistema sabe quién eres y qué te deja hacer — y por qué la pantalla que ves no es lo que te protege.</p>
+    <div class="meta"><span>Todo el equipo</span><span>·</span><span>8 min</span></div>
+  </div>
+
+  <!-- ═══ 1 ═══ -->
+  <section>
+    <div class="stag">Lo primero</div>
+    <h2>Un admin es un cliente con una casilla marcada</h2>
+    <p class="lead">No existe una "cuenta de administrador" aparte. El sistema tiene una sola tabla de personas, y cada una tiene un <b>rol</b>.</p>
+    <p>El mismo Pablo que compra su entrada un jueves es el mismo Pablo que abre el panel. Una persona, una ficha, una clave. Cuando alguien entra al equipo no se le crea una cuenta nueva: <b>se le sube el rol a la que ya tiene</b>.</p>
+    <div class="oro"><b>Por qué importa.</b> Si mañana esa persona se va, no hay que "borrarle el acceso" en cinco lugares. Se le baja el rol y queda como cliente. Su historial de compras sigue intacto.</div>
+  </section>
+
+  <!-- ═══ 2 ═══ -->
+  <section>
+    <div class="stag">Las identidades</div>
+    <h2>Cuatro roles, y nada más</h2>
+    <table class="tabla">
+      <tr><th>Rol</th><th>Quién es</th><th>Cómo se obtiene</th></tr>
+      <tr><td><b>usuario</b></td><td>El cliente. Compra y ve lo suyo.</td><td><b>Automático</b> al registrarse en frate.cl</td></tr>
+      <tr><td><b>rrpp</b></td><td>Embajadora o anfitrión. Arma listas, trae gente.</td><td>Se lo asigna un admin</td></tr>
+      <tr><td><b>portero</b></td><td>El que escanea en la puerta.</td><td>Se lo asigna un admin</td></tr>
+      <tr><td><b>admin</b></td><td>Todo el panel.</td><td>Se lo asigna otro admin</td></tr>
+    </table>
+    <p style="margin-top:14px">Y una quinta, la más numerosa: <b>nadie</b> — el visitante sin cuenta, que igual puede comprar una entrada.</p>
+    <div class="bien"><b>Cuatro y se acabó.</b> No hay roles escondidos ni cuentas de servicio con nombre de persona. Si ves un rol que no está en esta lista, algo anda mal.</div>
+  </section>
+
+  <!-- ═══ 3 ═══ -->
+  <section>
+    <div class="stag">El mapa</div>
+    <h2>Las diez puertas</h2>
+    <p class="lead">🟢 abre &nbsp;·&nbsp; 🟡 abre recortado &nbsp;·&nbsp; ⚪️ no abre</p>
+    <div style="overflow-x:auto">
+    <table class="puertas">
+      <thead><tr><th>Puerta</th><th>Sin<span class="p">cuenta</span></th><th>usuario</th><th>rrpp</th><th>portero</th><th>admin</th></tr></thead>
+      <tbody>
+        <tr><td>Sitio y compra <span>/ · /e/evento</span></td><td>🟢</td><td>🟢</td><td>🟢</td><td>🟢</td><td>🟢</td></tr>
+        <tr><td>Mi cuenta, mis entradas</td><td>⚪️</td><td>🟢</td><td>🟢</td><td>🟢</td><td>🟢</td></tr>
+        <tr><td>Anotarse en lista <span>/lista/CODIGO</span></td><td>🟢</td><td>🟢</td><td>🟢</td><td>🟢</td><td>🟢</td></tr>
+        <tr><td>Pedir devolución <span>/devolucion</span></td><td>🟢</td><td>🟢</td><td>🟢</td><td>🟢</td><td>🟢</td></tr>
+        <tr><td><b>Backoffice</b> <span>/admin</span></td><td>⚪️</td><td>⚪️</td><td>🟡</td><td>🟡</td><td>🟢</td></tr>
+        <tr><td><b>Validador de puerta</b> <span>/validacion</span></td><td>⚪️</td><td>⚪️</td><td>⚪️</td><td>🟢</td><td>🟢</td></tr>
+        <tr><td>Portal RRPP <span>/rrpp</span></td><td>⚪️</td><td>⚪️</td><td>🟡</td><td>⚪️</td><td>🟢</td></tr>
+        <tr><td>FRATE PASE <span>/pase</span></td><td>⚪️</td><td>⚪️</td><td>🟢</td><td>⚪️</td><td>🟢</td></tr>
+        <tr><td>CONNECT · inbox <span>/connect</span></td><td>⚪️</td><td>⚪️</td><td>🟢</td><td>🟢</td><td>🟢</td></tr>
+        <tr><td>Estos manuales <span>/os</span></td><td>⚪️</td><td>⚪️</td><td>🟢</td><td>🟢</td><td>🟢</td></tr>
+      </tbody>
+    </table>
+    </div>
+
+    <h3 style="margin-top:26px">Los dos recortes que más se usan</h3>
+    <table class="tabla">
+      <tr><th>Rol</th><th>Qué ve exactamente</th></tr>
+      <tr><td><b>portero</b> en el panel</td><td>Solo <b>Órdenes</b>, y adentro <b>solo la pestaña Validar QR</b>. La lista de órdenes con nombres, correos y RUT queda escondida.</td></tr>
+      <tr><td><b>rrpp</b> en su portal</td><td>Solo <b>sus</b> listas. No es que las otras se le escondan: la base <b>no se las manda</b>.</td></tr>
+    </table>
+
+    <div class="oro"><b>Sobre la devolución sin cuenta:</b> cualquiera puede abrir <b>/devolucion</b>, pero tiene que saber <b>el número de orden Y el correo</b> de esa compra. Con uno solo no encuentra nada.</div>
+  </section>
+
+  <!-- ═══ 4 ═══ -->
+  <section>
+    <div class="stag">Lo que de verdad protege</div>
+    <h2>Tres capas, y solo dos sirven</h2>
+    <p class="lead">Acá está la parte que más confunde, y la que más importa entender.</p>
+
+    <div class="capas">
+      <div class="capa mal">
+        <div class="nn">1</div>
+        <div><h4>La pantalla — es cortesía, no seguridad</h4>
+        <p>Esconde los menús que tu rol no usa. Sirve para no perderte, <b>no para protegerte</b>: alguien que sepa lo que hace la puede saltar desde el navegador.</p></div>
+      </div>
+      <div class="capa bien">
+        <div class="nn">2</div>
+        <div><h4>La base de datos — esta es la ley</h4>
+        <p>Cada tabla pregunta <i>«¿quién eres?»</i> antes de entregar una sola fila. Son <b>90 reglas</b> activas. Un rrpp que intente leer las órdenes no recibe una lista recortada: <b>no recibe nada</b>.</p></div>
+      </div>
+      <div class="capa bien">
+        <div class="nn">3</div>
+        <div><h4>Las funciones del servidor — el segundo candado</h4>
+        <p>Las operaciones importantes (validar un QR, emitir cortesías, devolver plata) vuelven a preguntar el rol <b>del lado del servidor</b>, donde nadie puede mentir.</p></div>
+      </div>
+    </div>
+
+    <div class="pant" style="margin-top:20px">
+      <div class="barra">El ejemplo que lo explica todo · la pantalla /vivo</div>
+      <div class="fila"><span class="sem" style="background:var(--oro)"></span><span style="flex:1">Un cliente con cuenta abre <b>/vivo</b></span><span style="color:var(--oro);font-size:.68rem">ve el marco</span></div>
+      <div class="fila"><span class="sem" style="background:var(--verde)"></span><span style="flex:1">La pantalla le pide los datos al servidor</span><span style="color:var(--verde);font-size:.68rem">pregunta el rol</span></div>
+      <div class="fila"><span class="sem" style="background:var(--rojo)"></span><span style="flex:1">El servidor ve que no es portero ni admin</span><span style="color:var(--rojo);font-size:.68rem">no manda nada</span></div>
+    </div>
+    <div class="bien" style="margin-top:14px"><b>La frase para recordar:</b> la pantalla es cortesía, <b>la base es la ley</b>. Por eso una pantalla que se abre no significa que haya una fuga.</div>
+  </section>
+
+  <!-- ═══ 5 ═══ -->
+  <section>
+    <div class="stag">El candado</div>
+    <h2>Cómo alguien se hace admin</h2>
+    <p class="lead">Tres llaves, y tienen que girar las tres. Si falta una, el sistema devuelve el rol viejo <b>sin decir nada</b>.</p>
+    <ol class="llaves">
+      <li>Quien lo hace <b>ya es admin</b>.</li>
+      <li>El correo de la persona está en la <b>lista blanca</b>, y para <b>ese rol exacto</b>.</li>
+      <li>Se hace desde <b>Configuración → Cuentas &amp; Roles</b>, que escribe las dos cosas a la vez.</li>
+    </ol>
+    <div class="bien"><b>Lo que esto impide:</b> que alguien con acceso a la base se ponga <code>admin</code> a mano. Aunque escriba la palabra, el candado se la borra.</div>
+    <div class="oro"><b>De yapa:</b> el mismo candado impide que alguien que no es admin se toque su propio <b>crédito</b> o su <b>membresía</b>. Y <b>nadie puede bajarse el rol a sí mismo</b> — hace falta otro admin.</div>
+  </section>
+
+  <!-- ═══ 6 ═══ -->
+  <section>
+    <div class="stag">La excepción</div>
+    <h2>El ingreso fuera de horario</h2>
+    <p>Cuando alguien llega después de la hora de su entrada, la puerta lo rechaza. Pero a veces hay que dejarlo pasar igual. Para eso está <b>Autorizar igual</b>, y ahí el sistema ofrece <b>dos puertas</b>.</p>
+
+    <table class="tabla">
+      <tr><th>Cómo autorizas</th><th>Qué queda escrito</th></tr>
+      <tr><td>✅ <b>Con tu cuenta de admin</b><br><span style="color:var(--gris2);font-size:.78rem">correo + clave, ahí mismo en la puerta</span></td><td style="color:var(--verde)"><b>Tu nombre.</b> Queda claro quién dejó pasar a esa persona.</td></tr>
+      <tr><td>🔑 <b>Con el PIN del equipo</b><br><span style="color:var(--gris2);font-size:.78rem">los cuatro dígitos de siempre</span></td><td style="color:var(--oro)"><b>«llave compartida».</b> El PIN lo sabe todo el equipo, así que no se sabe quién fue.</td></tr>
+    </table>
+
+    <div class="oro"><b>El PIN no se elimina, y es a propósito.</b> Si un sábado a las 3 de la mañana nadie recuerda su clave, o no hay señal, la puerta tiene que abrir igual. Un sistema que te deja afuera en medio de una noche es peor que uno con una llave imperfecta.</div>
+    <div class="peligro"><b>Pero no es gratis.</b> Todas las autorizaciones aparecen en el panel, en <b>Devoluciones &amp; Reactivaciones</b>, y las que se hicieron con el PIN salen marcadas <b>«sin firma»</b>. Si un mes aparecen veinte sin firma, hay una conversación que tener.</div>
+  </section>
+
+  <!-- ═══ Cierre ═══ -->
+  <section>
+    <div class="stag">Cierre</div>
+    <h2>Las cinco cosas que hay que saber</h2>
+    <ol>
+      <li><b>Tu cuenta de cliente es tu cuenta de trabajo.</b> No hay dos. Cuida tu clave como cuidas la del banco.</li>
+      <li><b>Nunca prestes tu cuenta.</b> Todo lo que se haga con ella va a quedar a tu nombre. Si alguien necesita entrar, se le sube el rol a la suya.</li>
+      <li><b>Si te dan de baja, se corta al instante.</b> No importa que tengas la sesión abierta: la base deja de responderte.</li>
+      <li><b>Que se te abra una pantalla no significa que veas datos.</b> El servidor decide qué te manda.</li>
+      <li><b>El PIN de la puerta es el último recurso.</b> Existe para emergencias, y cada uso queda marcado como sin firma.</li>
+    </ol>
+    <div class="bien"><b>Lo que el sistema hace bien hoy:</b> sabe perfectamente <b>quién puede</b> hacer cada cosa. Las claves están cifradas, nadie las puede ver — ni nosotros.</div>
+    <div class="no"><b>Lo que todavía falta:</b> el sistema no guarda <b>quién hizo</b> cada acción dentro del panel. Sabe que se devolvió una plata; todavía no registra quién apretó el botón. Está en la lista, y es lo próximo.</div>
+  </section>
+
+  <div class="pie">FRATE OS · Manual 15 · <a href="/os-datos">← Calidad de datos</a> · <a href="/os-libro">Todos los manuales →</a></div>
+</div>
+
+<script src="/os-guard.js"></script>
+<script>document.getElementById('bar').innerHTML = osBarra('15'); osProteger();</script>
+</body>
+</html>

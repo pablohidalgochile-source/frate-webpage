@@ -1,0 +1,160 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>FRATE WEB (TICKETERA) · OS 09 CONOCER A UN CLIENTE</title>
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🔎</text></svg>">
+<link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@600;800;900&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="/os-manual.css">
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<style>
+  .rastro{background:var(--neg2);border:1px solid var(--bor);border-radius:14px;padding:6px 18px 14px;margin-top:14px}
+  .rev{display:flex;gap:13px;padding:13px 0;border-bottom:1px solid var(--bor);align-items:flex-start}
+  .rev:last-child{border-bottom:0}
+  .rev .fe{flex:0 0 66px;font-size:.74rem;color:var(--gris2);font-variant-numeric:tabular-nums;padding-top:2px}
+  .rev .ic{flex:0 0 30px;height:30px;border-radius:9px;display:grid;place-items:center;font-size:.92rem}
+  .rev .cu{flex:1;min-width:0}
+  .rev .ti{font-weight:800;font-size:.88rem}
+  .rev .de{font-size:.76rem;color:var(--gris);margin-top:2px}
+  .i-sol{background:rgba(196,181,253,.16)} .i-ent{background:rgba(74,222,128,.16)}
+  .i-lis{background:rgba(96,165,250,.16)}  .i-com{background:rgba(230,200,96,.16)}
+  .persona{display:flex;gap:14px;align-items:center;flex-wrap:wrap;background:linear-gradient(135deg,rgba(232,54,61,.12),transparent);
+    border:1px solid var(--bor);border-radius:14px;padding:16px 18px}
+  .ava{width:50px;height:50px;border-radius:50%;background:var(--rojo);color:#fff;display:grid;place-items:center;
+    font-family:var(--disp);font-weight:900;font-size:1.3rem}
+  .paso-n{display:flex;gap:13px;margin-top:14px;align-items:flex-start}
+  .paso-n .num3{font-family:var(--disp);font-weight:900;font-size:1.6rem;color:var(--rojo);line-height:1;min-width:30px}
+</style>
+</head>
+<body>
+<div id="bar"></div>
+<div class="wrap">
+
+  <div class="hero">
+    <div class="eyebrow">Manual 09 · casos reales</div>
+    <h1>Conocer a<br>un <em>cliente</em></h1>
+    <p class="sub">Cómo seguirle el rastro a una persona: cuántas veces vino, cómo se comporta, qué le interesa y qué oportunidad estamos dejando pasar con ella.</p>
+    <div class="meta"><span>Comunidad · RRPP · Administración</span><span>·</span><span>Casos reales</span></div>
+  </div>
+
+  <section>
+    <div class="stag">Capítulo 1</div>
+    <h2>Los cuatro rastros</h2>
+    <p class="lead">Cada persona deja huellas en cuatro lugares distintos. Juntarlas es lo que llamamos "conocer al cliente".</p>
+    <div class="tw"><table class="tabla">
+      <thead><tr><th>Rastro</th><th>Qué nos dice</th><th>Dónde se ve</th></tr></thead>
+      <tbody>
+        <tr><td><b>🎂 SOLICITÓ</b></td><td>Qué quiso hacer: celebrar su cumpleaños, reservar mesa, ser frecuente.</td><td>Comunidad → Formularios</td></tr>
+        <tr><td><b>📋 EN LISTA</b></td><td>Alguien la invitó. Nos dice <b>quién la trae</b>.</td><td>Comunidad → Cortesías</td></tr>
+        <tr><td><b>💰 COMPRÓ</b></td><td>Pagó. Cuánto, qué tipo de entrada y cuándo.</td><td>Órdenes</td></tr>
+        <tr><td><b>🚪 ENTRÓ</b></td><td>La huella más importante: <b>vino de verdad</b>, y a qué hora.</td><td>Puerta / Reportes</td></tr>
+      </tbody>
+    </table></div>
+    <div class="oro"><b>La diferencia entre "invitado" y "asistente":</b> estar en una lista no es haber venido. Solo el rastro <b>ENTRÓ</b> confirma que la persona cruzó la puerta. Cuando midas gente, mide ingresos, no invitaciones.</div>
+  </section>
+
+  <section>
+    <div class="stag">Capítulo 2 · caso real</div>
+    <h2>Camila: la oportunidad que se nos fue</h2>
+    <p class="lead">Caso real del 15 de julio. Nombre cambiado, RUT enmascarado — el comportamiento es exactamente el que registró el sistema.</p>
+
+    <div class="persona">
+      <div class="ava">CG</div>
+      <div style="flex:1;min-width:190px">
+        <div style="font-weight:800;font-size:1.05rem">CAMILA G.</div>
+        <div style="font-size:.78rem;color:var(--gris)">22.16X.XXX-5 · primera vez: 15 de julio</div>
+      </div>
+      <div style="font-size:.75rem;color:var(--gris2);text-align:right">Origen del dato:<br><b style="color:var(--txt)">venta · cortesía · lista · invitada</b></div>
+    </div>
+
+    <div class="rastro">
+      <div class="rev"><span class="fe">15 jul</span><span class="ic i-sol">🎂</span><div class="cu">
+        <div class="ti">Pidió celebrar su cumpleaños</div>
+        <div class="de">Llenó el formulario de cumpleaños en frate.cl. Estado final: <b style="color:var(--rojo)">no realizado</b>.</div></div></div>
+      <div class="rev"><span class="fe">15 jul</span><span class="ic i-ent">🚪</span><div class="cu">
+        <div class="ti">Entró a las 23:51</div>
+        <div class="de">A TI TE REZO, MI SANTA — como <b>invitada del cumpleaños de otra persona</b>.</div></div></div>
+      <div class="rev"><span class="fe">16 jul</span><span class="ic i-lis">📋</span><div class="cu">
+        <div class="ti">Quedó en la lista "Cumples FRATE Miércoles"</div>
+        <div class="de">Cortesía de $0, aprobada.</div></div></div>
+    </div>
+
+    <div class="peligro" style="font-size:1rem"><b>Lee la historia completa:</b> Camila <b>quiso hacer su cumpleaños acá</b>. Llenó el formulario. Nadie cerró el trato — quedó marcado "no realizado". Y esa misma noche <b>vino igual</b>, pero como invitada del cumpleaños de otra persona.<br><br>
+      Un cumpleaños que sí se concreta trae <b>~20 personas</b> (lo vimos en el <a href="/os-comparar">manual 08</a>: los invitados de cumpleaños llegan en un 91%). Camila vino sola.</div>
+
+    <div class="oro"><b>Qué hacer con esta información:</b> las solicitudes de cumpleaños que quedan en "no realizado" <b>no son basura, son una lista de clientes calientes</b>. Ya levantaron la mano. Al que no cerró se le puede escribir: <i>"vimos que querías celebrar acá, ¿lo armamos para el próximo mes?"</i> Y desde su ficha se le escribe por WhatsApp en dos clics.</div>
+  </section>
+
+  <section>
+    <div class="stag">Capítulo 3 · caso real</div>
+    <h2>Matías: el que vino por otro</h2>
+    <p class="lead">Caso real del 12 de julio. Muestra la cadena que hace crecer el local.</p>
+
+    <div class="persona">
+      <div class="ava">ML</div>
+      <div style="flex:1;min-width:190px">
+        <div style="font-weight:800;font-size:1.05rem">MATÍAS L.</div>
+        <div style="font-size:.78rem;color:var(--gris)">21.46X.XXX-K · <b style="color:var(--oro)">👥 vino por: J. R.</b></div>
+      </div>
+      <div style="font-size:.75rem;color:var(--gris2);text-align:right">Entró a las<br><b style="color:var(--verde)">00:27</b></div>
+    </div>
+
+    <div class="rastro">
+      <div class="rev"><span class="fe">12 jul</span><span class="ic i-lis">📋</span><div class="cu">
+        <div class="ti">Lo inscribieron en "Cumpleaños Sábado"</div>
+        <div class="de">Alguien celebraba su cumpleaños y lo puso en su lista de invitados.</div></div></div>
+      <div class="rev"><span class="fe">12 jul</span><span class="ic i-com">🎁</span><div class="cu">
+        <div class="ti">Se le emitió su cortesía</div>
+        <div class="de">SOLIT@ Y FRIOLENT@ · entrada de $0 con su QR.</div></div></div>
+      <div class="rev"><span class="fe">12 jul</span><span class="ic i-ent">🚪</span><div class="cu">
+        <div class="ti">Entró a las 00:27</div>
+        <div class="de">Vino. El cumpleaños de otra persona lo trajo al local.</div></div></div>
+    </div>
+
+    <div class="bien"><b>Esta es la cadena que hay que entender:</b> una persona celebra su cumpleaños → invita a 20 amigos → esos amigos entran y quedan en el CRM → algunos vuelven después <b>por su cuenta y pagando</b>. Por eso el campo <b>"vino por"</b> vale oro: te dice qué cumpleaños te está trayendo clientes nuevos.</div>
+    <div class="oro"><b>Uso práctico:</b> a los invitados de un cumpleaños que sí llegaron, se les puede ofrecer preventa del próximo evento. Ya conocen el local, ya les gustó. Son el público más fácil de convertir en cliente que paga.</div>
+  </section>
+
+  <section>
+    <div class="stag">Capítulo 4</div>
+    <h2>Cómo seguir un rastro tú mismo</h2>
+    <p class="lead">Cinco pasos, dos minutos.</p>
+    <div class="paso-n"><span class="num3">1</span><div><b>Búscala.</b> Escribe su nombre, RUT o correo en el buscador de arriba del panel. Sale de todos lados a la vez: personas, cortesías, listas y órdenes.</div></div>
+    <div class="paso-n"><span class="num3">2</span><div><b>Abre su ficha</b> en Comunidad → Personas. Ahí ves de una: visitas, gasto, categoría, cumpleaños y de dónde salió.</div></div>
+    <div class="paso-n"><span class="num3">3</span><div><b>Mira los orígenes.</b> Si dice <i>venta</i>, compró alguna vez. Si dice solo <i>cortesía · invitado</i>, <b>nunca ha pagado</b> — y eso cambia cómo le hablas.</div></div>
+    <div class="paso-n"><span class="num3">4</span><div><b>Revisa "vino por".</b> Si tiene un nombre ahí, llegó por el cumpleaños de alguien. Ese alguien es un cliente valioso.</div></div>
+    <div class="paso-n"><span class="num3">5</span><div><b>Escríbele desde ahí mismo.</b> Los botones de contacto abren su WhatsApp o Instagram, o le mandas un mensaje por el número de FRATE para que quede en el historial del equipo.</div></div>
+    <div class="oro"><b>La pregunta que hay que hacerse siempre:</b> ¿esta persona paga o siempre viene gratis? Las dos son valiosas, pero <b>se les habla distinto</b>. A la que paga se le cuida el beneficio; a la que siempre viene de cortesía, en algún momento hay que invitarla a comprar.</div>
+  </section>
+
+  <section>
+    <div class="stag">Capítulo 5</div>
+    <h2>Lo que este ejercicio destapó</h2>
+    <p class="lead">Al seguir estos dos rastros reales aparecieron dos problemas de datos. Los decimos porque afectan las decisiones.</p>
+
+    <h3>1 · El contador de visitas está inflado</h3>
+    <p>La ficha de Camila dice <b>9 visitas</b>, pero su rastro muestra <b>un solo ingreso</b>. El número de visitas hoy <b>no es confiable</b> para decidir quién es cliente frecuente.</p>
+
+    <h3>2 · Hay personas duplicadas en las listas</h3>
+    <p>Matías aparece <b>dos veces</b> en la misma lista: dos cortesías idénticas, dos QR, y dos ingresos registrados con <b>un minuto de diferencia</b> (00:27 y 00:28). Es una sola persona que ocupó <b>dos cupos</b>.</p>
+    <div class="peligro"><b>Por qué importa:</b> si en una lista de 150 cortesías hay 20 duplicados, estás regalando 20 cupos que nadie usa, y esas personas aparecen como si vinieran el doble de veces. <b>Eso ensucia el aforo y el ranking de clientes.</b></div>
+    <div class="bien"><b>Cómo se evita:</b> el sistema marca los duplicados al revisar la lista, <b>antes</b> de emitir. Es exactamente el paso que nunca hay que saltarse (<a href="/os-noche">manual 04</a>). Cuando el semáforo diga "duplicado", hay que sacarlo.</div>
+    <div class="oro"><b>Está en la lista de arreglos.</b> Mientras tanto, para saber si alguien es frecuente, mira su <b>rastro de ingresos</b> (cuántas veces dice "ENTRÓ" en fechas distintas), no el contador de visitas.</div>
+  </section>
+
+  <section>
+    <div class="stag">Cierre</div>
+    <h2>Por qué esto importa</h2>
+    <p class="lead" style="font-size:1.1rem;max-width:700px">Cada persona que entra deja un rastro. Si nadie lo lee, es solo una noche más. Si alguien lo lee, es un cliente que vuelve.</p>
+    <p>Camila quería celebrar su cumpleaños con nosotros y nadie la llamó de vuelta. Matías vino por el cumpleaños de una amiga y nunca supo que existía la preventa. Los dos rastros estaban ahí, en el sistema, esperando que alguien los mirara.</p>
+    <div class="bien"><b>Eso es todo el trabajo:</b> mirar los rastros y actuar. El sistema ya guarda todo — lo que falta es la conversación que sigue.</div>
+  </section>
+
+  <div class="pie">FRATE OS · Manual 09 · <a href="/os-comparar">← Dos noches</a> · <a href="/os">Volver al mapa →</a></div>
+</div>
+
+<script src="/os-guard.js"></script>
+<script>document.getElementById('bar').innerHTML = osBarra('09'); osProteger();</script>
+</body>
+</html>

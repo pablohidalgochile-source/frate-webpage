@@ -1,0 +1,64 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>FRATE OS · POS 05 El catálogo</title>
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>📋</text></svg>">
+<link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@600;800;900&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="/os-manual.css">
+<link rel="stylesheet" href="/os-pos.css">
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<style>
+  .dos{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:12px;margin-top:14px}
+  .via{background:var(--neg2);border:1px solid var(--bor);border-radius:13px;padding:16px 18px}
+  .via h4{font-family:var(--disp);font-weight:800;font-size:1.05rem;text-transform:uppercase;margin-bottom:4px}
+  .via .c{font-size:.68rem;letter-spacing:1.3px;text-transform:uppercase;color:var(--gris2);margin-bottom:9px}
+  .via p{font-size:.83rem;color:var(--gris)}
+  .via .paso-n{font-family:var(--disp);font-weight:900;font-size:1.6rem;color:var(--acc);line-height:1}
+</style>
+</head>
+<body>
+<div id="bar"></div>
+<div class="wrap">
+
+  <div class="hero">
+    <div class="eyebrow">POS · Manual 05</div>
+    <h1>El <em>catálogo</em></h1>
+    <p class="sub">De un producto suelto a la carta de la noche, con combos, promos e inventario.</p>
+    <div class="meta"><span>Para quien arma la carta</span><span>·</span><span>6 minutos</span></div>
+  </div>
+
+  <section>
+    <div class="stag">Capítulo 1</div>
+    <h2>De un producto a la carta</h2>
+    <p class="lead">Un producto se vuelve carta cuando le sumas formatos, precios de la noche y su enlace con la bodega del ERP.</p>
+    <div class="dos">
+      <div class="via"><div class="paso-n">01</div><h4>Producto</h4><p>El ítem base: una cerveza, un trago.</p></div>
+      <div class="via"><div class="paso-n">02</div><h4>Combo</h4><p>2×1, packs, precio con cover.</p></div>
+      <div class="via"><div class="paso-n">03</div><h4>Promo</h4><p>Con hora de inicio y de expiración.</p></div>
+      <div class="via"><div class="paso-n" style="color:var(--sys-erp)">04</div><h4>🧠 Inventario</h4><p>Se mapea al stock del ERP.</p></div>
+    </div>
+    <div class="oro"><b>La promo expira sola.</b> Una promo con hora de fin <strong>desaparece del POS</strong> cuando vence. Nadie tiene que acordarse de sacarla a mitad de la noche.</div>
+    <div class="bien"><b>El stock baja en el cierre, no en la venta.</b> El inventario se ajusta en el <strong>cierre o por lote</strong>, nunca trago a trago. Poner esa resta dentro de la venta ya tumbó cobros con tarjeta una vez: por eso va aparte.</div>
+  </section>
+
+  <section>
+    <div class="stag">Capítulo 2</div>
+    <h2>Cómo lo vives tú</h2>
+    <div class="dos" style="grid-template-columns:repeat(auto-fit,minmax(260px,1fr))">
+      <div class="via"><h4>👤 Operador · en la Sunmi</h4><div class="c">A las 2 AM</div><p>La promo 2×1 de la primera hora <b>ya no aparece</b> en tu pantalla: expiró sola. Cobras el precio normal sin pensarlo, y no discutes con nadie si "todavía valía".</p></div>
+      <div class="via"><h4>🛠 Admin · en el panel</h4><div class="c">Armar la carta de BESUCONA</div><p>Subes los productos, marcas un <b>combo</b> con precio-con-cover, pones una <b>promo</b> de 00:00 a 01:00, y mapeas cada producto al stock del ERP. Al cerrar la noche, el inventario baja de una.</p></div>
+    </div>
+  </section>
+
+  <div class="pie">FRATE OS · POS · Manual 05 · <a href="/os-pos-puerta">← Puerta y barra</a> · <a href="/os-pos-reglas">Siguiente: reglas de oro →</a></div>
+</div>
+
+<script src="/os-guard.js"></script>
+<script>
+  document.getElementById('bar').innerHTML = osBarra('05', 'pos');
+  osProteger();
+</script>
+</body>
+</html>

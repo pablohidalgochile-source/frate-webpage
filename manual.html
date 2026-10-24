@@ -1,0 +1,284 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>FRATE WEB (TICKETERA) · MANUAL DEL SISTEMA</title>
+<meta name="theme-color" content="#0A0A0B" />
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@500;700;900&family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet" />
+<link rel="icon" href="/icon-frate.svg" type="image/svg+xml" />
+<style>
+  :root{ --negro:#0A0A0B; --negro2:#141416; --negro3:#1b1b1e; --borde:#2a2a2e;
+    --rojo:#E8363D; --dorado:#D4A832; --dorado2:#f0c75a; --verde:#22c55e; --azul:#5b8def; --gris:#9a9aa2; --txt:#f2f0ec;
+    --disp:'Barlow Condensed',sans-serif; --body:'Inter',-apple-system,sans-serif; }
+  *{box-sizing:border-box;} html{scroll-behavior:smooth;}
+  body{margin:0;background:var(--negro);color:var(--txt);font-family:var(--body);line-height:1.6;-webkit-font-smoothing:antialiased;}
+  a{color:var(--dorado);text-decoration:none;} .wrap{max-width:860px;margin:0 auto;padding:0 22px 90px;}
+  .cover{position:relative;padding:64px 22px 44px;text-align:center;background:
+     radial-gradient(680px 340px at 50% -8%, rgba(212,168,50,.14), transparent 60%),
+     radial-gradient(520px 300px at 50% 120%, rgba(232,54,61,.10), transparent 60%);border-bottom:1px solid var(--borde);}
+  .cover .kicker{font-family:var(--disp);letter-spacing:8px;font-weight:700;color:var(--dorado);font-size:.9rem;}
+  .cover h1{font-family:var(--disp);font-weight:900;font-size:clamp(2.5rem,8vw,4.2rem);line-height:.95;margin:8px 0 6px;letter-spacing:1px;text-transform:uppercase;}
+  .cover h1 span{color:var(--rojo);}
+  .cover .sub{color:var(--gris);font-size:1rem;max-width:520px;margin:6px auto 0;}
+  .roles-badges{display:flex;gap:8px;justify-content:center;flex-wrap:wrap;margin-top:18px;}
+  .rb{border:1px solid var(--borde);border-radius:999px;padding:6px 15px;font-size:.8rem;font-weight:600;}
+  .rb b{color:var(--dorado);}
+  .hair{height:2px;width:120px;margin:24px auto 0;background:linear-gradient(90deg,transparent,var(--dorado),transparent);}
+
+  .urgent{background:linear-gradient(135deg,rgba(232,54,61,.14),rgba(212,168,50,.06));border:1px solid rgba(232,54,61,.4);border-radius:16px;padding:20px 22px;margin:30px 0;}
+  .urgent .em{font-family:var(--disp);font-weight:900;letter-spacing:1px;text-transform:uppercase;color:var(--rojo);font-size:1.1rem;}
+
+  .toc{background:var(--negro2);border:1px solid var(--borde);border-radius:16px;padding:18px 22px;margin:26px 0;}
+  .toc h3{font-family:var(--disp);letter-spacing:2px;text-transform:uppercase;color:var(--gris);font-size:.8rem;margin:0 0 10px;}
+  .toc ol{margin:0;padding-left:0;list-style:none;counter-reset:t;columns:2;column-gap:26px;}
+  @media(max-width:560px){ .toc ol{columns:1;} }
+  .toc li{counter-increment:t;padding:5px 0;display:flex;gap:10px;align-items:baseline;break-inside:avoid;}
+  .toc li::before{content:counter(t,decimal-leading-zero);font-family:var(--disp);font-weight:700;color:var(--dorado);font-size:.85rem;min-width:24px;}
+  .toc a{color:var(--txt);font-weight:500;font-size:.92rem;} .toc a:hover{color:var(--dorado);}
+
+  section{margin:46px 0;scroll-margin-top:20px;}
+  .snum{display:inline-flex;align-items:center;justify-content:center;width:38px;height:38px;border-radius:50%;border:1.5px solid var(--dorado);color:var(--dorado);font-family:var(--disp);font-weight:900;font-size:1.2rem;flex-shrink:0;}
+  .shead{display:flex;gap:14px;align-items:center;margin-bottom:4px;}
+  .shead h2{font-family:var(--disp);font-weight:900;font-size:1.85rem;letter-spacing:.5px;text-transform:uppercase;margin:0;line-height:1;}
+  .who{font-size:.68rem;letter-spacing:1px;text-transform:uppercase;font-weight:700;padding:3px 9px;border-radius:6px;margin-left:auto;}
+  .who.admin{background:rgba(212,168,50,.15);color:var(--dorado2);} .who.rrpp{background:rgba(91,141,239,.15);color:var(--azul);} .who.todos{background:rgba(34,197,94,.14);color:var(--verde);}
+  .slead{color:var(--gris);margin:8px 0 16px 52px;font-size:.96rem;} @media(max-width:520px){.slead{margin-left:0;}}
+  .card{background:var(--negro2);border:1px solid var(--borde);border-radius:16px;padding:20px 22px;margin:14px 0;}
+  .card h4{font-family:var(--disp);font-weight:700;letter-spacing:1px;text-transform:uppercase;color:var(--dorado);font-size:1rem;margin:0 0 8px;}
+  .steps{counter-reset:s;margin:0;padding:0;list-style:none;}
+  .steps li{counter-increment:s;position:relative;padding:11px 0 11px 44px;border-bottom:1px solid #212127;}
+  .steps li:last-child{border-bottom:none;}
+  .steps li::before{content:counter(s);position:absolute;left:0;top:10px;width:29px;height:29px;border-radius:9px;background:rgba(212,168,50,.12);color:var(--dorado);font-family:var(--disp);font-weight:900;display:flex;align-items:center;justify-content:center;}
+  .steps b{color:#fff;}
+  .ui{display:inline-flex;align-items:center;gap:5px;background:var(--negro3);border:1px solid #34343a;border-radius:8px;padding:2px 9px;font-size:.86rem;font-weight:600;color:#fff;white-space:nowrap;line-height:1.8;}
+  .ui.gold{border-color:rgba(212,168,50,.5);color:var(--dorado2);} .ui.red{border-color:rgba(232,54,61,.5);color:#ff8085;} .ui.blue{border-color:rgba(91,141,239,.5);color:#9db8f5;}
+  .path{color:var(--gris);font-size:.88rem;}
+  .callout{border-radius:14px;padding:13px 18px;margin:14px 0;font-size:.92rem;border:1px solid;}
+  .tip{background:rgba(34,197,94,.07);border-color:rgba(34,197,94,.3);} .tip b{color:var(--verde);}
+  .warn{background:rgba(232,54,61,.07);border-color:rgba(232,54,61,.32);} .warn b{color:#ff8b8f;}
+  .callout .em{font-family:var(--disp);font-weight:700;letter-spacing:1px;text-transform:uppercase;display:block;margin-bottom:3px;font-size:.88rem;}
+  ul.dot{margin:6px 0;padding-left:20px;color:#dcdce2;font-size:.93rem;line-height:1.85;}
+  .foot{margin-top:56px;padding-top:24px;border-top:1px solid var(--borde);text-align:center;color:var(--gris);font-size:.85rem;}
+  .btn-print{position:fixed;right:16px;bottom:16px;background:var(--dorado);color:#1a1400;border:none;border-radius:30px;padding:11px 18px;font-weight:700;font-family:var(--body);cursor:pointer;box-shadow:0 8px 26px rgba(0,0,0,.5);z-index:20;}
+  @media print{ body{background:#fff;color:#111;} .btn-print{display:none;} .cover,.card,.toc,.urgent{background:#fafafa;border-color:#ddd;} .cover h1 span,.snum,.shead h2,.card h4,.toc li::before,.steps li::before{color:#111!important;} .ui{background:#eee;color:#111;border-color:#ccc;} a{color:#111;} section{page-break-inside:avoid;} }
+</style>
+</head>
+<body>
+<!--ARCHIVO-OS-->
+<div style="background:#2a1d05;border-bottom:3px solid #E6C860;padding:14px 20px;font:400 15px/1.5 system-ui;color:#f2f2f4;text-align:center"><b style="color:#E6C860">📦 Manual antiguo — se conserva como referencia</b><br><span style="color:#c9c9cf">Algunas partes ya no reflejan cómo funciona el sistema hoy. La versión vigente es <b>el libro completo de FRATE OS (4 series, 37 capítulos)</b>.</span><br><a href="/os-libro" style="display:inline-block;margin-top:8px;background:#E6C860;color:#08080a;font:800 14px system-ui;padding:9px 18px;border-radius:9px;text-decoration:none">Ir al manual vigente →</a></div>
+
+
+<div class="cover">
+  <div class="kicker">FRATERNIDAD CAMPUS CENTRAL</div>
+  <h1>Manual del <span>Sistema</span></h1>
+  <div class="sub">Todo lo que el equipo necesita para operar frate.cl: eventos, listas, cortesías, reservas, pagos, chats y puerta.</div>
+  <div class="roles-badges">
+    <div class="rb">🎧 <b>Anfitrión / Admin</b> — todo</div>
+    <div class="rb">🏷️ <b>RRPP</b> — sus listas e invitados</div>
+    <div class="rb">🚪 <b>Portero</b> — validación</div>
+  </div>
+  <div class="hair"></div>
+</div>
+
+<div class="wrap">
+
+  <div class="urgent">
+    <div class="em">⚡ ¿Tienes que enviar cortesías hoy?</div>
+    <div style="margin-top:6px;font-size:.95rem;">Ve directo a la <a href="#s2"><b>Sección 2 — Enviar cortesías</b></a>. En 3 pasos: subes el Excel → la IA lo revisa → apruebas y salen los QR por correo. 👇</div>
+  </div>
+
+  <div class="toc">
+    <h3>Contenido</h3>
+    <ol>
+      <li><a href="#s1">Entrar y los roles</a></li>
+      <li><a href="#s2">⚡ Enviar cortesías (Excel)</a></li>
+      <li><a href="#s3">Listas con link (se anotan solos)</a></li>
+      <li><a href="#s4">Reservas, cumpleaños y cobrar</a></li>
+      <li><a href="#s5">Eventos + importar brief + video</a></li>
+      <li><a href="#s6">Paquetes (catálogo con fotos)</a></li>
+      <li><a href="#s7">Chats del Anfitrión</a></li>
+      <li><a href="#s8">Frecuentes y convenios</a></li>
+      <li><a href="#s9">La puerta (validación)</a></li>
+      <li><a href="#s10">RRPP: tu caja de herramientas</a></li>
+    </ol>
+  </div>
+
+  <!-- 1 -->
+  <section id="s1">
+    <div class="shead"><span class="snum">1</span><h2>Entrar y los roles</h2><span class="who todos">Todos</span></div>
+    <p class="slead">Un solo panel, tres niveles de acceso.</p>
+    <div class="card">
+      <ol class="steps">
+        <li>Entra a <b>frate.cl/admin</b> e inicia sesión con tu cuenta.</li>
+        <li>El panel se adapta a tu rol automáticamente.</li>
+      </ol>
+      <h4 style="margin-top:16px;">Qué ve cada quien</h4>
+      <ul class="dot">
+        <li>🎧 <b>Anfitrión / Admin:</b> todo — Eventos, <span class="ui">👥 Comunidad</span> (listas, cortesías, reservas, chats, códigos, membresías), Órdenes, Contenido, Config.</li>
+        <li>🏷️ <b>RRPP:</b> solo <span class="ui">👥 Comunidad</span>, y ahí <b>solo sus</b> listas e invitaciones.</li>
+        <li>🚪 <b>Portero:</b> solo la validación de puerta.</li>
+      </ul>
+      <div class="callout tip"><span class="em">💡 Tip</span> Casi todo vive en el módulo <span class="ui">👥 Comunidad</span>, que abre con <b>pestañas</b>: Solicitudes Web · Chats · Cortesías · Paquetes · Reservas · Códigos · Membresías. Los grupos del menú se <b>pliegan</b> con un click, y en <b>Configuración → Módulos del panel</b> puedes esconder lo que no uses.</div>
+    </div>
+  </section>
+
+  <!-- 2 -->
+  <section id="s2">
+    <div class="shead"><span class="snum">2</span><h2>⚡ Enviar cortesías (Excel)</h2><span class="who admin">Anfitrión / Admin</span></div>
+    <p class="slead">Cuando ya tienes la lista en un Excel o Google Forms (ej. las de mujeres / embajadora).</p>
+    <div class="card">
+      <div class="path" style="margin-bottom:12px;">Dónde: <span class="ui">👥 Comunidad</span> → pestaña <span class="ui">🎁 Cortesías</span> → botón <span class="ui gold">📥 IMPORTAR MASIVO</span></div>
+      <ol class="steps">
+        <li>Abre <span class="ui gold">📥 IMPORTAR MASIVO</span> y <b>sube el archivo</b> (.xlsx o .csv, incluso el de respuestas del Google Form).</li>
+        <li>Revisa las columnas (se detectan solas) → <b>Confirmar</b>.</li>
+        <li>En <b>Configurar</b>: elige el evento, deja marcado <span class="ui">🎟️ Cortesía masiva</span>, y completa <b>dueño</b> (ej. Embajadora Cotty), <b>restricción de género</b> (ej. Solo mujeres), <b>hora máx. de llegada</b> y el texto de condiciones.</li>
+        <li>Toca <span class="ui gold">Pre-análisis IA →</span>. Revisa el semáforo: 🟢 en orden · 🟡 dudoso · 🔴 con alerta (RUT malo, duplicado, o nombre que no calza con el género). <b>Los 🔴 vienen desmarcados.</b></li>
+        <li>Ajusta a mano si quieres y toca <span class="ui gold">🚀 Aprobar y emitir</span>. Los <b>QR salen solos</b> al correo de cada persona.</li>
+      </ol>
+      <div class="callout tip"><span class="em">✨ Lo que te ahorra</span> Detecta a la <b>misma persona repetida entre dos listas</b> (tu lista + la de la RRPP) para no mandar doble entrada, valida los RUT, y descarga un <b>formato</b> limpio para las próximas.</div>
+      <div class="callout warn"><span class="em">⚠️ Importante</span> Si tienes <b>dos listas del mismo evento</b>, importa una y <b>después</b> la otra: la segunda te marca sola los repetidos. Y recuerda: <b>nada sale sin tu OK</b> (los 🔴 los apruebas tú).</div>
+    </div>
+  </section>
+
+  <!-- 3 -->
+  <section id="s3">
+    <div class="shead"><span class="snum">3</span><h2>Listas con link</h2><span class="who admin">Admin</span> <span class="who rrpp" style="margin-left:6px;">RRPP</span></div>
+    <p class="slead">La forma cómoda: compartes un link, la gente se anota sola, tú solo revisas.</p>
+    <div class="card">
+      <div class="path" style="margin-bottom:12px;">Dónde: <span class="ui">👥 Comunidad</span> → <span class="ui">📩 Solicitudes Web</span> → botón <span class="ui gold">🔗 Lista de inscripción</span></div>
+      <ol class="steps">
+        <li>Abre <span class="ui gold">🔗 Lista de inscripción</span> → nombre, evento, <b>dueño</b>, un <b>código</b> corto (ej. <b>COTTY-JUE</b>), restricción de género, hora y condiciones → <span class="ui gold">Crear y generar link</span>.</li>
+        <li><b>Ahí aparece tu link + QR</b> 👉 <b>frate.cl/lista/COTTY-JUE</b>. Cópialo o guarda el QR y compártelo (WhatsApp, Instagram, historia).</li>
+        <li>La gente entra, llena sus datos (género obligatorio, universidad…) y queda <b>pendiente</b>.</li>
+        <li>En la tabla de listas, esa lista muestra <span class="ui gold">Revisar (N)</span> → semáforo IA → <b>Aprobar y emitir</b> → QR + correo. (El botón <span class="ui">🔗</span> de cada fila copia el link cuando quieras.)</li>
+      </ol>
+      <div class="callout tip"><span class="em">📌 Diferencia clave</span> <span class="ui gold">🔗 Lista de inscripción</span> = lista <b>abierta con link</b> (usa esta). El viejo <span class="ui">+ Crear lista</span> queda pendiente sin link y lo aprueba el ERP.</div>
+    </div>
+  </section>
+
+  <!-- 4 -->
+  <section id="s4">
+    <div class="shead"><span class="snum">4</span><h2>Reservas, cumpleaños y cobrar</h2><span class="who admin">Admin</span></div>
+    <p class="slead">Las solicitudes que llegan desde frate.cl, y cómo cobrar el abono.</p>
+    <div class="card">
+      <div class="path" style="margin-bottom:12px;">Dónde: <span class="ui">👥 Comunidad</span> → <span class="ui">📩 Solicitudes Web</span> → tabla <b>Reservas &amp; cumpleaños</b></div>
+      <ol class="steps">
+        <li>Cada solicitud muestra tipo (🍾 reserva / 🎂 cumpleaños), la persona, fecha e invitados (nombre + RUT).</li>
+        <li>Para <b>cobrar un abono/cover</b>: toca el botón <span class="ui gold">💳</span> de esa fila → pones el <b>monto</b> y el concepto → se genera un <b>link de pago MercadoPago</b> y se copia solo.</li>
+        <li>Se lo mandas al cliente por WhatsApp. Al pagar, se <b>concilia solo</b> (queda marcada como pagada) — sin revisar transferencias a mano.</li>
+        <li>Si necesitas <b>cancelar</b> a nombre del cliente, usa el botón <span class="ui red">✕</span>.</li>
+      </ol>
+      <div class="callout tip"><span class="em">💡 Adiós WebPay manual</span> El link de pago reemplaza el link genérico y el "quién pagó" a mano. Cada cobro va con su referencia y se concilia automático.</div>
+    </div>
+  </section>
+
+  <!-- 5 -->
+  <section id="s5">
+    <div class="shead"><span class="snum">5</span><h2>Eventos + brief + video</h2><span class="who admin">Admin</span></div>
+    <p class="slead">Crear el evento a mano o importándolo del FRATE FLYER.</p>
+    <div class="card">
+      <div class="path" style="margin-bottom:12px;">Dónde: menú <span class="ui">🎵 Eventos</span></div>
+      <ol class="steps">
+        <li><b>Importar del FLYER:</b> botón <span class="ui gold">📄 Importar brief</span> → sube el <b>.html</b> que genera FRATE FLYER → revisa el preview (título, fecha, horario, YouTube, canción) → <b>Crear evento (borrador)</b>.</li>
+        <li>O <b>+ Nuevo evento</b> a mano. Ponle nombre, fecha, horario, imagen o video.</li>
+        <li><b>Video de fondo del evento:</b> pega un link de YouTube en <span class="ui">🎬 YouTube</span>. Aparece un control de <b>Encuadre + Color</b> con <b>preview en vivo</b> — ajusta zoom, posición y el <b>color del día</b> (una capa suave sobre el video). Lo que ves ahí es lo que se ve en la tarjeta.</li>
+        <li>Ponle precios a las entradas y cambia el estado a <span class="ui">🟢 Publicado</span> para que salga a la venta. (Los borradores no se muestran.)</li>
+      </ol>
+      <div class="callout warn"><span class="em">⚠️ Ojo</span> El brief <b>no trae precios</b> → el evento queda en borrador. Tú pones precios y publicas. Nada se publica solo.</div>
+    </div>
+  </section>
+
+  <!-- 6 -->
+  <section id="s6">
+    <div class="shead"><span class="snum">6</span><h2>Paquetes (catálogo)</h2><span class="who admin">Admin</span></div>
+    <p class="slead">Cumpleaños, packs VIP, covers y botellas — con foto, en un solo lugar.</p>
+    <div class="card">
+      <div class="path" style="margin-bottom:12px;">Dónde: <span class="ui">👥 Comunidad</span> → pestaña <span class="ui">📦 Paquetes</span></div>
+      <ul class="dot">
+        <li><b>+ Nuevo paquete:</b> categoría, nombre, precio, "qué incluye" y <b>foto</b> (se sube al toque).</li>
+        <li>Los <b>activos</b> se muestran solos en la web (sección "Nuestros Paquetes") y el <b>chatbot los cotiza</b> cuando preguntan.</li>
+        <li>Es la <b>fuente única</b>: el ERP los lee por la API. Editas en un lugar, cambia en todos.</li>
+      </ul>
+    </div>
+  </section>
+
+  <!-- 7 -->
+  <section id="s7">
+    <div class="shead"><span class="snum">7</span><h2>Chats del Anfitrión</h2><span class="who admin">Admin</span> <span class="who rrpp" style="margin-left:6px;">RRPP</span></div>
+    <p class="slead">Cuando el chatbot pasa una conversación a una persona.</p>
+    <div class="card">
+      <div class="path" style="margin-bottom:12px;">Dónde: <span class="ui">👥 Comunidad</span> → pestaña <span class="ui">💬 Chats</span></div>
+      <ol class="steps">
+        <li>Cuando alguien en la web pide <b>reserva/cumple</b> o quiere hablar con una persona, el bot <b>escala</b> y la conversación cae aquí (las que esperan humano, arriba).</li>
+        <li>Abres el hilo y <b>respondes</b> — el cliente lo ve al toque en el chat de la web.</li>
+        <li>Cierras la conversación cuando termines.</li>
+      </ol>
+    </div>
+  </section>
+
+  <!-- 8 -->
+  <section id="s8">
+    <div class="shead"><span class="snum">8</span><h2>Frecuentes y convenios</h2><span class="who todos">Todos</span></div>
+    <div class="card">
+      <h4>⭐ Clientes frecuentes (loyalty)</h4>
+      <p style="margin:0 0 6px;color:var(--gris);font-size:.92rem;">El sistema cuenta las <b>visitas reales</b> (check-ins en puerta) por RUT y le muestra al cliente su nivel en <b>Mi Cuenta</b>:</p>
+      <ul class="dot">
+        <li>🎧 <b>Nuevo</b> → ⭐ <b>Frecuente</b> (a las 5 visitas) → 👑 <b>VIP</b> (a las 10).</li>
+        <li>Beneficios por nivel: cortesía hasta 01:00, 2×1 los jueves, invita 3 amig@s, VIP cada 5 visitas, zona reservada, acceso anticipado.</li>
+      </ul>
+      <h4 style="margin-top:16px;">🎓 Convenios universitarios</h4>
+      <p style="margin:0;color:var(--gris);font-size:.92rem;">La card <b>FRAT &amp; FRIENDS</b> en frate.cl capta el convenio (universidad + contacto + mensaje) y llega como <b>lead</b> a las solicitudes, para que el equipo lo gestione.</p>
+    </div>
+  </section>
+
+  <!-- 9 -->
+  <section id="s9">
+    <div class="shead"><span class="snum">9</span><h2>La puerta</h2><span class="who todos">Portero / Admin</span></div>
+    <p class="slead">Validar entradas y hacer cumplir las condiciones.</p>
+    <div class="card">
+      <div class="path" style="margin-bottom:12px;">Dónde: <b>frate.cl/validacion</b> (login con cuenta Admin o Portero)</div>
+      <ol class="steps">
+        <li>Escanea el QR (o busca por RUT si no tiene el celular).</li>
+        <li>Ves el <b>nombre y RUT en grande</b> y un aviso automático: <b>✅ válida</b> (cotejar carnet) o <b>⚠️ fuera de horario / RUT no calza</b>.</li>
+        <li>Toca <b>Confirmar ingreso</b> para quemar el QR (no se puede usar dos veces).</li>
+      </ol>
+      <div class="callout tip"><span class="em">💡 Tranquilo</span> No hay que acordarse de las horas de cada lista: <b>el escáner las hace cumplir solo</b> (respeta el cruce de medianoche 23:00→05:00).</div>
+      <ul class="dot" style="margin-top:12px;">
+        <li>📲 <b>Se instala como app</b> (PWA) y funciona <b>sin internet</b>: descarga las entradas al empezar, valida offline y sincroniza al reconectar.</li>
+        <li>📟 En <b>Sunmi</b> hay switch <b>Cámara/Láser</b> — el láser valida solo, sin apretar nada.</li>
+        <li>➕ <b>Cliente nuevo/VIP</b>: mete a alguien que no está en lista (cuenta en el aforo y queda en el CRM).</li>
+        <li>🪪 <b>Cédula</b>: escanea el carnet y saca Nombre + RUN solos.</li>
+        <li>🔴 <b>Puerta en vivo</b>: <b>frate.cl/vivo</b> (admin) muestra en grande cuántos entraron, el aforo y el desglose por lista, en tiempo real.</li>
+      </ul>
+      <div class="path" style="margin-top:12px;">Detalle completo: <b>frate.cl/manual-puerta</b></div>
+    </div>
+  </section>
+
+  <!-- 10 -->
+  <section id="s10">
+    <div class="shead"><span class="snum">10</span><h2>RRPP: tu caja</h2><span class="who rrpp">RRPP</span></div>
+    <p class="slead">Lo que puedes hacer con tu cuenta (todo acotado a lo tuyo).</p>
+    <div class="card">
+      <ul class="dot">
+        <li>🔗 <b>Tu link de inscripción:</b> creas tu lista con link y la compartes (sección 3). Queda a tu nombre para tus comisiones.</li>
+        <li>🔎 <b>Revisar y emitir:</b> revisas quién se anotó con el pre-análisis IA y emites los QR — <b>solo de tus listas</b>.</li>
+        <li>🎫 <b>Invitar 1 x 1:</b> <span class="ui">+ Invitar (RRPP)</span> para un invitado puntual.</li>
+        <li>🏷️ <b>Tus códigos:</b> en la pestaña Códigos & RRPP ves los tuyos y sus usos.</li>
+      </ul>
+      <div class="callout tip"><span class="em">💡 Recuerda</span> Todo lo tuyo queda registrado por tu cuenta. No ves las listas de otros RRPP ni los datos internos — solo lo tuyo.</div>
+    </div>
+  </section>
+
+  <div class="foot">
+    <div style="font-family:var(--disp);letter-spacing:4px;font-weight:900;font-size:1.3rem;color:var(--dorado);">FRATE</div>
+    Dudas o algo no funciona: WhatsApp del equipo <b>+56 9 8131 1548</b><br>
+    <span style="font-size:.78rem;color:#6a6a72;">Fraternidad Campus Central · Pío Nono 430, Bellavista · frate.cl/admin</span>
+  </div>
+</div>
+
+<button class="btn-print" onclick="window.print()">🖨️ Imprimir / Guardar PDF</button>
+</body>
+</html>

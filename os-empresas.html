@@ -1,0 +1,263 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>FRATE WEB (TICKETERA) · OS LAS EMPRESAS DEL GRUPO FAMILIAR</title>
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🏛</text></svg>">
+<link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@600;800;900&family=Fraunces:ital,opsz,wght@0,9..144,400;1,9..144,400&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="/os-manual.css">
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<style>
+  .emps{display:flex;gap:5px;flex-wrap:wrap;margin:18px 0 6px}
+  .emps a{font-family:var(--disp);font-weight:700;font-size:.7rem;letter-spacing:1.2px;text-transform:uppercase;
+    text-decoration:none;color:var(--gris2);padding:5px 10px;border-radius:8px;border:1px solid var(--bor)}
+  .emps a:hover{color:var(--txt);border-color:var(--bor2)}
+  .emp{border-top:1px solid var(--bor);padding:52px 0 0;scroll-margin-top:20px}
+  .ehead{display:flex;align-items:center;gap:14px;flex-wrap:wrap;margin-bottom:6px}
+  .dot{width:42px;height:42px;border-radius:12px;flex-shrink:0;display:flex;align-items:center;justify-content:center}
+  .dot i{width:18px;height:18px;border-radius:5px;display:block}
+  .ehead h2{margin:0}
+  .erol{font-family:var(--disp);font-size:.72rem;letter-spacing:2.5px;text-transform:uppercase;color:var(--gris2)}
+  .duo{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-top:16px}
+  @media(max-width:700px){.duo{grid-template-columns:1fr}}
+  .bx{background:var(--neg2);border:1px solid var(--bor);border-radius:13px;padding:15px 17px}
+  .bx h4{font-family:var(--disp);font-size:.7rem;letter-spacing:2px;text-transform:uppercase;color:var(--gris2);margin:0 0 10px;font-weight:700}
+  .bx ul{margin:0 0 0 3px;padding:0;list-style:none;color:var(--txt)}
+  .bx li{position:relative;padding:3px 0 3px 15px;font-size:.9rem}
+  .bx li::before{content:"";position:absolute;left:0;top:12px;width:5px;height:5px;border-radius:50%;background:var(--ac)}
+  .lk{display:inline-flex;align-items:center;gap:8px;font-size:.92rem;font-weight:600;text-decoration:none;color:var(--txt);padding:3px 0}
+  .lk i{width:9px;height:9px;border-radius:50%;display:block;flex-shrink:0}
+  .lk small{color:var(--gris2);font-weight:400;font-size:.78rem}
+  .rel{display:flex;gap:10px;align-items:flex-start;padding:5px 0;font-size:.9rem}
+  .rel i{width:8px;height:8px;border-radius:50%;flex-shrink:0;margin-top:7px}
+  .rel b{color:var(--txt);font-weight:600}
+  .rel span{color:var(--gris)}
+  .est{border-left:4px solid var(--ac);border-radius:0 12px 12px 0;padding:14px 17px;margin-top:14px;font-size:.9rem;color:var(--gris);background:rgba(255,255,255,.02)}
+  .est b{color:var(--ac)}
+  .ck{display:inline-block;font-family:var(--font);font-size:.62rem;letter-spacing:.4px;color:var(--oro);
+    border:1px solid rgba(230,200,96,.4);background:rgba(230,200,96,.07);border-radius:99px;padding:1px 7px;margin-left:5px;vertical-align:1px}
+</style>
+</head>
+<body>
+<div id="bar"></div>
+<div class="wrap">
+
+  <div class="hero">
+    <div class="eyebrow">Grupo Familiar</div>
+    <h1>Siete empresas,<br>una sola <em>familia</em></h1>
+    <p class="sub">Cada una es dueña de algo, le presta servicios reales a las otras y recibe de vuelta. Es la misma lógica con la que funcionan los cuatro sistemas — porque es la misma forma de pensar.</p>
+    <div class="emps">
+      <a href="#magnus">Magnus Pro</a><a href="#campus">Campus Central</a><a href="#fraternidad">Fraternidad</a>
+      <a href="#fratv">FRATV</a><a href="#company">FRAT Company</a><a href="#express">FRATEXPRESS</a>
+      <a href="#opus">OPUS</a><a href="#grupo">Grupo Familiar</a>
+    </div>
+    <div class="meta"><span>Lo marcado <span class="ck">por confirmar</span> es un supuesto que hay que revisar</span></div>
+  </div>
+
+  <!-- MAGNUS PRO -->
+  <section class="emp" id="magnus" style="--ac:#D4A62A">
+    <div class="ehead"><span class="dot" style="background:rgba(212,166,42,.14);border:1px solid rgba(212,166,42,.45)"><i style="background:#D4A62A"></i></span>
+      <div><div class="stag" style="color:var(--ac);margin:0">Empresa 01</div><h2>Magnus Pro</h2><div class="erol">El dinero</div></div></div>
+    <p class="lead">La empresa que firma, arrienda y paga. Tiene los contratos, las propiedades y la relación con bancos y proveedores. Ninguna otra empresa de la familia firma por su cuenta.</p>
+    <div class="duo">
+      <div class="bx"><h4>De qué es dueña</h4><ul>
+        <li>Los contratos y convenios</li><li>Arriendos y propiedades</li>
+        <li>La relación con bancos y proveedores</li><li>La facturación del grupo</li></ul></div>
+      <div class="bx"><h4>Su sistema</h4>
+        <a class="lk" href="/os-erp-dinero"><i style="background:#FF2D8B"></i>Módulo financiero del ERP <small>· ver manual</small></a>
+        <p style="font-size:.82rem;color:var(--gris2);margin-top:8px">No tiene sistema propio: usa el del ERP.<span class="ck">por confirmar</span></p></div>
+    </div>
+    <div class="bx" style="margin-top:12px"><h4>Lo que le presta a la familia</h4>
+      <div class="rel"><i style="background:#E9E4D8"></i><div><b>A todas</b> <span>— contrata, firma y paga. Nadie más asume compromisos.</span></div></div>
+      <div class="rel"><i style="background:#FF2D8B"></i><div><b>Fraternidad</b> <span>— la plata para la nómina del equipo.</span></div></div>
+      <div class="rel"><i style="background:#4A9EFF"></i><div><b>Campus Central</b> <span>— paga las cuentas de los sistemas (dominio, hosting, servicios).</span></div></div>
+    </div>
+    <div class="bx" style="margin-top:12px"><h4>Lo que recibe</h4>
+      <div class="rel"><i style="background:#E9E4D8"></i><div><b>De cada empresa</b> <span>— la facturación por los servicios que presta cada una.</span></div></div>
+    </div>
+    <div class="est"><b>Estado hoy.</b> Existe y opera: es la razón social real del grupo (Magnus Pro Eventos Ltda). Hoy hace <em>todo</em>; el plan es que se quede solo con lo financiero y lo legal, mientras las demás se especializan.</div>
+  </section>
+
+  <!-- CAMPUS CENTRAL -->
+  <section class="emp" id="campus" style="--ac:#4A9EFF">
+    <div class="ehead"><span class="dot" style="background:rgba(74,158,255,.14);border:1px solid rgba(74,158,255,.45)"><i style="background:#4A9EFF"></i></span>
+      <div><div class="stag" style="color:var(--ac);margin:0">Empresa 02</div><h2>Campus Central</h2><div class="erol">Los sistemas</div></div></div>
+    <p class="lead">La empresa de software. Acá viven los cuatro cerebros que mueven la operación — y el libro que los explica. Es la que convierte nuestra forma de trabajar en algo que se puede repetir.</p>
+    <div class="duo">
+      <div class="bx"><h4>De qué es dueña</h4><ul>
+        <li>El código de los cuatro sistemas</li><li>Las bases de datos</li>
+        <li>Dominios, hosting y cuentas de servicio</li><li>El evento canónico (<span class="num">event_uid</span>)</li></ul></div>
+      <div class="bx"><h4>Sus sistemas</h4>
+        <a class="lk" href="/os"><i style="background:#FF3B3B"></i>FRATE.CL <small>· ticketera</small></a><br>
+        <a class="lk" href="/os-pos"><i style="background:#A855F7"></i>FRATE POS <small>· cajas</small></a><br>
+        <a class="lk" href="/os-flyer"><i style="background:#06E5B0"></i>FRATE FLYER <small>· el origen</small></a></div>
+    </div>
+    <div class="bx" style="margin-top:12px"><h4>Lo que le presta a la familia</h4>
+      <div class="rel"><i style="background:#E9E4D8"></i><div><b>A todas</b> <span>— los sistemas con los que operan, y el libro que explica cómo.</span></div></div>
+      <div class="rel"><i style="background:#FF2D8B"></i><div><b>Fraternidad</b> <span>— el ERP donde vive su gente.</span></div></div>
+    </div>
+    <div class="bx" style="margin-top:12px"><h4>Lo que recibe</h4>
+      <div class="rel"><i style="background:#FF2D8B"></i><div><b>Fraternidad</b> <span>— las personas que operan y mantienen los sistemas.</span></div></div>
+      <div class="rel"><i style="background:#D4A62A"></i><div><b>Magnus Pro</b> <span>— el pago de las cuentas de servicio.</span></div></div>
+    </div>
+    <div class="est"><b>Estado hoy.</b> Los cuatro sistemas existen y están en producción; el evento canónico ya cose tres de ellos. La empresa como tal <em>aún no está constituida</em>.<span class="ck">por confirmar</span></div>
+  </section>
+
+  <!-- FRATERNIDAD -->
+  <section class="emp" id="fraternidad" style="--ac:#FF2D8B">
+    <div class="ehead"><span class="dot" style="background:rgba(255,45,139,.14);border:1px solid rgba(255,45,139,.45)"><i style="background:#FF2D8B"></i></span>
+      <div><div class="stag" style="color:var(--ac);margin:0">Empresa 03</div><h2>Fraternidad</h2><div class="erol">Las personas</div></div></div>
+    <p class="lead">La empresa de la gente. Todo el que trabaja una noche en Fraternidad — su ficha, su turno, su pago, su cuidado — vive acá. Es la más antigua y la más conocida: es la marca de la discoteca.</p>
+    <div class="duo">
+      <div class="bx"><h4>De qué es dueña</h4><ul>
+        <li>La ficha de cada persona</li><li>El trato: cuánto vale su noche</li>
+        <li>Turnos, asistencia y colaciones</li><li>Pagos, propinas y boletas</li></ul></div>
+      <div class="bx"><h4>Su sistema</h4>
+        <a class="lk" href="/os-erp"><i style="background:#FF2D8B"></i>FRATE ERP <small>· 7 manuales</small></a>
+        <p style="font-size:.82rem;color:var(--gris2);margin-top:8px">El cerebro interno: personal, inventario, caja, aforo.</p></div>
+    </div>
+    <div class="bx" style="margin-top:12px"><h4>Lo que le presta a la familia</h4>
+      <div class="rel"><i style="background:#4A9EFF"></i><div><b>Campus Central</b> <span>— la gente que opera los sistemas.</span></div></div>
+      <div class="rel"><i style="background:#FF6B3D"></i><div><b>FRATV</b> <span>— el equipo humano de la noche.</span></div></div>
+      <div class="rel"><i style="background:#A855F7"></i><div><b>FRAT Company</b> <span>— contrata y paga al elenco.</span></div></div>
+    </div>
+    <div class="bx" style="margin-top:12px"><h4>Lo que recibe</h4>
+      <div class="rel"><i style="background:#D4A62A"></i><div><b>Magnus Pro</b> <span>— los contratos y la plata para pagar.</span></div></div>
+      <div class="rel"><i style="background:#4A9EFF"></i><div><b>Campus Central</b> <span>— el ERP y su mantención.</span></div></div>
+    </div>
+    <div class="est"><b>Estado hoy.</b> Opera dentro de Magnus Pro. El ERP funciona con <strong>83 personas activas</strong> y 11 dadas de baja. Falta constituirla como empresa aparte.<span class="ck">por confirmar</span></div>
+  </section>
+
+  <!-- FRATV -->
+  <section class="emp" id="fratv" style="--ac:#FF6B3D">
+    <div class="ehead"><span class="dot" style="background:rgba(255,107,61,.14);border:1px solid rgba(255,107,61,.45)"><i style="background:#FF6B3D"></i></span>
+      <div><div class="stag" style="color:var(--ac);margin:0">Empresa 04</div><h2>FRATV</h2><div class="erol">Audiovisual</div></div></div>
+    <p class="lead">El brazo que registra y cuenta. Cámaras en la noche, contenido para redes, transmisión. Convierte una fiesta que ya pasó en algo que la gente puede volver a ver — y en las ganas de venir a la próxima.</p>
+    <div class="duo">
+      <div class="bx"><h4>De qué es dueña</h4><ul>
+        <li>El archivo audiovisual de cada noche</li><li>Los equipos de cámara y transmisión<span class="ck">por confirmar</span></li>
+        <li>El contenido publicado</li></ul></div>
+      <div class="bx"><h4>Su sistema</h4>
+        <a class="lk" href="/os-flyer-reel"><i style="background:#06E5B0"></i>FRATE FLYER · el reel <small>· ver manual</small></a>
+        <p style="font-size:.82rem;color:var(--gris2);margin-top:8px">Usa el Flyer para el reel semanal. No tiene sistema propio.<span class="ck">por confirmar</span></p></div>
+    </div>
+    <div class="bx" style="margin-top:12px"><h4>Lo que le presta a la familia</h4>
+      <div class="rel"><i style="background:#06E5B0"></i><div><b>Flyer</b> <span>— el material con el que se arma el reel de la semana.</span></div></div>
+      <div class="rel"><i style="background:#A855F7"></i><div><b>FRAT Company</b> <span>— el registro de los shows.</span></div></div>
+      <div class="rel"><i style="background:#E9E4D8"></i><div><b>A todas</b> <span>— el contenido que sostiene la marca.</span></div></div>
+    </div>
+    <div class="bx" style="margin-top:12px"><h4>Lo que recibe</h4>
+      <div class="rel"><i style="background:#FF2D8B"></i><div><b>Fraternidad</b> <span>— el equipo humano que graba.</span></div></div>
+      <div class="rel"><i style="background:#F5C518"></i><div><b>FRATEXPRESS</b> <span>— el traslado de los equipos.</span></div></div>
+    </div>
+    <div class="est"><b>Estado hoy.</b> Opera de manera informal — hay trabajo audiovisual constante y carpetas propias, pero no está constituida ni tiene su proceso escrito.<span class="ck">por confirmar</span></div>
+  </section>
+
+  <!-- FRAT COMPANY -->
+  <section class="emp" id="company" style="--ac:#A855F7">
+    <div class="ehead"><span class="dot" style="background:rgba(168,85,247,.14);border:1px solid rgba(168,85,247,.45)"><i style="background:#A855F7"></i></span>
+      <div><div class="stag" style="color:var(--ac);margin:0">Empresa 05</div><h2>FRAT Company</h2><div class="erol">Artístico</div></div></div>
+    <p class="lead">El elenco. Bailarines, performers, personajes y shows. Es lo que hace que una noche en Fraternidad no sea solo música sonando: que pase algo.</p>
+    <div class="duo">
+      <div class="bx"><h4>De qué es dueña</h4><ul>
+        <li>El elenco y su agenda</li><li>El repertorio de shows</li>
+        <li>El casting y sus postulantes</li><li>El vestuario y la utilería<span class="ck">por confirmar</span></li></ul></div>
+      <div class="bx"><h4>Su sistema</h4>
+        <span class="lk"><i style="background:#A855F7"></i>FRATE CASTING</span>
+        <p style="font-size:.82rem;color:var(--gris2);margin-top:8px">Módulo de postulación y evaluación, ya construido.<span class="ck">por confirmar</span></p></div>
+    </div>
+    <div class="bx" style="margin-top:12px"><h4>Lo que le presta a la familia</h4>
+      <div class="rel"><i style="background:#FF2D8B"></i><div><b>Fraternidad</b> <span>— los shows de la noche.</span></div></div>
+      <div class="rel"><i style="background:#FF6B3D"></i><div><b>FRATV</b> <span>— el contenido que se graba y se publica.</span></div></div>
+    </div>
+    <div class="bx" style="margin-top:12px"><h4>Lo que recibe</h4>
+      <div class="rel"><i style="background:#FF2D8B"></i><div><b>Fraternidad</b> <span>— la contratación y el pago del elenco.</span></div></div>
+      <div class="rel"><i style="background:#14D4C0"></i><div><b>OPUS</b> <span>— la música de los shows.</span></div></div>
+      <div class="rel"><i style="background:#F5C518"></i><div><b>FRATEXPRESS</b> <span>— el traslado de los artistas.</span></div></div>
+    </div>
+    <div class="est"><b>Estado hoy.</b> En formación. Ya existe un módulo de casting construido y el elenco trabaja; falta separarla como empresa con su propia agenda y tarifas.<span class="ck">por confirmar</span></div>
+  </section>
+
+  <!-- FRATEXPRESS -->
+  <section class="emp" id="express" style="--ac:#F5C518">
+    <div class="ehead"><span class="dot" style="background:rgba(245,197,24,.13);border:1px solid rgba(245,197,24,.45)"><i style="background:#F5C518"></i></span>
+      <div><div class="stag" style="color:var(--ac);margin:0">Empresa 06</div><h2>FRATEXPRESS</h2><div class="erol">Transporte</div></div></div>
+    <p class="lead">Mueve gente y cosas. Artistas al venue, personal de vuelta a su casa de madrugada, fletes de equipos e insumos. Es el brazo que nadie ve pero sin el cual no parte la noche.</p>
+    <div class="duo">
+      <div class="bx"><h4>De qué es dueña</h4><ul>
+        <li>Los vehículos<span class="ck">por confirmar</span></li><li>Las rutas y los horarios</li>
+        <li>El registro de traslados</li></ul></div>
+      <div class="bx"><h4>Su sistema</h4>
+        <p style="font-size:.9rem;color:var(--gris)">No tiene. Hoy se coordina a mano.<span class="ck">por confirmar</span></p>
+        <p style="font-size:.82rem;color:var(--gris2);margin-top:8px">Es la empresa con más espacio para un sistema propio: rutas, turnos de conductor y costo por traslado.</p></div>
+    </div>
+    <div class="bx" style="margin-top:12px"><h4>Lo que le presta a la familia</h4>
+      <div class="rel"><i style="background:#A855F7"></i><div><b>FRAT Company</b> <span>— traslado de artistas.</span></div></div>
+      <div class="rel"><i style="background:#FF6B3D"></i><div><b>FRATV</b> <span>— traslado de equipos audiovisuales.</span></div></div>
+      <div class="rel"><i style="background:#FF2D8B"></i><div><b>Fraternidad</b> <span>— el retorno seguro del personal de madrugada.</span></div></div>
+    </div>
+    <div class="bx" style="margin-top:12px"><h4>Lo que recibe</h4>
+      <div class="rel"><i style="background:#D4A62A"></i><div><b>Magnus Pro</b> <span>— el financiamiento de vehículos y combustible.</span></div></div>
+      <div class="rel"><i style="background:#FF2D8B"></i><div><b>Fraternidad</b> <span>— los conductores.</span></div></div>
+    </div>
+    <div class="est"><b>Estado hoy.</b> El servicio se presta hoy de manera informal — la gente se mueve igual, pero sin registro ni costeo. Es de las que más ordena constituir.<span class="ck">por confirmar</span></div>
+  </section>
+
+  <!-- OPUS -->
+  <section class="emp" id="opus" style="--ac:#14D4C0">
+    <div class="ehead"><span class="dot" style="background:rgba(20,212,192,.13);border:1px solid rgba(20,212,192,.45)"><i style="background:#14D4C0"></i></span>
+      <div><div class="stag" style="color:var(--ac);margin:0">Empresa 07</div><h2>OPUS</h2><div class="erol">Producción musical</div></div></div>
+    <p class="lead">El estudio. Produce la música propia de Fraternidad: los edits de la noche, las pistas del contenido, los temas del elenco. Que la fiesta suene a nosotros y no a una playlist prestada.</p>
+    <div class="duo">
+      <div class="bx"><h4>De qué es dueña</h4><ul>
+        <li>Las producciones y sus masters</li><li>Los derechos de lo producido<span class="ck">por confirmar</span></li>
+        <li>El estudio y sus equipos</li></ul></div>
+      <div class="bx"><h4>Su sistema</h4>
+        <p style="font-size:.9rem;color:var(--gris)">No tiene todavía.<span class="ck">por confirmar</span></p>
+        <p style="font-size:.82rem;color:var(--gris2);margin-top:8px">A futuro: catálogo de producciones, derechos y uso por evento.</p></div>
+    </div>
+    <div class="bx" style="margin-top:12px"><h4>Lo que le presta a la familia</h4>
+      <div class="rel"><i style="background:#A855F7"></i><div><b>FRAT Company</b> <span>— la música de los shows.</span></div></div>
+      <div class="rel"><i style="background:#FF6B3D"></i><div><b>FRATV y Flyer</b> <span>— las pistas del contenido y los reels.</span></div></div>
+      <div class="rel"><i style="background:#FF2D8B"></i><div><b>Fraternidad</b> <span>— los edits que suenan en la noche.</span></div></div>
+    </div>
+    <div class="bx" style="margin-top:12px"><h4>Lo que recibe</h4>
+      <div class="rel"><i style="background:#D4A62A"></i><div><b>Magnus Pro</b> <span>— la inversión en estudio y equipos.</span></div></div>
+      <div class="rel"><i style="background:#A855F7"></i><div><b>FRAT Company</b> <span>— los artistas que graban.</span></div></div>
+    </div>
+    <div class="est"><b>Estado hoy.</b> La más nueva de la familia. En formación.<span class="ck">por confirmar</span></div>
+  </section>
+
+  <!-- GRUPO FAMILIAR -->
+  <section class="emp" id="grupo" style="--ac:#E9E4D8">
+    <div class="ehead"><span class="dot" style="background:rgba(233,228,216,.1);border:1px dashed rgba(233,228,216,.45)"><i style="background:#E9E4D8"></i></span>
+      <div><div class="stag" style="color:var(--ac);margin:0">La casa matriz</div><h2>Grupo Familiar</h2><div class="erol">El techo de las siete</div></div></div>
+    <p class="lead">No opera: sostiene. Es el techo que agrupa a las siete empresas y define cómo se tratan entre ellas. Lo que las une no es un organigrama — es una forma de pensar la fiesta.</p>
+    <div class="duo">
+      <div class="bx"><h4>De qué es dueña</h4><ul>
+        <li>La visión y los valores</li><li>La relación entre las empresas</li>
+        <li>Las reglas del juego: cómo se prestan servicios</li><li>La identidad de la familia</li></ul></div>
+      <div class="bx"><h4>Su regla</h4>
+        <p style="font-size:.92rem;color:var(--gris)">Primero la idea, nunca el monto. Primero las personas, después la recaudación.</p>
+        <p style="font-size:.82rem;color:var(--gris2);margin-top:8px">Si una decisión contradice eso, está mal tomada — por rentable que parezca.</p></div>
+    </div>
+    <div class="bx" style="margin-top:12px"><h4>Lo que le presta a la familia</h4>
+      <div class="rel"><i style="background:#E9E4D8"></i><div><b>A todas</b> <span>— el nombre, la identidad y la forma de trabajar. Nadie parte de cero.</span></div></div>
+    </div>
+    <div class="bx" style="margin-top:12px"><h4>Lo que recibe</h4>
+      <div class="rel"><i style="background:#E9E4D8"></i><div><b>De cada una</b> <span>— su parte, y el compromiso de cuidar a las otras seis.</span></div></div>
+    </div>
+    <div class="est"><b>Estado hoy.</b> Es el marco que estamos escribiendo ahora. Falta constituirlo formalmente — pero ya existe en cómo trabajamos.<span class="ck">por confirmar</span></div>
+  </section>
+
+  <div class="pie" style="margin-top:40px"><a href="/os-inicio">← Por qué existe esto</a> &nbsp;·&nbsp; <a href="/os-libro">El libro de manuales →</a></div>
+</div>
+
+<script src="/os-guard.js"></script>
+<script>
+  document.getElementById('bar').innerHTML = osBarra('', 'web');
+  osProteger();
+</script>
+</body>
+</html>

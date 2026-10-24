@@ -1,0 +1,152 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+<title>FRATE · Nos vemos en casita</title>
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Anton&family=Barlow+Condensed:wght@700;800;900&display=swap" rel="stylesheet">
+<style>
+  *{ box-sizing:border-box; margin:0; padding:0; }
+  html,body{ height:100%; background:#000; overflow:hidden; font-family:system-ui,sans-serif; }
+  #wrap{ position:fixed; inset:0; display:flex; align-items:center; justify-content:center; }
+  #cv{ height:100dvh; max-width:100vw; display:block; }
+  #bar{ position:fixed; left:0; right:0; bottom:0; padding:14px 16px calc(14px + env(safe-area-inset-bottom)); display:flex; gap:10px; justify-content:center; background:linear-gradient(180deg,transparent,rgba(0,0,0,.85)); z-index:5; }
+  .btn{ font-family:system-ui,sans-serif; font-weight:800; font-size:.9rem; border:0; border-radius:12px; padding:14px 20px; cursor:pointer; }
+  .btn.rec{ background:#E8363D; color:#fff; } .btn.sh{ background:rgba(255,255,255,.12); color:#fff; border:1px solid rgba(255,255,255,.3); }
+  .btn:disabled{ opacity:.65; }
+  #rec{ display:none; position:fixed; top:14px; right:16px; z-index:6; color:#fff; font-size:.8rem; font-weight:800; align-items:center; gap:7px; }
+  #rec.on{ display:flex; } #rec i{ width:11px;height:11px;border-radius:50%;background:#E8363D;animation:bl 1s infinite; } @keyframes bl{50%{opacity:.25}}
+</style>
+</head>
+<body>
+<div id="rec"><i></i> Grabando tu video…</div>
+<video id="vid" src="/casita.mp4" muted loop autoplay playsinline preload="auto" crossorigin="anonymous" style="position:absolute;width:1px;height:1px;opacity:0;pointer-events:none;"></video>
+<div id="wrap"><canvas id="cv" width="810" height="1080"></canvas></div>
+<div id="bar">
+  <button class="btn rec" id="b-rec">📹 Descargar video</button>
+  <button class="btn sh" id="b-sh">📸 Compartir foto</button>
+</div>
+<script>
+const P=new URLSearchParams(location.search);
+// Sin nombre NO se pone el de nadie: el ejemplo anterior ('PABLO ANDRES')
+// se estaba compartiendo de verdad, porque la RLS tapa `pedidos` para quien
+// compra sin cuenta y el nombre llegaba vacío.
+const NOMBRE=(P.get('n')||'¡VAMOS!').toUpperCase();
+// Sin fecha no se dibuja NINGUNA. Antes caía a 'MIÉRCOLES 15 JULIO', y la
+// gente compartía un flyer anunciando un evento ya pasado.
+const FECHA =(P.get('f')||'').toUpperCase();
+const RED='#E8363D';
+const cv=document.getElementById('cv'), ctx=cv.getContext('2d'), vid=document.getElementById('vid');
+let W=cv.width, H=cv.height;
+function sizeCanvas(){ if(vid.videoWidth && (cv.width!==vid.videoWidth || cv.height!==vid.videoHeight)){ cv.width=vid.videoWidth; cv.height=vid.videoHeight; W=cv.width; H=cv.height; } }
+vid.addEventListener('loadedmetadata', sizeCanvas);
+
+function fitFont(txt, maxW, size, weight, fam){
+  ctx.font=`${weight} ${size}px "${fam}", sans-serif`;
+  let w=ctx.measureText(txt).width;
+  while(w>maxW && size>14){ size-=2; ctx.font=`${weight} ${size}px "${fam}", sans-serif`; w=ctx.measureText(txt).width; }
+  return size;
+}
+// Ancho de un texto con letter-spacing
+function lsWidth(txt,ls){ let t=0; for(const c of txt) t+=ctx.measureText(c).width+ls; return t-ls; }
+// Ajusta el tamaño para que quepa en maxW considerando el letter-spacing
+function fitLS(txt, maxW, size, weight, fam, ls){
+  ctx.font=`${weight} ${size}px "${fam}", sans-serif`;
+  while(lsWidth(txt,ls)>maxW && size>12){ size-=1; ctx.font=`${weight} ${size}px "${fam}", sans-serif`; }
+  return size;
+}
+function textC(txt,x,y,size,color,weight,fam,letter){
+  ctx.fillStyle=color; ctx.textAlign='center'; ctx.textBaseline='middle';
+  ctx.font=`${weight} ${size}px "${fam}", sans-serif`;
+  if(letter){ ctx.textAlign='left'; const total=[...txt].reduce((s,c)=>s+ctx.measureText(c).width+letter,0)-letter; let cx=x-total/2; for(const c of txt){ ctx.fillText(c,cx,y); cx+=ctx.measureText(c).width+letter; } ctx.textAlign='center'; }
+  else ctx.fillText(txt,x,y);
+}
+
+function overlay(){
+  const cx=W/2;
+  const MARGIN=W*0.11;                    // margen seguro a cada lado
+  const safeW=W-MARGIN*2;                 // ancho máximo para cualquier texto
+  // Bloque SUBIDO: usa el espacio de arriba (aunque tape algo del video)
+  const y1=H*0.235, y2=H*0.288;           // "YA COMPRÉ" / "NOS VEMOS EN CASITA"
+  const lineTop=H*0.320, lineBot=H*0.438; // líneas que enmarcan el nombre (banda alta)
+  const yName=(lineTop+lineBot)/2;        // nombre centrado entre las líneas
+  const yFecha=H*0.478;                    // fecha DEBAJO de la línea del nombre
+  // 1) YA COMPRÉ MI ENTRADA — se achica si no cabe en el margen
+  ctx.save(); ctx.shadowColor='rgba(0,0,0,.9)'; ctx.shadowBlur=12;
+  const s1=fitLS('YA COMPRÉ MI ENTRADA', safeW, 50, 900, 'Barlow Condensed', 2);
+  textC('YA COMPRÉ MI ENTRADA', cx, y1, s1, '#fff', 900, 'Barlow Condensed', 2);
+  // 2) NOS VEMOS EN CASITA (CASITA en rojo)
+  const t2a='NOS VEMOS EN ', t2b='CASITA';
+  const s2=fitLS(t2a+t2b, safeW, 36, 800, 'Barlow Condensed', 1);
+  ctx.font=`800 ${s2}px "Barlow Condensed", sans-serif`;
+  const wa=lsWidth(t2a,1), wb=lsWidth(t2b,1), x0=cx-(wa+wb)/2;
+  ctx.textAlign='left'; ctx.textBaseline='middle';
+  ctx.fillStyle='#fff'; ctx.fillText(t2a, x0, y2);
+  ctx.fillStyle=RED;    ctx.fillText(t2b, x0+wa, y2);
+  ctx.restore();
+  // 3) Nombre: banda alta enmarcada por líneas rojas; se ajusta SIEMPRE al margen
+  const ns=fitFont(NOMBRE, safeW, 94, 400, 'Anton');
+  ctx.font=`400 ${ns}px "Anton", sans-serif`;
+  const nameW=lsWidth(NOMBRE,1);
+  const bandW=Math.min(safeW, nameW + W*0.08);
+  const fX=(W-bandW)/2;
+  ctx.fillStyle='rgba(0,0,0,.5)'; ctx.fillRect(fX,lineTop,bandW,lineBot-lineTop);
+  ctx.strokeStyle=RED; ctx.lineWidth=3;
+  ctx.beginPath(); ctx.moveTo(fX,lineTop); ctx.lineTo(fX+bandW,lineTop); ctx.moveTo(fX,lineBot); ctx.lineTo(fX+bandW,lineBot); ctx.stroke();
+  ctx.save(); ctx.shadowColor='rgba(232,54,61,.55)'; ctx.shadowBlur=18;
+  textC(NOMBRE, cx, yName, ns, '#fff', 400, 'Anton', 1); ctx.restore();
+  // 4) Fecha DEBAJO de la línea del nombre
+  if (FECHA) {
+    ctx.save(); ctx.shadowColor='rgba(0,0,0,.9)'; ctx.shadowBlur=8;
+    const sf=fitLS(FECHA, safeW, 33, 800, 'Barlow Condensed', 2);
+    textC(FECHA, cx, yFecha, sf, RED, 800, 'Barlow Condensed', 2);
+    ctx.restore();
+  }
+}
+function frame(){
+  sizeCanvas();
+  if(vid.paused) vid.play().catch(()=>{});
+  if(vid.readyState>=2){ try{ ctx.drawImage(vid,0,0,W,H); }catch(e){} } else { ctx.fillStyle='#000'; ctx.fillRect(0,0,W,H); }
+  overlay();
+  requestAnimationFrame(frame);
+}
+(document.fonts&&document.fonts.ready?document.fonts.ready:Promise.resolve()).then(()=>{ sizeCanvas(); vid.play().catch(()=>{}); requestAnimationFrame(frame); });
+document.addEventListener('click', ()=>{ vid.play().catch(()=>{}); }, {once:true});
+
+// ── Descargar video: graba el canvas 1 loop del video ──
+function pickMime(){ for(const m of ['video/mp4;codecs=avc1','video/webm;codecs=vp9','video/webm;codecs=vp8','video/webm']) if(window.MediaRecorder&&MediaRecorder.isTypeSupported(m)) return m; return ''; }
+document.getElementById('b-rec').addEventListener('click', function(){
+  const btn=this;
+  if(!window.MediaRecorder || !cv.captureStream){ alert('Tu navegador no permite grabar. Prueba en Chrome.'); return; }
+  const mime=pickMime();
+  try{ vid.currentTime=0; }catch(e){} vid.play().catch(()=>{});
+  const stream=cv.captureStream(30);
+  const rec=new MediaRecorder(stream, mime?{mimeType:mime,videoBitsPerSecond:9000000}:undefined);
+  const chunks=[]; rec.ondataavailable=e=>{ if(e.data.size) chunks.push(e.data); };
+  rec.onstop=()=>{
+    const type=mime||'video/webm', ext=type.indexOf('mp4')>=0?'mp4':'webm';
+    const url=URL.createObjectURL(new Blob(chunks,{type})); const a=document.createElement('a'); a.href=url; a.download='frate-nos-vemos.'+ext; a.click();
+    setTimeout(()=>URL.revokeObjectURL(url),5000);
+    document.getElementById('rec').classList.remove('on'); btn.disabled=false; btn.textContent='📹 Descargar video';
+  };
+  document.getElementById('rec').classList.add('on'); btn.disabled=true; btn.textContent='Grabando…';
+  rec.start(); setTimeout(()=>{ try{rec.stop();}catch(e){} }, 10300);
+});
+// ── Compartir FOTO: captura el frame actual y lo manda al compartir nativo (historia) ──
+document.getElementById('b-sh').addEventListener('click', function(){
+  const btn=this;
+  try{ if(vid.paused) vid.play().catch(()=>{}); }catch(e){}
+  try{ sizeCanvas(); if(vid.readyState>=2) ctx.drawImage(vid,0,0,W,H); overlay(); }catch(e){}
+  cv.toBlob(async function(blob){
+    if(!blob){ alert('No se pudo generar la foto. Prueba de nuevo.'); return; }
+    const file=new File([blob],'frate-nos-vemos.jpg',{type:'image/jpeg'});
+    const data={ files:[file], title:'FRATE · Nos vemos en casita', text:'¡Ya compré mi entrada! Nos vemos en casita 🔥' };
+    try{ if(navigator.canShare && navigator.canShare({files:[file]})){ await navigator.share(data); return; } }catch(e){ if(e && e.name==='AbortError') return; }
+    // Fallback (desktop o sin compartir nativo): descarga la foto
+    const url=URL.createObjectURL(blob); const a=document.createElement('a'); a.href=url; a.download='frate-nos-vemos.jpg'; a.click(); setTimeout(()=>URL.revokeObjectURL(url),5000);
+  },'image/jpeg',0.92);
+});
+</script>
+</body>
+</html>

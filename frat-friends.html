@@ -1,0 +1,211 @@
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>FRAT&FRIENDS · Convenios universitarios · Fraternidad Campus Central</title>
+<meta name="description" content="Club de Embajadores FRAT&FRIENDS — entradas rebajadas, cortesías y comisión por ventas para centros de estudiantes, federaciones y grupos universitarios." />
+<link rel="icon" href="/icon-frate.svg" type="image/svg+xml" />
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@600;700;800;900&family=Inter:wght@400;500;600;700&display=swap');
+  :root{ --rojo:#E8363D; --dorado:#D4A832; --negro:#0A0A0B; --negro2:#121216; --negro3:#18181d; --gris:#a1a1aa; --blanco:#f0ede8; --border:rgba(255,255,255,.1); }
+  *{ box-sizing:border-box; margin:0; padding:0; }
+  body{ background:var(--negro); color:var(--blanco); font-family:'Inter',sans-serif; line-height:1.6; -webkit-font-smoothing:antialiased; }
+  .disp{ font-family:'Barlow Condensed',sans-serif; font-weight:900; letter-spacing:.5px; line-height:1; }
+  .wrap{ max-width:1080px; margin:0 auto; padding:0 22px; }
+  a{ color:inherit; }
+  /* Hero */
+  .hero{ text-align:center; padding:70px 0 40px; background:radial-gradient(circle at 50% -10%, rgba(232,54,61,.22), transparent 60%); }
+  .kicker{ display:inline-block; font-size:.72rem; letter-spacing:3px; text-transform:uppercase; color:var(--rojo); border:1px solid rgba(232,54,61,.4); padding:6px 14px; border-radius:30px; margin-bottom:20px; }
+  .hero h1{ font-size:clamp(3rem,10vw,6rem); }
+  .hero h1 .amp{ color:var(--rojo); }
+  .hero .sub{ color:var(--gris); font-size:.78rem; letter-spacing:3px; text-transform:uppercase; margin-top:6px; }
+  .hero p.lead{ max-width:640px; margin:24px auto 0; color:#d8d8de; font-size:1.02rem; }
+  .cta-row{ margin-top:28px; display:flex; gap:12px; justify-content:center; flex-wrap:wrap; }
+  .btn{ display:inline-block; font-family:'Barlow Condensed',sans-serif; font-weight:800; letter-spacing:2px; text-transform:uppercase; font-size:1rem; padding:14px 28px; border-radius:6px; border:none; cursor:pointer; text-decoration:none; transition:filter .2s,transform .15s; }
+  .btn:active{ transform:scale(.98); }
+  .btn-rojo{ background:var(--rojo); color:#fff; } .btn-rojo:hover{ filter:brightness(1.12); }
+  .btn-ghost{ background:transparent; border:1px solid var(--border); color:var(--blanco); } .btn-ghost:hover{ border-color:var(--dorado); }
+  /* Secciones */
+  section{ padding:44px 0; }
+  .slabel{ font-size:.7rem; letter-spacing:3px; text-transform:uppercase; color:var(--dorado); margin-bottom:8px; }
+  .stitle{ font-size:clamp(1.8rem,5vw,2.8rem); margin-bottom:24px; }
+  /* Pasos */
+  .pasos{ display:grid; grid-template-columns:repeat(auto-fit,minmax(200px,1fr)); gap:16px; }
+  .paso{ background:var(--negro2); border:1px solid var(--border); border-radius:14px; padding:20px; }
+  .paso .n{ font-family:'Barlow Condensed',sans-serif; font-weight:900; font-size:2rem; color:var(--rojo); }
+  .paso h3{ font-family:'Barlow Condensed',sans-serif; font-weight:800; font-size:1.2rem; margin:4px 0 6px; letter-spacing:.5px; }
+  .paso p{ color:var(--gris); font-size:.88rem; }
+  /* Planes */
+  .planes{ display:grid; grid-template-columns:repeat(auto-fill,minmax(280px,1fr)); gap:16px; }
+  .plan{ background:var(--negro2); border:1px solid var(--border); border-radius:16px; padding:22px; display:flex; flex-direction:column; position:relative; overflow:hidden; }
+  .plan.destacado{ border-color:rgba(212,168,50,.55); box-shadow:0 0 0 1px rgba(212,168,50,.25), 0 16px 40px rgba(212,168,50,.1); }
+  .plan .badge{ position:absolute; top:0; right:0; background:var(--dorado); color:#1a1204; font-size:.6rem; font-weight:800; letter-spacing:1px; text-transform:uppercase; padding:4px 12px; border-radius:0 0 0 10px; }
+  .plan h3{ font-family:'Barlow Condensed',sans-serif; font-weight:900; font-size:1.5rem; letter-spacing:.5px; }
+  .plan .dias{ font-size:.66rem; letter-spacing:1.5px; text-transform:uppercase; color:var(--rojo); margin:2px 0 12px; }
+  .plan .precio{ color:var(--dorado); font-weight:800; font-size:1.1rem; }
+  .plan .precio small{ color:var(--gris); font-weight:500; font-size:.72rem; display:block; }
+  .plan ul{ list-style:none; margin:14px 0 0; display:flex; flex-direction:column; gap:6px; }
+  .plan li{ font-size:.84rem; color:#c9c9d0; display:flex; gap:8px; }
+  .plan li b{ color:#fff; }
+  .plan li span{ color:var(--dorado); flex-shrink:0; }
+  /* Extras */
+  .extras{ display:grid; grid-template-columns:repeat(auto-fit,minmax(240px,1fr)); gap:16px; }
+  .extra{ background:var(--negro3); border:1px solid var(--border); border-radius:14px; padding:18px 20px; }
+  .extra h4{ font-family:'Barlow Condensed',sans-serif; font-weight:800; font-size:1.15rem; letter-spacing:.5px; margin-bottom:4px; }
+  .extra p{ color:var(--gris); font-size:.86rem; }
+  /* Form */
+  #solicitar{ background:linear-gradient(180deg, transparent, rgba(232,54,61,.06)); }
+  .form-card{ background:var(--negro2); border:1px solid var(--border); border-radius:18px; padding:26px; max-width:640px; margin:0 auto; }
+  .fg{ margin-bottom:14px; } .row2{ display:grid; grid-template-columns:1fr 1fr; gap:12px; }
+  label.fl{ display:block; font-size:.68rem; letter-spacing:1.5px; text-transform:uppercase; color:var(--gris); margin-bottom:6px; }
+  label.fl .req{ color:var(--rojo); }
+  input,select,textarea{ width:100%; background:var(--negro); border:1px solid var(--border); color:var(--blanco); border-radius:10px; padding:12px 14px; font-family:inherit; font-size:.95rem; }
+  input:focus,select,textarea:focus{ outline:none; border-color:var(--rojo); }
+  textarea{ resize:vertical; min-height:80px; }
+  .err{ color:var(--rojo); font-size:.85rem; min-height:20px; margin:4px 0; }
+  .exito{ text-align:center; padding:30px; }
+  .hidden{ display:none; }
+  .legal{ color:#6b6b73; font-size:.74rem; border-top:1px solid var(--border); padding:24px 0 50px; text-align:center; }
+  .legal b{ color:var(--gris); }
+  @media(max-width:560px){ .row2{ grid-template-columns:1fr; } }
+</style>
+
+<div class="hero">
+  <div class="wrap">
+    <span class="kicker">Club de Embajadores · Temporada 2026</span>
+    <h1 class="disp">FRAT<span class="amp">&amp;</span>FRIENDS</h1>
+    <div class="sub">Convenios universitarios · Fraternidad Campus Central</div>
+    <p class="lead">La red de contacto entre <b>Fraternidad Campus Central</b> y quien represente a tu universidad, instituto, federación o centro de estudiantes. Entradas rebajadas, cortesías y hasta comisión por ventas para tu grupo. 🎓</p>
+    <div class="cta-row">
+      <a href="#solicitar" class="btn btn-rojo">Solicitar convenio</a>
+      <a href="#planes" class="btn btn-ghost">Ver los planes</a>
+    </div>
+  </div>
+</div>
+
+<section>
+  <div class="wrap">
+    <div class="slabel">Cómo funciona</div>
+    <h2 class="stitle disp">En 4 pasos</h2>
+    <div class="pasos">
+      <div class="paso"><div class="n">1</div><h3>Reunión</h3><p>Coordinamos una reunión (presencial u online) para definir plazos, metas y beneficios de tu grupo.</p></div>
+      <div class="paso"><div class="n">2</div><h3>Embajador oficial</h3><p>Tu grupo designa 1 Embajador(a) oficial: el vínculo formal con LA CASA que difunde, coordina y valida.</p></div>
+      <div class="paso"><div class="n">3</div><h3>Formulario</h3><p>Cada asistente completa el formulario con sus datos y comprobante. El Embajador valida a los suyos.</p></div>
+      <div class="paso"><div class="n">4</div><h3>Producimos</h3><p>LA CASA produce la fiesta completa (acceso, personal, barras, DJs) y envía los tickets a los validados.</p></div>
+    </div>
+  </div>
+</section>
+
+<section id="planes">
+  <div class="wrap">
+    <div class="slabel">Modalidades</div>
+    <h2 class="stitle disp">Elige tu plan</h2>
+    <div class="planes" id="planes-grid"></div>
+    <p style="color:#6b6b73;font-size:.8rem;margin-top:14px;">Los <b>mínimos base</b> que lo indican deben estar pagados <b>48 horas antes</b> del evento; si no se alcanza la venta comprometida, el grupo cubre la diferencia. Cortesías y regalías no son una obligación adquirida: se entregan cuando LA CASA lo estime conveniente.</p>
+  </div>
+</section>
+
+<section>
+  <div class="wrap">
+    <div class="slabel">Además</div>
+    <h2 class="stitle disp">Extras &amp; promos</h2>
+    <div class="extras">
+      <div class="extra"><h4>🎤 Activación presencial</h4><p>LA FRATE va a tu centro de estudios: amplificación, 1 DJ, 3 animadoras, dinámicas y premios. $250.000 IVA incl. (gratuidad excepcional según volumen).</p></div>
+      <div class="extra"><h4>🎟️ "FRAT&amp;FRIEND te invita"</h4><p>Como parte del club, tu grupo puede solicitar hasta 10 entradas generales de cortesía semanales (sujeto a evaluación y al plan activo).</p></div>
+      <div class="extra"><h4>🍹 Cover estudiante</h4><p>Agua, Pisco, Ron o Vodka 2×$6.000, válido hasta la 01:30 AM.</p></div>
+      <div class="extra"><h4>🎉 Bienvenid@s a la Fraternidad</h4><p>Ciertos convenios acceden a beneficios de bienvenida — se acuerdan en reunión según el tipo de convenio.</p></div>
+    </div>
+  </div>
+</section>
+
+<section id="solicitar">
+  <div class="wrap">
+    <div class="slabel" style="text-align:center;">Da el primer paso</div>
+    <h2 class="stitle disp" style="text-align:center;">Solicita tu convenio</h2>
+    <div class="form-card">
+      <div id="cv-form">
+        <p style="color:var(--gris);font-size:.9rem;margin-bottom:18px;">Déjanos tus datos y te contactamos para coordinar la reunión y armar el convenio de tu grupo. 💛</p>
+        <div class="fg"><label class="fl">Nombre y apellido <span class="req">*</span></label><input id="cv-nombre" type="text" placeholder="Tu nombre" /></div>
+        <div class="row2">
+          <div class="fg"><label class="fl">WhatsApp <span class="req">*</span></label><input id="cv-tel" type="tel" placeholder="+56 9 …" /></div>
+          <div class="fg"><label class="fl">Correo</label><input id="cv-email" type="email" placeholder="tu@correo.com" /></div>
+        </div>
+        <div class="row2">
+          <div class="fg"><label class="fl">Universidad / instituto</label><input id="cv-uni" type="text" placeholder="Ej: Duoc UC" /></div>
+          <div class="fg"><label class="fl">Tu cargo</label><input id="cv-cargo" type="text" placeholder="Ej: Presidente CAA" /></div>
+        </div>
+        <div class="row2">
+          <div class="fg"><label class="fl">Plan de interés</label><select id="cv-plan"></select></div>
+          <div class="fg"><label class="fl">N° aprox. de personas</label><input id="cv-personas" type="number" min="0" placeholder="50" /></div>
+        </div>
+        <div class="fg"><label class="fl">Mensaje</label><textarea id="cv-msg" placeholder="Cuéntanos de tu grupo, fecha tentativa, lo que necesites…"></textarea></div>
+        <div class="err" id="cv-err"></div>
+        <button class="btn btn-rojo" id="cv-btn" style="width:100%;" onclick="enviarConvenio()">Enviar solicitud 🎓</button>
+      </div>
+      <div id="cv-exito" class="exito hidden">
+        <div style="font-size:2.6rem;">✅</div>
+        <div class="disp" style="font-size:1.8rem;margin:8px 0;">¡Solicitud enviada!</div>
+        <p style="color:var(--gris);">Te contactaremos por WhatsApp para coordinar la reunión y armar tu convenio. Revisa también el WhatsApp del equipo: <b>+56 9 8131 1548</b>.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<div class="legal">
+  <div class="wrap">
+    Fraternidad Campus Central · Pío Nono 430, esq. Dominica, Bellavista, Recoleta · WhatsApp +56 9 8131 1548 · @fraternidadcampuscentral<br><br>
+    <b>Aspecto legal:</b> La recopilación y manejo de datos se alinea a la <b>Ley 19.628</b>, con fines de coordinación y seguridad del evento. Como negocio regido por la <b>Ley 19.925</b> (Ley de Alcoholes), LA CASA puede prohibir el acceso o cancelar beneficios ante incumplimiento. Regalías y cortesías no son una obligación adquirida.
+  </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script>
+  var SB_URL='https://ydwlpraoaaijlfssevoh.supabase.co', SB_ANON='sb_publishable_-_7GeDU_h84zf2v--lWQaQ_15ZFxOWt';
+  var sb = window.supabase.createClient(SB_URL, SB_ANON);
+  var $ = function(id){ return document.getElementById(id); };
+
+  var PLANES = [
+    { n:'Plan Embajador', com:true, dias:'Jueves', min:50, base:'$200.000', precio:'$4.000 – $5.000', grat:'30 grales + 8 VIP + 4 cover', extra:'Comisión $500 por entrada' },
+    { n:'Embajador sin comisión', dias:'Jueves', min:50, base:'Ref. $150.000', precio:'$3.000 – $4.000', grat:'10 grales + 4 VIP + 4 cover', extra:'Acceso más económico' },
+    { n:'Convenio Small', dias:'Viernes y sábado', min:30, base:'Ref. $180.000', precio:'$6.000 – $7.000', grat:'10 grales + 2 VIP + 2 cover' },
+    { n:'Convenio Medium', dias:'Viernes y sábado', min:60, base:'Ref. $420.000', precio:'$7.000 – $8.000', grat:'20 grales + 4 VIP + 4 cover' },
+    { n:'Convenio Large', com:true, dias:'Viernes y sábado', min:90, base:'$720.000', precio:'$8.000 – $9.000', grat:'30 grales + 6 VIP + 6 cover', extra:'Comisión $1.000 por entrada', destacado:true },
+    { n:'Fiesta Dom a Miér', com:true, dias:'Domingo a miércoles', min:500, base:'$3.000.000', precio:'$6.000 – $7.000', grat:'Fiesta exclusiva', extra:'Comisión $1.000 por entrada' },
+    { n:'Jueves Pista Exclusiva', com:true, dias:'Jueves', min:300, base:'$1.500.000', precio:'$5.000 – $6.000', grat:'Pista exclusiva', extra:'Comisión $1.000 por entrada' },
+    { n:'Jueves Excepcional', com:true, dias:'Jueves', min:800, base:'$5.600.000', precio:'$7.000 – $8.000', grat:'Fiesta exclusiva', extra:'Comisión $1.500 por entrada' }
+  ];
+  function esc(s){ return String(s==null?'':s).replace(/[&<>"]/g,function(c){return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c];}); }
+  (function(){
+    document.getElementById('planes-grid').innerHTML = PLANES.map(function(p){
+      return '<div class="plan'+(p.destacado?' destacado':'')+'">'
+        + (p.destacado?'<span class="badge">Popular</span>':'')
+        + '<h3>'+esc(p.n)+'</h3><div class="dias">'+esc(p.dias)+'</div>'
+        + '<div class="precio">'+esc(p.precio)+'<small>entrada estudiante (sin cover · con cover)</small></div>'
+        + '<ul>'
+        + '<li><span>▸</span> <b>Mínimo:</b> '+p.min+' entradas</li>'
+        + '<li><span>▸</span> <b>Base:</b> '+esc(p.base)+'</li>'
+        + (p.extra?'<li><span>▸</span> '+esc(p.extra)+'</li>':'')
+        + '<li><span>🎁</span> '+esc(p.grat)+'</li>'
+        + '</ul></div>';
+    }).join('');
+    var sel=document.getElementById('cv-plan');
+    sel.innerHTML='<option value="">— Aún no sé, oriéntenme —</option>'+PLANES.map(function(p){return '<option value="'+esc(p.n)+'">'+esc(p.n)+'</option>';}).join('');
+  })();
+
+  async function enviarConvenio(){
+    var err=$('cv-err'); err.textContent='';
+    var nombre=$('cv-nombre').value.trim(), tel=$('cv-tel').value.trim();
+    if(!nombre) return err.textContent='Escribe tu nombre.';
+    if(!tel) return err.textContent='Déjanos tu WhatsApp para contactarte.';
+    var btn=$('cv-btn'); btn.disabled=true; btn.textContent='Enviando…';
+    try{
+      var payload={ nombre:nombre, telefono:tel, email:$('cv-email').value.trim(),
+        universidad:$('cv-uni').value.trim(), cargo:$('cv-cargo').value.trim(),
+        personas:parseInt($('cv-personas').value)||null,
+        mensaje:('Plan: '+($('cv-plan').value||'a definir')+'. '+$('cv-msg').value.trim()).slice(0,600) };
+      var r=await sb.functions.invoke('crm-solicitud',{ body:{ accion:'crear_convenio', payload:payload } });
+      if(r.error) throw new Error(r.error.message||'Error');
+      if(r.data&&r.data.error) throw new Error(r.data.error);
+      $('cv-form').classList.add('hidden'); $('cv-exito').classList.remove('hidden');
+      try{ window.scrollTo({top:document.getElementById('solicitar').offsetTop-40,behavior:'smooth'}); }catch(e){}
+    }catch(e){ err.textContent=(e.message||e)+''; btn.disabled=false; btn.textContent='Enviar solicitud 🎓'; }
+  }
+</script>

@@ -1,0 +1,378 @@
+<!DOCTYPE html>
+<html lang="es-CL">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>FRATE · Flyer REC / Diagnóstico</title>
+<link rel="stylesheet" href="styles.css">
+</head>
+<body>
+<div class="fr-stage">
+  <div class="fr-canvas" id="canvas">
+
+    <!-- FONDO -->
+    <div class="fr-photo">
+      <image-slot id="frate-face" shape="rounded" radius="0" placeholder="ARRASTRA EL ROSTRO AQUÍ · FULL-BLEED"></image-slot>
+    </div>
+    <div class="fr-flare"></div>
+
+    <!-- CONTENIDO -->
+    <div class="fr-content">
+      <div class="fr-topbar">
+        <div class="fr-rec">
+          <div class="fr-rec-row"><span class="fr-dot"></span><span class="fr-rec-label" data-slot="rec">REC</span></div>
+          <span class="fr-mono-sm" data-slot="fps">180FPS</span>
+        </div>
+        <div class="fr-logo-top"><img src="assets/logo-fraternidad.png" alt="Fraternidad Campus Central"></div>
+        <div class="fr-cam">
+          <div class="fr-battery"><i></i><i></i><i></i><i></i></div>
+          <span class="fr-mono-sm" data-slot="timecode">23:47:32</span>
+          <span class="fr-mono-sm" data-slot="zone">ZONA PISTA</span>
+        </div>
+      </div>
+
+      <!-- FOOTER -->
+      <div class="fr-footer">
+        <div class="fr-foot-main">
+          <div class="fr-date">
+            <div class="fr-date-day" data-slot="dateDay">JUEVES</div>
+            <div class="fr-date-main"><span class="fr-date-num" data-slot="dateNum">30</span><span class="fr-date-month" data-slot="dateMonth">ABRIL</span></div>
+            <div class="fr-date-time" data-slot="time">11 PM – 05 AM</div>
+          </div>
+          <div class="fr-logo-frate">
+            <image-slot id="frate-logo" shape="rounded" radius="6" placeholder="LOGO FRATE (arrastra PNG/SVG)"></image-slot>
+          </div>
+          <div class="fr-tags" id="tags"></div>
+        </div>
+
+        <div class="fr-strip">
+          <div class="fr-concurso">
+            <h4 data-slot="concursoTitle">CONCURSO</h4>
+            <p data-slot="concursoText">Etiqueta a quien te hace sonreír y gana:</p>
+            <div class="fr-prizes" id="prizes"></div>
+          </div>
+
+          <div class="fr-mid">
+            <div class="fr-song" id="song"></div>
+            <div class="fr-handle" data-slot="handle">@FRATERNIDADCAMPUSCENTRAL</div>
+            <div class="fr-socials"><i>IG</i><i>TT</i><i>SP</i><i>YT</i></div>
+          </div>
+
+          <div class="fr-entradas">
+            <div class="fr-qr" id="qr"></div>
+            <div class="fr-qr-cap">ENTRADAS · <span data-slot="qrCap">WWW.FRATE.CL</span></div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- HUD IZQUIERDA -->
+    <div class="fr-hud">
+      <div class="fr-card">
+        <div class="fr-card-row">
+          <div class="fr-eye"><image-slot id="frate-eye" shape="circle" placeholder="ojo" style="width:100%;height:100%"></image-slot></div>
+          <div style="flex:1">
+            <div class="fr-card-label" data-slot="hudEyeLabel">SU MIRADA</div>
+            <svg class="fr-heart-line" viewBox="0 0 160 24" preserveAspectRatio="none"><polyline points="0,12 30,12 40,3 50,21 60,7 70,15 80,12 110,12 120,5 128,17 136,12 160,12"/></svg>
+          </div>
+        </div>
+      </div>
+      <div class="fr-card"><div class="fr-card-label" data-slot="impactoLabel">NIVEL DE IMPACTO</div><div class="fr-card-val fr-val-accent" data-slot="impacto">99.7%</div></div>
+      <div class="fr-card"><div class="fr-card-label" data-slot="peligroLabel">PELIGROSIDAD</div><div class="fr-card-val" data-slot="peligro">EXTREMA</div></div>
+      <div class="fr-card">
+        <div class="fr-card-row"><span class="fr-pin">◈</span><div class="fr-card-label" data-slot="ubicLabel">UBICACIÓN</div></div>
+        <div class="fr-card-val" style="font-size:24px;margin-top:6px" data-slot="ubic">FRATE</div>
+        <div class="fr-card-label" data-slot="ubicSub">PISTA CENTRAL</div>
+      </div>
+      <div class="fr-card"><div class="fr-card-label" data-slot="horaLabel">HORA DETECTADA</div><div class="fr-card-val fr-val-accent" style="font-size:26px" data-slot="hora">01:47 AM</div></div>
+    </div>
+
+    <!-- CHAT -->
+    <div class="fr-chat" id="chat"><div class="fr-typing" data-slot="typing">ESCRIBIENDO… <b></b><b></b><b></b></div></div>
+
+    <!-- TÍTULO -->
+    <div class="fr-title" id="title">
+      <div class="fr-title-pre" data-slot="titlePre">DIAGNÓSTICO</div>
+      <div class="fr-title-1"><span data-slot="titleLine1">ME ENCANTA</span> <span class="fr-title-tu" data-slot="titleTu">TU</span></div>
+      <div class="fr-title-2"><span data-slot="titleKeyword">SONRISA</span><span class="fr-title-heart">♡</span></div>
+      <div class="fr-concept" data-slot="concept">PERO ME ENAMORA MÁS <em>CÓMO BAILAS</em>.</div>
+      <div class="fr-analysis">
+        <div class="fr-analysis-label" data-slot="analysisLabel">ANÁLISIS COMPLETO</div>
+        <div class="fr-bar" id="bar"></div>
+      </div>
+    </div>
+
+    <!-- frame + overlays -->
+    <div class="fr-corners"><i></i><i></i><i></i><i></i></div>
+    <div class="fr-scan"></div>
+    <div class="fr-grain"></div>
+  </div>
+</div>
+
+<!-- TWEAKS -->
+<div id="tweaks">
+  <h3>Tweaks <button id="tw-close">×</button></h3>
+  <div class="tw-group"><button class="tw-regen" id="tw-regen">⟳ Regenerar (demo)</button></div>
+  <div class="tw-group"><label>Formato Instagram</label><div class="tw-seg" id="tw-format"></div></div>
+  <div class="tw-group"><label>Paleta (3 colores)</label><div class="tw-swatches" id="tw-accent"></div></div>
+  <div class="tw-group"><label>Presentación del título</label><div class="tw-seg" id="tw-title"></div></div>
+  <div class="tw-group"><label>Canción / artista</label><div class="tw-seg" id="tw-song"></div></div>
+  <div class="tw-group"><label>Fuente palabra clave</label><div class="tw-seg" id="tw-kw"></div></div>
+  <div class="tw-group">
+    <div class="tw-row"><span>Mostrar chat</span><div class="tw-toggle" data-k="showChat"></div></div>
+    <div class="tw-row"><span>Mostrar HUD</span><div class="tw-toggle" data-k="showHud"></div></div>
+  </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/qrcode-generator@1.4.4/qrcode.js"></script>
+<script src="image-slot.js"></script>
+<script>
+/* ============================================================
+   PRESET VISUAL (tema) — editable por Tweaks / IA
+   ============================================================ */
+const TWEAKS = /*EDITMODE-BEGIN*/{
+  "palette": "rec",
+  "format": "story",
+  "titleStyle": "aligned",
+  "keywordFont": "bungee",
+  "songStyle": "player",
+  "showChat": true,
+  "showHud": true
+}/*EDITMODE-END*/;
+
+const PALETTES = {
+  rec:     { name: "Rosa",    colors: ["#ff2d78", "#00e5ff", "#b14bff"] },
+  violeta: { name: "Violeta", colors: ["#b14bff", "#00e5ff", "#ff2d78"] },
+  cyan:    { name: "Cyan",    colors: ["#00e5ff", "#ff2d78", "#b14bff"] },
+  coral:   { name: "Coral",   colors: ["#ff6a3d", "#ffd23d", "#ff2d78"] },
+  verde:   { name: "Verde",   colors: ["#39ff7d", "#00e5ff", "#f5ff3d"] }
+};
+const KW_FONTS = {
+  bungee: "'Bungee', cursive",
+  marker: "'Permanent Marker', cursive",
+  spray:  "'Rubik Spray Paint', cursive"
+};
+/* formatos Instagram */
+const FORMATS = {
+  story:    [1080, 1920],  // 9:16 historia
+  carousel: [1080, 1350],  // 4:5 carrusel / feed
+  poster:   [1080, 1620]   // 2:3 afiche
+};
+
+/* ============================================================
+   DATOS DEL EVENTO — auto-rellenado desde Supabase (ver MAPEO-DATOS.md)
+   ============================================================ */
+const EVENT = {
+  rec: "REC", fps: "180FPS", timecode: "23:47:32", zone: "ZONA PISTA",
+  hudEyeLabel: "SU MIRADA",
+  impactoLabel: "NIVEL DE IMPACTO", impacto: "99.7%",
+  peligroLabel: "PELIGROSIDAD", peligro: "EXTREMA",
+  ubicLabel: "UBICACIÓN", ubic: "FRATE", ubicSub: "PISTA CENTRAL",
+  horaLabel: "HORA DETECTADA", hora: "01:47 AM",
+  typing: "ESCRIBIENDO…",
+  chat: [
+    { side: "in",  text: "No sé cómo decírtelo…", time: "23:47" },
+    { side: "out", text: "pero cada vez que sonríes se me olvida todo", time: "23:48", seen: true },
+    { side: "in",  text: "Nos vemos en FRATE?", time: "23:48" },
+    { side: "out", text: "sí.", time: "23:48", seen: true },
+  ],
+  titlePre: "DIAGNÓSTICO",
+  titleLine1: "ME ENCANTA", titleTu: "TU", titleKeyword: "SONRISA",
+  concept: "PERO ME ENAMORA MÁS <em>CÓMO BAILAS</em>.",
+  analysisLabel: "ANÁLISIS COMPLETO", analysisPct: 99,
+  dateDay: "JUEVES", dateNum: "30", dateMonth: "ABRIL", time: "11 PM – 05 AM",
+  tags: ["PERREO", "AMIGOS", "HISTORIAS"],
+  concursoTitle: "CONCURSO",
+  concursoText: "Etiqueta a quien te hace sonreír y gana:",
+  prizes: [ { n: "4", label: "ENTRADAS" }, { n: "1", label: "BOTELLA DESTILADO A ELECCIÓN" } ],
+  songTitle: "SI ANTES TE HUBIERA CONOCIDO", songArtist: "KAROL G",
+  qrUrl: "https://www.frate.cl", qrCap: "WWW.FRATE.CL",
+  ticketsLabel: "ENTRADAS EN:", ticketsUrl: "WWW.FRATE.CL",
+  handle: "@FRATERNIDADCAMPUSCENTRAL",
+};
+
+/* ---- Render de datos ---- */
+function fillData(d) {
+  document.querySelectorAll("[data-slot]").forEach(el => {
+    const k = el.dataset.slot;
+    if (d[k] != null) el.innerHTML = d[k];
+  });
+  document.getElementById("tags").innerHTML = d.tags.map(t => `<div><span>${t[0]}</span>${t.slice(1)}</div>`).join("");
+  document.getElementById("prizes").innerHTML = d.prizes.map((p,i) =>
+    `${i ? '<span class="fr-plus">+</span>' : ''}<div class="fr-prize"><b>${p.n}</b><small>${p.label}</small></div>`).join("");
+
+  const chat = document.getElementById("chat");
+  chat.querySelectorAll(".fr-bubble").forEach(n => n.remove());
+  d.chat.forEach(m => {
+    const b = document.createElement("div");
+    b.className = "fr-bubble " + (m.side === "out" ? "fr-out" : "fr-in");
+    b.innerHTML = `${m.text}<span class="t">${m.time}${m.seen ? ' <span class="fr-check">✓✓</span>' : ''}</span>`;
+    chat.appendChild(b);
+  });
+
+  const bar = document.getElementById("bar");
+  const total = 30, on = Math.round(total * d.analysisPct / 100);
+  bar.innerHTML = Array.from({length: total}, (_,i) => `<span class="seg${i<on?'':' off'}"></span>`).join("") +
+    `<span class="pct">${d.analysisPct}%</span>`;
+
+  renderQR(d.qrUrl);
+  renderSong(d, TWEAKS.songStyle);
+}
+
+/* ---- Canción: 3 estilos ---- */
+function renderSong(d, style) {
+  const el = document.getElementById("song");
+  if (!el) return;
+  const t = d.songTitle, a = d.songArtist;
+  if (style === "spectrum") {
+    let seed = 11; const rnd = () => (seed = (seed*1103515245+12345)&0x7fffffff)/0x7fffffff;
+    const bars = Array.from({length:30}, () => `<i style="height:${(22+rnd()*78).toFixed(0)}%"></i>`).join("");
+    el.innerHTML = `<div class="song-spectrum"><div class="ss-label">AUDIO DETECTADO</div><div class="ss-wave">${bars}</div><div class="ss-title">${t}</div><div class="ss-artist">${a}</div></div>`;
+  } else if (style === "editorial") {
+    el.innerHTML = `<div class="song-editorial"><div class="se-kicker">SUENA EN LA PISTA</div><div class="se-title">${t}</div><div class="se-artist">— ${a}</div></div>`;
+  } else {
+    el.innerHTML = `<div class="song-player"><div class="sp-play">▶</div><div class="sp-info"><div class="sp-kicker">SONANDO EN LA PISTA</div><div class="sp-title">${t}</div><div class="sp-artist">${a}</div><div class="sp-bar"><i></i></div></div></div>`;
+  }
+}
+
+/* ---- QR → www.frate.cl (módulos dark sobre panel claro = escaneable) ---- */
+function renderQR(url) {
+  const host = document.getElementById("qr");
+  try {
+    const qr = qrcode(0, "M"); qr.addData(url); qr.make();
+    const n = qr.getModuleCount(), s = 100 / n;
+    let rects = "";
+    for (let r = 0; r < n; r++) for (let c = 0; c < n; c++)
+      if (qr.isDark(r,c)) rects += `<rect x="${(c*s).toFixed(2)}" y="${(r*s).toFixed(2)}" width="${s.toFixed(2)}" height="${s.toFixed(2)}"/>`;
+    host.innerHTML = `<svg viewBox="0 0 100 100" shape-rendering="crispEdges"><g fill="#0a0a0a">${rects}</g></svg>`;
+  } catch(e) { host.innerHTML = ""; }
+}
+
+/* ---- Aplicar tema (acento + fuente keyword + módulos) ---- */
+function applyTweaks(t) {
+  const pal = (Array.isArray(t.palette) ? t.palette : (PALETTES[t.palette] || PALETTES.rec).colors);
+  document.documentElement.style.setProperty("--accent", pal[0]);
+  document.documentElement.style.setProperty("--accent-2", pal[1]);
+  document.documentElement.style.setProperty("--accent-3", pal[2]);
+  document.documentElement.style.setProperty("--f-keyword", KW_FONTS[t.keywordFont] || KW_FONTS.bungee);
+  const cv = document.getElementById("canvas");
+  const [w, h] = FORMATS[t.format] || FORMATS.story;
+  cv.style.width = w + "px"; cv.style.height = h + "px";
+  cv.className = "fr-canvas fmt-" + (t.format || "story") + " kw-" + t.keywordFont +
+    (t.showChat ? "" : " hide-chat") + (t.showHud ? "" : " hide-hud");
+  const tt = document.getElementById("title");
+  if (tt) tt.className = "fr-title ts-" + (t.titleStyle || "aligned");
+  renderSong(EVENT, t.songStyle);
+  scale();
+}
+
+/* ============================================================
+   TWEAKS PANEL  (protocolo host)
+   ============================================================ */
+function buildPanel() {
+  const pal = document.getElementById("tw-accent");
+  pal.innerHTML = Object.entries(PALETTES).map(([k,p]) =>
+    `<div class="tw-pal${k===TWEAKS.palette?' sel':''}" data-k="${k}" title="${p.name}">${p.colors.map(c=>`<i style="background:${c}"></i>`).join("")}</div>`).join("");
+  pal.onclick = e => { const el = e.target.closest(".tw-pal"); if(!el) return;
+    setTweak("palette", el.dataset.k);
+    pal.querySelectorAll(".tw-pal").forEach(x => x.classList.toggle("sel", x===el)); };
+
+  const fm = document.getElementById("tw-format");
+  const fmLabels = { story:"Historia 9:16", carousel:"Carrusel 4:5", poster:"Afiche 2:3" };
+  fm.innerHTML = Object.keys(fmLabels).map(k =>
+    `<button class="${k===TWEAKS.format?'sel':''}" data-k="${k}">${fmLabels[k]}</button>`).join("");
+  fm.onclick = e => { const b = e.target.closest("button"); if(!b) return;
+    setTweak("format", b.dataset.k);
+    fm.querySelectorAll("button").forEach(x => x.classList.toggle("sel", x===b)); };
+
+  const ts = document.getElementById("tw-title");
+  const tsLabels = { aligned:"Alineado", center:"Centrado", block:"Bloque" };
+  ts.innerHTML = Object.keys(tsLabels).map(k =>
+    `<button class="${k===TWEAKS.titleStyle?'sel':''}" data-k="${k}">${tsLabels[k]}</button>`).join("");
+  ts.onclick = e => { const b = e.target.closest("button"); if(!b) return;
+    setTweak("titleStyle", b.dataset.k);
+    ts.querySelectorAll("button").forEach(x => x.classList.toggle("sel", x===b)); };
+
+  const sg = document.getElementById("tw-song");
+  const sgLabels = { player:"Player", spectrum:"Espectro", editorial:"Editorial" };
+  sg.innerHTML = Object.keys(sgLabels).map(k =>
+    `<button class="${k===TWEAKS.songStyle?'sel':''}" data-k="${k}">${sgLabels[k]}</button>`).join("");
+  sg.onclick = e => { const b = e.target.closest("button"); if(!b) return;
+    setTweak("songStyle", b.dataset.k);
+    sg.querySelectorAll("button").forEach(x => x.classList.toggle("sel", x===b)); };
+
+  const kw = document.getElementById("tw-kw");
+  const labels = { bungee:"Urbano", marker:"Marcador", spray:"Spray" };
+  kw.innerHTML = Object.keys(KW_FONTS).map(k =>
+    `<button class="${k===TWEAKS.keywordFont?'sel':''}" data-k="${k}">${labels[k]}</button>`).join("");
+  kw.onclick = e => { const b = e.target.closest("button"); if(!b) return;
+    setTweak("keywordFont", b.dataset.k);
+    kw.querySelectorAll("button").forEach(x => x.classList.toggle("sel", x===b)); };
+
+  document.querySelectorAll("#tweaks .tw-toggle").forEach(tg => {
+    tg.classList.toggle("on", TWEAKS[tg.dataset.k]);
+    tg.onclick = () => { const v = !TWEAKS[tg.dataset.k]; tg.classList.toggle("on", v); setTweak(tg.dataset.k, v); };
+  });
+  const rg = document.getElementById("tw-regen"); if (rg) rg.onclick = regenDemo;
+}
+function setTweak(k, v) {
+  TWEAKS[k] = v; applyTweaks(TWEAKS);
+  try { window.parent.postMessage({ type: "__edit_mode_set_keys", edits: { [k]: v } }, "*"); } catch(e){}
+}
+
+window.addEventListener("message", e => {
+  if (e.data?.type === "__activate_edit_mode") document.getElementById("tweaks").classList.add("on");
+  if (e.data?.type === "__deactivate_edit_mode") document.getElementById("tweaks").classList.remove("on");
+});
+document.getElementById("tw-close").onclick = () => {
+  document.getElementById("tweaks").classList.remove("on");
+  try { window.parent.postMessage({ type: "__edit_mode_dismissed" }, "*"); } catch(e){}
+};
+
+/* ---- Inyección de datos por la app (regeneración) ----
+   La app define window.FRATE_EVENT / window.FRATE_TWEAKS (o ?data= base64 JSON)
+   ANTES de cargar; si no, usa el demo. Todos los textos + paleta + formato = parámetros. */
+function loadInjected() {
+  try {
+    const raw = new URLSearchParams(location.search).get("data");
+    if (raw) { const d = JSON.parse(decodeURIComponent(escape(atob(raw)))); Object.assign(EVENT, d.event || {}); Object.assign(TWEAKS, d.tweaks || {}); }
+  } catch (e) { console.warn("data param inválido", e); }
+  if (window.FRATE_EVENT)  Object.assign(EVENT, window.FRATE_EVENT);
+  if (window.FRATE_TWEAKS) Object.assign(TWEAKS, window.FRATE_TWEAKS);
+}
+
+/* ---- Muestras demo para el botón Regenerar ---- */
+const SAMPLES = [
+  { titleLine1:"ME ENCANTA", titleTu:"TU", titleKeyword:"SONRISA", concept:"PERO ME ENAMORA MÁS <em>CÓMO BAILAS</em>.", dateDay:"JUEVES", dateNum:"30", dateMonth:"ABRIL", songTitle:"SI ANTES TE HUBIERA CONOCIDO", songArtist:"KAROL G", concursoText:"Etiqueta a quien te hace sonreír y gana:" },
+  { titleLine1:"ME GUSTA", titleTu:"TU", titleKeyword:"CAOS", concept:"Y CÓMO <em>LO BAILAS TODO</em>.", dateDay:"VIERNES", dateNum:"15", dateMonth:"MAYO", songTitle:"LUNA", songArtist:"FEID, ATL JACOB", concursoText:"Etiqueta a tu cómplice de caos y gana:" },
+  { titleLine1:"NADIE BAILA", titleTu:"", titleKeyword:"COMO TÚ", concept:"Y LO <em>SABES BIEN</em>.", dateDay:"SÁBADO", dateNum:"07", dateMonth:"JUNIO", songTitle:"LA FALDA", songArtist:"MYKE TOWERS", concursoText:"Etiqueta a la reina de la pista y gana:" }
+];
+let sampleIdx = 0;
+function regenDemo() {
+  sampleIdx = (sampleIdx + 1) % SAMPLES.length;
+  Object.assign(EVENT, SAMPLES[sampleIdx]);
+  const keys = Object.keys(PALETTES);
+  TWEAKS.palette = keys[(keys.indexOf(TWEAKS.palette) + 1 + Math.floor(Math.random()*(keys.length-1))) % keys.length];
+  fillData(EVENT); applyTweaks(TWEAKS); buildPanel();
+}
+
+/* ---- init ---- */
+loadInjected();
+applyTweaks(TWEAKS);
+fillData(EVENT);
+buildPanel();
+try { window.parent.postMessage({ type: "__edit_mode_available" }, "*"); } catch(e){}
+
+/* ---- escala lienzo: ajusta al ANCHO del panel; alto = exacto (sin recortes) ---- */
+function scale() {
+  const c = document.getElementById("canvas");
+  const stage = document.querySelector(".fr-stage");
+  const [w, h] = FORMATS[TWEAKS.format] || FORMATS.story;
+  const s = window.innerWidth / w;
+  c.style.transform = `scale(${s})`;
+  if (stage) stage.style.height = (h * s) + "px";
+}
+scale(); window.addEventListener("resize", scale);
+</script>
+</body>
+</html>

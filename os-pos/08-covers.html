@@ -1,0 +1,93 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>FRATE OS · POS 08 Covers</title>
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🍸</text></svg>">
+<link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@600;800;900&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="/os-manual.css">
+<link rel="stylesheet" href="/os-pos.css">
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<style>
+  .dos{display:grid;grid-template-columns:repeat(auto-fit,minmax(260px,1fr));gap:12px;margin-top:14px}
+  .via{background:var(--neg2);border:1px solid var(--bor);border-radius:13px;padding:16px 18px}
+  .via h4{font-family:var(--disp);font-weight:800;font-size:1.05rem;text-transform:uppercase;margin-bottom:4px}
+  .via .c{font-size:.68rem;letter-spacing:1.3px;text-transform:uppercase;color:var(--gris2);margin-bottom:9px}
+  .via p{font-size:.83rem;color:var(--gris)}
+  .via .paso-n{font-family:var(--disp);font-weight:900;font-size:1.6rem;color:var(--acc);line-height:1}
+  .tres{display:grid;grid-template-columns:repeat(auto-fit,minmax(160px,1fr));gap:10px;margin-top:14px}
+  .fuente{background:var(--neg);border:1px solid var(--bor2);border-radius:12px;padding:14px 16px;text-align:center}
+  .fuente .ic{font-size:1.5rem}
+  .fuente b{display:block;font-family:var(--disp);text-transform:uppercase;letter-spacing:.5px;font-size:.95rem;margin:4px 0 2px}
+  .fuente span{font-size:.76rem;color:var(--gris)}
+</style>
+</head>
+<body>
+<div id="bar"></div>
+<div class="wrap">
+
+  <div class="hero">
+    <div class="eyebrow">POS · Manual 08 · Herramientas</div>
+    <h1><em>Covers</em></h1>
+    <p class="sub">Escanear, imprimir y quemar covers desde la barra — y por qué un cover no es una entrada.</p>
+    <div class="meta"><span>Para la barra</span><span>·</span><span>5 minutos</span><span>·</span><span>Se conecta con la Web</span></div>
+  </div>
+
+  <section>
+    <div class="stag">Qué es</div>
+    <h2>Un cover no es una entrada</h2>
+    <p class="lead">La entrada te deja <b>pasar</b>. El cover te da un <b>consumo</b>: un trago, una ficha. Son dos cosas y se validan en dos lugares distintos.</p>
+    <div class="dos">
+      <div class="via"><h4>🚪 Entrada</h4><div class="c">Se valida en la puerta</div><p>Deja entrar a una persona. Si llega a la barra, no sirve para pedir trago.</p></div>
+      <div class="via"><h4>🍸 Cover</h4><div class="c">Se valida en la barra</div><p>Se canjea por su consumo. Si llega a la puerta, se rechaza y se manda a la barra <b>sin quemarse</b>.</p></div>
+    </div>
+    <p class="lead" style="margin-top:18px">Un cover puede llegar por tres caminos, y a la barra le da lo mismo cuál:</p>
+    <div class="tres">
+      <div class="fuente"><div class="ic">🚪</div><b>De la puerta</b><span>Se vendió al entrar, junto con la entrada.</span></div>
+      <div class="fuente"><div class="ic">🌐</div><b>De la Web</b><span>Se compró online antes del evento.</span></div>
+      <div class="fuente"><div class="ic">🎁</div><b>Cortesía</b><span>Se emitió como invitación, valor $0.</span></div>
+    </div>
+  </section>
+
+  <section>
+    <div class="stag">En la barra</div>
+    <h2>Escanear, quemar, entregar</h2>
+    <p class="lead">El flujo es siempre el mismo. Apuntas la cámara al QR y el POS te dice, sin dudar, si vale o si ya se usó.</p>
+    <div class="dos">
+      <div class="via"><div class="paso-n">01</div><h4>Escaneas</h4><p>Apuntas al QR del cover. Da igual si es de la puerta, de la Web o una cortesía.</p></div>
+      <div class="via"><div class="paso-n">02</div><h4>Se quema e imprime</h4><p>Si vale: <b style="color:var(--verde)">ACEPTADO</b>, se marca como usado y sale su comprobante por la impresora. Le pasas el trago.</p></div>
+      <div class="via"><div class="paso-n">03</div><h4>No entra dos veces</h4><p>El mismo QR de nuevo: <b style="color:var(--oro)">YA UTILIZADO</b>, con la hora en que se ocupó. Un cover, un consumo.</p></div>
+    </div>
+    <div class="choque">
+      <div class="quien">🌐 Web &nbsp;→&nbsp; 💵 POS — los covers de la Web entran solos</div>
+      Lo que la Web vende como cover <b>aparece en el POS</b> para leerse igual que los propios (así quedó decidido: la Web los empuja al POS). El barman no distingue de dónde vino: escanea y quema. Y quemar es <b>idempotente cruzado</b> — si la Web ya lo quemó, el POS lo respeta, y al revés.
+    </div>
+  </section>
+
+  <section>
+    <div class="stag">La impresora</div>
+    <h2>El comprobante del cover</h2>
+    <p class="lead">La app de covers imprime por <b>Bluetooth</b> en la impresora portátil de la barra. El comprobante sale con su QR.</p>
+    <div class="bien"><b>Si la impresora se corta, no pierdes el cover.</b> Reconectas y reimprimes. El cover ya quedó quemado en el sistema: reimprimir no lo cobra ni lo valida de nuevo.</div>
+  </section>
+
+  <section>
+    <div class="stag">Casos reales</div>
+    <h2>Cómo lo vives tú</h2>
+    <div class="dos">
+      <div class="via"><h4>👤 Operador · en la barra</h4><div class="c">Llega alguien con su QR</div><p>Escaneas: <b style="color:var(--verde)">ACEPTADO</b>, se quema, imprime, le entregas su trago. Más tarde vuelve con el mismo: <b style="color:var(--oro)">YA UTILIZADO a las 01:12</b>. No hay discusión.</p></div>
+      <div class="via"><h4>🛠 Admin · en el panel</h4><div class="c">Cuadrar con la Web</div><p>Los covers vendidos online aparecen en el POS sin que muevas nada. Al cierre, revisas la <b>conciliación de QR</b> con la Web: cada cover se quemó una sola vez, de un lado o del otro.</p></div>
+    </div>
+  </section>
+
+  <div class="pie">FRATE OS · POS · Manual 08 · <a href="/os-pos-vincular">← Vincular Sunmi</a> · <a href="/os-pos-noche">Siguiente: el sábado real →</a> · <a href="/os-pos">↑ índice</a></div>
+</div>
+
+<script src="/os-guard.js"></script>
+<script>
+  document.getElementById('bar').innerHTML = osBarra('08', 'pos');
+  osProteger();
+</script>
+</body>
+</html>

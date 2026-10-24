@@ -1,0 +1,188 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+<title>FRATE — ¿A qué cumpleaños vienes?</title>
+<meta name="description" content="Elige el cumpleaños al que vienes y anótate." />
+<meta property="og:title" content="Estás invitad@ · FRATE" />
+<meta property="og:description" content="Elige el cumpleaños al que vienes y anótate en 30 segundos." />
+<meta property="og:image" content="https://www.frate.cl/assets/og-lista.png" />
+<meta property="og:image:width" content="1200" />
+<meta property="og:image:height" content="630" />
+<meta property="og:type" content="website" />
+<meta property="og:site_name" content="FRATE" />
+<meta name="twitter:card" content="summary_large_image" />
+<meta name="twitter:image" content="https://www.frate.cl/assets/og-lista.png" />
+<link rel="icon" href="/icon-frate.svg" />
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="/frate-afiche.js?v=af1"></script>
+<style>
+  :root{--bg:#0a0a0b;--card:#141416;--card2:#1b1b1f;--line:#26262b;--line2:#33333a;
+        --txt:#f2f0f4;--dim:#8b8892;--faint:#5a5862;--rojo:#E8363D;--gold:#D4A832;
+        --verde:#22c55e;--disp:'Barlow Condensed',Impact,sans-serif;}
+  *{box-sizing:border-box}
+  body{margin:0;background:var(--bg);color:var(--txt);
+       font:400 15px/1.6 -apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;}
+  .wrap{max-width:520px;margin:0 auto;min-height:100vh;}
+  .cover{position:relative;min-height:190px;padding:18px;display:flex;flex-direction:column;
+         justify-content:flex-end;overflow:hidden;border-bottom:2px solid var(--rojo);}
+  .cfoto{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;}
+  .cvid{position:absolute;inset:0;overflow:hidden;}
+  .ccolor{position:absolute;inset:0;}
+  .ctex{position:absolute;inset:0;overflow:hidden;}
+  .cvelo{position:absolute;inset:0;background:#0a0a0b;}
+  .chalo{position:absolute;inset:0;background:radial-gradient(circle at 50% 40%,
+         rgba(10,10,13,.97) 0%,rgba(10,10,13,.82) 62%,rgba(10,10,13,0) 100%);}
+  .cpie{position:absolute;inset:0;background:linear-gradient(180deg,
+        rgba(10,10,13,0) 55%,rgba(10,10,13,.95));}
+  .clogo{position:absolute;left:50%;top:38%;transform:translate(-50%,-50%);
+         height:96px;max-width:74%;object-fit:contain;}
+  .who,.meta{position:relative;}
+  .who{font-size:.72rem;letter-spacing:1.5px;text-transform:uppercase;color:var(--gold);font-weight:700;}
+  .meta{font-size:1.12rem;font-weight:700;color:#fafafa;margin-top:7px;line-height:1.25;}
+  .body{padding:18px 16px 40px;}
+  h1{font-size:1.15rem;font-weight:700;margin:0 0 4px;line-height:1.3;}
+  .sub{color:var(--dim);font-size:.86rem;margin:0 0 18px;}
+  .op{display:flex;justify-content:space-between;align-items:center;gap:12px;width:100%;
+      background:var(--card);border:1px solid var(--line);border-radius:14px;
+      padding:15px 16px;margin-bottom:9px;color:var(--txt);font-size:1rem;
+      text-align:left;cursor:pointer;text-decoration:none;font-family:inherit;}
+  .op:active{transform:scale(.99)}
+  .op b{font-weight:700;font-size:1.06rem;}
+  .op .q{color:var(--dim);font-size:.78rem;white-space:nowrap;}
+  .op.lleno{opacity:.5;pointer-events:none;}
+  .op.lleno .q{color:var(--rojo);}
+  .estado{text-align:center;padding:56px 20px;color:var(--dim);}
+  .estado .ico{font-size:2.6rem;margin-bottom:12px;}
+  .estado h2{color:var(--txt);font-size:1.2rem;margin:0 0 8px;}
+  .nota{margin-top:18px;background:rgba(212,168,50,.08);border:1px solid rgba(212,168,50,.28);
+        border-radius:12px;padding:13px 14px;font-size:.82rem;color:#e9dcb6;line-height:1.6;}
+  .nota b{color:var(--gold);}
+  .cop{margin-top:10px;width:100%;background:transparent;border:1px dashed var(--gold);
+       color:var(--gold);border-radius:10px;padding:10px;font-size:.82rem;font-weight:600;
+       cursor:pointer;font-family:inherit;}
+  .pie{text-align:center;color:var(--faint);font-size:.72rem;margin-top:26px;}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <div class="cover" id="cover" style="display:none;">
+    <img class="cfoto" id="cover-foto" alt="" style="display:none;" />
+    <div class="cvid" id="cover-video" style="display:none;"></div>
+    <div class="ccolor" id="cover-color" style="display:none;"></div>
+    <div class="ctex" id="cover-tex"></div>
+    <div class="cvelo" id="cover-velo" style="display:none;"></div>
+    <div class="chalo" id="cover-halo"></div>
+    <div class="cpie"></div>
+    <img class="clogo" id="cover-logo" alt="FRATE" style="display:none;" />
+    <div class="who">Te invita · FRATE</div>
+    <div class="meta" id="cover-meta"></div>
+  </div>
+  <div class="body" id="app">
+    <div class="estado"><div class="ico">🎂</div><h2>Cargando…</h2></div>
+  </div>
+</div>
+
+<script>
+const SB_URL='https://ydwlpraoaaijlfssevoh.supabase.co', SB_ANON='sb_publishable_-_7GeDU_h84zf2v--lWQaQ_15ZFxOWt';
+const sb=window.supabase.createClient(SB_URL,SB_ANON);
+const $=id=>document.getElementById(id);
+
+// El código viene por /cumples/JUE20-A7X o por ?c=JUE20-A7X
+function getCodigo(){
+  const q=new URLSearchParams(location.search).get('c'); if(q) return q.trim().toUpperCase();
+  const p=location.pathname.split('/').filter(Boolean);
+  if(p[0]==='cumples'&&p[1]) return decodeURIComponent(p[1]).trim().toUpperCase();
+  return '';
+}
+const DOW=['domingo','lunes','martes','miércoles','jueves','viernes','sábado'];
+const MES=['enero','febrero','marzo','abril','mayo','junio','julio','agosto','septiembre','octubre','noviembre','diciembre'];
+function fmtFecha(f){
+  if(!f) return '';
+  const [a,m,d]=String(f).slice(0,10).split('-').map(Number);
+  const dt=new Date(a,m-1,d);
+  return DOW[dt.getDay()]+', '+d+' de '+MES[m-1];
+}
+function esc(s){ return String(s==null?'':s).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c])); }
+function estado(ico,tit,txt){
+  $('app').innerHTML='<div class="estado"><div class="ico">'+ico+'</div><h2>'+esc(tit)+'</h2><div>'+esc(txt)+'</div></div>';
+}
+
+// Mismo fondo que el link de listas: si el local puso uno por defecto en
+// Configuración → link, el hub de cumpleaños lo usa también. Sin eso, la
+// trama de siempre. Copiado de lista.html/index.html a propósito.
+function _ytId(u){ var m=String(u||'').match(/(?:v=|youtu\.be\/|embed\/|shorts\/|live\/|\/v\/)([A-Za-z0-9_-]{11})/); return m?m[1]:''; }
+function _encStyle(enc){ enc=enc||{}; var z=Math.max(100,Math.min(340,+enc.zoom||160)), y=Math.max(-80,Math.min(80,+enc.y||0));
+  return 'position:absolute;top:50%;left:50%;width:'+z+'%;min-width:820px;aspect-ratio:16/9;transform:translate(-50%,calc(-50% + '+(y*0.7)+'px));border:0;pointer-events:none;'; }
+function _ytBg(id,enc){
+  enc=enc||{}; var st=Math.max(0,parseInt(enc.start)||0);
+  var src='https://www.youtube.com/embed/'+id+'?autoplay=1&mute=1&loop=1&playlist='+id
+    +'&controls=0&showinfo=0&modestbranding=1&rel=0&iv_load_policy=3&playsinline=1&disablekb=1&fs=0&start='+st;
+  return '<iframe src="'+src+'" allow="autoplay; encrypted-media" frameborder="0" loading="lazy" style="'+_encStyle(enc)+'"></iframe>';
+}
+async function fondoGlobal(){
+  try{
+    const { data } = await sb.from('config_valores').select('clave,valor')
+      .in('clave',['link_portada_url','link_portada_velo']);
+    const m={}; (data||[]).forEach(r=>m[r.clave]=r.valor);
+    const url=(m.link_portada_url||'').trim(); if(!url) return;
+    const velo=parseInt(m.link_portada_velo);
+    const g=id=>document.getElementById(id);
+    const tx=g('cover-tex'), ha=g('cover-halo'), vl=g('cover-velo');
+    const propio=()=>{ if(tx) tx.style.display='none'; if(ha) ha.style.display='none'; };
+    const yt=_ytId(url);
+    if(yt){
+      const vd=g('cover-video');
+      if(vd){ vd.style.background="#000 url('https://img.youtube.com/vi/"+yt+"/hqdefault.jpg') center/cover no-repeat";
+              vd.innerHTML=_ytBg(yt,{}); vd.style.display=''; propio(); }
+      if(vl){ vl.style.opacity=String((isNaN(velo)?45:velo)/100); vl.style.display=''; }
+    } else {
+      const fo=g('cover-foto'); if(!fo) return;
+      // Si no carga, vuelve la trama: negro con el texto encima se ve peor.
+      fo.onerror=function(){ this.style.display='none'; if(tx) tx.style.display=''; if(ha) ha.style.display=''; if(vl) vl.style.display='none'; };
+      fo.onload=propio;
+      fo.src=url; fo.style.display='';
+      if(vl){ vl.style.opacity=String((isNaN(velo)?55:velo)/100); vl.style.display=''; }
+    }
+  }catch(e){}
+}
+async function cargar(){
+  const codigo=getCodigo();
+  if(!codigo) return estado('🔗','Falta el código','El link no viene completo. Pídeselo de nuevo a quien te invitó.');
+  let data,error;
+  try{ ({data,error}=await sb.rpc('cumples_del_dia',{p_codigo:codigo})); }catch(e){ error=e; }
+  if(error) return estado('🌙','No pudimos abrirlo','Inténtalo de nuevo en un momento.');
+  const filas=Array.isArray(data)?data:[];
+  if(!filas.length) return estado('🌙','Este link ya no está activo','Puede que la fecha haya pasado. Escríbenos por WhatsApp.');
+
+  // Portada, igual que en el link de listas: la trama se siembra con la fecha
+  // para que todos los cumpleaños del mismo día compartan portada.
+  const fecha=filas[0].fecha;
+  try{
+    const tx=$('cover-tex');
+    if(tx && window.FrateAfiche && FrateAfiche.texturaF) tx.innerHTML=FrateAfiche.texturaF('CUMPLEANOS '+(fecha||''),{w:620,h:190});
+  }catch(e){}
+  const lg=$('cover-logo');
+  if(lg){ lg.onerror=function(){ this.style.display='none'; }; lg.src='/assets/logo-mail.png'; lg.style.display=''; }
+  $('cover-meta').textContent='🎂 '+fmtFecha(fecha);
+  $('cover').style.display='';
+  fondoGlobal();
+
+  let h='<h1>¿A qué cumpleaños vienes?</h1><div class="sub">Toca el nombre y te anotas ahí.</div>';
+  filas.forEach(f=>{
+    const quedan=Math.max(0,(f.cupos||0)-(f.tomados||0));
+    const lleno=!!f.lleno;
+    const cupoTxt = lleno ? 'lleno' : (f.cupos>0 ? 'quedan '+quedan : '');
+    h+='<a class="op'+(lleno?' lleno':'')+'" href="/lista/'+encodeURIComponent(f.codigo)+'">'
+      +'<b>'+esc(f.nombre||'—')+'</b><span class="q">'+esc(cupoTxt)+'</span></a>';
+  });
+  h+='<div class="nota">🎂 <b>¿Es tu cumpleaños?</b> Toca tu nombre y copia tu link para reenviárselo a tus invitados: '
+    +'así entran directo, sin tener que elegir.</div>';
+  h+='<div class="pie">FRATE · Fraternidad Campus Central</div>';
+  $('app').innerHTML=h;
+}
+cargar();
+</script>
+</body>
+</html>

@@ -1,0 +1,354 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>FRATE WEB (TICKETERA) · MANUAL DE COMUNIDAD</title>
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;500;600;700;800;900&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet" />
+<style>
+  :root{
+    --page:#08080a; --ink:#f0ede8; --dim:#a7a4ad; --faint:#6f6c76;
+    --card:#131317; --card2:#191920; --line:rgba(255,255,255,.10); --line2:rgba(255,255,255,.16);
+    --frate:#ff3b3b; --fluor:#3dff88; --gold:#f0c84a; --azul:#5b8dff;
+    --mono:'DM Mono',ui-monospace,monospace;
+  }
+  *{box-sizing:border-box}
+  html{scroll-behavior:smooth}
+  body{margin:0;background:var(--page);color:var(--ink);font-family:'Outfit',system-ui,sans-serif;line-height:1.6;-webkit-font-smoothing:antialiased}
+  a{color:var(--fluor)}
+  .layout{display:grid;grid-template-columns:250px 1fr;gap:0;max-width:1180px;margin:0 auto}
+  /* TOC */
+  nav.toc{position:sticky;top:0;align-self:start;height:100vh;overflow-y:auto;padding:26px 18px;border-right:1px solid var(--line);background:linear-gradient(180deg,#0c0c0f,#08080a)}
+  nav.toc .brand{display:flex;align-items:center;gap:10px;margin-bottom:18px}
+  nav.toc .disc{width:34px;height:34px;border-radius:99px;position:relative;background:repeating-radial-gradient(circle at 50% 50%,#191919 0 1px,#0b0b0b 1px 3px);box-shadow:inset 0 0 0 1px rgba(255,255,255,.06)}
+  nav.toc .disc::after{content:"";position:absolute;inset:36%;border-radius:99px;background:radial-gradient(circle at 38% 32%,#ff8fbb,var(--frate) 60%,#8a1020);box-shadow:0 0 0 2px var(--page)}
+  nav.toc b{font-weight:800;font-size:14px}
+  nav.toc small{display:block;color:var(--faint);font-size:10.5px}
+  nav.toc a{display:block;color:var(--dim);text-decoration:none;font-size:12.5px;padding:5px 8px;border-radius:7px;border-left:2px solid transparent}
+  nav.toc a:hover{color:var(--ink);background:rgba(255,255,255,.03)}
+  nav.toc a.h2{padding-left:18px;font-size:12px;color:var(--faint)}
+  nav.toc .sec{font-family:var(--mono);font-size:9.5px;letter-spacing:.18em;text-transform:uppercase;color:var(--faint);margin:14px 8px 4px}
+  /* Content */
+  main{padding:34px clamp(20px,4vw,54px) 90px;max-width:820px}
+  .hero{border-bottom:1px solid var(--line);padding-bottom:22px;margin-bottom:10px}
+  .hero .ey{font-family:var(--mono);font-size:11px;letter-spacing:.2em;text-transform:uppercase;color:var(--frate)}
+  h1{font-size:clamp(28px,5vw,40px);font-weight:900;letter-spacing:-.02em;margin:8px 0 6px;line-height:1.05}
+  .hero p{color:var(--dim);margin:0;max-width:60ch}
+  h2{font-size:23px;font-weight:800;letter-spacing:-.01em;margin:44px 0 6px;padding-top:14px;scroll-margin-top:16px}
+  h2 .n{font-family:var(--mono);font-size:14px;color:var(--frate);margin-right:8px}
+  h3{font-size:16.5px;font-weight:700;margin:24px 0 4px;color:#fff}
+  p{margin:8px 0}
+  ul,ol{margin:8px 0;padding-left:22px}
+  li{margin:5px 0}
+  .lead{color:var(--dim);font-size:15px}
+  code{font-family:var(--mono);font-size:.86em;background:rgba(255,255,255,.07);padding:1px 6px;border-radius:5px;color:var(--gold)}
+  .step{counter-reset:s;list-style:none;padding-left:0;margin:12px 0}
+  .step>li{counter-increment:s;position:relative;padding:4px 0 4px 40px;margin:6px 0}
+  .step>li::before{content:counter(s);position:absolute;left:0;top:2px;width:26px;height:26px;border-radius:99px;background:var(--frate);color:#fff;font-weight:800;font-size:13px;display:flex;align-items:center;justify-content:center}
+  .box{border:1px solid var(--line2);border-radius:12px;padding:14px 16px;margin:16px 0;background:var(--card)}
+  .box.tip{border-left:3px solid var(--fluor)} .box.warn{border-left:3px solid var(--gold)} .box.dang{border-left:3px solid var(--frate)}
+  .box .t{font-weight:800;font-size:13px;margin-bottom:2px}
+  .box.tip .t{color:var(--fluor)} .box.warn .t{color:var(--gold)} .box.dang .t{color:var(--frate)}
+  .box p{margin:3px 0;font-size:14px;color:var(--dim)}
+  .pill{display:inline-block;font-family:var(--mono);font-size:11px;padding:2px 9px;border-radius:99px;border:1px solid var(--line2);color:var(--dim);margin:2px 3px 2px 0}
+  .pill.a{color:var(--frate);border-color:rgba(255,45,120,.4)} .pill.g{color:var(--fluor);border-color:rgba(61,255,136,.4)} .pill.o{color:var(--gold);border-color:rgba(240,200,74,.4)} .pill.b{color:var(--azul);border-color:rgba(91,141,255,.4)}
+  table{width:100%;border-collapse:collapse;margin:14px 0;font-size:13.5px;display:block;overflow-x:auto}
+  th,td{border:1px solid var(--line);padding:8px 10px;text-align:left;vertical-align:top}
+  th{background:var(--card2);font-weight:700;color:#fff;white-space:nowrap}
+  .kbd{font-family:var(--mono);font-size:12px;background:var(--card2);border:1px solid var(--line2);border-bottom-width:2px;border-radius:6px;padding:1px 7px}
+  .top{position:fixed;right:18px;bottom:18px;background:var(--frate);color:#fff;width:44px;height:44px;border-radius:99px;display:flex;align-items:center;justify-content:center;text-decoration:none;font-size:20px;box-shadow:0 10px 24px -10px var(--frate)}
+  @media (max-width:820px){ .layout{grid-template-columns:1fr} nav.toc{display:none} main{padding:24px 18px 80px} }
+  @media print{ nav.toc,.top{display:none} .layout{display:block} main{max-width:none;padding:0} h2{page-break-after:avoid} .box,table{page-break-inside:avoid} body{background:#fff;color:#111} code,.box,th{background:#f2f2f2} }
+</style>
+</head>
+<body>
+<!--ARCHIVO-OS-->
+<div style="background:#2a1d05;border-bottom:3px solid #E6C860;padding:14px 20px;font:400 15px/1.5 system-ui;color:#f2f2f4;text-align:center"><b style="color:#E6C860">📦 Manual antiguo — se conserva como referencia</b><br><span style="color:#c9c9cf">Algunas partes ya no reflejan cómo funciona el sistema hoy. La versión vigente es <b>Web · 05 · El panel (y el resto del libro en /os-libro)</b>.</span><br><a href="/os-panel" style="display:inline-block;margin-top:8px;background:#E6C860;color:#08080a;font:800 14px system-ui;padding:9px 18px;border-radius:9px;text-decoration:none">Ir al manual vigente →</a></div>
+
+<div class="layout">
+  <nav class="toc">
+    <div class="brand"><div class="disc"></div><div><b>FRATE</b><small>Manual · Comunidad</small></div></div>
+    <div class="sec">Empezar</div>
+    <a href="#intro">Qué es Comunidad</a>
+    <a href="#roles">Roles y permisos</a>
+    <a href="#entrar">Entrar al panel</a>
+    <div class="sec">Atención</div>
+    <a href="#solicitudes">Solicitudes Web</a>
+    <a href="#chats">Chats (Anfitrión)</a>
+    <a href="#formularios">Formularios</a>
+    <div class="sec">Emitir entradas</div>
+    <a href="#cortesias">Cortesías</a>
+    <a href="#importar">Importar masivo</a>
+    <a href="#listas">Listas de inscripción</a>
+    <a href="#codigos">Códigos & RRPP</a>
+    <div class="sec">Catálogo</div>
+    <a href="#paquetes">Paquetes</a>
+    <a href="#membresias">Membresías</a>
+    <div class="sec">Entender el sistema</div>
+    <a href="#entradas">Flujo de entradas</a>
+    <a href="#buenas">Buenas prácticas</a>
+    <div class="sec">🆕 Novedades 2026</div>
+    <a href="#personas">Personas (CRM)</a>
+    <a href="#reservas">Reservas (kanban)</a>
+    <a href="#vivo">🔴 Puerta en vivo</a>
+    <a href="#correo">Correo del ticket</a>
+    <a href="#novedades">Otras novedades</a>
+  </nav>
+
+  <main>
+    <div class="hero" id="intro">
+      <div class="ey">FRATE · Fraternidad Campus Central</div>
+      <h1>Manual del módulo Comunidad</h1>
+      <p class="lead">Todo lo que necesitas para administrar solicitudes, cortesías, listas, formularios, RRPP y entender cómo viajan las entradas de punta a punta. Pensado para <b>admins, anfitriones y RRPP</b>.</p>
+    </div>
+
+    <h2 id="roles"><span class="n">01</span>Roles y permisos</h2>
+    <p>Cada cuenta tiene un <b>rol</b> que decide qué ve y qué puede hacer. Se asignan en <b>Configuración → Cuentas &amp; Roles</b>.</p>
+    <table>
+      <tr><th>Rol</th><th>Qué puede hacer</th></tr>
+      <tr><td><span class="pill a">admin</span></td><td>Todo: crea eventos, entradas, cortesías, listas, formularios, precios, RRPP, membresías y valida en puerta.</td></tr>
+      <tr><td><span class="pill b">rrpp</span></td><td>Sus <b>listas</b> y <b>códigos/invitaciones</b>. Ve solo lo suyo. No toca precios ni configuración.</td></tr>
+      <tr><td><span class="pill o">portero</span></td><td>Solo el <b>validador de puerta</b> (escanear QR). No entra al panel de gestión.</td></tr>
+    </table>
+    <div class="box tip"><div class="t">💡 Regla de oro</div><p>El <b>admin aprueba todo</b>. RRPP propone (crea listas/invita), pero la emisión de QR y las decisiones finales pasan por admin.</p></div>
+
+    <h2 id="entrar"><span class="n">02</span>Entrar al panel</h2>
+    <ol class="step">
+      <li>Anda a <code>frate.cl/admin</code> e inicia sesión con tu correo y clave.</li>
+      <li>En la barra lateral, abre <b>Comunidad</b>. Adentro verás pestañas: <b>Solicitudes Web · Chats · Cortesías · Formularios · Paquetes · Reservas · Códigos &amp; RRPP · Membresías</b>.</li>
+      <li>Si no ves una pestaña, tu rol no la tiene o el módulo está oculto (Configuración → módulos).</li>
+    </ol>
+
+    <h2 id="solicitudes"><span class="n">03</span>Solicitudes Web</h2>
+    <p>Es el <b>buzón de lo que llega desde la web</b>: reservas, cumpleaños, inscripciones a listas e invitaciones de RRPP. Cada una llega con estado <span class="pill">pendiente</span>.</p>
+    <ul>
+      <li><b>Aprobar</b> una inscripción/invitación → genera la <b>cortesía nominativa</b> (con QR) y le llega el correo a la persona.</li>
+      <li><b>Rechazar</b> → se marca rechazada; si hay correo, se avisa.</li>
+      <li>Las reservas/cumpleaños se <b>confirman</b> con mesa, consumo y condiciones (llega correo de confirmación).</li>
+    </ul>
+    <div class="box tip"><div class="t">💡 Ojo</div><p>Estas solicitudes también las puede trabajar el <b>ERP</b>. Lo que apruebes acá o allá queda sincronizado.</p></div>
+
+    <h2 id="chats"><span class="n">04</span>Chats (el Anfitrión)</h2>
+    <p>El <b>Anfitrión</b> 🎧 es el chatbot de la web. Responde las preguntas comunes y, cuando alguien pide hablar con una persona, <b>escala</b> y la conversación cae acá, en una <b>bandeja estilo WhatsApp</b>.</p>
+    <h3>Bandejas (por estado)</h3>
+    <p>Arriba hay botones que filtran por estado:</p>
+    <ul>
+      <li><b>⏳ Te esperan</b> — escalaron y nadie las tomó. <b>Empieza por acá.</b></li>
+      <li><b>💬 Activas</b> — las atiende una persona · <b>🤖 Con bot</b> — las maneja el Anfitrión solo.</li>
+      <li><b>🙋 Tuyas</b> — las que tomaste tú · <b>💳 Cobro</b> · <b>🗄️ Archivo</b> (cerradas).</li>
+    </ul>
+    <h3>Atender una conversación</h3>
+    <ol class="step">
+      <li>Ábrela y toca <b>✋ Tomar</b>: queda tuya y pasa a <b>Activas</b>. Escribe y el cliente lo ve al instante en la web.</li>
+      <li><b>🤖 Bot</b> la devuelve al Anfitrión · <b>✕ Rechazar</b> la cierra (va a Archivo).</li>
+      <li>Busca por <b>nombre, teléfono, @instagram o etiqueta</b> con la lupa 🔎.</li>
+    </ol>
+    <h3>Grupos (etiquetas de color)</h3>
+    <p>Bajo las bandejas hay una fila de <b>grupos</b> para ordenar las conversaciones (Cumpleaños 🎂, Reserva ⭐, Cobro 💳…). Se <b>combinan</b> con la bandeja (ej: “Te esperan” + “Cumpleaños”).</p>
+    <ul>
+      <li>En una conversación, elige su <b>🏷️ Grupo</b> (o escribe uno nuevo al vuelo).</li>
+      <li>Marca varias con los ✓ y usa <b>🏷️ Mover a grupo</b> — sale un <b>menú desplegable</b> con cada grupo (color + emoji), “✖️ Quitar grupo” y “＋ Grupo nuevo”.</li>
+      <li><b>⚙️ Administrar</b> abre la biblioteca de grupos: crear (emoji + nombre + color), editar, borrar y reordenar.</li>
+    </ul>
+    <div class="box tip"><div class="t">💡 Probar el bot</div><p>Abajo del chat tienes el <b>probador</b>: escribes como cliente y ves qué contestaría el Anfitrión, sin crear conversación real.</p></div>
+    <p>Para editar <b>qué responde</b> el bot, mira el <a href="/manual-bot">mini-manual del Bot</a>.</p>
+
+    <h2 id="formularios"><span class="n">05</span>Formularios</h2>
+    <p>Son los <b>leads con link propio</b>: <code>frate.cl/formcumple</code>, <code>frate.cl/formreserva</code>, <code>frate.cl/formfrecuente</code> (y FRAT&amp;FRIENDS enlaza su landing). <b>No son entradas</b> — son solicitudes que tú trabajas.</p>
+    <ol class="step">
+      <li>Cuando alguien llena un form, aparece en <b>Comunidad → Formularios</b> como <span class="pill b">🔵 Nuevo</span> (y te llega un correo si configuraste el BCC).</li>
+      <li>Filtra por <b>tipo</b> o <b>etapa</b>, o busca por nombre/correo/teléfono. Vistas: <b>📋 Lista</b> · <b>🗂️ Kanban</b> · <b>📅 Agenda</b>.</li>
+      <li>Toca <b>👁️ Ver</b>: ves todos los datos, y botones directos a <b>✉️ correo / 🟢 WhatsApp / 📸 Instagram / 🤖 IA</b>.</li>
+      <li><b>Mueve la etapa</b> (7): <span class="pill b">Nuevo</span> → <span class="pill">Sin información</span> → <span class="pill o">Contactado</span> → <span class="pill">Sin disponibilidad</span> → <span class="pill g">Confirmado</span> → <span class="pill g">Realizado</span> → <span class="pill">No realizado</span>. Deja <b>notas internas</b>.</li>
+      <li><b>✏️ Editar</b> (sobre "Datos del formulario"): corriges nombre, correo, teléfono, fecha, etc. si el cliente se equivocó.</li>
+      <li>Con <b>⬇️ Exportar CSV</b> te bajas lo filtrado para campañas.</li>
+    </ol>
+    <div class="box tip"><div class="t">🚫 Sin duplicados</div><p>Si una persona manda el mismo formulario dos veces (mismo <b>correo, teléfono o nombre</b>) mientras su solicitud sigue abierta, <b>el sistema no crea otra</b> — se queda con la primera. Así no ves 3 veces al mismo.</p></div>
+    <h3>🎂 Memoria de cumpleaños &amp; 📊 Informe</h3>
+    <p>Dentro de Formularios, dos pestañas más:</p>
+    <ul>
+      <li><b>🎂 Memoria</b> — todos los cumpleaños celebrados (historial). Lo clave: <b>"Para re-ofrecer"</b> te muestra a quién le vuelve a llegar el cumpleaños en los próximos días, con <b>💬 WhatsApp 1-clic</b> para ofrecerle repetir. En cada uno puedes anotar el <b>reporte post-evento</b> (¿asistió?, cuántos llegaron, calificación, gasto, notas).</li>
+      <li><b>📊 Informe</b> — pulseras (entregadas/devueltas/usadas) e ingreso por noche, agrupado por semana. Botón <b>➕ Registrar noche</b> para cargar la del día. Reemplaza la planilla que se llevaba a mano.</li>
+    </ul>
+    <p>Cuando marcas un cumple/reserva como <b>Realizado</b>, se guarda solo en la Memoria.</p>
+    <div class="box tip"><div class="t">💡 Derivar desde el bot</div><p>El Anfitrión manda el link del form correcto cuando detecta "cumpleaños / mesa / beneficios / convenio". Los links salen <b>clicables</b> en el chat.</p></div>
+
+    <h2 id="cortesias"><span class="n">06</span>Cortesías</h2>
+    <p>Una <b>cortesía</b> es una entrada <b>gratis y nominativa</b> (a nombre de una persona, con su RUT). Genera un QR válido igual que una entrada pagada.</p>
+    <h3>Crear una cortesía (una persona)</h3>
+    <ol class="step">
+      <li><b>Comunidad → Cortesías → + Nueva cortesía</b>.</li>
+      <li>Completa <b>Nombre</b> (queda en MAYÚSCULAS), <b>Email</b> (llega el QR), <b>RUT</b> (se formatea solo), <b>Teléfono</b>, <b>Evento</b>, <b>Cantidad</b> y <b>Motivo</b> (Staff, Prensa, etc.).</li>
+      <li><b>Generar cortesía</b> → se crea la orden $0 en estado <b>pagado</b> y se manda el correo con el QR automáticamente.</li>
+    </ol>
+    <h3>Ver, reenviar y borrar</h3>
+    <ul>
+      <li><b>🔳</b> — muestra el QR en pantalla (para escanearlo de prueba o mandarlo por WhatsApp). Es el <b>mismo código</b> que valida la puerta.</li>
+      <li><b>📧</b> — reenvía el correo con el QR.</li>
+      <li><b>×</b> — anula (cancela) la cortesía. <b>🗑️</b> — la borra definitivamente.</li>
+    </ul>
+    <div class="box dang"><div class="t">⚠️ Cuidado al borrar</div><p>Si borras una cortesía, su <b>QR deja de existir</b>: en la puerta saldrá "QR no existe". Borra solo pruebas o errores, no cortesías reales ya enviadas.</p></div>
+
+    <h2 id="importar"><span class="n">07</span>Importar masivo (Excel)</h2>
+    <p>Para cargar una lista de cortesías de golpe (ej. "Cortesía Mujeres"). El sistema hace un <b>pre-análisis</b> antes de emitir.</p>
+    <ol class="step">
+      <li><b>Cortesías → 📥 Importar masivo</b>. Sube el Excel y mapea las columnas (nombre, RUT, etc.).</li>
+      <li>El <b>pre-análisis</b> revisa cada persona y pone un semáforo:
+        <ul>
+          <li>🔴 <b>RUT DV inválido</b>, <b>Menor de 18</b>, <b>Duplicado en archivo</b>, <b>Ya en otra lista</b>, <b>Género no calza</b> o <b>🚫 VETADO</b> (del ERP).</li>
+          <li>🟡 <b>Género ambiguo</b>, <b>Ya en otra lista (nombre)</b>, <b>⭐ Frecuente</b>.</li>
+          <li>🟢 OK.</li>
+        </ul>
+      </li>
+      <li>Los 🔴 quedan <b>desmarcados</b> por defecto. Revisa, marca/desmarca a mano y decide.</li>
+      <li><b>🚀 Aprobar y emitir</b> genera las cortesías (QR + correo) de los marcados. O <b>💾 Guardar SIN emitir</b> para dejarlas en borrador y emitir después.</li>
+    </ol>
+    <div class="box tip"><div class="t">💡 Nombres y RUT</div><p>Todo se <b>normaliza solo</b>: nombres a MAYÚSCULAS, RUT a <code>12345678-9</code> (los extranjeros se respetan). El <b>veto</b> lo consulta al ERP por lote.</p></div>
+
+    <h2 id="listas"><span class="n">08</span>Listas de inscripción</h2>
+    <p>Una <b>lista</b> es un link público donde la gente se anota sola (ej. lista de una embajadora). Al aprobar, cada inscrito recibe su cortesía con QR.</p>
+    <h3>Crear y compartir</h3>
+    <ol class="step">
+      <li>Crea la lista (nombre, fecha, evento, cupos). Se genera un <b>código</b> y su link: <code>frate.cl/lista/CODIGO</code>. Con <b>📚 Usar plantilla de la biblioteca</b> rellenas de una la hora máx. y las condiciones (así no reescribes lo mismo cada vez).</li>
+      <li>Comparte ese link. La gente se inscribe con nombre, RUT, contacto (y género/edad si la lista lo pide).</li>
+      <li>Si activas <b>cierre automático</b>, la lista se cierra sola al llegar a los cupos.</li>
+    </ol>
+    <h3>Administrar una lista</h3>
+    <p>Al abrir una lista ves a los inscritos y estos botones:</p>
+    <ul>
+      <li><b>✏️ Editar</b> · <b>📋 Duplicar</b> · <b>🔗 Link</b> · <b>🗑️ Borrar</b>.</li>
+      <li><b>🧹 Normalizar</b> — arregla todos los RUT (<code>12345678-9</code>) y pasa los nombres a MAYÚSCULAS de una.</li>
+      <li><b>🔍 Duplicados</b> — cruza contra otras listas del mismo evento (por RUT y por nombre) para que nadie esté dos veces.</li>
+      <li><b>🎟️ Revisar / emitir</b> (cuando está aprobada) — emite las cortesías de los inscritos.</li>
+    </ul>
+    <div class="box tip"><div class="t">💡 El ERP también crea listas</div><p>El ERP puede crear una lista y recibir el mismo <code>frate.cl/lista/CODIGO</code>. La inscripción, el QR y el correo siempre los hace la web.</p></div>
+
+    <h2 id="codigos"><span class="n">09</span>Códigos &amp; RRPP</h2>
+    <p>Un <b>RRPP</b> es una persona que trae público. Tiene un <b>código</b> propio y puede armar listas/invitaciones.</p>
+    <ul>
+      <li>Cada RRPP ve <b>solo lo suyo</b> (sus listas y sus códigos).</li>
+      <li>Sus <b>invitaciones</b> caen en Solicitudes Web; al aprobarlas se emite la cortesía.</li>
+      <li>El admin ve el <b>catálogo de RRPP</b> con sus códigos y usos.</li>
+    </ul>
+
+    <h2 id="paquetes"><span class="n">10</span>Paquetes</h2>
+    <p>El <b>catálogo con fotos</b> que se muestra en la web (cumpleaños, despedidas, etc.). Tú lo editas acá y la web (y el ERP) lo leen.</p>
+    <ol class="step">
+      <li><b>Comunidad → Paquetes → + Nuevo paquete</b>.</li>
+      <li>Nombre, categoría, qué incluye, precio, <b>foto</b> (se sube a Storage) y condiciones.</li>
+      <li>Guarda: aparece al toque en la vitrina pública.</li>
+    </ol>
+
+    <h2 id="membresias"><span class="n">11</span>Membresías</h2>
+    <p>Gestión de socios/miembros: alta, estado y beneficios. Desde acá ves quién es miembro y su nivel.</p>
+
+    <h2 id="entradas"><span class="n">12</span>Cómo funcionan las ENTRADAS (flujo completo)</h2>
+    <p>Esto es clave: <b>toda</b> entrada —pagada o cortesía— es lo mismo por dentro. Así la entiende la app:</p>
+    <h3>Los tipos de entrada</h3>
+    <table>
+      <tr><th>Tipo</th><th>Cómo se crea</th></tr>
+      <tr><td>🎫 <b>Venta</b></td><td>El cliente compra en la web → paga con MercadoPago → queda <b>pagada</b> y llega el QR por correo.</td></tr>
+      <tr><td>🎁 <b>Cortesía directa</b></td><td>Tú la creas en Cortesías (orden $0, ya pagada).</td></tr>
+      <tr><td>📥 <b>Cortesía masiva</b></td><td>Importador de Excel.</td></tr>
+      <tr><td>📝 <b>Lista</b></td><td>La gente se inscribe en <code>/lista/CODIGO</code> y al aprobar se emite.</td></tr>
+      <tr><td>🏷️ <b>Invitación RRPP</b></td><td>Un RRPP invita con su código; al aprobar se emite.</td></tr>
+    </table>
+    <h3>El QR es único e irrepetible</h3>
+    <p>Cada QR nace atado al <b>número de orden</b> (que nunca se repite). Por eso dos entradas <b>jamás</b> tienen el mismo código. Y en la puerta cada QR <b>se quema una sola vez</b>: si lo escanean de nuevo, dice <b>"YA ESCANEADO"</b>.</p>
+    <h3>Qué pasa en la puerta</h3>
+    <ul>
+      <li>El QR debe ser de una orden <b>pagada</b> (una cortesía en borrador sale RECHAZADA).</li>
+      <li>El QR debe ser <b>del evento</b> de esa noche: si es de otro, dice <b>"OTRO EVENTO"</b> y no se ingresa.</li>
+      <li>Se respetan las <b>condiciones</b> (horario máximo, zona, no transferible).</li>
+    </ul>
+    <p>El detalle operativo está en el <a href="/manual-puerta">mini-manual de Puerta</a>.</p>
+    <h3>Qué puedes hacer con una entrada ya vendida</h3>
+    <p>En <b>Órdenes → 👁️ (detalle)</b>:</p>
+    <ul>
+      <li><b>✏️ Modificar datos</b> — corriges nombre/correo/teléfono del comprador y reenvías el ticket.</li>
+      <li><b>📅 Cambiar día</b> — mueve la entrada a otro evento: el <b>mismo QR pasa a valer para el día nuevo</b>, se libera el cupo del día viejo y se toma uno del nuevo, y el precio no cambia. Te ofrece reenviar el ticket con la fecha nueva.</li>
+      <li><b>📧 Reenviar email</b> · <b>💳 Toggle pagado</b> (para transferencias).</li>
+      <li><b>💸 Devolver dinero</b> (en la lista de órdenes) — devolución <b>automática por MercadoPago</b> o <b>manual</b>; queda <b>reembolsada</b>.</li>
+      <li><b>✖ Cancelar</b> — la anula. <b>El cupo se libera solo</b> y vuelve al stock: tanto si la orden estaba pagada como si tenía el cupo reservado sin pagar. No devuelve el dinero — para eso usa 💸 Devolver.</li>
+    </ul>
+    <div class="box tip">
+      <b>🟡 El cupo se toma al comprar, no al pagar</b>
+      <p>Desde que el cliente aprieta <b>Comprar</b>, su lugar queda <b>guardado 15 minutos</b>. Si paga dentro de ese rato, el lugar era suyo desde el principio. Si no paga, el cupo <b>vuelve solo a la venta</b>.</p>
+      <p>Por eso ya no puede pasar que dos personas paguen el último lugar: al segundo se le avisa <b>«agotado» antes de pagar</b>, nunca después.</p>
+      <p>Si aun así aparece una orden en <b>requiere reembolso</b> (un pago que llegó tarde), en Órdenes tienes <b>➕ Dar cupo</b>: abre un lugar extra, deja la orden pagada y le manda su QR. El cliente ya pagó — lo correcto es darle su entrada.</p>
+    </div>
+
+    <div class="box tip"><div class="t">💡 Cambiar día vs. devolver</div><p>Si el cliente solo quiere <b>otra fecha</b>, usa <b>📅 Cambiar día</b> (no toca la plata). Si quiere que le <b>devuelvas</b>, usa <b>💸 Devolver</b>. Cortesías no se devuelven (son gratis): solo se borran.</p></div>
+
+    <h2 id="buenas"><span class="n">13</span>Buenas prácticas &amp; errores comunes</h2>
+    <ul>
+      <li>✅ Deja que el sistema <b>normalice</b> RUT y nombres (no pelees con el formato).</li>
+      <li>✅ Antes de emitir una lista grande, revisa el <b>pre-análisis</b> y los <b>duplicados</b>.</li>
+      <li>✅ Usa <b>💾 Guardar sin emitir</b> si aún no quieres mandar los correos.</li>
+      <li>⚠️ <b>No borres</b> cortesías reales ya enviadas (rompe su QR).</li>
+      <li>⚠️ Si un QR "no valida", casi siempre es: cortesía <b>borrada</b>, en <b>borrador</b>, o de <b>otro evento</b>.</li>
+      <li>⚠️ El <b>portero</b> debe estar <b>logueado</b> y con el <b>evento correcto</b> elegido.</li>
+    </ul>
+    <div class="box tip"><div class="t">🎧 ¿Dudas?</div><p>Este manual se irá actualizando. Para el chatbot mira <a href="/manual-bot">Manual del Bot</a> y para la puerta el <a href="/manual-puerta">Manual de Puerta</a>.</p></div>
+
+    <h2 id="personas"><span class="n">14</span>Personas (CRM)</h2>
+    <p>En <b>Comunidad → 👥 Personas</b> tienes una <b>ficha única de cada persona</b> que pasó por FRATE. Se llena <b>sola</b> y no la mantienes a mano.</p>
+    <ul>
+      <li>Se crea/actualiza cuando alguien va en una <b>lista</b>, hace una <b>reserva</b>, <b>compra</b>, recibe <b>cortesía</b>, se <b>registra</b> en la web o hace <b>check-in</b> en la puerta.</li>
+      <li>Deduplica por <b>RUT</b> (si no, por correo): una misma persona = una ficha, aunque venga por varios caminos.</li>
+      <li>Ves su <b>origen</b> (📝 lista · 📅 reserva · 🎟️ compra · 🎁 cortesía · 👤 registro · 🚪 visita), cuántas <b>visitas</b> lleva y su <b>última vez</b>.</li>
+    </ul>
+    <h3>Filtros (combinables) &amp; envío masivo</h3>
+    <p>Sobre la tabla tienes una barra de filtros que se <b>suman</b> entre sí (y trabajan sobre <b>toda</b> la base, no solo las primeras 1.000):</p>
+    <ul>
+      <li><b>Origen</b> (lista/reserva/compra/cortesía/frecuente/vino por cumple/entró) · <b>Género</b> · <b>🎓 Universidad</b> · <b>Edad</b>.</li>
+      <li><b>🎂 Cumplen en [mes]</b> (para saludar/re-ofrecer) · <b>📅 Última vez</b> (por año, activos ≤30 días, dormidos +6 meses, o rango de fechas) · <b>🎟️ Visitas</b> (frecuentes / nunca entró).</li>
+      <li><b>Con dato</b>: teléfono / correo / IG / RUT válido — para campañas sin fallar.</li>
+    </ul>
+    <ol class="step">
+      <li>Filtras hasta dejar a quién quieres.</li>
+      <li><b>☑️ Seleccionar los N filtrados</b> → <b>📤 Envío masivo</b>.</li>
+      <li>Escribes el mensaje con <b>{nombre}</b> (se reemplaza por cada uno) y eliges <b>💬 WhatsApp uno por uno</b> (gratis, con tu número, abre cada chat con el texto listo), o <b>📋 copiar teléfonos / correos</b> para tu difusión, o <b>⬇️ exportar CSV</b>.</li>
+    </ol>
+    <div class="box tip"><div class="t">💡 Autocompletar + 👷 Staff del ERP</div><p>Esta base <b>rellena sola</b> los modales de cortesía, agregar-a-lista y reserva: empieza a escribir un nombre/RUT y elígelo. Ahora también trae tu <b>👷 Staff del ERP</b> (los que siempre vienen) — aparecen con la etiqueta STAFF, listos para darles cortesía sin tipearlos.</p></div>
+
+    <h2 id="reservas"><span class="n">15</span>Reservas (tabla y kanban)</h2>
+    <p>En <b>Comunidad → 📋 Reservas</b> gestionas cumpleaños y mesas. Arriba a la derecha cambias entre <b>☰ Tabla</b> y <b>🗂️ Kanban</b>.</p>
+    <ul>
+      <li>El <b>Kanban</b> tiene 4 columnas: <b>Pendiente · 🔍 En análisis · Confirmada · Cancelada</b>. <b>Arrastra</b> una tarjeta a otra columna para cambiar su estado.</li>
+      <li>Cada tarjeta trae nombre, tipo, fecha, personas y botones directos (🔍 manejar · ✏️ editar · 💬 WhatsApp).</li>
+      <li>Cada cambio queda en el <b>historial</b> de la reserva (timeline en su ficha).</li>
+    </ul>
+
+    <h2 id="vivo"><span class="n">16</span>🔴 Puerta en vivo</h2>
+    <p>Una pantalla para ver <b>en tiempo real</b> quién va entrando — ideal para un monitor en la oficina o la puerta.</p>
+    <ol class="step">
+      <li>Abre <code>frate.cl/vivo</code> con una cuenta <b>admin/portero</b> y elige el evento.</li>
+      <li>Verás en grande: <b>ENTRARON</b> / <b>EMITIDAS</b>, la <b>barra de aforo</b> (si le pusiste capacidad al evento), el <b>ritmo</b> (últimos 10 min) y las <b>incidencias</b>.</li>
+      <li><b>Desglose por lista/tipo</b>: cuántos <b>llegaron / total</b> de cada lista (ej. LISTA VIP FUEGO 32/80). Y el <b>feed en vivo</b>: el último que entró aparece arriba.</li>
+    </ol>
+    <div class="box tip"><div class="t">💡 Aforo</div><p>Para ver la barra de aforo, ponle la <b>capacidad</b> al evento en su editor (campo “Aforo”).</p></div>
+
+    <h2 id="correo"><span class="n">17</span>✉️ El correo del ticket (automático)</h2>
+    <p>El correo que recibe cada persona muestra <b>exactamente lo mismo que ve la puerta al escanear</b>, y sale <b>solo</b> según el tipo:</p>
+    <ul>
+      <li>🎫 <b>Nombre de la lista/tipo</b> · 🕐 <b>validez</b> (hora máx.) · 🕚 <b>horario del evento</b> (real) · 🔒 <b>no transferible</b> · 🚪 <b>zona</b> · 📋 <b>condiciones</b>.</li>
+      <li>Estos datos salen <b>automáticamente</b> de la lista o del tipo de ticket. Para que salgan bien, cárgalos ahí (hora máx. + condiciones).</li>
+      <li>En <b>Configuración → Correo de entradas</b> personalizas color, logo, asunto, instrucciones generales y pie.</li>
+    </ul>
+
+    <h2 id="novedades"><span class="n">18</span>Otras novedades del panel</h2>
+    <ul>
+      <li><b>📚 Biblioteca de tipos de ticket</b> — guarda una configuración (con hora y condiciones) y reúsala en cualquier evento o lista.</li>
+      <li><b>🎟️ Valores por defecto</b> — en <b>Configuración → General</b>: para <b>tickets nuevos</b> (máx. por compra, hora máx., solo web) y para <b>eventos nuevos</b> (hora inicio/término, aforo).</li>
+      <li><b>👷 Staff del ERP</b> en el autocompletar de cortesías/reservas.</li>
+      <li><b>Selección múltiple en Órdenes</b> — acciones masivas: 💳 marcar pagadas, 📧 reenviar comprobante, ⬇️ exportar CSV, 🗑️ eliminar.</li>
+      <li><b>Pre-formateo automático</b> — teléfono, RUT, correo y nombres se normalizan solos.</li>
+      <li><b>🪪 Puerta:</b> validador PWA instalable, láser Sunmi, validación offline, captura VIP y lectura de cédula (Nombre+RUN). Detalle en el <a href="/manual-puerta">Manual de Puerta</a>.</li>
+    </ul>
+  </main>
+</div>
+<a class="top" href="#intro" title="Volver arriba">↑</a>
+</body>
+</html>

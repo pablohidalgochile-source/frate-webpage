@@ -1,0 +1,137 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>FRATE WEB (TICKETERA) · OS 05 EL PANEL POR DENTRO</title>
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🎛️</text></svg>">
+<link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@600;800;900&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="/os-manual.css">
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+</head>
+<body>
+<div id="bar"></div>
+<div class="wrap">
+
+  <div class="hero">
+    <div class="eyebrow">Manual 05</div>
+    <h1>El <em>panel</em><br>por dentro</h1>
+    <p class="sub">Sección por sección: para qué sirve cada una, cuándo se usa y qué NO hay que tocar sin saber.</p>
+    <div class="meta"><span>Administración</span><span>·</span><span>Referencia</span></div>
+  </div>
+
+  <section>
+    <div class="stag">Capítulo 1</div>
+    <h2>Cómo está ordenado</h2>
+    <p class="lead">El menú sigue el ritmo del trabajo: primero lo que pasa hoy, después lo que se prepara, y al final la configuración.</p>
+    <div class="tw"><table class="tabla">
+      <thead><tr><th>Bloque</th><th>Para qué</th><th>Quién lo usa</th></tr></thead>
+      <tbody>
+        <tr><td><b>📊 Resumen</b></td><td>Cómo va todo <b>ahora</b>. Es la primera pantalla del día.</td><td>Todos</td></tr>
+        <tr><td><b>🎵 Eventos & Tickets</b></td><td>Crear eventos, tipos de entrada, precios, cupos y reportes.</td><td>Producción · Admin</td></tr>
+        <tr><td><b>👥 Comunidad</b></td><td>Personas, listas, cortesías, solicitudes, conversaciones, mapa.</td><td>Comunidad · RRPP</td></tr>
+        <tr><td><b>📦 Órdenes</b></td><td>Todas las compras y su estado. Validar QR a mano.</td><td>Administración</td></tr>
+        <tr><td><b>🚪 Puerta · Pulseras</b></td><td>Conteo de aforo por color de pulsera.</td><td>Puerta</td></tr>
+        <tr><td><b>↩️ Devol. & React.</b></td><td>Devoluciones, rebotes de correo, dobles ingresos.</td><td>Administración</td></tr>
+        <tr><td><b>⚙️ Configuración</b></td><td>Correos, horarios, textos, retención, permisos.</td><td><b>Solo admin</b></td></tr>
+      </tbody>
+    </table></div>
+  </section>
+
+  <section>
+    <div class="stag">Capítulo 2</div>
+    <h2>Resumen — la pantalla del día</h2>
+    <p class="lead">Lo que tienes que mirar apenas entras.</p>
+    <ul>
+      <li><b>🔴 Puerta en vivo</b> — solo aparece si hay evento corriendo. Cuánta gente entró, separada por preventa / cortesía / puerta.</li>
+      <li><b>🚨 Banner rojo</b> — alguien pagó y no tiene entrada. <b>Esto se resuelve el mismo día.</b></li>
+      <li><b>↩️ Banner dorado</b> — hay solicitudes de devolución esperando respuesta.</li>
+      <li><b>Ventas por evento</b> — cuánto lleva vendido cada evento próximo.</li>
+    </ul>
+    <div class="oro"><b>Si ves un banner, no lo dejes para mañana.</b> Los dos significan que hay una persona esperando algo que ya pagó.</div>
+  </section>
+
+  <section>
+    <div class="stag">Capítulo 3</div>
+    <h2>Comunidad — el corazón</h2>
+    <p class="lead">Es la sección más grande porque es donde vive la gente.</p>
+    <div class="tw"><table class="tabla">
+      <thead><tr><th>Pestaña</th><th>Qué es</th><th>Cuándo la usas</th></tr></thead>
+      <tbody>
+        <tr><td><b>👥 CRM / Personas</b></td><td>Todas las personas que han pasado por FRATE.</td><td>Para buscar a alguien y ver su historia.</td></tr>
+        <tr><td><b>🎁 Cortesías</b></td><td>Las listas y sus invitados.</td><td>Jueves: revisar y emitir.</td></tr>
+        <tr><td><b>📋 Formularios</b></td><td>Solicitudes de cumpleaños, reservas y frecuentes.</td><td>A diario: responder solicitudes.</td></tr>
+        <tr><td><b>📆 Calendario</b></td><td>Cumples y reservas del mes, con la plata de cada día.</td><td>Para ver cómo viene el mes.</td></tr>
+        <tr><td><b>⚡ FRATE CONNECT</b></td><td>Todas las conversaciones (WhatsApp, web, IG).</td><td>A diario: responder.</td></tr>
+        <tr><td><b>🗺️ Disposición</b></td><td>El mapa del local y la ocupación de zonas por día.</td><td>Antes del evento: asignar mesas.</td></tr>
+        <tr><td><b>✨ Extras</b></td><td>Productos que se venden junto a la entrada.</td><td>Al armar un evento.</td></tr>
+      </tbody>
+    </table></div>
+    <div class="bien"><b>El flujo típico de un cumpleaños:</b> llega por Formularios → se responde por WhatsApp desde la misma ficha → se acuerda todo y se registra el monto → se crea su lista de invitados → se revisa y se emite → el jueves llegan y entran.</div>
+  </section>
+
+  <section>
+    <div class="stag">Capítulo 4</div>
+    <h2>Órdenes — el dinero, orden por orden</h2>
+    <p class="lead">Los filtros de arriba son la forma rápida de encontrar lo que buscas.</p>
+    <div class="tw"><table class="tabla">
+      <thead><tr><th>Filtro</th><th>Qué muestra</th><th>Urgencia</th></tr></thead>
+      <tbody>
+        <tr><td><b>Pagadas</b></td><td>Compras completas y con entrada emitida.</td><td>—</td></tr>
+        <tr><td><b>🎁 Cortesías</b></td><td>Entradas gratis (valen $0).</td><td>—</td></tr>
+        <tr><td><b>⚠️ Reembolsar</b></td><td><b>Pagaron y no tienen entrada.</b></td><td style="color:var(--rojo)"><b>Hoy</b></td></tr>
+        <tr><td><b>↩️ Devoluciones</b></td><td>Solicitudes de clientes esperando respuesta.</td><td style="color:var(--oro)">Hoy</td></tr>
+        <tr><td><b>Pendientes</b></td><td>Empezaron a comprar y no terminaron.</td><td>Recordatorio</td></tr>
+        <tr><td><b>🎟️ Abiertos</b></td><td>Tickets sin fecha asignada.</td><td>Cuando la elijan</td></tr>
+      </tbody>
+    </table></div>
+    <h3>Los botones de cada fila</h3>
+    <ul>
+      <li><b>➕ Dar cupo</b> (solo si dice "requiere reembolso") — le abre cupo, emite su entrada y le manda el QR. <b>Un clic.</b></li>
+      <li><b>👁️ Ver</b> — el detalle completo: qué compró, cuánto pagó, sus QR y si entró.</li>
+      <li><b>✏️ Editar</b> — corregir nombre, correo o teléfono. Útil cuando el correo rebotó.</li>
+      <li><b>📧 Reenviar</b> — vuelve a mandar el comprobante con los QR.</li>
+      <li><b>💸 Devolver</b> — abre el flujo de devolución (total o por ticket).</li>
+    </ul>
+    <div class="peligro"><b>🗑️ Eliminar no es lo mismo que cancelar.</b> Cancelar deja rastro y devuelve el cupo. Eliminar borra la orden del sistema. <b>Casi nunca es lo correcto</b> — si hubo plata de por medio, jamás.</div>
+  </section>
+
+  <section>
+    <div class="stag">Capítulo 5</div>
+    <h2>Configuración — con cuidado</h2>
+    <p class="lead">Acá se cambian cosas que afectan a todos. Solo admin, y solo sabiendo qué se toca.</p>
+    <div class="tw"><table class="tabla">
+      <thead><tr><th>Qué</th><th>Efecto</th><th>Riesgo</th></tr></thead>
+      <tbody>
+        <tr><td><b>Retención de devoluciones</b></td><td>El % que se descuenta al devolver.</td><td style="color:var(--oro)">Medio · sale en el checkout</td></tr>
+        <tr><td><b>Correo del ticket</b></td><td>Cómo se ve el mail con el QR.</td><td>Bajo · hay vista previa</td></tr>
+        <tr><td><b>Hora & evento</b></td><td>Horarios por defecto y PIN de la puerta.</td><td style="color:var(--oro)">Medio</td></tr>
+        <tr><td><b>Mensajes al cliente</b></td><td>Textos que la gente lee en formularios y listas.</td><td>Bajo</td></tr>
+        <tr><td><b>Cuentas & roles</b></td><td>Quién puede entrar y qué puede hacer.</td><td style="color:var(--rojo)"><b>Alto</b></td></tr>
+        <tr><td><b>Zona de pruebas</b></td><td>Borra datos de prueba.</td><td style="color:var(--rojo)"><b>Alto</b></td></tr>
+      </tbody>
+    </table></div>
+    <div class="oro"><b>Regla:</b> si no sabes exactamente qué hace una opción, no la toques. Pregunta. Toma 2 minutos preguntar y puede tomar un día arreglar.</div>
+  </section>
+
+  <section>
+    <div class="stag">Capítulo 6</div>
+    <h2>Los tres roles</h2>
+    <div class="tw"><table class="tabla">
+      <thead><tr><th>Rol</th><th>Puede</th><th>No puede</th></tr></thead>
+      <tbody>
+        <tr><td><b>Admin</b></td><td>Todo: configuración, devoluciones, roles, eventos.</td><td>—</td></tr>
+        <tr><td><b>RRPP / Embajadora</b></td><td>Ver y armar sus propias listas, inscribir gente, ver sus resultados.</td><td>Devolver plata, cambiar configuración, ver listas ajenas.</td></tr>
+        <tr><td><b>Portero</b></td><td>Escanear, buscar por RUT, registrar ingresos e incidencias.</td><td>Entrar al panel de administración.</td></tr>
+      </tbody>
+    </table></div>
+    <div class="peligro"><b>Las cuentas no se prestan.</b> Cada acción queda registrada con el nombre de quien la hizo. Si prestas tu cuenta, lo que haga esa persona queda a tu nombre.</div>
+  </section>
+
+  <div class="pie">FRATE OS · Manual 05 · <a href="/os-noche">← La noche</a> · <a href="/os-reglas">Siguiente: reglas de oro →</a></div>
+</div>
+
+<script src="/os-guard.js"></script>
+<script>document.getElementById('bar').innerHTML = osBarra('05'); osProteger();</script>
+</body>
+</html>

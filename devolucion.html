@@ -1,0 +1,217 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>FRATE · Solicitar devolución</title>
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>↩️</text></svg>">
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<style>
+  :root{
+    --bg:#0a0a0d; --panel:#131316; --panel2:#1b1b20; --panel3:#232329; --border:#26262b; --border2:#3a3a41;
+    --text:#f4f4f6; --muted:#8a8a92; --muted2:#5a5a62;
+    --rojo:#E8363D; --dorado:#E6C860; --verde:#4ade80; --azul:#60a5fa;
+    --disp:"Barlow Condensed","Arial Narrow",system-ui,sans-serif;
+    --font:-apple-system,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;
+  }
+  *{box-sizing:border-box;margin:0;padding:0}
+  body{background:var(--bg);color:var(--text);font-family:var(--font);-webkit-font-smoothing:antialiased;line-height:1.45;padding:22px 14px 60px}
+  .wrap{max-width:460px;margin:0 auto}
+  .brand{font-family:var(--disp);font-weight:900;font-size:1.5rem;letter-spacing:1.5px;text-align:center;margin-bottom:2px}
+  .brand .r{color:var(--rojo)}
+  h1{font-family:var(--disp);font-weight:800;font-size:1.35rem;letter-spacing:.5px;text-align:center;margin-bottom:4px}
+  .lead{color:var(--muted);font-size:.82rem;text-align:center;margin-bottom:20px}
+  .card{background:var(--panel);border:1px solid var(--border);border-radius:16px;padding:18px}
+  label.lb{display:block;font-size:.62rem;text-transform:uppercase;letter-spacing:.8px;color:var(--muted);margin:12px 0 5px}
+  label.lb:first-child{margin-top:0}
+  input,select,textarea{width:100%;background:#0e0e12;border:1px solid var(--border2);color:var(--text);border-radius:10px;padding:12px 13px;font-size:.95rem;font-family:inherit}
+  input:focus,select,textarea:focus{outline:none;border-color:var(--rojo)}
+  textarea{resize:vertical;min-height:60px}
+  .btn{width:100%;background:var(--rojo);color:#fff;border:0;border-radius:11px;padding:14px;font-weight:800;font-size:.95rem;cursor:pointer;margin-top:16px;letter-spacing:.3px}
+  .btn:disabled{opacity:.5;cursor:default}
+  .btn.ghost{background:transparent;border:1px solid var(--border2);color:var(--text)}
+  .msg{font-size:.82rem;padding:10px 12px;border-radius:9px;margin-top:12px;display:none}
+  .msg.err{display:block;background:rgba(232,54,61,.12);border:1px solid rgba(232,54,61,.4);color:#ff9ba0}
+  .hint{font-size:.68rem;color:var(--muted2);text-align:center;margin-top:10px}
+
+  .ohead{font-size:.78rem;color:var(--muted);margin-bottom:12px}
+  .ohead b{color:var(--text)}
+  .tk{display:flex;align-items:center;gap:11px;background:#0e0e12;border:1px solid var(--border);border-radius:11px;padding:11px 12px;margin-bottom:8px;cursor:pointer;user-select:none}
+  .tk.dis{opacity:.5;cursor:not-allowed}
+  .tk.on{border-color:var(--rojo);background:rgba(232,54,61,.07)}
+  .tk .ck{width:20px;height:20px;border-radius:6px;border:1.5px solid var(--border2);flex-shrink:0;display:grid;place-items:center;font-size:.8rem;color:#fff}
+  .tk.on .ck{background:var(--rojo);border-color:var(--rojo)}
+  .tk .nm{font-weight:700;font-size:.86rem}
+  .tk .mt{font-size:.66rem;color:var(--muted);margin-top:1px}
+  .tk .pr{margin-left:auto;font-family:var(--disp);font-weight:800;color:var(--dorado);font-size:1rem;white-space:nowrap}
+  .opt{display:flex;flex-direction:column;gap:8px}
+  .o{border:1px solid var(--border2);border-radius:11px;padding:11px 13px;display:flex;gap:11px;align-items:center;cursor:pointer}
+  .o.sel{border-color:var(--verde);background:rgba(74,222,128,.08)}
+  .o .rd{width:18px;height:18px;border-radius:50%;border:2px solid var(--border2);flex-shrink:0}
+  .o.sel .rd{border-color:var(--verde);background:var(--verde);box-shadow:inset 0 0 0 3px #0e0e12}
+  .o b{font-weight:700;font-size:.86rem} .o small{color:var(--muted);font-size:.68rem;display:block;margin-top:1px}
+  .pol{font-size:.72rem;color:var(--muted);background:rgba(230,200,96,.07);border:1px solid rgba(230,200,96,.25);border-radius:9px;padding:10px 12px;margin:14px 0 4px}
+  .pol b{color:var(--dorado)}
+  .polbox{white-space:pre-wrap;font-size:.7rem;line-height:1.6;color:var(--muted);background:#0e0e12;border:1px solid var(--border);border-radius:9px;padding:12px 13px;max-height:160px;overflow:auto;margin:16px 0 10px}
+  .accept{display:flex;gap:9px;align-items:flex-start;font-size:.78rem;color:var(--text);cursor:pointer;user-select:none}
+  .accept input{width:auto;margin-top:2px;accent-color:var(--rojo);flex-shrink:0}
+  .okmark{width:60px;height:60px;border-radius:50%;background:rgba(74,222,128,.15);border:2px solid var(--verde);color:var(--verde);display:grid;place-items:center;font-size:1.9rem;margin:6px auto 14px}
+  .center{text-align:center}
+  .spin{display:inline-block;width:15px;height:15px;border:2px solid rgba(255,255,255,.4);border-top-color:#fff;border-radius:50%;animation:sp .7s linear infinite;vertical-align:-2px;margin-right:6px}
+  @keyframes sp{to{transform:rotate(360deg)}}
+  .rowsum{display:flex;justify-content:space-between;font-size:.8rem;color:var(--muted);margin-top:10px}
+  .rowsum b{color:var(--verde);font-family:var(--disp);font-size:1.05rem}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <div class="brand">F<span class="r">R</span>ATE</div>
+  <h1>Solicitar devolución</h1>
+  <div class="lead">Busca tu compra, elige qué devolver y el equipo te confirma.</div>
+
+  <!-- PASO 1: buscar -->
+  <div class="card" id="s1">
+    <label class="lb">Correo de la compra</label>
+    <input id="f-email" type="email" inputmode="email" autocomplete="email" placeholder="tucorreo@correo.cl">
+    <label class="lb">N° de orden <span style="text-transform:none;letter-spacing:0;color:var(--muted2)">(está en tu correo de compra)</span></label>
+    <input id="f-orden" type="text" inputmode="text" placeholder="FCC-004821">
+    <button class="btn" id="b1" onclick="buscar()">Buscar mi compra</button>
+    <div class="msg err" id="m1"></div>
+    <div class="hint">🔒 Solo se muestra TU compra. Verificamos correo + N° de orden.</div>
+  </div>
+
+  <!-- PASO 2: elegir -->
+  <div class="card" id="s2" style="display:none">
+    <div class="ohead" id="s2-head"></div>
+    <label class="lb">¿Qué tickets quieres devolver?</label>
+    <div id="s2-tickets"></div>
+    <label class="lb">Motivo</label>
+    <select id="f-motivo">
+      <option value="">Elige un motivo…</option>
+      <option>No puedo asistir</option>
+      <option>Me equivoqué de fecha o evento</option>
+      <option>Compré de más</option>
+      <option>El evento se canceló o cambió</option>
+      <option>Otro</option>
+    </select>
+    <label class="lb">¿Qué prefieres?</label>
+    <div class="opt" id="f-pref">
+      <div class="o sel" data-p="dinero"><span class="rd"></span><div><b>💵 Dinero de vuelta</b><small>Hasta 5 días hábiles. Aplica retención.</small></div></div>
+      <div class="o" data-p="credito"><span class="rd"></span><div><b>🎟️ Crédito FRATE</b><small>Al toque, para otro evento. Sin retención.</small></div></div>
+      <div class="o" data-p="cambio_dia"><span class="rd"></span><div><b>🔄 Cambiar de día</b><small>Movemos tu entrada. Sin retención.</small></div></div>
+    </div>
+    <label class="lb">Comentario <span style="text-transform:none;letter-spacing:0;color:var(--muted2)">(opcional)</span></label>
+    <textarea id="f-coment" placeholder="Cuéntanos algo si quieres…"></textarea>
+    <div class="pol" id="s2-pol"></div>
+    <div class="rowsum"><span>Total seleccionado</span><b id="s2-sum">$0</b></div>
+    <label class="lb">Condiciones de devolución</label>
+    <div class="polbox" id="s2-politica"></div>
+    <label class="accept"><input type="checkbox" id="f-acepto" onchange="actualizar()"> He leído y <b>acepto las condiciones</b> de devolución.</label>
+    <button class="btn" id="b2" onclick="enviar()">Enviar solicitud</button>
+    <button class="btn ghost" onclick="volver()">← Buscar otra orden</button>
+    <div class="msg err" id="m2"></div>
+  </div>
+
+  <!-- PASO 3: listo -->
+  <div class="card center" id="s3" style="display:none">
+    <div class="okmark">✓</div>
+    <h1 style="margin-bottom:6px">¡Solicitud recibida!</h1>
+    <div class="lead" id="s3-msg" style="margin-bottom:14px"></div>
+    <div style="background:#0e0e12;border:1px solid var(--border);border-radius:10px;padding:12px 14px;text-align:left;font-size:.82rem" id="s3-res"></div>
+    <div class="hint" style="margin-top:14px">Te avisaremos por WhatsApp y correo apenas la revisemos. Normalmente el mismo día. 🍷</div>
+  </div>
+</div>
+
+<script>
+const sb = window.supabase.createClient('https://ydwlpraoaaijlfssevoh.supabase.co','sb_publishable_-_7GeDU_h84zf2v--lWQaQ_15ZFxOWt');
+const D = { email:'', orden:'', data:null, sel:new Set(), pref:'dinero' };
+const $ = id => document.getElementById(id);
+const clp = n => '$' + Number(n||0).toLocaleString('es-CL');
+const esc = s => String(s==null?'':s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/"/g,'&quot;');
+
+async function buscar(){
+  const email = $('f-email').value.trim(), orden = $('f-orden').value.trim();
+  $('m1').style.display='none';
+  if(!email || !orden){ err('m1','Escribe tu correo y el N° de orden.'); return; }
+  const b=$('b1'); b.disabled=true; b.innerHTML='<span class="spin"></span>Buscando…';
+  try{
+    const { data, error } = await sb.functions.invoke('devolucion-buscar', { body:{ email, orden } });
+    if(error){ let m='No pudimos buscar. Intenta de nuevo.'; try{ const ctx=await error.context.json(); if(ctx&&ctx.error) m=ctx.error; }catch(_){} throw new Error(m); }
+    if(!data || data.error) throw new Error((data&&data.error)||'No encontramos esa orden.');
+    D.email=email; D.orden=data.orden; D.data=data; D.sel.clear();
+    pintarOrden();
+    $('s1').style.display='none'; $('s2').style.display='';
+    window.scrollTo(0,0);
+  }catch(e){ err('m1', e.message||'Error'); }
+  finally{ b.disabled=false; b.textContent='Buscar mi compra'; }
+}
+
+function pintarOrden(){
+  const d=D.data;
+  $('s2-politica').textContent = d.politica || 'La devolución es una solicitud; el equipo la revisa y aprueba.';
+  const ac=$('f-acepto'); if(ac) ac.checked=false;
+  $('s2-head').innerHTML = `Orden <b>${esc(d.orden)}</b> · ${esc(d.evento_nombre||'Evento')}${d.evento_fecha?' · '+esc(d.evento_fecha):''}`;
+  const cont=$('s2-tickets'); cont.innerHTML='';
+  let devolvibles=0;
+  d.tickets.forEach((t,i)=>{
+    const dis = t.usado || t.solicitado;
+    if(!dis) devolvibles++;
+    const nota = t.usado ? 'Ya ingresó · no aplica' : t.solicitado ? 'Ya tiene solicitud' : (t.persona||'');
+    const div=document.createElement('div');
+    div.className='tk'+(dis?' dis':'');
+    div.dataset.i=i;
+    div.innerHTML = `<span class="ck">${dis?'':'&nbsp;'}</span><div style="min-width:0"><div class="nm">${esc(t.nombre_ticket)}</div><div class="mt">${esc(nota)}</div></div><span class="pr">${t.monto?clp(t.monto):'—'}</span>`;
+    if(!dis) div.onclick=()=>toggleTk(i,div);
+    cont.appendChild(div);
+  });
+  if(!devolvibles){ $('s2-tickets').innerHTML += '<div class="pol" style="background:rgba(232,54,61,.08);border-color:rgba(232,54,61,.3);color:#ff9ba0">No hay tickets devolvibles en esta orden (usados o ya solicitados).</div>'; $('b2').disabled=true; }
+  actualizar();
+}
+
+function toggleTk(i, div){
+  if(D.sel.has(i)){ D.sel.delete(i); div.classList.remove('on'); div.querySelector('.ck').innerHTML='&nbsp;'; }
+  else { D.sel.add(i); div.classList.add('on'); div.querySelector('.ck').innerHTML='✓'; }
+  actualizar();
+}
+
+document.querySelectorAll('#f-pref .o').forEach(o=>o.onclick=()=>{
+  document.querySelectorAll('#f-pref .o').forEach(x=>x.classList.remove('sel'));
+  o.classList.add('sel'); D.pref=o.dataset.p; actualizar();
+});
+
+function actualizar(){
+  const d=D.data; let sum=0; D.sel.forEach(i=>sum+=(d.tickets[i].monto||0));
+  $('s2-sum').textContent=clp(sum);
+  const ret=d.retencion||0;
+  let pol;
+  if(D.pref==='dinero'){ const dev=Math.round(sum*(100-ret)/100); pol=`↩️ Devolución de dinero con retención <b>${ret}%</b>. Te devolveríamos <b>${clp(dev)}</b> de ${clp(sum)}. Lo revisa el equipo.`; }
+  else if(D.pref==='credito'){ pol=`🎟️ Crédito FRATE por <b>${clp(sum)}</b> (sin retención) para usar en otro evento. Rápido.`; }
+  else { pol=`🔄 Cambio de día: movemos tu entrada a otra fecha (sin retención), según disponibilidad.`; }
+  $('s2-pol').innerHTML=pol;
+  $('b2').disabled = D.sel.size===0 || !$('f-acepto').checked;
+}
+
+async function enviar(){
+  $('m2').style.display='none';
+  const motivo=$('f-motivo').value.trim();
+  if(D.sel.size===0){ err('m2','Elige al menos un ticket.'); return; }
+  if(!motivo){ err('m2','Elige un motivo.'); return; }
+  if(!$('f-acepto').checked){ err('m2','Debes aceptar las condiciones de devolución.'); return; }
+  const qrs=[...D.sel].map(i=>D.data.tickets[i].qr);
+  const b=$('b2'); b.disabled=true; b.innerHTML='<span class="spin"></span>Enviando…';
+  try{
+    const { data, error } = await sb.functions.invoke('devolucion-solicitar', { body:{ email:D.email, orden:D.orden, qrs, preferencia:D.pref, motivo, comentario:$('f-coment').value.trim(), acepto:true } });
+    if(error){ let m='No se pudo enviar. Intenta de nuevo.'; try{ const ctx=await error.context.json(); if(ctx&&ctx.error) m=ctx.error; }catch(_){} throw new Error(m); }
+    if(!data || data.error) throw new Error((data&&data.error)||'No se pudo enviar.');
+    const prefTxt = data.preferencia==='dinero'?('devolución de '+clp(data.monto_devolver)):data.preferencia==='credito'?'crédito FRATE':'cambio de día';
+    $('s3-msg').innerHTML = `Folio <b style="color:var(--text)">${esc(data.folio)}</b>.`;
+    $('s3-res').innerHTML = `<b>${D.sel.size}</b> ticket(s) · ${esc(prefTxt)}<br><span style="color:var(--muted)">${esc(D.data.evento_nombre||'')} · orden ${esc(D.orden)}</span>`;
+    $('s2').style.display='none'; $('s3').style.display=''; window.scrollTo(0,0);
+  }catch(e){ err('m2', e.message||'Error'); b.disabled=false; b.textContent='Enviar solicitud'; }
+}
+
+function volver(){ $('s2').style.display='none'; $('s1').style.display=''; window.scrollTo(0,0); }
+function err(id,msg){ const el=$(id); el.textContent=msg; el.style.display='block'; }
+</script>
+</body>
+</html>

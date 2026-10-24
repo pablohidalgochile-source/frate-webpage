@@ -1,0 +1,334 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>FRATE WEB (TICKETERA) · MANUAL DE LA ANFITRIONA</title>
+<meta name="theme-color" content="#0A0A0B" />
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@500;700;900&family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet" />
+<link rel="icon" href="/icon-frate.svg" type="image/svg+xml" />
+<style>
+  :root{
+    --negro:#0A0A0B; --negro2:#141416; --negro3:#1b1b1e; --borde:#2a2a2e;
+    --rojo:#FF3B3B; --dorado:#D4A832; --dorado2:#f0c75a; --verde:#22c55e; --azul:#3b82f6; --morado:#a78bfa; --gris:#9a9aa2; --txt:#f2f0ec;
+    --disp:'Barlow Condensed',sans-serif; --body:'Inter',-apple-system,sans-serif;
+  }
+  *{box-sizing:border-box;}
+  html{scroll-behavior:smooth;}
+  body{margin:0;background:var(--negro);color:var(--txt);font-family:var(--body);line-height:1.6;-webkit-font-smoothing:antialiased;}
+  a{color:var(--dorado);text-decoration:none;}
+  .wrap{max-width:820px;margin:0 auto;padding:0 22px 80px;}
+
+  /* Portada */
+  .cover{position:relative;padding:72px 22px 54px;text-align:center;background:
+     radial-gradient(680px 340px at 50% -8%, rgba(212,168,50,.14), transparent 60%),
+     radial-gradient(520px 300px at 50% 120%, rgba(232,54,61,.10), transparent 60%);
+     border-bottom:1px solid var(--borde);overflow:hidden;}
+  .cover .kicker{font-family:var(--disp);letter-spacing:9px;font-weight:700;color:var(--dorado);font-size:.92rem;}
+  .cover h1{font-family:var(--disp);font-weight:900;font-size:clamp(2.7rem,9vw,4.6rem);line-height:.95;margin:10px 0 6px;letter-spacing:1px;text-transform:uppercase;}
+  .cover h1 span{color:var(--rojo);}
+  .cover .sub{color:var(--gris);font-size:1.02rem;max-width:500px;margin:8px auto 0;}
+  .cover .meta{margin-top:22px;font-size:.74rem;letter-spacing:2px;text-transform:uppercase;color:#6a6a72;}
+  .hair{height:2px;width:120px;margin:26px auto 0;background:linear-gradient(90deg,transparent,var(--dorado),transparent);}
+
+  /* Índice */
+  .toc{background:var(--negro2);border:1px solid var(--borde);border-radius:16px;padding:20px 22px;margin:34px 0;}
+  .toc h3{font-family:var(--disp);letter-spacing:2px;text-transform:uppercase;color:var(--gris);font-size:.82rem;margin:0 0 12px;font-weight:700;}
+  .toc ol{margin:0;padding-left:0;list-style:none;counter-reset:t;}
+  .toc li{counter-increment:t;padding:7px 0;border-bottom:1px dashed #26262b;display:flex;gap:12px;align-items:baseline;}
+  .toc li:last-child{border-bottom:none;}
+  .toc li::before{content:counter(t,decimal-leading-zero);font-family:var(--disp);font-weight:700;color:var(--dorado);font-size:.9rem;min-width:26px;}
+  .toc a{color:var(--txt);font-weight:500;}
+  .toc a:hover{color:var(--dorado);}
+
+  /* Secciones */
+  section{margin:52px 0;scroll-margin-top:20px;}
+  .snum{display:inline-flex;align-items:center;justify-content:center;width:40px;height:40px;border-radius:50%;
+    border:1.5px solid var(--dorado);color:var(--dorado);font-family:var(--disp);font-weight:900;font-size:1.25rem;flex-shrink:0;}
+  .shead{display:flex;gap:14px;align-items:center;margin-bottom:6px;}
+  .shead h2{font-family:var(--disp);font-weight:900;font-size:2rem;letter-spacing:.5px;text-transform:uppercase;margin:0;line-height:1;}
+  .slead{color:var(--gris);margin:0 0 18px 54px;font-size:.98rem;}
+  @media(max-width:520px){ .slead{margin-left:0;} }
+
+  .card{background:var(--negro2);border:1px solid var(--borde);border-radius:16px;padding:22px 24px;margin:16px 0;}
+  .card h4{font-family:var(--disp);font-weight:700;letter-spacing:1px;text-transform:uppercase;color:var(--dorado);font-size:1.05rem;margin:0 0 10px;}
+
+  /* Pasos */
+  .steps{counter-reset:s;margin:0;padding:0;list-style:none;}
+  .steps li{counter-increment:s;position:relative;padding:12px 0 12px 46px;border-bottom:1px solid #212127;}
+  .steps li:last-child{border-bottom:none;}
+  .steps li::before{content:counter(s);position:absolute;left:0;top:11px;width:30px;height:30px;border-radius:9px;
+    background:rgba(212,168,50,.12);color:var(--dorado);font-family:var(--disp);font-weight:900;font-size:1rem;
+    display:flex;align-items:center;justify-content:center;}
+  .steps b{color:#fff;}
+
+  /* Chips que imitan botones reales de la UI */
+  .ui{display:inline-flex;align-items:center;gap:5px;background:var(--negro3);border:1px solid #34343a;border-radius:8px;
+    padding:2px 9px;font-size:.86rem;font-weight:600;color:#fff;white-space:nowrap;line-height:1.7;}
+  .ui.gold{border-color:rgba(212,168,50,.5);color:var(--dorado2);}
+  .ui.red{border-color:rgba(232,54,61,.5);color:#ff8085;}
+  .ui.green{border-color:rgba(34,197,94,.5);color:#7ee2a0;}
+  .ui.blue{border-color:rgba(59,130,246,.5);color:#89bbff;}
+  .path{color:var(--gris);font-size:.88rem;}
+  .path .ui{margin:0 1px;}
+
+  /* Callouts */
+  .callout{border-radius:14px;padding:14px 18px;margin:16px 0;font-size:.93rem;border:1px solid;}
+  .tip{background:rgba(34,197,94,.07);border-color:rgba(34,197,94,.3);}
+  .tip b{color:var(--verde);}
+  .warn{background:rgba(232,54,61,.07);border-color:rgba(232,54,61,.32);}
+  .warn b{color:#ff8b8f;}
+  .info{background:rgba(59,130,246,.07);border-color:rgba(59,130,246,.32);}
+  .info b{color:#89bbff;}
+  .callout .em{font-family:var(--disp);font-weight:700;letter-spacing:1px;text-transform:uppercase;display:block;margin-bottom:3px;font-size:.9rem;}
+
+  /* Semáforo / tarjetas */
+  .semaf{display:flex;gap:10px;flex-wrap:wrap;margin-top:6px;}
+  .semaf div{flex:1;min-width:150px;background:var(--negro3);border:1px solid var(--borde);border-radius:12px;padding:12px 14px;font-size:.86rem;}
+  .semaf .d{font-size:1.1rem;}
+
+  /* Pipeline de etapas */
+  .pipe{display:flex;gap:8px;flex-wrap:wrap;margin:12px 0 4px;}
+  .pipe span{background:var(--negro3);border:1px solid var(--borde);border-radius:20px;padding:5px 12px;font-size:.82rem;font-weight:600;white-space:nowrap;}
+  .pipe .arw{border:none;background:none;color:var(--gris);padding:5px 0;align-self:center;}
+
+  .foot{margin-top:60px;padding-top:26px;border-top:1px solid var(--borde);text-align:center;color:var(--gris);font-size:.85rem;}
+  .btn-print{position:fixed;right:16px;bottom:16px;background:var(--dorado);color:#1a1400;border:none;border-radius:30px;
+    padding:11px 18px;font-weight:700;font-family:var(--body);cursor:pointer;box-shadow:0 8px 26px rgba(0,0,0,.5);z-index:20;}
+
+  @media print{
+    body{background:#fff;color:#111;} .btn-print{display:none;} .cover{background:none;border-color:#ccc;}
+    .cover h1 span{color:#c0202a;} .card,.toc{background:#fafafa;border-color:#ddd;} .ui{background:#eee;border-color:#ccc;color:#111;}
+    a{color:#111;} .snum,.shead h2,.card h4,.toc li::before,.steps li::before{color:#111!important;border-color:#999;}
+    .slead,.path,.gris,.foot{color:#444;} section{page-break-inside:avoid;} .pipe span,.semaf div{background:#f0f0f0;border-color:#ccc;}
+  }
+</style>
+</head>
+<body>
+<!--OFICIO-OS-->
+<div style="background:#0d1a12;border-bottom:3px solid #4ade80;padding:14px 20px;font:400 15px/1.5 system-ui;color:#f2f2f4;text-align:center"><b style="color:#4ade80">🧭 Manual de oficio — vigente</b><br><span style="color:#c9c9cf">Este explica <b>cómo recibir y cuidar la mesa</b>. Para entender cómo funciona el sistema por dentro, el libro de FRATE OS lo cuenta al día.</span><br><a href="/os-listas" style="display:inline-block;margin-top:8px;background:#4ade80;color:#08130a;font:800 14px system-ui;padding:9px 18px;border-radius:9px;text-decoration:none">Ver en el libro →</a></div>
+
+
+<div class="cover">
+  <div class="kicker">FRATERNIDAD CAMPUS CENTRAL</div>
+  <h1>Manual de la<br><span>Anfitriona</span></h1>
+  <div class="sub">Reservas · Cumpleaños · FRATE LINK · Listas. Todo desde tu celular, sin WhatsApp sueltos, sin Google Forms y sin escribir un QR a mano.</div>
+  <div class="hair"></div>
+  <div class="meta">Guía operativa · frate.cl/admin</div>
+</div>
+
+<div class="wrap">
+
+  <div class="toc">
+    <h3>Contenido</h3>
+    <ol>
+      <li><a href="#s1">Entrar a tu panel</a></li>
+      <li><a href="#s2">El mapa: cómo se conecta todo</a></li>
+      <li><a href="#s3">🔗 FRATE LINK — que se anoten solos</a></li>
+      <li><a href="#s4">🎟️ Listas — importar, revisar y emitir QR</a></li>
+      <li><a href="#s5">🍾 Reservas de mesa</a></li>
+      <li><a href="#s6">🎂 Cumpleaños — el Centro de Cumpleaños</a></li>
+      <li><a href="#s7">Condiciones y la puerta</a></li>
+      <li><a href="#s8">Tips de oro</a></li>
+    </ol>
+  </div>
+
+  <!-- 1 -->
+  <section id="s1">
+    <div class="shead"><span class="snum">1</span><h2>Entrar a tu panel</h2></div>
+    <p class="slead">Tu centro de operaciones. Desde aquí manejas todo.</p>
+    <div class="card">
+      <ol class="steps">
+        <li>Entra a <b>frate.cl/admin</b> desde el celular o el computador.</li>
+        <li>Inicia sesión con tu correo y clave de anfitriona.</li>
+        <li>Las secciones que vas a usar en este manual son cuatro: <span class="ui gold">🔗 FRATE LINK</span>, <span class="ui">🎁 Cortesías</span> (ahí viven las <b>Listas</b>), <span class="ui">📅 Reservas</span> y <span class="ui">💬 Comunidad → Formularios</span> (el <b>Centro de Cumpleaños</b>).</li>
+      </ol>
+      <div class="callout tip"><span class="em">💡 Tip</span> Guarda <b>frate.cl/admin</b> en la pantalla de inicio del celular. Lo vas a abrir todos los días de evento.</div>
+    </div>
+  </section>
+
+  <!-- 2 -->
+  <section id="s2">
+    <div class="shead"><span class="snum">2</span><h2>El mapa: cómo se conecta todo</h2></div>
+    <p class="slead">Cuatro palabras que vas a escuchar todos los días. Así se relacionan:</p>
+    <div class="card">
+      <ul style="margin:0;padding-left:20px;color:#dcdce2;font-size:.95rem;line-height:1.9;">
+        <li><b style="color:var(--dorado2)">🔗 FRATE LINK</b> — es la <b>herramienta para captar</b>. Creas un link, lo compartes, y la persona <b>se anota sola</b> desde su celular. Según el <b>tipo</b> que elijas, ese link es una lista, una reserva o un cumpleaños.</li>
+        <li><b style="color:#7ee2a0">🎟️ Listas</b> — la <b>lista de invitad@s</b> de una embajadora o de un convenio. La armas importando un Excel o con un FRATE LINK. Al final <b>emites los QR</b>.</li>
+        <li><b style="color:#89bbff">🍾 Reservas</b> — cuando alguien pide <b>mesa</b>. Llega como solicitud y tú la gestionas hasta confirmarla.</li>
+        <li><b style="color:var(--morado)">🎂 Cumpleaños</b> — cuando alguien quiere <b>celebrar</b>. Llega al <b>Centro de Cumpleaños</b> y lo llevas por etapas hasta el día del evento.</li>
+      </ul>
+      <div class="callout info"><span class="em">🧭 En una frase</span> <b>FRATE LINK capta</b> → cae en <b>Listas, Reservas o Cumpleaños</b> → tú <b>gestionas y emites</b>. Todo termina en un QR que la persona muestra en la puerta.</div>
+    </div>
+  </section>
+
+  <!-- 3 -->
+  <section id="s3">
+    <div class="shead"><span class="snum">3</span><h2>🔗 FRATE LINK — que se anoten solos</h2></div>
+    <p class="slead">La forma más cómoda: compartes un link, la gente llena sus datos, y tú solo revisas.</p>
+    <div class="card">
+      <div class="path" style="margin-bottom:14px;">Dónde: menú <span class="ui gold">🔗 FRATE LINK</span> → botón <span class="ui gold">➕ Nuevo FRATE LINK</span></div>
+      <ol class="steps">
+        <li><b>Elige el tipo de link</b> (define qué formulario ve el invitado):
+          <div class="pipe" style="margin-top:8px;">
+            <span>🎫 Lista — general</span><span>🎂 Cumpleaños</span><span>🍾 Reserva de mesa</span><span>🎤 Artista / DJ</span><span>🎬 Producción / prensa</span>
+          </div>
+        </li>
+        <li>Completa: <b>nombre del link</b>, <b>evento</b>, <b>quién invita</b> (ej. “Embajadora Cotty”), un <b>código corto</b> (ej. <b>COTTY-JUE</b>), la <b>restricción de género</b>, la <b>hora máxima de llegada</b> y las condiciones.</li>
+        <li>Toca <span class="ui gold">Crear y generar link</span>. Aparece tu link y un <b>QR</b> 👉 <b>frate.cl/lista/COTTY-JUE</b>.</li>
+        <li>Cópialo (botón <span class="ui">🔗</span>) o guarda el <b>QR</b>, y mándalo por WhatsApp, Instagram o súbelo a tu historia.</li>
+      </ol>
+      <div class="callout tip"><span class="em">✨ Qué pasa cuando alguien se anota</span> Llena nombre, RUT, género, correo y WhatsApp desde su celular. Queda <b>“pendiente”</b> esperando tu visto bueno — <b>nada sale sin que tú lo apruebes</b>. Lo revisas en <b>Listas</b> (sección 4).</div>
+      <div class="callout info"><span class="em">📍 ¿Dónde vuelvo a encontrar mis links?</span> En el panel <span class="ui gold">🔗 FRATE LINK</span> están todos, con su código, cuántos se anotaron y el botón para <b>copiar el link</b> cuando quieras.</div>
+    </div>
+  </section>
+
+  <!-- 4 -->
+  <section id="s4">
+    <div class="shead"><span class="snum">4</span><h2>🎟️ Listas — importar, revisar y emitir</h2></div>
+    <p class="slead">La lista de invitad@s de una embajadora o convenio. Dos caminos para armarla, un mismo final: sale el QR.</p>
+
+    <div class="card">
+      <h4>A · Ya tengo la lista en Excel o Google Forms</h4>
+      <div class="path" style="margin-bottom:14px;">Dónde: menú <span class="ui">🎁 Cortesías</span> → <span class="ui gold">📥 Importar masivo</span></div>
+      <ol class="steps">
+        <li>Abre <span class="ui gold">📥 Importar masivo</span> y <b>sube el archivo</b> (.xlsx o .csv, incluso bajado directo del Google Form).</li>
+        <li>El sistema <b>detecta las columnas solo</b>. Revísalas y aprieta <b>Confirmar</b>.</li>
+        <li>En <b>Configurar</b>: elige el evento, marca <span class="ui">🎟️ Cortesía masiva</span> y completa <b>dueño</b> (ej. “Embajadora Cotty”), <b>restricción de género</b>, <b>hora máxima de llegada</b> y el texto de condiciones.</li>
+        <li>Toca <span class="ui gold">Pre-análisis IA →</span>. La IA revisa <b>género por nombre, RUT, duplicados y edad</b>.</li>
+      </ol>
+    </div>
+
+    <div class="card">
+      <h4>B · Vino por un FRATE LINK</h4>
+      <p style="margin:0;color:var(--gris);font-size:.93rem;">Si armaste un <span class="ui gold">🔗 FRATE LINK</span> de tipo Lista, la gente ya se anotó sola. La encuentras en <span class="ui">🎁 Cortesías</span> con el botón <span class="ui gold">Revisar (N)</span> (N = cuántos esperan tu visto bueno).</p>
+    </div>
+
+    <div class="card">
+      <h4>Revisar y emitir los QR</h4>
+      <p style="margin:0 0 10px;color:var(--gris);font-size:.93rem;">El paso donde tú tienes la última palabra. Corre el pre-análisis y aparece el semáforo por persona:</p>
+      <div class="semaf">
+        <div><span class="d">🟢</span> <b>Verde</b> — todo en orden, listo para emitir.</div>
+        <div><span class="d">🟡</span> <b>Amarillo</b> — dudoso (ej. nombre unisex). Tú decides.</div>
+        <div><span class="d">🔴</span> <b>Rojo</b> — con alerta (RUT malo, duplicado, género no calza). <b>Viene desmarcado.</b></div>
+      </div>
+      <ol class="steps" style="margin-top:14px;">
+        <li>Marca o desmarca a mano las que quieras. <b>Tú mandas.</b></li>
+        <li>Toca <span class="ui gold">🚀 Aprobar y emitir</span> (o el botón verde <span class="ui green">📨 Enviar N cortesías</span>). Se generan los <b>QR con las condiciones</b> y llegan al correo de cada persona.</li>
+      </ol>
+      <div class="callout warn"><span class="em">⚠️ Ojo con los rojos</span> Los <b>🔴 vienen desmarcados a propósito</b>. Si igual quieres dejar entrar a alguien, márcalo tú — pero revisa por qué la IA lo marcó (casi siempre un RUT mal escrito o alguien repetido).</div>
+      <div class="callout tip"><span class="em">✨ Lo que te ahorra</span> Detecta a la <b>misma persona repetida entre dos listas</b> (la tuya y la de la RRPP) para no mandarle dos entradas. Si a alguien no le llegó el correo, hay un botón <span class="ui">📧 Reenviar correos con el QR</span> en el detalle de la lista.</div>
+    </div>
+  </section>
+
+  <!-- 5 -->
+  <section id="s5">
+    <div class="shead"><span class="snum">5</span><h2>🍾 Reservas de mesa</h2></div>
+    <p class="slead">Cuando alguien pide mesa desde la web o desde un FRATE LINK de reserva.</p>
+    <div class="card">
+      <div class="path" style="margin-bottom:14px;">Dónde: menú <span class="ui">📅 Reservas</span></div>
+      <ol class="steps">
+        <li>Cada solicitud llega con la persona, la <b>fecha</b>, cuántas personas y el detalle. Empieza en estado <b>pendiente</b>.</li>
+        <li>Puedes verlas como <span class="ui">☰ Tabla</span> o como <span class="ui">🗂️ Kanban</span> (arrastras la tarjeta entre columnas para cambiar el estado):
+          <div class="pipe" style="margin-top:8px;">
+            <span>⏳ Pendiente</span><span class="arw">→</span><span>🔎 En análisis</span><span class="arw">→</span><span>🟢 Confirmada</span><span class="arw">·</span><span>⚫ Cancelada</span>
+          </div>
+        </li>
+        <li>Abre la ficha para escribir la <b>mesa, el consumo mínimo y las condiciones</b>. Cada cambio queda en el <b>historial</b> de esa reserva.</li>
+        <li>Al <b>confirmar</b>, a la persona le llega el correo. Si necesitas <b>cancelar a nombre del cliente</b>, usa el botón <span class="ui red">✕</span> de esa fila.</li>
+      </ol>
+      <div class="callout tip"><span class="em">💡 Autocompletar</span> Al crear una reserva a mano, empieza a escribir el nombre o RUT en <b>“Buscar persona registrada”</b>: si ya vino antes, se rellenan solos sus datos (incluso si es <b>staff</b> del equipo).</div>
+    </div>
+  </section>
+
+  <!-- 6 -->
+  <section id="s6">
+    <div class="shead"><span class="snum">6</span><h2>🎂 Cumpleaños — el Centro de Cumpleaños</h2></div>
+    <p class="slead">Todo un CRM para no perder ningún cumpleaños: desde que escriben hasta que soplan las velas.</p>
+    <div class="card">
+      <div class="path" style="margin-bottom:14px;">Dónde: menú <span class="ui">💬 Comunidad</span> → pestaña <span class="ui gold">📋 Formularios</span> (el Centro de Cumpleaños)</div>
+      <h4>Tres formas de mirar</h4>
+      <div class="pipe">
+        <span>📄 Lista</span><span>🗂️ Kanban</span><span>📅 Agenda</span>
+      </div>
+      <ul style="margin:10px 0 0;padding-left:20px;color:#dcdce2;font-size:.93rem;line-height:1.8;">
+        <li><b>Lista</b> — todos, con buscador y filtros. Arriba ves las <b>métricas</b> (nuevos, en gestión, confirmados del mes, conversión) y las <b>alertas</b> (sin contactar hace rato, evento en 2 días).</li>
+        <li><b>Kanban</b> — tarjetas que arrastras entre etapas.</li>
+        <li><b>Agenda</b> — ordenados por fecha de celebración (próximos 7 días / este mes / más adelante).</li>
+      </ul>
+    </div>
+
+    <div class="card">
+      <h4>El pipeline (las etapas)</h4>
+      <div class="pipe">
+        <span>🔵 Nuevo</span><span class="arw">→</span><span>🟡 Contactando</span><span class="arw">→</span><span>🟠 Coordinando</span><span class="arw">→</span><span>🟢 Confirmado</span><span class="arw">→</span><span>✅ Realizado</span>
+      </div>
+      <p style="margin:8px 0 0;color:var(--gris);font-size:.9rem;">(Y <b>⚫ Perdido</b> si no se concretó.) Mueves de etapa con un toque en la ficha o arrastrando en el Kanban.</p>
+    </div>
+
+    <div class="card">
+      <h4>Dentro de la ficha</h4>
+      <p style="margin:0 0 8px;color:var(--gris);font-size:.93rem;">Abre a la <b>cumpleañer@</b> y tienes todo en una pantalla:</p>
+      <ol class="steps">
+        <li><span class="ui green">💬 Responder por WhatsApp</span> — abre el chat con un <b>mensaje ya escrito</b>. Contestas sin salir del sistema.</li>
+        <li><span class="ui gold">🤖 Redactar con IA</span> — la IA te escribe el mensaje y una <b>cotización sugerida</b> según los paquetes. Lo revisas y lo mandas.</li>
+        <li><span class="ui blue">🎟️ Crear lista de invitados</span> — genera una lista para la puerta con l@s invitad@s del cumpleaños (con su propio link para que se anoten). Se la mandas por WhatsApp.</li>
+        <li>Anotas <b>responsable, paquete, nº de invitados, mesa, pago, monto y próximo contacto</b>, y guardas con <span class="ui gold">💾 Guardar gestión</span>. Todo queda en el historial.</li>
+      </ol>
+      <div class="callout info"><span class="em">🤖 Para que la IA cotice bien</span> Carga tus paquetes en <span class="path">admin → <span class="ui">Configuración → General</span> → <b>🎂 Paquetes de cumpleaños (para la IA)</b></span>. Escribe tus precios ahí y la IA los usa. Si lo dejas vacío, la IA no inventa precios.</div>
+    </div>
+    <div class="callout tip"><span class="em">✅ Respuesta automática</span> Apenas alguien envía el formulario de cumpleaños, le llega solo un <b>correo de bienvenida</b> — nadie queda sin contestación mientras tú lo tomas.</div>
+  </section>
+
+  <!-- 7 -->
+  <section id="s7">
+    <div class="shead"><span class="snum">7</span><h2>Condiciones y la puerta</h2></div>
+    <p class="slead">Cada entrada nace con sus reglas, y la puerta las hace cumplir sola.</p>
+    <div class="card">
+      <h4>Qué son las condiciones</h4>
+      <p style="margin:0 0 8px;color:var(--gris);font-size:.93rem;">Cuando creas la lista o el FRATE LINK, defines:</p>
+      <ul style="margin:0;padding-left:20px;color:#dcdce2;font-size:.93rem;">
+        <li>🕐 <b>Hora máxima de llegada</b> (ej. 00:00) — hasta cuándo vale el beneficio.</li>
+        <li>🔒 <b>No transferible</b> — el RUT del QR debe calzar con el carnet.</li>
+        <li>🚪 <b>Zona</b> — general, VIP o cumpleañer@s.</li>
+        <li>👩/👨/🎓 <b>Público</b> — mujeres, hombres o universitarios (se chequea con la cédula en la puerta).</li>
+      </ul>
+      <h4 style="margin-top:18px;">En la puerta</h4>
+      <p style="margin:0;color:var(--gris);font-size:.93rem;">En <b>frate.cl/validacion</b>, al escanear el QR, el portero ve <b>nombre y RUT en grande</b> y un aviso automático:</p>
+      <div class="semaf" style="margin-top:10px;">
+        <div><span class="d">✅</span> <b>Válido</b> — cotejar carnet y dejar pasar.</div>
+        <div><span class="d">⚠️</span> <b>Fuera de horario</b> — llegó tarde; el beneficio se perdió (el portero decide).</div>
+      </div>
+      <div class="callout tip"><span class="em">💡 Tranquila</span> No tienes que acordarte de las horas de cada lista: <b>el escáner lo dice solo</b>.</div>
+    </div>
+  </section>
+
+  <!-- 8 -->
+  <section id="s8">
+    <div class="shead"><span class="snum">8</span><h2>Tips de oro</h2></div>
+    <p class="slead">Lo que te hace la vida más fácil.</p>
+    <div class="card">
+      <ul style="margin:0;padding-left:20px;color:#dcdce2;font-size:.95rem;line-height:1.9;">
+        <li>El <b>código del FRATE LINK</b> hazlo corto y con sentido: <b>COTTY-JUE</b>, <b>USACH-VIE</b>, etc. Es más fácil de compartir y de recordar.</li>
+        <li>Al importar <b>dos listas del mismo evento</b>, importa una y después la otra: la segunda te marca sola a los repetidos.</li>
+        <li>Un cumpleaños <b>no se aprueba solo</b>: la IA ordena, escribe y avisa, pero <b>la que decide y confirma eres tú</b>.</li>
+        <li>Usa las <b>alertas</b> del Centro de Cumpleaños como tu lista de pendientes del día (sin contactar / evento cerca).</li>
+        <li>Si a alguien no le llegó su QR, dile que <b>revise spam</b>; igual puede entrar mostrando su carnet si está en la lista aprobada, o usas <b>📧 Reenviar correos</b>.</li>
+        <li>Todo queda registrado: cuántos se anotaron, quién entró en la puerta y cada cambio de estado.</li>
+      </ul>
+      <div class="callout tip"><span class="em">🐵 Recuerda</span> <b>FRATE LINK capta · tú gestionas · el QR manda en la puerta.</b> Ese es el ciclo.</div>
+    </div>
+  </section>
+
+  <div class="foot">
+    <div style="font-family:var(--disp);letter-spacing:4px;font-weight:900;font-size:1.3rem;color:var(--dorado);">FRATE</div>
+    ¿Dudas? Escríbele al equipo por WhatsApp: <b>+56 9 8131 1548</b><br>
+    <span style="font-size:.78rem;color:#6a6a72;">Fraternidad Campus Central · Pío Nono 430, Bellavista</span>
+  </div>
+</div>
+
+<button class="btn-print" onclick="window.print()">🖨️ Imprimir / Guardar PDF</button>
+</body>
+</html>

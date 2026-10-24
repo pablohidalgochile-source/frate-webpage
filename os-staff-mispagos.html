@@ -1,0 +1,328 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>FRATE WEB (TICKETERA) · OS TU PORTAL: PAGOS Y BOLETA</title>
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🧾</text></svg>">
+<link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@600;800;900&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="/os-manual.css">
+<link rel="stylesheet" href="/os-erp.css">
+<style>
+  .paso{background:var(--neg2);border:1px solid var(--bor);border-radius:14px;padding:20px 22px;margin-top:14px;
+    display:grid;grid-template-columns:44px 1fr;gap:16px;align-items:start}
+  .paso .num{font-family:var(--disp);font-weight:900;font-size:1.6rem;color:var(--acc);line-height:1;
+    border:1px solid var(--bor2);border-radius:11px;width:44px;height:44px;display:grid;place-items:center}
+  .paso h3{font-family:var(--disp);font-weight:800;font-size:1.18rem;text-transform:uppercase;margin:0 0 6px}
+  .paso p{margin:0;color:var(--gris);font-size:.92rem;line-height:1.7}
+  .paso p + p{margin-top:9px}
+  .pant{background:var(--neg);border:1px solid var(--bor2);border-radius:14px;padding:18px 20px;margin-top:16px}
+  .pant .tit{font-family:var(--disp);font-size:.66rem;letter-spacing:2px;text-transform:uppercase;color:var(--gris2);margin-bottom:12px}
+  .lin{display:flex;justify-content:space-between;gap:14px;padding:7px 0;border-bottom:1px solid var(--bor);font-size:.9rem}
+  .lin:last-child{border-bottom:0}
+  .lin .k{color:var(--gris)} .lin .v{font-family:var(--mono,monospace);color:var(--txt)}
+  .lin.total{border-top:1px solid var(--bor2);border-bottom:0;margin-top:6px;padding-top:11px}
+  .lin.total .k,.lin.total .v{color:var(--txt);font-weight:700}
+  .ojo{border-left:3px solid var(--rojo);background:var(--neg);border-radius:0 10px 10px 0;padding:14px 18px;margin-top:16px}
+  .ojo h4{font-family:var(--disp);font-weight:800;font-size:.98rem;text-transform:uppercase;color:var(--rojo);margin-bottom:5px}
+  .ojo p{margin:0;color:var(--gris);font-size:.9rem;line-height:1.7}
+  .avi{border-left:3px solid var(--acc);background:var(--neg);border-radius:0 10px 10px 0;padding:14px 18px;margin-top:16px}
+  .avi h4{font-family:var(--disp);font-weight:800;font-size:.98rem;text-transform:uppercase;color:var(--acc);margin-bottom:5px}
+  .avi p{margin:0;color:var(--gris);font-size:.9rem;line-height:1.7}
+  .form-eq{background:var(--neg);border:1px solid var(--bor2);border-radius:14px;padding:22px 24px;margin-top:16px;text-align:center}
+  .form-eq .ec{font-family:var(--disp);font-weight:900;font-size:clamp(1rem,3vw,1.5rem);line-height:1.35;text-wrap:balance}
+  .form-eq .no{display:block;margin-top:14px;font-family:var(--font);font-weight:400;font-size:.86rem;color:var(--gris)}
+  .qa{margin-top:14px;border-top:1px solid var(--bor);padding-top:14px}
+  .qa h4{font-family:var(--disp);font-weight:800;font-size:1rem;text-transform:uppercase;margin:0 0 5px}
+  .qa p{margin:0;color:var(--gris);font-size:.9rem;line-height:1.7}
+</style>
+</head>
+<body>
+<div id="bar"></div>
+
+<div class="wrap">
+
+  <header class="hero">
+    <div class="kicker">FRATE OS · PORTAL DEL COLABORADOR</div>
+    <h1>Tus pagos y tu boleta</h1>
+    <p class="bajada">
+      Todo lo que ganaste, lo que ya te transferimos y lo que falta, en tu propio celular.
+      Y cómo emitir tu boleta de honorarios sin tener que preguntarle a nadie.
+    </p>
+  </header>
+
+  <section>
+    <h2>Cómo entrar</h2>
+    <p>
+      Desde cualquier celular o computador, anda a <b>erp.frate.cl/portal</b> y entra con tu
+      <b>RUT y tu PIN</b>. Es la misma clave con la que marcas tu servicio.
+    </p>
+    <p>
+      Si se te olvidó el PIN, en la misma pantalla de entrada hay un enlace para recuperarlo
+      por WhatsApp. Te llega un código de 6 dígitos y eliges uno nuevo.
+    </p>
+    <div class="avi">
+      <h4>Guárdalo en tu pantalla de inicio</h4>
+      <p>
+        Desde el navegador del celular, «Agregar a pantalla de inicio». Queda como una app y
+        entras de una, sin escribir la dirección cada vez.
+      </p>
+    </div>
+  </section>
+
+  <section>
+    <h2>Qué vas a ver en «Mis pagos»</h2>
+    <p>
+      La pestaña <b>💰 Mis pagos</b> te muestra el mes en curso. Arriba de todo, lo único que
+      de verdad importa: <b>cuánto te falta por cobrar</b>. Si dice cero, estás al día.
+    </p>
+
+    <div class="pant">
+      <div class="tit">Así se ve</div>
+      <div class="lin"><span class="k">Pendiente por cobrar</span><span class="v">$0</span></div>
+      <div class="lin"><span class="k">Tu servicio mensual pactado</span><span class="v">$1.800.000</span></div>
+      <div class="lin"><span class="k">Noches trabajadas (11)</span><span class="v">$310.000</span></div>
+      <div class="lin"><span class="k">Bonos del mes</span><span class="v">$20.000</span></div>
+      <div class="lin total"><span class="k">Total del mes</span><span class="v">$2.130.000</span></div>
+      <div class="lin"><span class="k">Ya te transferimos</span><span class="v">$2.130.000</span></div>
+    </div>
+
+    <p>
+      No todas las líneas te van a aparecer: depende de cómo te pagamos a ti.
+      Si cobras por noche, no vas a ver «servicio mensual». Si tienes sueldo, no vas a ver
+      noches. Si no hubo bonos ni descuentos, esa línea no sale.
+    </p>
+
+    <div class="ojo">
+      <h4>Solo tú ves esto</h4>
+      <p>
+        Tu portal muestra <b>únicamente lo tuyo</b>. Nadie del equipo ve lo que ganas, ni
+        siquiera tu jefe de sección. No existe ninguna lista compartida con los montos de
+        todos. Lo único que ve administración es lo mismo que ves tú.
+      </p>
+    </div>
+  </section>
+
+  <section>
+    <h2>De dónde sale cada número</h2>
+    <p>
+      Nada de esto se escribe a mano al final del mes. Cada peso viene de algo que pasó y que
+      quedó registrado esa misma noche.
+    </p>
+
+    <div class="form-eq">
+      <div class="ec">
+        Tu total del mes = noches trabajadas + servicio mensual + bonos − descuentos
+      </div>
+      <span class="no">
+        Y lo que te falta por cobrar es ese total <b>menos lo que ya te transferimos</b>.
+      </span>
+    </div>
+
+    <table class="tabla2">
+      <tr>
+        <td>Noches trabajadas</td>
+        <td>El monto de cada noche queda fijado cuando te asignan a ese servicio, y no cambia
+        después. Si una noche cobraste distinto —porque hiciste otra función o fue un turno
+        especial—, ese es el monto que vas a ver.</td>
+      </tr>
+      <tr>
+        <td>Servicio mensual</td>
+        <td>Si tu trato es por mes, es tu monto pactado. Se te paga vayas o no vayas todas las
+        noches, y por eso tus noches aparecen sin monto: son asistencia, no cobro aparte.</td>
+      </tr>
+      <tr>
+        <td>Bonos y descuentos</td>
+        <td>Lo que se acordó ese mes por fuera de las noches. Siempre queda con el motivo
+        escrito.</td>
+      </tr>
+      <tr>
+        <td>Propinas</td>
+        <td><b>No entran acá.</b> Las propinas son tuyas por ley, van íntegras y se reparten
+        aparte. No son parte de tus honorarios ni de tu boleta.</td>
+      </tr>
+    </table>
+  </section>
+
+  <section>
+    <h2>Tu boleta de honorarios, paso a paso</h2>
+    <p>
+      Todos los meses tienes que emitir una boleta por lo que trabajaste. La app te dice el
+      monto exacto y dónde dejarla.
+    </p>
+
+    <div class="paso">
+      <div class="num">1</div>
+      <div>
+        <h3>Mira el monto</h3>
+        <p>
+          En «Mis pagos» aparece un recuadro que dice <b>Tu boleta de [mes]</b> con el monto en
+          grande. <b>Ese es el número que tienes que poner en la boleta</b> — no el que te
+          transferimos.
+        </p>
+      </div>
+    </div>
+
+    <div class="paso">
+      <div class="num">2</div>
+      <div>
+        <h3>Por qué la boleta dice más de lo que recibiste</h3>
+        <p>
+          No es un error. Cuando emites una boleta de honorarios, el SII retiene el
+          <b>15,25%</b> y ese monto lo paga la empresa directamente al Estado a tu nombre.
+        </p>
+        <div class="form-eq">
+          <div class="ec">Monto de tu boleta = lo que te transferimos ÷ 0,8475</div>
+          <span class="no">
+            Si te transferimos $310.000, tu boleta va por <b>$365.782</b>.
+            La diferencia, $55.782, es la retención que va al SII a tu nombre —
+            la recuperas en tu declaración de renta.
+          </span>
+        </div>
+      </div>
+    </div>
+
+    <div class="paso">
+      <div class="num">3</div>
+      <div>
+        <h3>Emítela en el SII</h3>
+        <p>
+          Desde el mismo recuadro hay un botón que te lleva directo a la página del SII para
+          emitir boletas de honorarios electrónicas. Entras con tu RUT y tu clave del SII.
+        </p>
+        <p>
+          Los datos de quién la recibe son siempre los mismos:<br>
+          <b>MAGNUS PRO EVENTOS LIMITADA</b> · RUT <b>76.503.063-3</b> · Pío Nono 430, Recoleta.<br>
+          En «Prestación» pones <b>STAFF</b> y el mes. Y ojo con la fecha: tiene que quedar
+          <b>dentro del mes que estás cobrando</b>, no del mes siguiente.
+        </p>
+      </div>
+    </div>
+
+    <div class="paso">
+      <div class="num">4</div>
+      <div>
+        <h3>Súbela acá</h3>
+        <p>
+          En ese mismo recuadro, el botón <b>⬆ Subir mi boleta</b>. Puede ser el PDF que te da
+          el SII o una foto. Al subirla, el recuadro cambia a <b>✓ Boleta enviada</b> y ahí
+          queda guardada con tu mes y tu monto.
+        </p>
+        <p>
+          Si te equivocaste, subes otra encima y reemplaza a la anterior.
+        </p>
+      </div>
+    </div>
+
+    <div class="paso">
+      <div class="num">5</div>
+      <div>
+        <h3>Mándala también por correo</h3>
+        <p>
+          A <b>contabilidad.campuscentral@gmail.com</b>. Subirla al portal es lo que nos deja
+          ver quién ya la entregó; el correo es lo que necesita contabilidad para procesarla.
+          Haz las dos cosas.
+        </p>
+      </div>
+    </div>
+  </section>
+
+  <section>
+    <h2>Si algo no calza</h2>
+
+    <div class="ojo">
+      <h4>Avísanos antes de emitir</h4>
+      <p>
+        El sistema es nuevo y todavía lo estamos afinando. <b>Si un monto no corresponde con lo
+        que trabajaste, dilo antes de emitir la boleta.</b> Una boleta emitida por un monto
+        equivocado no se borra con un clic: hay que anularla en el SII y volver a hacerla.
+      </p>
+    </div>
+
+    <p>
+      Revisa dos cosas antes de emitir: que la <b>cantidad de noches</b> sea la que trabajaste,
+      y que el <b>total del mes</b> sea el que acordaste. Si cualquiera de las dos no calza,
+      avisa.
+    </p>
+
+    <h3>Cómo avisar</h3>
+    <table class="tabla2">
+      <tr>
+        <td>Por el chat de la app</td>
+        <td>La pestaña <b>💬 Chat</b> del portal. Es lo más rápido y queda escrito.</td>
+      </tr>
+      <tr>
+        <td>A tu jefe de sección</td>
+        <td>Barra, ingreso, seguridad, aseo o artistas — el que corresponda a tu área.</td>
+      </tr>
+      <tr>
+        <td>Por WhatsApp a administración</td>
+        <td>Si es urgente o es un tema de plata que no quieres poner en un grupo.</td>
+      </tr>
+    </table>
+
+    <p>
+      Cuenta <b>qué noche</b> y <b>qué monto</b> esperabas. Con eso se revisa al tiro; sin
+      eso hay que ir a buscarlo.
+    </p>
+  </section>
+
+  <section>
+    <h2>Preguntas que nos hacen siempre</h2>
+
+    <div class="qa">
+      <h4>¿Por qué mi boleta dice más de lo que me llegó?</h4>
+      <p>
+        Porque la boleta va por el bruto y a ti te transferimos el líquido. La diferencia es el
+        15,25% que el SII retiene y que la empresa le paga al Estado a tu nombre. Esa plata es
+        tuya: la recuperas cuando haces tu declaración de renta en abril.
+      </p>
+    </div>
+
+    <div class="qa">
+      <h4>Trabajé y mis noches aparecen sin monto</h4>
+      <p>
+        Si tu trato es mensual, es normal: cobras tu sueldo vayas o no vayas, y las noches
+        quedan como registro de asistencia. Si cobras por noche y aparece en cero, avísanos.
+      </p>
+    </div>
+
+    <div class="qa">
+      <h4>Dice «acumulado». ¿Me deben esa plata?</h4>
+      <p>
+        Sí. «Acumulado» significa que esa noche no se pagó en su semana y queda guardada para
+        el siguiente pago. No se pierde.
+      </p>
+    </div>
+
+    <div class="qa">
+      <h4>No veo la pestaña de pagos</h4>
+      <p>
+        Puede estar apagada mientras se afina algo. Pregunta en administración y te dicen
+        cuándo se enciende.
+      </p>
+    </div>
+
+    <div class="qa">
+      <h4>¿Y mis propinas?</h4>
+      <p>
+        Van aparte y no entran en la boleta. Son tuyas por ley, íntegras y sin comisión, y las
+        digitales se pagan dentro de los 7 días hábiles.
+      </p>
+    </div>
+
+    <div class="qa">
+      <h4>Me salió una pantalla roja de error</h4>
+      <p>
+        Casi siempre es que tu celular tiene guardada la versión anterior de la app. Aprieta
+        <b>«Actualizar a la última versión»</b> y listo. No se pierde nada de lo que estabas
+        haciendo.
+      </p>
+    </div>
+  </section>
+
+</div>
+
+<script src="/os-manual.js"></script>
+</body>
+</html>

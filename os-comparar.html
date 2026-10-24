@@ -1,0 +1,192 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>FRATE WEB (TICKETERA) · OS 08 DOS NOCHES, DOS HISTORIAS</title>
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>⚖️</text></svg>">
+<link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@600;800;900&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="/os-manual.css">
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<style>
+  .vs{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-top:14px}
+  @media(max-width:640px){.vs{grid-template-columns:1fr}}
+  .ev{background:var(--neg2);border:1px solid var(--bor);border-radius:14px;padding:18px;position:relative;overflow:hidden}
+  .ev::before{content:"";position:absolute;inset:0 auto auto 0;width:100%;height:3px}
+  .ev.a::before{background:var(--gris2)} .ev.b::before{background:var(--rojo)}
+  .ev .fe{font-size:.66rem;letter-spacing:1.5px;text-transform:uppercase;color:var(--gris2)}
+  .ev h3{font-family:var(--disp);font-weight:900;font-size:1.5rem;margin:4px 0 12px;text-transform:uppercase}
+  .ev .big{font-family:var(--disp);font-weight:900;font-size:2.6rem;line-height:1}
+  .ev.a .big{color:var(--gris)} .ev.b .big{color:var(--verde)}
+  .ev .peq{font-size:.75rem;color:var(--gris);margin-top:3px}
+  .comp td.a{color:var(--gris)} .comp td.b{color:var(--txt);font-weight:700}
+  .flecha{font-family:var(--disp);font-weight:900;font-size:.9rem}
+  .up{color:var(--verde)} .down{color:var(--rojo)}
+  .barra-lin{display:flex;align-items:center;gap:10px;margin-bottom:7px}
+  .barra-lin .et{flex:0 0 230px;font-size:.79rem}
+  @media(max-width:640px){.barra-lin .et{flex:0 0 130px;font-size:.71rem}}
+  .barra-lin .tr{flex:1;height:18px;background:#0c0c0f;border:1px solid var(--bor);border-radius:6px;overflow:hidden}
+  .barra-lin .tr i{display:block;height:100%;border-radius:5px}
+  .barra-lin .nu{flex:0 0 96px;text-align:right;font-size:.76rem;font-variant-numeric:tabular-nums}
+  .curva{display:flex;align-items:flex-end;gap:6px;height:130px;margin-top:10px}
+  .cc{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:flex-end;height:100%}
+  .cc i{display:block;width:100%;max-width:40px;border-radius:4px 4px 0 0}
+  .cc .v{font-size:.7rem;font-weight:800;margin-bottom:3px} .cc .h{font-size:.62rem;color:var(--gris2);margin-top:4px}
+</style>
+</head>
+<body>
+<div id="bar"></div>
+<div class="wrap">
+
+  <div class="hero">
+    <div class="eyebrow">Manual 08 · datos reales</div>
+    <h1>Dos noches,<br>dos <em>historias</em></h1>
+    <p class="sub">A MI ME GUSTA (jueves 23) contra BESUCONA (sábado 25). Dos eventos con dos días de diferencia y resultados opuestos. Esto es lo que el sistema nos enseñó.</p>
+    <div class="meta"><span>Administración · Producción</span><span>·</span><span>Datos reales</span></div>
+  </div>
+
+  <section>
+    <div class="stag">El titular</div>
+    <h2>Menos entradas, más gente, mucha más plata</h2>
+    <div class="vs">
+      <div class="ev a">
+        <div class="fe">Jueves 23 de julio</div>
+        <h3>A mi me gusta</h3>
+        <div class="big">368</div><div class="peq">personas adentro · de <b>614</b> emitidas</div>
+        <div style="margin-top:14px;font-family:var(--disp);font-weight:900;font-size:1.5rem;color:var(--gris)">$740.000</div>
+        <div class="peq">recaudado</div>
+      </div>
+      <div class="ev b">
+        <div class="fe">Sábado 25 de julio</div>
+        <h3>Besucona</h3>
+        <div class="big">393</div><div class="peq">personas adentro · de <b>448</b> emitidas</div>
+        <div style="margin-top:14px;font-family:var(--disp);font-weight:900;font-size:1.5rem;color:var(--oro)">$1.879.000</div>
+        <div class="peq">recaudado</div>
+      </div>
+    </div>
+    <div class="bien" style="font-size:1.02rem"><b>BESUCONA emitió 166 entradas MENOS y entraron 25 personas MÁS.</b><br>
+      Y recaudó <b>2,5 veces más</b>: $1.139.000 de diferencia en la misma semana.</div>
+  </section>
+
+  <section>
+    <div class="stag">Capítulo 1</div>
+    <h2>Los números lado a lado</h2>
+    <div class="tw"><table class="tabla comp">
+      <thead><tr><th>Qué</th><th>A mi me gusta</th><th>Besucona</th><th></th></tr></thead>
+      <tbody>
+        <tr><td>Entradas emitidas</td><td class="a num">614</td><td class="b num">448</td><td class="flecha down">−27%</td></tr>
+        <tr><td><b>Personas adentro</b></td><td class="a num">368</td><td class="b num">393</td><td class="flecha up">+7%</td></tr>
+        <tr><td><b>Eficiencia</b> (llegó / emitido)</td><td class="a num">60%</td><td class="b num">88%</td><td class="flecha up">+28 pts</td></tr>
+        <tr><td>Preventa vendida</td><td class="a num">116</td><td class="b num">213</td><td class="flecha up">+84%</td></tr>
+        <tr><td>Cortesías emitidas</td><td class="a num">486</td><td class="b num">215</td><td class="flecha down">−56%</td></tr>
+        <tr><td>Rendimiento de las cortesías</td><td class="a num">50%</td><td class="b num">77%</td><td class="flecha up">+27 pts</td></tr>
+        <tr><td><b>Cortesías por cada preventa</b></td><td class="a num">4,2 : 1</td><td class="b num">1,0 : 1</td><td class="flecha up">★</td></tr>
+        <tr><td>De los que entraron, ¿cuántos pagaron?</td><td class="a num">30%</td><td class="b num">53%</td><td class="flecha up">+23 pts</td></tr>
+        <tr><td><b>Recaudado</b></td><td class="a num">$740.000</td><td class="b num">$1.879.000</td><td class="flecha up">×2,5</td></tr>
+        <tr><td><b>$ por persona adentro</b></td><td class="a num">$2.011</td><td class="b num">$4.781</td><td class="flecha up">×2,4</td></tr>
+      </tbody>
+    </table></div>
+    <div class="oro"><b>La fila más importante es la de las cortesías por preventa.</b> En A MI ME GUSTA se regalaban <b>4 entradas por cada una vendida</b>. En BESUCONA fue <b>1 a 1</b>. Ese solo cambio explica casi todo lo demás.</div>
+  </section>
+
+  <section>
+    <div class="stag">Capítulo 2</div>
+    <h2>Lo que parece imposible: subieron los precios y vendieron más</h2>
+    <div class="tw"><table class="tabla comp">
+      <thead><tr><th>Tipo de entrada</th><th>A mi me gusta</th><th>Besucona</th><th>Cambio</th></tr></thead>
+      <tbody>
+        <tr><td>Pre-Venta PRO Mujer</td><td class="a num">$6.000</td><td class="b num">$9.000</td><td class="flecha up">+50%</td></tr>
+        <tr><td>Pre-Venta GRAL. Mujer</td><td class="a num">$5.000</td><td class="b num">$8.000</td><td class="flecha up">+60%</td></tr>
+        <tr><td>Pre-Venta PRO Hombre Univ.</td><td class="a num">$8.000</td><td class="b num">$10.000</td><td class="flecha up">+25%</td></tr>
+        <tr><td>Pre-Venta GRAL. Hombre Univ.</td><td class="a num">$9.000</td><td class="b num">$9.000</td><td>=</td></tr>
+        <tr style="background:var(--neg3)"><td><b>Entradas vendidas en total</b></td><td class="a num"><b>116</b></td><td class="b num"><b>213</b></td><td class="flecha up"><b>+84%</b></td></tr>
+      </tbody>
+    </table></div>
+    <div class="bien"><b>Subieron los precios entre 25% y 60%, y vendieron casi el doble.</b> Eso desmiente la idea de que "hay que regalar y cobrar barato para llenar". La gente pagó $9.000 y $10.000 sin problema — y además <b>llegó</b>: tres tipos de entrada tuvieron 100% de asistencia.</div>
+  </section>
+
+  <section>
+    <div class="stag">Capítulo 3</div>
+    <h2>Las listas: dónde estuvo la diferencia</h2>
+    <h3>A mi me gusta — apostó a las embajadoras</h3>
+    <div class="barra-lin"><span class="et">Cortesía Hombre (Embajadora)</span><span class="tr"><i style="width:49%;background:var(--oro)"></i></span><span class="nu">74 / 150 · 49%</span></div>
+    <div class="barra-lin"><span class="et">Cortesía Mujer (Embajadora)</span><span class="tr"><i style="width:48%;background:var(--oro)"></i></span><span class="nu">72 / 150 · 48%</span></div>
+    <div class="barra-lin"><span class="et">Cortesía Mujer (FRATE)</span><span class="tr"><i style="width:30%;background:var(--rojo)"></i></span><span class="nu">30 / 101 · 30%</span></div>
+    <p style="margin-top:12px;color:var(--gris)"><b>401 cortesías</b> repartidas en esas tres listas. Llegaron <b>176</b>. Se perdieron 225 entradas.</p>
+
+    <h3>Besucona — apostó a los cumpleaños</h3>
+    <div class="barra-lin"><span class="et">🎂 Cumpleaños Invitad@</span><span class="tr"><i style="width:91%;background:var(--verde)"></i></span><span class="nu">107 / 117 · 91%</span></div>
+    <div class="barra-lin"><span class="et">🍾 Lista VIP Fuego</span><span class="tr"><i style="width:69%;background:var(--oro)"></i></span><span class="nu">37 / 54 · 69%</span></div>
+    <div class="barra-lin"><span class="et">📸 Cortesía Instagram</span><span class="tr"><i style="width:34%;background:var(--rojo)"></i></span><span class="nu">11 / 32 · 34%</span></div>
+    <p style="margin-top:12px;color:var(--gris)"><b>203 cortesías</b> repartidas. Llegaron <b>155</b>. Se perdieron solo 48.</p>
+
+    <div class="oro"><b>La lección:</b> una lista de cumpleaños rinde <b>91%</b>; una lista de embajadora rinde <b>48%</b>. Por cada 100 cortesías de cumpleaños llegan 91 personas; por cada 100 de embajadora, llegan 48. <b>No son lo mismo y no se pueden planificar igual.</b></div>
+    <div class="peligro"><b>Cortesía Mujer (FRATE) al 30% y Cortesía Instagram al 34%</b> son las dos peores de ambas noches. Si se van a seguir usando, hay que emitir el triple de lo que se espera que llegue — o cambiar cómo se entregan.</div>
+  </section>
+
+  <section>
+    <div class="stag">Capítulo 4</div>
+    <h2>A qué hora llega la gente</h2>
+    <div class="vs">
+      <div class="ev a">
+        <div class="fe">Jueves</div><h3 style="font-size:1.15rem">A mi me gusta</h3>
+        <div class="curva">
+          <div class="cc"><span class="v" style="color:var(--gris)">163</span><i style="height:100%;background:var(--gris2)"></i><span class="h">23h</span></div>
+          <div class="cc"><span class="v" style="color:var(--gris)">162</span><i style="height:99%;background:var(--gris2)"></i><span class="h">00h</span></div>
+          <div class="cc"><span class="v" style="color:var(--gris)">41</span><i style="height:25%;background:var(--gris2)"></i><span class="h">01h</span></div>
+          <div class="cc"><span class="v" style="color:var(--gris)">2</span><i style="height:2%;background:var(--gris2)"></i><span class="h">02h</span></div>
+          <div class="cc"><span class="v" style="color:var(--gris2)">0</span><i style="height:1%;background:var(--bor)"></i><span class="h">03h</span></div>
+        </div>
+        <p class="peq" style="margin-top:10px"><b>88%</b> entró antes de la 1. A las 2 ya no llegaba nadie.</p>
+      </div>
+      <div class="ev b">
+        <div class="fe">Sábado</div><h3 style="font-size:1.15rem">Besucona</h3>
+        <div class="curva">
+          <div class="cc"><span class="v" style="color:var(--verde)">70</span><i style="height:37%;background:var(--rojo)"></i><span class="h">23h</span></div>
+          <div class="cc"><span class="v" style="color:var(--verde)">187</span><i style="height:100%;background:var(--rojo)"></i><span class="h">00h</span></div>
+          <div class="cc"><span class="v" style="color:var(--verde)">97</span><i style="height:52%;background:var(--rojo)"></i><span class="h">01h</span></div>
+          <div class="cc"><span class="v" style="color:var(--verde)">38</span><i style="height:20%;background:var(--rojo)"></i><span class="h">02h</span></div>
+          <div class="cc"><span class="v" style="color:var(--verde)">1</span><i style="height:2%;background:var(--rojo)"></i><span class="h">03h</span></div>
+        </div>
+        <p class="peq" style="margin-top:10px">Peak a medianoche y <b>sigue entrando hasta las 2</b>.</p>
+      </div>
+    </div>
+    <div class="oro"><b>El jueves la gente llega temprano y se acaba; el sábado llega más tarde y sigue llegando.</b> Eso cambia cómo se arma el turno de puerta: el jueves necesitas todo el equipo a las 23:00; el sábado, a medianoche. Y explica por qué los cortes de horario (como "válida hasta las 02:30") pesan más un sábado.</div>
+  </section>
+
+  <section>
+    <div class="stag">Capítulo 5</div>
+    <h2>Cinco cosas que aprendimos</h2>
+    <ol>
+      <li><b>Regalar más no llena más.</b> 486 cortesías trajeron 244 personas; 215 cortesías trajeron 166. Mucho papel para poca gente.</li>
+      <li><b>El que paga, viene.</b> 97% de asistencia en preventa las dos noches. Es el número más estable del negocio.</li>
+      <li><b>Los cumpleaños son el mejor negocio de cortesías.</b> 91% de asistencia. Cada cumpleaños trae ~20 personas que sí llegan.</li>
+      <li><b>Se puede cobrar más.</b> Subieron precios hasta 60% y vendieron 84% más.</li>
+      <li><b>La eficiencia es la métrica que faltaba.</b> No es "cuánta gente entró", es <b>cuántas entradas emitiste para lograrlo</b>. 88% contra 60% es la diferencia entre una noche ordenada y una desordenada.</li>
+    </ol>
+    <div class="peligro"><b>Seamos honestos con el dato:</b> son <b>dos eventos, no un experimento</b>. Uno fue jueves y el otro sábado, con nombres y públicos distintos. Un sábado vende más por naturaleza. Lo que sí se puede afirmar con seguridad es lo que <b>no depende del día</b>: que las cortesías de cumpleaños rinden 91% y las de embajadora 48%, y que quien paga llega en un 97%. Para confirmar lo demás, hay que mirar varias semanas.</div>
+  </section>
+
+  <section>
+    <div class="stag">Capítulo 6</div>
+    <h2>Cómo usar esto para el próximo evento</h2>
+    <p class="lead">La receta práctica, con los números de arriba:</p>
+    <div class="tw"><table class="tabla">
+      <thead><tr><th>Si quieres…</th><th>Emite…</th><th>Porque…</th></tr></thead>
+      <tbody>
+        <tr><td>100 personas por cumpleaños</td><td><b>110 invitaciones</b></td><td>rinden 91%</td></tr>
+        <tr><td>100 personas por lista de embajadora</td><td><b>205 cortesías</b></td><td>rinden 49%</td></tr>
+        <tr><td>100 personas por Instagram</td><td><b>295 cortesías</b></td><td>rinden 34%</td></tr>
+        <tr><td>100 personas de preventa</td><td><b>103 entradas</b></td><td>rinden 97%</td></tr>
+      </tbody>
+    </table></div>
+    <div class="bien"><b>Esa tabla es la que hay que tener a mano el martes</b>, cuando se decide cuántas cortesías emitir. Deja de ser corazonada y pasa a ser cuenta.</div>
+  </section>
+
+  <div class="pie">FRATE OS · Manual 08 · <a href="/os-besucona">← BESUCONA</a> · <a href="/os-cliente">Siguiente: conocer a un cliente →</a></div>
+</div>
+
+<script src="/os-guard.js"></script>
+<script>document.getElementById('bar').innerHTML = osBarra('08'); osProteger();</script>
+</body>
+</html>

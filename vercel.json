@@ -1,6 +1,90 @@
 {
   "rewrites": [
     {
+      "source": "/temporada",
+      "destination": "/api/temporada"
+    },
+    {
+      "source": "/halloween2026",
+      "destination": "/api/temporada"
+    },
+    {
+      "source": "/halloween",
+      "destination": "/api/temporada"
+    },
+    {
+      "source": "/premio",
+      "destination": "/premio.html"
+    },
+    {
+      "source": "/comprar",
+      "destination": "/comprar.html"
+    },
+    {
+      "source": "/mi-entrada",
+      "destination": "/mi-entrada.html"
+    },
+    {
+      "source": "/cuenta",
+      "destination": "/mi-entrada.html"
+    },
+    {
+      "source": "/os-inicio",
+      "destination": "/os-inicio.html"
+    },
+    {
+      "source": "/os-empresas",
+      "destination": "/os-empresas.html"
+    },
+    {
+      "source": "/os-libro",
+      "destination": "/os-libro.html"
+    },
+    {
+      "source": "/os-pos",
+      "destination": "/os-pos/index.html"
+    },
+    {
+      "source": "/os-pos-mapa",
+      "destination": "/os-pos/00-mapa.html"
+    },
+    {
+      "source": "/os-pos-turno",
+      "destination": "/os-pos/01-turno.html"
+    },
+    {
+      "source": "/os-pos-venta",
+      "destination": "/os-pos/02-venta.html"
+    },
+    {
+      "source": "/os-pos-dinero",
+      "destination": "/os-pos/03-dinero.html"
+    },
+    {
+      "source": "/os-pos-puerta",
+      "destination": "/os-pos/04-puerta-barra.html"
+    },
+    {
+      "source": "/os-pos-catalogo",
+      "destination": "/os-pos/05-catalogo.html"
+    },
+    {
+      "source": "/os-pos-reglas",
+      "destination": "/os-pos/06-reglas.html"
+    },
+    {
+      "source": "/os-pos-vincular",
+      "destination": "/os-pos/07-vincular.html"
+    },
+    {
+      "source": "/os-pos-covers",
+      "destination": "/os-pos/08-covers.html"
+    },
+    {
+      "source": "/os-pos-noche",
+      "destination": "/os-pos/09-noche.html"
+    },
+    {
       "source": "/admin",
       "destination": "/admin.html"
     },
@@ -61,6 +145,30 @@
       "destination": "/os-cliente.html"
     },
     {
+      "source": "/os-usuario",
+      "destination": "/os-usuario.html"
+    },
+    {
+      "source": "/os-listas",
+      "destination": "/os-listas.html"
+    },
+    {
+      "source": "/os-entradas",
+      "destination": "/os-entradas.html"
+    },
+    {
+      "source": "/os-eventos",
+      "destination": "/os-eventos.html"
+    },
+    {
+      "source": "/os-datos",
+      "destination": "/os-datos.html"
+    },
+    {
+      "source": "/os-accesos",
+      "destination": "/os-accesos.html"
+    },
+    {
       "source": "/os-flyer",
       "destination": "/os-flyer.html"
     },
@@ -89,6 +197,18 @@
       "destination": "/os-flyer-reglas.html"
     },
     {
+      "source": "/os-flyer-id",
+      "destination": "/os-flyer-id.html"
+    },
+    {
+      "source": "/os-flyer-nube",
+      "destination": "/os-flyer-nube.html"
+    },
+    {
+      "source": "/os-flyer-export",
+      "destination": "/os-flyer-export.html"
+    },
+    {
       "source": "/os-erp",
       "destination": "/os-erp.html"
     },
@@ -115,10 +235,6 @@
     {
       "source": "/os-erp-reglas",
       "destination": "/os-erp-reglas.html"
-    },
-    {
-      "source": "/devolucion",
-      "destination": "/devolucion.html"
     },
     {
       "source": "/devolucion/",
@@ -226,7 +342,23 @@
     },
     {
       "source": "/lista/:code",
-      "destination": "/lista.html"
+      "destination": "/api/lista?c=:code"
+    },
+    {
+      "source": "/girar",
+      "destination": "/girar.html"
+    },
+    {
+      "source": "/cumples",
+      "destination": "/cumples.html"
+    },
+    {
+      "source": "/cumples/",
+      "destination": "/cumples.html"
+    },
+    {
+      "source": "/cumples/:code",
+      "destination": "/cumples.html"
     },
     {
       "source": "/manual",
@@ -299,9 +431,34 @@
     {
       "source": "/privacidad",
       "destination": "/privacidad.html"
+    },
+    {
+      "source": "/terminos",
+      "destination": "/terminos.html"
     }
   ],
   "redirects": [
+    {
+      "source": "/",
+      "has": [
+        {
+          "type": "host",
+          "value": "web.frate.cl"
+        }
+      ],
+      "destination": "/admin",
+      "permanent": false
+    },
+    {
+      "source": "/devolucion",
+      "destination": "/mi-entrada",
+      "permanent": false
+    },
+    {
+      "source": "/devolucion.html",
+      "destination": "/mi-entrada",
+      "permanent": false
+    },
     {
       "source": "/admin.html",
       "destination": "/admin",

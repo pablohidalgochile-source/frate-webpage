@@ -1,0 +1,593 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+<title>FRATE — Anótate en la lista</title>
+<meta name="theme-color" content="#0a0a0b" />
+<meta property="og:title" content="Estás invitad@ · FRATE" />
+<meta property="og:description" content="Anótate en 30 segundos y tu entrada te llega al correo." />
+<meta property="og:image" content="https://www.frate.cl/assets/og-lista.png" />
+<meta property="og:image:width" content="1200" />
+<meta property="og:image:height" content="630" />
+<meta property="og:type" content="website" />
+<meta property="og:site_name" content="FRATE" />
+<meta name="twitter:card" content="summary_large_image" />
+<meta name="twitter:image" content="https://www.frate.cl/assets/og-lista.png" />
+<link rel="icon" href="/icon-frate.svg" type="image/svg+xml" />
+<link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@600;700;800;900&family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="https://unpkg.com/html5-qrcode@2.3.8/html5-qrcode.min.js"></script>
+<script src="/frate-afiche.js?v=af1"></script>
+<script src="/frate-cedula.js?v=ced1"></script>
+<script src="/frate-format.js?v=fmt3"></script>
+<script src="/frate-instituciones.js?v=inst1"></script>
+<style>
+  :root{--bg:#0a0a0b;--card:#141416;--card2:#1b1b1f;--input:#0e0e12;--line:#26262b;--line2:#33333a;--txt:#f2f0f4;--dim:#8b8892;--faint:#5a5862;--rojo:#E8363D;--rojo2:#f2555b;--gold:#D4A832;--verde:#22c55e;--azul:#4d8dff;--morado:#a78bfa;--disp:'Barlow Condensed',sans-serif;}
+  *{box-sizing:border-box;-webkit-tap-highlight-color:transparent;margin:0;padding:0;}
+  body{background:radial-gradient(1200px 600px at 20% -5%,#17070a 0%,var(--bg) 55%);color:var(--txt);font-family:'Inter',system-ui,-apple-system,sans-serif;min-height:100vh;-webkit-font-smoothing:antialiased;}
+  .wrap{max-width:440px;margin:0 auto;padding-bottom:40px;}
+  .scr{display:none;animation:pop .25s ease;max-width:460px;margin:0 auto;padding-bottom:40px;} .scr.on{display:block;}
+  .cover{border-radius:0 0 20px 20px;}
+  @keyframes pop{from{opacity:0;transform:scale(.97);}to{opacity:1;transform:none;}}
+  /* Cover */
+  .cover{position:relative;min-height:190px;padding:18px 18px 20px;display:flex;flex-direction:column;justify-content:flex-end;overflow:hidden;
+    background:linear-gradient(135deg,#3a0d12,#1a0a0e 55%,#0a0a0b),repeating-linear-gradient(115deg,rgba(232,54,61,.06) 0 2px,transparent 2px 22px);}
+  .cover .cfoto{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;}
+  .cover .cvid{position:absolute;inset:0;overflow:hidden;}
+  .cover .ccolor{position:absolute;inset:0;}
+  .cover .ctex{position:absolute;inset:0;overflow:hidden;}
+  /* Velo plano sobre la foto: sin esto el nombre y la fecha se pierden
+     encima de una foto clara. Solo aparece si hay foto o color. */
+  .cover .cvelo{position:absolute;inset:0;background:#0a0a0b;}
+  .cover .chalo{position:absolute;inset:0;background:radial-gradient(circle at 50% 40%,rgba(10,10,13,.97) 0%,rgba(10,10,13,.82) 62%,rgba(10,10,13,0) 100%);}
+  .cover .cpie{position:absolute;inset:0;background:linear-gradient(180deg,rgba(10,10,13,0) 55%,rgba(10,10,13,.95));}
+  .cover .clogo{position:absolute;left:50%;top:38%;transform:translate(-50%,-50%);height:106px;max-width:76%;object-fit:contain;}
+  .cover .who,.cover .meta{position:relative;}
+  .cover .who{font-size:.72rem;letter-spacing:1.5px;text-transform:uppercase;color:var(--gold);font-weight:700;}
+  .cover .ev{font-family:var(--disp);font-weight:900;font-size:2.6rem;line-height:.9;text-transform:uppercase;margin-top:4px;letter-spacing:.5px;}
+  .cover .meta{font-size:1.12rem;font-weight:700;color:#fafafa;margin-top:7px;letter-spacing:.2px;line-height:1.25;}
+  .cupos{position:absolute;top:14px;right:14px;background:rgba(10,10,11,.72);backdrop-filter:blur(6px);border:1px solid var(--line2);border-radius:999px;padding:6px 13px;font-size:.74rem;font-weight:700;}
+  .cupos b{color:var(--verde);} .cupos.pocos b{color:var(--gold);} .cupos.lleno b{color:var(--rojo);}
+  .body{padding:16px 18px;}
+  /* OCR btn */
+  .ocr{width:100%;background:rgba(212,168,50,.08);border:1.5px dashed var(--gold);color:var(--gold);border-radius:13px;padding:14px;font-weight:800;font-size:.92rem;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:8px;}
+  .hint{color:var(--faint);font-size:.75rem;text-align:center;margin:10px 0 4px;line-height:1.5;}
+  /* Form */
+  .fld{margin-top:13px;}
+  .fld label{display:block;font-size:.72rem;text-transform:uppercase;letter-spacing:.5px;color:var(--dim);font-weight:600;margin-bottom:6px;}
+  .fld label .req{color:var(--rojo);} .fld label .opt{color:var(--faint);text-transform:none;font-weight:500;}
+  .fld .fhint{font-size:.72rem;color:var(--faint);margin:-2px 0 6px;line-height:1.35;}
+  /* Banner + bienvenida (editables) */
+  .banner-l{position:relative;min-height:130px;display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;padding:20px 18px;overflow:hidden;
+    background:linear-gradient(135deg,#3a0d12,#1a0a0e 60%),repeating-linear-gradient(115deg,rgba(232,54,61,.08) 0 2px,transparent 2px 22px);border-bottom:2px solid var(--rojo);}
+  .banner-l .bimg{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;opacity:.5;}
+  .banner-l .bin{position:relative;}
+  .banner-l .bmark{font-family:var(--disp);font-weight:700;letter-spacing:4px;font-size:.66rem;color:var(--gold);}
+  .banner-l .btit{font-family:var(--disp);font-weight:900;font-size:1.9rem;line-height:.95;text-transform:uppercase;margin:5px 0;}
+  .banner-l .bseason{display:inline-block;font-size:.62rem;letter-spacing:3px;color:#e9e9ee;text-transform:uppercase;background:rgba(0,0,0,.4);padding:4px 12px;border-radius:20px;}
+  .welcome-l{background:linear-gradient(180deg,rgba(212,168,50,.09),rgba(212,168,50,.03));border:1px solid rgba(212,168,50,.28);border-radius:14px;padding:15px 16px;margin:14px 0 4px;}
+  .welcome-l .wt{font-family:var(--disp);font-weight:800;font-size:1.15rem;color:var(--gold);text-transform:uppercase;letter-spacing:.5px;margin-bottom:7px;}
+  .welcome-l .wtext{font-size:.86rem;line-height:1.6;color:#dcdce2;white-space:pre-line;}
+  .welcome-l .benef-l{display:flex;align-items:center;gap:8px;background:rgba(34,197,94,.12);border:1px solid rgba(34,197,94,.4);border-radius:10px;padding:9px 12px;margin-top:10px;font-size:.82rem;font-weight:700;color:#9be7b4;}
+  .fld input,.fld select{width:100%;background:var(--input);border:1px solid var(--line);color:#fff;padding:13px;border-radius:11px;font-size:1rem;font-family:inherit;outline:none;transition:border-color .15s;}
+  .fld input:focus,.fld select:focus{border-color:var(--rojo);}
+  .fld input::placeholder{color:var(--faint);}
+  .row2{display:grid;grid-template-columns:1fr 1fr;gap:10px;}
+  .chk{display:flex;align-items:center;gap:9px;margin-top:12px;font-size:.82rem;color:var(--dim);cursor:pointer;}
+  .chk input{width:auto;accent-color:var(--rojo);}
+  .go{width:100%;background:var(--rojo);color:#fff;border:0;border-radius:12px;padding:15px;font-weight:800;font-size:1rem;cursor:pointer;margin-top:18px;box-shadow:0 8px 24px rgba(232,54,61,.3);}
+  .go:disabled{opacity:.55;box-shadow:none;}
+  .err{color:var(--rojo);font-size:.84rem;margin-top:12px;min-height:16px;text-align:center;}
+  .privz{color:var(--faint);font-size:.72rem;text-align:center;margin-top:12px;}
+  /* Estados centrados */
+  .center{min-height:80vh;display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;padding:30px 24px;}
+  .ico{width:78px;height:78px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:2.4rem;margin-bottom:18px;}
+  .ico.v{background:rgba(34,197,94,.14);border:2px solid var(--verde);}
+  .ico.m{background:rgba(167,139,250,.14);border:2px solid var(--morado);}
+  .ico.r{background:rgba(232,54,61,.12);border:2px solid var(--rojo);}
+  .ico.g{background:rgba(212,168,50,.12);border:2px solid var(--gold);}
+  .ico.n{background:var(--card);border:2px solid var(--line2);}
+  .t-big{font-family:var(--disp);font-weight:900;font-size:2.4rem;text-transform:uppercase;line-height:.95;}
+  .t-sub{color:var(--dim);font-size:.95rem;margin-top:10px;line-height:1.55;max-width:340px;}
+  .go-est{display:inline-block;margin-top:22px;background:var(--gold);color:#1a1405;border-radius:999px;padding:13px 24px;font-weight:800;font-size:.95rem;text-decoration:none;}
+  .qr-card{background:#fff;border-radius:16px;padding:18px;margin:20px auto 0;width:230px;}
+  .qr-img{width:194px;height:194px;background:#fff;display:block;margin:0 auto;}
+  .qr-tok{font-family:ui-monospace,monospace;letter-spacing:3px;color:#111;font-weight:800;text-align:center;margin-top:8px;}
+  .qr-rows{width:100%;max-width:300px;margin-top:16px;}
+  .qr-rows .r{display:flex;justify-content:space-between;padding:7px 0;border-bottom:1px solid var(--line);font-size:.9rem;}
+  .qr-rows .r span{color:var(--dim);}
+  .cal{display:inline-block;margin-top:14px;background:rgba(212,168,50,.1);border:1px solid rgba(212,168,50,.4);color:var(--gold);border-radius:999px;padding:5px 14px;font-size:.78rem;font-weight:700;}
+  .pill-m{display:inline-flex;align-items:center;gap:8px;margin-top:16px;background:rgba(167,139,250,.1);border:1px solid var(--morado);color:#c9b8ff;border-radius:999px;padding:7px 15px;font-size:.82rem;font-weight:700;}
+  .pill-m .d{width:8px;height:8px;border-radius:50%;background:var(--morado);animation:pul 1.3s infinite;}
+  @keyframes pul{0%,100%{opacity:1;}50%{opacity:.4;}}
+  .btn-ghost{background:transparent;border:1px solid var(--line2);color:var(--txt);border-radius:12px;padding:13px 20px;font-weight:700;cursor:pointer;margin-top:18px;font-family:inherit;font-size:.92rem;}
+  /* OCR overlay */
+  #ocr-ov{position:fixed;inset:0;background:rgba(0,0,0,.92);z-index:99;display:none;flex-direction:column;padding:20px;}
+  #ocr-reader{width:100%;max-width:420px;margin:auto;border-radius:14px;overflow:hidden;}
+  .ocr-done{background:rgba(34,197,94,.08);border:1px solid var(--verde);border-radius:13px;padding:14px;margin-top:13px;}
+  .ocr-done .t{color:var(--verde);font-weight:800;font-size:.85rem;margin-bottom:8px;}
+  .ocr-done .r{display:flex;justify-content:space-between;font-size:.9rem;padding:3px 0;border-bottom:1px solid var(--line);}
+  .ocr-done .r span{color:var(--dim);} .ocr-done .r b{font-family:ui-monospace,monospace;}
+</style>
+</head>
+<body>
+
+<!-- CARGANDO -->
+<div id="s-load" class="scr on"><div class="center"><div class="ico n">⏳</div><div class="t-sub">Buscando tu lista…</div></div></div>
+
+<!-- ESTADO DE BORDE (cerrada / llena / vencida / no existe) -->
+<div id="s-estado" class="scr"><div class="center">
+  <div class="ico n" id="e-ico">🌙</div>
+  <div class="t-big" id="e-tit">No disponible</div>
+  <div class="t-sub" id="e-sub">Revisa la página o nuestras publicaciones para obtener más información sobre tickets de cortesía, eventos de la semana y preventas disponibles.</div>
+  <a class="go-est" id="e-btn" href="/">Ver eventos y preventas →</a>
+</div></div>
+
+<!-- INSCRIPCIÓN -->
+<div id="s-form" class="scr">
+  <div class="banner-l" id="banner" style="display:none;">
+    <img class="bimg" id="banner-img" alt="" style="display:none;" />
+    <div class="bin">
+      <div class="bmark" id="banner-mark"></div>
+      <div class="btit" id="banner-tit"></div>
+      <div class="bseason" id="banner-season" style="display:none;"></div>
+    </div>
+  </div>
+  <div class="cover">
+    <img class="cfoto" id="cover-foto" alt="" style="display:none;" />
+    <div class="cvid" id="cover-video" style="display:none;"></div>
+    <div class="ccolor" id="cover-color" style="display:none;"></div>
+    <div class="ctex" id="cover-tex"></div>
+    <div class="cvelo" id="cover-velo" style="display:none;"></div>
+    <div class="chalo" id="cover-halo"></div>
+    <div class="cpie"></div>
+    <img class="clogo" id="cover-logo" alt="FRATE" style="display:none;" />
+    <div class="cupos" id="cupos"></div>
+    <div class="who" id="who">Te invita</div>
+    <div class="ev" id="ev">Lista FRATE</div>
+    <div class="meta" id="meta"></div>
+  </div>
+  <div class="body">
+    <div class="welcome-l" id="welcome" style="display:none;">
+      <div class="wt" id="welcome-tit"></div>
+      <div class="wtext" id="welcome-text"></div>
+      <div class="benef-l" id="welcome-benef" style="display:none;"></div>
+    </div>
+    <button class="ocr" onclick="abrirOCR()">📸 Escanear mi carnet · autocompleta</button>
+    <div class="hint">Rápido y sin errores de tipeo. También puedes llenarlo a mano 👇</div>
+    <div id="campos"></div>
+    <div class="err" id="err"></div>
+    <button class="go" id="btn" onclick="enviar()">Anotarme →</button>
+    <div class="privz">Solo pedimos lo necesario para esta lista. Tus datos no se comparten.</div>
+  </div>
+</div>
+
+<!-- ÉXITO / QR -->
+<div id="s-qr" class="scr"><div class="center">
+  <div class="ico v">✅</div>
+  <div class="t-big" id="qr-tit">¡Estás<br>en la lista!</div>
+  <div class="t-sub" id="qr-ev"></div>
+  <div class="qr-card"><img class="qr-img" id="qr-img" alt="QR" /><div class="qr-tok" id="qr-tok"></div></div>
+  <div class="qr-rows"><div class="r"><span>A nombre de</span><b id="qr-nom"></b></div><div class="r" id="qr-mesa-row" style="display:none;"><span>Mesa</span><b style="color:var(--verde);" id="qr-mesa"></b></div></div>
+  <div class="cal" id="qr-cal"></div>
+  <a id="qr-full" href="#" target="_blank" class="btn-ghost" style="display:inline-block;text-decoration:none;margin-top:16px;">🔍 Ver a pantalla completa</a>
+  <div class="hint" id="qr-hint" style="margin-top:14px;">Muestra este QR en la puerta · se valida <b>una sola vez</b> · te llega al correo.</div>
+</div></div>
+
+<!-- INSCRITO (revisión humana) -->
+<div id="s-rev" class="scr"><div class="center">
+  <div class="ico m">⏳</div>
+  <div class="t-big" id="rev-tit">Ya estás inscrito/a</div>
+  <div class="t-sub" id="rev-sub">Nuestro equipo revisará tu inscripción. El día del evento te llega tu ticket al correo si todo está en orden.</div>
+  <div class="pill-m"><span class="d"></span><span id="rev-pill">Estado: inscrito ✓</span></div>
+  <div class="hint" style="margin-top:16px;">Dudas: WhatsApp +56 9 8131 1548</div>
+</div></div>
+
+<!-- OCR overlay -->
+<div id="ocr-ov"><div style="color:var(--gold);font-weight:800;text-align:center;margin-bottom:12px;">🪪 Apunta al código de barras del reverso</div><div id="ocr-reader"></div><button class="btn-ghost" style="max-width:420px;margin:14px auto 0;width:100%;" onclick="cerrarOCR()">Prefiero llenar a mano</button></div>
+
+<script>
+const SB_URL='https://ydwlpraoaaijlfssevoh.supabase.co', SB_ANON='sb_publishable_-_7GeDU_h84zf2v--lWQaQ_15ZFxOWt';
+const sb=window.supabase.createClient(SB_URL,SB_ANON);
+const $=id=>document.getElementById(id);
+let LISTA=null, FORM=null, ocrScanner=null;
+const DEF_FORM={email:'obligatorio',rut:'obligatorio',fnac:'obligatorio',instagram:'obligatorio',universidad:'obligatorio',telefono:'obligatorio',apodo:'oculto',rol:'oculto',productor:'oculto',nacionalidad:'oculto'};
+const LABELS={rut:'RUT',email:'Correo electrónico',telefono:'Teléfono celular',instagram:'Instagram',universidad:'Universidad o centro de estudios',fnac:'Fecha de nacimiento',apodo:'Apodo',rol:'Rol',productor:'Productor',nacionalidad:'Nacionalidad'};
+const HINTS={email:'Revísalo bien, sin espacios en blanco.',rut:'Se ordena solo (12.345.678-9). Si eres extranjer@, marca la casilla.',universidad:'Si no eres estudiante, escribe NO.'};
+const PH={rut:'12.345.678-9',email:'tucorreo@mail.com',telefono:'+56 9 1234 5678',instagram:'@usuario',universidad:'Ej: Universidad, INACAP… o NO',apodo:'Cómo te dicen',rol:'DJ, prensa…',productor:'Productora',nacionalidad:'Chilena'};
+
+// Mensajes al cliente — editables desde el admin (config_valores clave msg_*). Fallback a estos por defecto.
+const MSG_DEF={
+  lista_ok_tit:'Ya estás inscrito/a',
+  lista_ok_txt:'Nuestro equipo revisará tu inscripción. El día del evento te llega tu ticket al correo si todo está en orden.',
+  lista_ok_pill:'Estado: inscrito ✓',
+  lista_qr_tit:'¡Estás en la lista!',
+  lista_qr_txt:'Muestra este QR en la puerta · se valida una sola vez · te llega al correo.',
+  lista_llena_tit:'Lista llena',
+  lista_llena_txt:'Se agotaron los cupos de esta lista. Revisa la página o nuestras publicaciones para obtener más información sobre tickets de cortesía, eventos de la semana y preventas disponibles.',
+  lista_cerrada_tit:'Se cerró el registro',
+  lista_cerrada_txt:'El plazo para inscribirte terminó. Revisa la página o nuestras publicaciones para obtener más información sobre tickets de cortesía, eventos de la semana y preventas disponibles.',
+  lista_notfound_tit:'Lista no encontrada',
+  lista_notfound_txt:'Puede que la lista aún no esté abierta o que el link esté malo. Revisa la página o nuestras publicaciones para obtener más información sobre tickets de cortesía, eventos de la semana y preventas disponibles.'
+};
+let MSG={};
+function _sub(t,ctx){ ctx=ctx||{}; return String(t==null?'':t).replace(/\{(\w+)\}/g,function(m,k){return (ctx[k]!=null&&ctx[k]!=='')?ctx[k]:'';}).replace(/[ \t]{2,}/g,' ').trim(); }
+function msg(key,ctx){ var v=(MSG['msg_'+key]!=null&&MSG['msg_'+key]!=='')?MSG['msg_'+key]:MSG_DEF[key]; return _sub(v,ctx); }
+async function loadMsgs(){ try{ const {data}=await sb.from('config_valores').select('clave,valor').or('clave.like.msg_%,clave.like.link_%'); (data||[]).forEach(function(r){MSG[r.clave]=r.valor;}); }catch(e){} }
+
+function scr(id){ document.querySelectorAll('.scr').forEach(s=>s.classList.remove('on')); $(id).classList.add('on'); try{scrollTo(0,0);}catch(e){} }
+function getCodigo(){ const q=new URLSearchParams(location.search).get('c'); if(q) return q.trim().toUpperCase();
+  const p=location.pathname.split('/').filter(Boolean); if(p[0]==='lista'&&p[1]) return decodeURIComponent(p[1]).trim().toUpperCase(); return ''; }
+function rutLimpio(r){ return String(r||'').replace(/[.\s]/g,'').replace(/-/g,'').toUpperCase(); }
+function rutValido(r){ const c=rutLimpio(r); if(!/^\d{7,8}[0-9K]$/.test(c)) return false; const cu=c.slice(0,-1),dv=c.slice(-1); let s=0,m=2; for(let i=cu.length-1;i>=0;i--){s+=+cu[i]*m;m=m<7?m+1:2;} const x=11-(s%11); return dv===(x===11?'0':x===10?'K':''+x); }
+function fmtRut(r){ const c=rutLimpio(r); if(!/^\d{7,8}[0-9K]$/.test(c)) return r; return c.slice(0,-1).replace(/\B(?=(\d{3})+(?!\d))/g,'.')+'-'+c.slice(-1); }
+function fmtFecha(f){ try{const[y,m,d]=String(f).split('-').map(Number); return new Date(y,m-1,d).toLocaleDateString('es-CL',{weekday:'long',day:'numeric',month:'long'});}catch(e){return f||'';} }
+function estado(ico,cls,tit,sub){ $('e-ico').textContent=ico; $('e-ico').className='ico '+(cls||'n'); $('e-tit').textContent=tit; $('e-sub').innerHTML=sub; scr('s-estado'); }
+
+// ── Video de fondo · MISMO código que usa la portada de los eventos ──
+// Copiado de index.html a propósito: si algún día cambia el encuadre allá,
+// hay que cambiarlo acá también. El min-width grande recorta el título y
+// los controles de YouTube fuera del marco, sobre todo en el celular.
+function _ytId(u){ var m=String(u||'').match(/(?:v=|youtu\.be\/|embed\/|shorts\/|live\/|\/v\/)([A-Za-z0-9_-]{11})/); return m?m[1]:''; }
+function _encStyle(enc){ enc=enc||{}; var z=Math.max(100,Math.min(340,+enc.zoom||160)), y=Math.max(-80,Math.min(80,+enc.y||0));
+  return 'position:absolute;top:50%;left:50%;width:'+z+'%;min-width:820px;aspect-ratio:16/9;transform:translate(-50%,calc(-50% + '+(y*0.7)+'px));border:0;pointer-events:none;'; }
+function _ytBg(id,enc){
+  enc=enc||{}; var st=Math.max(0,parseInt(enc.start)||0);
+  var src='https://www.youtube.com/embed/'+id+'?autoplay=1&mute=1&loop=1&playlist='+id
+    +'&controls=0&showinfo=0&modestbranding=1&rel=0&iv_load_policy=3&playsinline=1&disablekb=1&fs=0&start='+st;
+  return '<iframe src="'+src+'" allow="autoplay; encrypted-media" frameborder="0" loading="lazy" style="'+_encStyle(enc)+'"></iframe>';
+}
+async function init(){
+  await loadMsgs();
+  const codigo=getCodigo();
+  if(!codigo) return estado('🔗','n','Falta el código','El link no trae el código de la lista. Pide el link correcto a quien te invitó. También puedes revisar la página o nuestras publicaciones para obtener más información sobre tickets de cortesía, eventos de la semana y preventas disponibles.');
+  const BASE='id,nombre,fecha,condiciones,genero_esperado,valido_hasta,estado,cupos,evento_id,duenio_nombre';
+  let data, error;
+  // v_lista_publica y no `listas`: la tabla entrega 57 columnas —notas
+  // internas, quién aprobó, y los códigos de TODAS las listas— a cualquiera
+  // sin sesión. La vista trae solo lo que esta página necesita.
+  // Primero la función: EXIGE el código, así que no se puede enumerar. La vista
+  // queda de respaldo por si frate-cerrar-listas.sql todavía no se corrió.
+  ({ data, error } = await sb.rpc('lista_publica',{ p_codigo: codigo }).maybeSingle());
+  if(error){ ({ data, error } = await sb.from('v_lista_publica').select('*').eq('codigo',codigo).maybeSingle()); }
+  // Respaldo por si el SQL de privacidad todavía no se corrió.
+  if(error){ ({ data, error } = await sb.from('listas').select(BASE+',closes_at,tipo,form_config,inviter_nombre,requires_manual_approval,cover_amount,benefit_text').eq('codigo',codigo).maybeSingle()); }
+  if(error){ ({ data, error } = await sb.from('listas').select(BASE).eq('codigo',codigo).maybeSingle()); }  // aún sin frate-link.sql → columnas base
+  if(error||!data) return estado('🌙','n',msg('lista_notfound_tit'),msg('lista_notfound_txt'));
+  // El organizador cerró el registro → cartel claro (no "no existe")
+  if(data.estado==='cerrada') return estado('🔒','g',msg('lista_cerrada_tit'),msg('lista_cerrada_txt'));
+  // Cualquier otro estado que no sea 'aprobada' (pendiente/rechazada) → no disponible
+  if(data.estado!=='aprobada') return estado('🌙','n',msg('lista_notfound_tit'),msg('lista_notfound_txt'));
+  const vto = data.closes_at || data.valido_hasta;
+  if(vto && new Date(vto) < new Date()) return estado('⌛','g',msg('lista_cerrada_tit'),msg('lista_cerrada_txt'));
+  LISTA=data; FORM=Object.assign({}, DEF_FORM, data.form_config||{});
+  // Semilla de la portada. Una consulta chica y opcional: si falla, la trama
+  // se siembra igual con el nombre de la lista.
+  window._semPortada = data.nombre || 'FRATE';
+  if(data.evento_id){
+    try{
+      const { data:_ev } = await sb.from('eventos').select('nombre').eq('id',data.evento_id).maybeSingle();
+      if(_ev && _ev.nombre) window._semPortada = _ev.nombre;
+    }catch(e){}
+  }
+  // ── cupos ──
+  // Antes esto contaba `lista_inscritos` desde el navegador. Esa tabla tiene
+  // RLS y la invitada no la puede leer, así que Supabase devolvía `count=null`
+  // —sin error— y toda lista decía "100/100". Ahora el número lo da la base.
+  // Si la lista está en "no mostrar", la función NO manda el número: no lo
+  // escondemos en pantalla, no viaja. Lo que sí viene siempre es `lleno`.
+  let tomados=0, cupos=parseInt(data.cupos||0)||0, muestraCupos=false, lleno=false;
+  try{
+    const { data:cu, error:eCu } = await sb.rpc('lista_cupos',{ p_codigo: codigo });
+    const c0 = Array.isArray(cu) ? cu[0] : cu;
+    if(!eCu && c0){
+      muestraCupos = !!c0.mostrar; lleno = !!c0.lleno;
+      tomados = c0.tomados || 0;
+      if(c0.cupos != null) cupos = c0.cupos;
+    }
+  }catch(e){}
+  // Si la función todavía no existe (SQL sin correr), no mostramos contador.
+  // Mejor sin número que con uno mentiroso.
+  if(lleno) return estado('🎟','r',msg('lista_llena_tit'),msg('lista_llena_txt',{tomados:tomados,cupos:cupos}));
+  render(tomados, muestraCupos ? cupos : 0);
+}
+
+function render(tomados, cupos){
+  $('who').textContent = 'Te invita · ' + (LISTA.inviter_nombre || LISTA.duenio_nombre || 'FRATE');
+  $('ev').style.display = 'none';   // el título va en el banner; evita duplicarlo
+  const c=LISTA.condiciones||{};
+  $('meta').innerHTML = (LISTA.fecha?'🗓 '+fmtFecha(LISTA.fecha):'') + (c.hora_max_llegada?' · hasta '+c.hora_max_llegada:'');
+  // ── Banner (global editable) ──
+  // El logo oficial es el mismo de los correos, para que el link y el mail
+  // digan lo mismo. Se puede cambiar desde Configuración → link.
+  const bMark=MSG['link_banner_mark']||'🏛 FRATERNIDAD · CAMPUS CENTRAL', bSeason=MSG['link_banner_season']||'', bImg=MSG['link_banner_img']||'';
+  const bLogo=(MSG['link_banner_logo']!=null&&MSG['link_banner_logo']!=='')?MSG['link_banner_logo']:'/assets/logo-mail.png';
+  $('banner-mark').textContent=bMark;
+  $('banner-tit').textContent=LISTA.nombre||'FRATE';
+  if(bSeason){ $('banner-season').textContent=bSeason; $('banner-season').style.display=''; }
+  if(bImg){ $('banner-img').src=bImg; $('banner-img').style.display=''; }
+  // ── Portada: trama de palabras con F + el logo grande ──
+  // La trama se siembra con el NOMBRE DEL EVENTO, no el de la lista: así los
+  // tres links del mismo jueves comparten portada y se ven como uno solo.
+  try{
+    const _tx=$('cover-tex');
+    if(_tx && window.FrateAfiche && FrateAfiche.texturaF){
+      _tx.innerHTML = FrateAfiche.texturaF(window._semPortada || LISTA.nombre || 'FRATE', {w:620,h:190});
+    }
+    // ── Fondo propio ────────────────────────────────────────────────
+    // Manda la lista; si no dice nada, el fondo global del local; si no,
+    // la trama de siempre. Si la imagen no carga, VUELVE a la trama: una
+    // portada negra con el nombre encima se ve peor que la trama.
+    const _P = (c.portada && typeof c.portada==='object') ? c.portada
+             : (MSG['link_portada_url']
+                  ? (_ytId(MSG['link_portada_url'])
+                      ? { modo:'video', yt:MSG['link_portada_url'], enc:{},
+                          velo:parseInt(MSG['link_portada_velo'])||45 }
+                      : { modo:'img', url:MSG['link_portada_url'],
+                          velo:parseInt(MSG['link_portada_velo'])||55 })
+                  : {});
+    const _vl=$('cover-velo'), _fo=$('cover-foto'), _co=$('cover-color'), _ha=$('cover-halo');
+    // Con ?debug=1 el link cuenta qué recibió. Sin esto, "no se pinta" y
+    // "no llegó el dato" se ven exactamente igual desde afuera.
+    if(new URLSearchParams(location.search).get('debug')==='1'){
+      const d=document.createElement('pre');
+      d.style.cssText='position:relative;z-index:9;margin:0;padding:8px;font-size:10px;line-height:1.4;'
+        +'background:#000;color:#0f0;white-space:pre-wrap;word-break:break-all;border-bottom:1px solid #0f0;';
+      d.textContent='portada de la lista: '+JSON.stringify(c.portada||null)
+        +'\nfondo global: '+JSON.stringify(MSG['link_portada_url']||null)
+        +'\nva a usar: '+JSON.stringify(_P)
+        +'\ncapas: '+['cover-foto','cover-video','cover-color','cover-velo','cover-halo']
+            .map(id=>id.replace('cover-','')+'='+($(id)?'ok':'FALTA')).join(' ');
+      document.body.insertBefore(d, document.body.firstChild);
+    }
+    // El halo tapa el centro al 97%: está calibrado para que la trama no
+    // compita con el logo. Sobre una foto la deja casi negra, así que con
+    // fondo propio se apaga y manda el velo, que sí es regulable.
+    const _trama=()=>{ if(_tx) _tx.style.display=''; if(_vl) _vl.style.display='none'; if(_ha) _ha.style.display=''; };
+    const _propio=()=>{ if(_tx) _tx.style.display='none'; if(_ha) _ha.style.display='none'; };
+    if(_P.modo==='img' && _P.url && _fo){
+      _fo.onerror=function(){ this.style.display='none'; _trama(); };
+      _fo.onload =function(){ _propio(); };
+      if(_P.pos) _fo.style.objectPosition=_P.pos;   // encuadre elegido en el admin
+      _fo.src=_P.url; _fo.style.display='';
+      if(_vl){ _vl.style.opacity=String(Math.min(90,Math.max(0,_P.velo==null?55:+_P.velo))/100); _vl.style.display=''; }
+    } else if(_P.modo==='video' && _ytId(_P.yt||'')){
+      const _vd=$('cover-video'), _id=_ytId(_P.yt);
+      // El servidor ya preguntó si el video deja incrustarse. Si dijo que no,
+      // se muestra su miniatura como foto en vez de un marco negro.
+      if(window._ytBloqueado && _fo){
+        _fo.onerror=function(){ this.style.display='none'; _trama(); };
+        _fo.onload =function(){ _propio(); };
+        _fo.src=window._ytBloqueado; _fo.style.display='';
+        if(_vl){ _vl.style.opacity=String(Math.min(90,Math.max(0,_P.velo==null?45:+_P.velo))/100); _vl.style.display=''; }
+      } else if(_vd){
+        // La miniatura del video va DEBAJO del iframe. Si YouTube no deja
+        // incrustar (video privado, restringido, o el dueño lo bloqueó),
+        // el iframe queda negro y sin aviso: la miniatura tapa ese hoyo.
+        _vd.style.background="#000 url('https://img.youtube.com/vi/"+_id+"/hqdefault.jpg') center/cover no-repeat";
+        _vd.innerHTML=_ytBg(_id, _P.enc||{}); _vd.style.display=''; _propio();
+      }
+      if(_vl){ _vl.style.opacity=String(Math.min(90,Math.max(0,_P.velo==null?45:+_P.velo))/100); _vl.style.display=''; }
+    } else if(_P.modo==='color' && _P.color && _co){
+      _co.style.background=_P.color; _co.style.display='';
+      _propio();
+      if(_vl){ _vl.style.opacity=String(Math.min(90,Math.max(0,_P.velo==null?35:+_P.velo))/100); _vl.style.display=''; }
+    }
+  }catch(e){}
+  if(bLogo){ const _lg=$('cover-logo'); if(_lg){ _lg.onerror=function(){ this.style.display='none'; }; _lg.src=bLogo; _lg.style.display=''; } }
+  $('banner').style.display='';
+  // ── Bloque de bienvenida (por lista, con plantilla base) ──
+  const wCtx={evento:LISTA.nombre||'', fecha:LISTA.fecha?fmtFecha(LISTA.fecha):'', cupos:cupos||''};
+  const wTit = c.welcome_titulo || MSG['link_welcome_tit'] || '¡Hola! 👋 Bienvenid@';
+  const wText = c.welcome_texto || c.texto || MSG['link_welcome_texto'] || '';
+  const wBenef = LISTA.benefit_text || c.benefit || '';
+  if(wText || wBenef){
+    $('welcome-tit').textContent=_sub(wTit,wCtx);
+    $('welcome-text').textContent=_sub(wText,wCtx);
+    if(wBenef){ $('welcome-benef').innerHTML='🎁 '+_sub(wBenef,wCtx); $('welcome-benef').style.display=''; }
+    $('welcome').style.display='';
+  }
+  // cupos pill
+  if(cupos>0){ const quedan=cupos-tomados; const cl=quedan<=Math.max(3,cupos*0.1)?'pocos':''; $('cupos').className='cupos '+cl; $('cupos').innerHTML='Cupos: <b>'+quedan+'</b>/'+cupos; }
+  else $('cupos').style.display='none';
+  // campos (orden como la foto: nombre → correo → RUT → nacimiento → IG → universidad → teléfono)
+  // Cartel automático de restricción de género (sale solo, sin escribirlo en la bienvenida)
+  const _gr = LISTA.genero_esperado;
+  const _grBanner = _gr==='F'
+    ? `<div style="background:rgba(232,54,61,.12);border:2px solid #E8363D;border-radius:12px;padding:12px 14px;margin-bottom:14px;text-align:center;"><div style="font-weight:900;color:#fff;font-size:1rem;letter-spacing:.5px;">🎫 Lista exclusiva para MUJERES</div><div style="color:#f0a5a8;font-size:0.78rem;margin-top:2px;">Se valida en la puerta con tu cédula</div></div>`
+    : _gr==='M'
+    ? `<div style="background:rgba(59,130,246,.12);border:2px solid #3b82f6;border-radius:12px;padding:12px 14px;margin-bottom:14px;text-align:center;"><div style="font-weight:900;color:#fff;font-size:1rem;letter-spacing:.5px;">🎫 Lista exclusiva para HOMBRES</div><div style="color:#9dc0f7;font-size:0.78rem;margin-top:2px;">Se valida en la puerta con tu cédula</div></div>`
+    : '';
+  let html=_grBanner+'<div class="fld"><label>Nombre completo <span class="req">*</span></label><input id="f-nombre" data-fmt="nombre" autocomplete="name" placeholder="1 nombre + 2 apellidos" /></div>';
+  const orden=['email','rut','fnac','instagram','universidad','telefono','apodo','rol','productor','nacionalidad'];
+  orden.forEach(k=>{ const st=FORM[k]||'oculto'; if(st==='oculto') return;
+    const req = st==='obligatorio' ? ' <span class="req">*</span>' : ' <span class="opt">(opcional)</span>';
+    const hint = HINTS[k] ? `<div class="fhint">${HINTS[k]}</div>` : '';
+    const input = k==='fnac'
+      ? `<input id="f-fnac" type="date" style="color-scheme:dark" />`
+      : k==='universidad'
+      ? `<select id="f-universidad"></select>`
+      : `<input id="f-${k}" placeholder="${PH[k]||''}" ${k==='rut'?'data-fmt="rut" inputmode="text" autocapitalize="characters"':''} ${k==='email'?'type="email" autocomplete="email"':k==='telefono'?'type="tel" autocomplete="tel"':''} />`;
+    html += `<div class="fld"><label>${LABELS[k]}${req}</label>${hint}${input}</div>`;
+  });
+  // género: si la lista es de un género, se asume (no se pregunta); si no, se pide
+  const gen = LISTA.genero_esperado;
+  if(!gen) html += `<div class="fld"><label>Género <span class="req">*</span></label><select id="f-genero"><option value="">—</option><option value="F">Mujer</option><option value="M">Hombre</option><option value="X">Otro</option></select></div>`;
+  html += `<label class="chk"><input type="checkbox" id="f-ext" onchange="toggleExt()" /> Soy extranjer@ (pasaporte / RUT reciente)</label>`;
+  // Casilla OBLIGATORIA: declaración de género (respaldo de la restricción; se corrobora en la puerta)
+  const _gd = _gr==='F' ? 'Declaro que soy mujer y que lo puedo acreditar con mi cédula en la puerta.'
+            : _gr==='M' ? 'Declaro que soy hombre y que lo puedo acreditar con mi cédula en la puerta.'
+            : 'Declaro que el género que indiqué es el que aparece en mi cédula.';
+  html += `<label class="chk" style="border:1px solid rgba(232,54,61,.4);border-radius:8px;padding:9px 11px;margin-top:8px;background:rgba(232,54,61,.06);align-items:flex-start;line-height:1.4;"><input type="checkbox" id="f-gendecl" style="margin-top:2px;" /> <span>${_gd} <span class="req">*</span></span></label>`;
+  // F4 — ficha especializada según tipo
+  if(LISTA.tipo==='birthday'){
+    html += `<div style="margin-top:14px;padding-top:12px;border-top:1px solid var(--line);"><div style="font-family:var(--disp);font-weight:800;text-transform:uppercase;font-size:1rem;color:var(--gold);margin-bottom:6px;">🎂 Tu cumpleaños</div>
+      <div class="row2"><div class="fld"><label>¿Cuántos vienen? <span class="opt">(aprox)</span></label><input id="fk-invitados" type="number" inputmode="numeric" placeholder="Ej: 15" /></div><div class="fld"><label>Zona preferida <span class="opt">(opcional)</span></label><input id="fk-zona" placeholder="VIP, terraza…" /></div></div>
+      <div class="fld"><label>Presupuesto aprox. <span class="opt">(opcional)</span></label><input id="fk-presupuesto" placeholder="Ej: $200.000" /></div>
+      <label class="chk"><input type="checkbox" id="fk-decoracion" /> Quiero decoración 🎈</label>
+      <label class="chk"><input type="checkbox" id="fk-botellas" /> Quiero botellas 🍾</label></div>`;
+  } else if(LISTA.tipo==='reservation'){
+    html += `<div style="margin-top:14px;padding-top:12px;border-top:1px solid var(--line);"><div style="font-family:var(--disp);font-weight:800;text-transform:uppercase;font-size:1rem;color:var(--gold);margin-bottom:6px;">🍾 Tu reserva</div>
+      <div class="row2"><div class="fld"><label>¿Cuántas personas? <span class="req">*</span></label><input id="fk-party" type="number" inputmode="numeric" placeholder="Ej: 8" /></div><div class="fld"><label>Zona <span class="opt">(opcional)</span></label><input id="fk-zona" placeholder="VIP, palco…" /></div></div>
+      <div class="fld"><label>Presupuesto aprox. <span class="opt">(opcional)</span></label><input id="fk-presupuesto" placeholder="Ej: $300.000" /></div>
+      <label class="chk"><input type="checkbox" id="fk-botellas" /> Quiero botellas 🍾</label></div>`;
+  }
+  // F3 — croquis (elegir zona/mesa) si el link lo permite
+  if(LISTA.allow_space_selection){
+    html += `<div style="margin-top:14px;padding-top:12px;border-top:1px solid var(--line);"><div style="font-family:var(--disp);font-weight:800;text-transform:uppercase;font-size:1rem;color:var(--gold);margin-bottom:2px;">🗺 Elige tu zona</div><div class="hint" style="margin:0 0 8px;">Toca una zona disponible (borde verde).</div><div id="croquis"></div><div id="croquis-sel" class="hint" style="margin-top:8px;"></div></div>`;
+  }
+  $('campos').innerHTML=html;
+  if($('f-universidad')&&window.poblarInstituciones) poblarInstituciones($('f-universidad'), '');
+  if(LISTA.allow_space_selection) _cargarCroquis();
+  scr('s-form');
+}
+function toggleExt(){ const e=$('f-ext').checked, r=$('f-rut'); if(r) r.placeholder=e?'Pasaporte / N° documento':'12.345.678-9'; }
+
+// ── OCR de cédula — ahora usa el lector compartido ──
+// Antes acá había una copia propia que solo sacaba el RUT y el nombre.
+// El lector de /frate-cedula.js es el mismo que usa la puerta y además
+// entiende la fecha de nacimiento. Si por alguna razón no cargó, se cae
+// al método viejo para no dejar el formulario sin OCR.
+function _run(s){
+  if(window.FrateCedula) return FrateCedula.extraerRut(s);
+  const m=String(s).match(/RUN\s*=\s*([0-9.\-]+[0-9kK])/i);
+  if(m&&rutValido(m[1])) return rutLimpio(m[1]);
+  const c=String(s).match(/\d{1,2}\.?\d{3}\.?\d{3}-?[0-9kK]/gi)||[];
+  const v=c.find(x=>rutValido(x)); return v?rutLimpio(v):null;
+}
+function _nom(s){
+  if(window.FrateCedula) return FrateCedula.extraerNombre(s);
+  const m=String(s).match(/[?&]name=([^&]+)/i); if(!m) return null;
+  return m[1].replace(/\+/g,' ').replace(/%([0-9A-Fa-f]{2})/g,(_,h)=>String.fromCharCode(parseInt(h,16))).replace(/\s+/g,' ').trim()||null;
+}
+async function abrirOCR(){
+  $('ocr-ov').style.display='flex';
+  try{
+    ocrScanner=new Html5Qrcode('ocr-reader',{formatsToSupport:(window.Html5QrcodeSupportedFormats?[Html5QrcodeSupportedFormats.PDF_417,Html5QrcodeSupportedFormats.QR_CODE]:undefined)});
+    await ocrScanner.start({facingMode:'environment'},{fps:12,qrbox:(w,h)=>({width:Math.min(w*0.92,400),height:Math.min(h*0.6,240)})}, txt=>{ ocrHit(txt); }, ()=>{});
+  }catch(e){ $('err').style.color='var(--gold)'; cerrarOCR(); $('err').textContent='No se pudo abrir la cámara — llénalo a mano 🙌'; setTimeout(()=>{$('err').style.color='var(--rojo)';$('err').textContent='';},3500); }
+}
+function ocrHit(txt){
+  // El lector saca cuatro datos y antes se usaban dos: la fecha de nacimiento
+  // venía en el mrz del carnet y se botaba, así que la persona igual la tenía
+  // que escribir. `leer()` los entrega todos de una vez.
+  const c = (window.FrateCedula && FrateCedula.leer) ? FrateCedula.leer(txt) : null;
+  const run = c ? c.rut : _run(txt);
+  const nom = c ? c.nombre : _nom(txt);
+  if(!run && !nom) return;
+  if(nom && $('f-nombre')) $('f-nombre').value=String(nom).toUpperCase();
+  if(run && $('f-rut')) $('f-rut').value=fmtRut(run);
+  // El campo es <input type="date">, que espera exactamente AAAA-MM-DD — que
+  // es el formato que devuelve el lector. No hay que convertir nada.
+  if(c && c.nacimiento && $('f-fnac') && !$('f-fnac').value) $('f-fnac').value = c.nacimiento;
+  try{ if(navigator.vibrate) navigator.vibrate(60); }catch(e){}
+  cerrarOCR();
+  // Si el carnet dice que es menor, se avisa AQUÍ y no en la puerta a las 2 AM.
+  // Es un aviso, no un bloqueo: quien decide si entra es el anfitrión.
+  if(c && c.edad != null && c.edad < 18){
+    $('err').style.color='var(--gold)';
+    $('err').textContent='⚠️ El carnet dice ' + c.edad + ' años. La entrada es solo para mayores de 18.';
+    setTimeout(()=>{$('err').style.color='var(--rojo)';$('err').textContent='';},7000);
+    return;
+  }
+  $('err').style.color='var(--verde)';
+  $('err').textContent = (c && c.nacimiento) ? '🪪 Carnet leído — nombre, RUT y fecha listos' : '🪪 Carnet leído — revisa y completa lo que falte';
+  setTimeout(()=>{$('err').style.color='var(--rojo)';$('err').textContent='';},3500);
+}
+async function cerrarOCR(){ try{ if(ocrScanner){ await ocrScanner.stop(); ocrScanner=null; } }catch(e){} $('ocr-ov').style.display='none'; }
+
+// ── F3: croquis (elegir zona/mesa) ──
+let ESPACIO=null, _croqData=null;
+async function _cargarCroquis(){
+  const box=$('croquis'); if(!box) return; box.innerHTML='<div class="hint">Cargando plano…</div>';
+  try{
+    let q; if(LISTA.floorplan_id) q=sb.from('planos').select('id,nombre,data').eq('id',LISTA.floorplan_id).limit(1);
+    else q=sb.from('planos').select('id,nombre,data').eq('activo',true).order('orden').limit(1);
+    const { data:ps }=await q; const plano=(ps||[])[0];
+    if(!plano||!plano.data||!Array.isArray(plano.data.espacios)){ box.innerHTML='<div class="hint">Sin plano configurado — el operador puede agregar uno en Disposición.</div>'; return; }
+    _croqData=plano.data; _renderCroquis();
+  }catch(e){ box.innerHTML='<div class="hint">No se pudo cargar el plano.</div>'; }
+}
+function _cxy(e,W,H){ if(e.forma==='rect') return [(e.x||0)+(e.w||40)/2,(e.y||0)+(e.h||30)/2];
+  const n=(String(e.d||'').match(/-?\d+\.?\d*/g)||[]).map(Number); if(n.length<2) return [W/2,H/2];
+  let sx=0,sy=0,c=0; for(let i=0;i+1<n.length;i+=2){ sx+=n[i]; sy+=n[i+1]; c++; } return [sx/c,sy/c]; }
+function _renderCroquis(){
+  const box=$('croquis'), d=_croqData, W=d.w||320, H=d.h||360;
+  const svg=d.espacios.map((e,i)=>{
+    const selectable=e.sel===true, isSel=ESPACIO&&ESPACIO.i===i;
+    const fill=isSel?'#22c55e':selectable?'rgba(34,197,94,.10)':(e.color||'#17171c');
+    const stroke=isSel?'#22c55e':selectable?'#22c55e':'#33333a', op=(selectable||isSel)?1:.5;
+    const clk=selectable?`style="cursor:pointer" onclick="_pickEspacio(${i},'${String(e.nombre||'').replace(/'/g,'')}')"`:'';
+    const common=`fill="${fill}" stroke="${stroke}" stroke-width="1.5" opacity="${op}" ${clk}`;
+    const shape=(e.forma==='path'&&e.d)?`<path d="${e.d}" ${common} />`:`<rect x="${e.x||0}" y="${e.y||0}" width="${e.w||40}" height="${e.h||30}" rx="6" ${common} />`;
+    const [cx,cy]=_cxy(e,W,H);
+    return shape+`<text x="${cx}" y="${cy}" fill="${isSel?'#04120a':'#fff'}" font-size="9" font-weight="800" text-anchor="middle" dominant-baseline="middle" style="pointer-events:none;">${String(e.nombre||'').slice(0,14)}</text>`;
+  }).join('');
+  box.innerHTML=`<svg viewBox="0 0 ${W} ${H}" style="width:100%;max-height:300px;background:#0e0e12;border:1px solid var(--line);border-radius:12px;display:block;">${svg}</svg>`;
+}
+function _pickEspacio(i,nombre){ ESPACIO={i,nombre}; _renderCroquis(); const s=$('croquis-sel'); if(s) s.innerHTML='Elegiste <b style="color:var(--verde)">'+String(nombre).replace(/</g,'&lt;')+'</b>'; }
+
+async function enviar(){
+  const err=$('err'); err.style.color='var(--rojo)'; err.textContent='';
+  const v=id=>{ const e=$(id); return e?e.value.trim():''; };
+  const nombre=v('f-nombre'); if(!nombre) return err.textContent='Escribe tu nombre completo.';
+  const ext=$('f-ext')&&$('f-ext').checked;
+  const req=(k)=>FORM[k]==='obligatorio';
+  const rut=v('f-rut');
+  if(($('f-rut')&&req('rut'))&&!rut) return err.textContent=ext?'Ingresa tu pasaporte o N° de documento.':'Ingresa tu RUT.';
+  if(rut&&!ext&&!rutValido(rut)) return err.textContent='Revisa tu RUT (con guión y dígito verificador). Si eres extranjer@, marca la casilla.';
+  const email=v('f-email'); if(req('email')&&(!email||!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email))) return err.textContent='Revisa tu correo — ahí llega la entrada.';
+  if($('f-telefono')&&req('telefono')&&!v('f-telefono')) return err.textContent='Ingresa tu teléfono celular.';
+  if($('f-instagram')&&req('instagram')&&!v('f-instagram')) return err.textContent='Ingresa tu Instagram.';
+  const universidad=v('f-universidad'); if($('f-universidad')&&req('universidad')&&!universidad) return err.textContent='Escribe tu universidad (o NO si no estudias).';
+  // género: si la lista es de un género, se asume; si no, se pide
+  const genero = LISTA.genero_esperado || v('f-genero');
+  if(!genero) return err.textContent='Selecciona tu género.';
+  if($('f-gendecl') && !$('f-gendecl').checked) return err.textContent='Marca la casilla para confirmar tu género (se valida en la puerta).';
+  const fnac=v('f-fnac'); if(req('fnac')&&!fnac) return err.textContent='Ingresa tu fecha de nacimiento.';
+  // +18
+  try{ const d=new Date(fnac), h=new Date(); let a=h.getFullYear()-d.getFullYear(); const mm=h.getMonth()-d.getMonth(); if(mm<0||(mm===0&&h.getDate()<d.getDate()))a--; if(a<18) return err.textContent='Debes ser mayor de 18 años.'; }catch(e){}
+
+  // F4 — ficha de cumple/reserva
+  let ficha=null;
+  if(LISTA.tipo==='birthday') ficha={ invitados:v('fk-invitados'), zona:v('fk-zona'), presupuesto:v('fk-presupuesto'), decoracion:$('fk-decoracion')?.checked, botellas:$('fk-botellas')?.checked };
+  else if(LISTA.tipo==='reservation'){ if(!v('fk-party')) return err.textContent='Ingresa cuántas personas para la reserva.'; ficha={ party_size:v('fk-party'), zona:v('fk-zona'), presupuesto:v('fk-presupuesto'), botellas:$('fk-botellas')?.checked }; }
+  const btn=$('btn'); btn.disabled=true; btn.textContent='Enviando…';
+  try{
+    const { data:resp, error } = await sb.functions.invoke('crm-solicitud',{ body:{ accion:'inscribir_lista', payload:{
+      codigo:getCodigo(), nombre, rut:rut?fmtRut(rut):'', genero, genero_declarado:genero, email, telefono:(window.FrateFmt?FrateFmt.telFull(v('f-telefono')):v('f-telefono')),
+      instagram:v('f-instagram'), fecha_nacimiento:fnac, extranjero:!!ext, universidad:universidad,
+      apodo:v('f-apodo'), rol:v('f-rol'), productor:v('f-productor'), nacionalidad:v('f-nacionalidad'), ficha,
+      espacio_id: ESPACIO?String(ESPACIO.i):'', espacio_nombre: ESPACIO?ESPACIO.nombre:''
+    } } });
+    if(error) throw new Error((await error.context?.json?.())?.error || error.message || 'Error');
+    if(resp?.error) throw new Error(resp.error);
+    // Éxito → inscrito (aprobación humana) o QR si viene
+    const _ctx={nombre:(nombre||'').trim(), evento:(LISTA.nombre||''), fecha:(LISTA.fecha?fmtFecha(LISTA.fecha):'')};
+    if(resp && resp.qr_token){
+      $('qr-tit').innerHTML = msg('lista_qr_tit',_ctx);
+      $('qr-hint').innerHTML = msg('lista_qr_txt',_ctx);
+      $('qr-ev').textContent = (LISTA.nombre||'') + (LISTA.fecha?' · '+fmtFecha(LISTA.fecha):'');
+      $('qr-img').src='https://ydwlpraoaaijlfssevoh.supabase.co/functions/v1/qr?s=300&d='+encodeURIComponent(resp.qr_token);
+      $('qr-tok').textContent=resp.qr_token; $('qr-nom').textContent=nombre.toUpperCase();
+      if(ESPACIO){ $('qr-mesa-row').style.display='flex'; $('qr-mesa').textContent=ESPACIO.nombre; }
+      { const fb=$('qr-full'); if(fb) fb.href='/entrada?t='+encodeURIComponent(resp.qr_token)+'&n='+encodeURIComponent(nombre); }
+      const cal = (rut&&email)?'completa':(rut||email)?'parcial':'mínima';
+      $('qr-cal').textContent='Calidad de dato: '+cal; scr('s-qr');
+    } else {
+      $('rev-tit').innerHTML = msg('lista_ok_tit',_ctx);
+      $('rev-sub').innerHTML = msg('lista_ok_txt',_ctx);
+      $('rev-pill').textContent = msg('lista_ok_pill',_ctx);
+      // Si estaba en otra lista de la misma noche, se le dice — no se le esconde.
+      if(resp && resp.aviso){
+        const _s=$('rev-sub'); if(_s) _s.innerHTML += '<br><br><span style="color:#E6C860;">ℹ️ '+String(resp.aviso).replace(/[<>]/g,'')+'</span>';
+      }
+      scr('s-rev');
+    }
+  }catch(e){ err.textContent=(e.message||e)+''; btn.disabled=false; btn.textContent='Anotarme →'; }
+}
+init();
+</script>
+</body>
+</html>

@@ -8,7 +8,7 @@ const SUPABASE_ANON = 'sb_publishable_-_7GeDU_h84zf2v--lWQaQ_15ZFxOWt';
 const sb = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON);
 
 // ── REGISTRO ─────────────────────────────────────────────────
-async function sbSignUp({ nombres, apellidos, nombre, username, email, password, telefono, rut, universidad, carrera, fechaNacimiento }) {
+async function sbSignUp({ nombres, apellidos, nombre, username, email, password, telefono, rut, universidad, carrera, fechaNacimiento, extranjero, sexo }) {
   // Verificar que el username no esté tomado
   if (username) {
     const { data: existing } = await sb.from('clientes').select('id').eq('username', username.toLowerCase()).maybeSingle();
@@ -22,7 +22,12 @@ async function sbSignUp({ nombres, apellidos, nombre, username, email, password,
     // Referido: si el usuario llegó por un link ?ref=
     let refCode = null;
     try { refCode = (localStorage.getItem('frate_ref') || '').trim().toLowerCase() || null; } catch(e) {}
-    await sb.from('clientes').upsert({
+    // Sexo: F / M / X (prefiero no decirlo). Solo se manda si vino, para no
+    // chocar con cuentas creadas antes de que exista la columna.
+    const _sx = String(sexo || '').trim().toUpperCase();
+    const _extra = ['F', 'M', 'X'].includes(_sx) ? { sexo: _sx } : {};
+    let { error: cliErr } = await sb.from('clientes').upsert({
+      ..._extra,
       id:          data.user.id,
       username:    (username || '').toLowerCase(),
       nombres:     n,
@@ -30,12 +35,42 @@ async function sbSignUp({ nombres, apellidos, nombre, username, email, password,
       email:       email       || '',
       telefono:    telefono    || '',
       rut:         rut         || '',
+      extranjero:  !!extranjero,
       universidad: universidad || '',
       carrera:     carrera     || '',
       fecha_nacimiento:   fechaNacimiento || null,
       referido_por_codigo: refCode
     });
+    // Si la columna sexo todavía no existe, se guarda igual sin ella.
+    if (cliErr && _extra.sexo && /sexo/i.test(cliErr.message || '')) {
+      ({ error: cliErr } = await sb.from('clientes').upsert({
+        id: data.user.id, username: (username||'').toLowerCase(), nombres:n, apellidos:a,
+        email: email||'', telefono: telefono||'', rut: rut||'', extranjero: !!extranjero, universidad: universidad||'',
+        carrera: carrera||'', fecha_nacimiento: fechaNacimiento||null, referido_por_codigo: refCode
+      }));
+    }
+    // Si la base rechaza el RUT (candado anti-falso) o falta la columna, avisar claro
+    if (cliErr) {
+      const m = String(cliErr.message || '').toLowerCase();
+      if (m.includes('rut') || m.includes('check_violation')) throw new Error('Ingresa tu RUT chileno REAL. Si eres extranjer@, marca la casilla.');
+      if (m.includes('extranjero') || m.includes('column')) {
+        // La columna extranjero aún no existe (SQL sin correr) → reintenta sin ella
+        await sb.from('clientes').upsert({
+          id: data.user.id, username: (username||'').toLowerCase(), nombres:n, apellidos:a,
+          email: email||'', telefono: telefono||'', rut: rut||'', universidad: universidad||'',
+          carrera: carrera||'', fecha_nacimiento: fechaNacimiento||null, referido_por_codigo: refCode
+        });
+      } else { throw cliErr; }
+    }
     try { localStorage.removeItem('frate_ref'); } catch(e) {}
+    // Muchísima gente compra sin cuenta (545 compradores, 23 con cuenta).
+    // Al registrarse se le pegan sus compras anteriores y, si ya era cliente,
+    // se le abona el crédito de bienvenida. Best-effort: si falla, el registro
+    // igual queda hecho.
+    try {
+      const { data: act } = await sb.rpc('activar_socio');
+      if (act && act.ok) data._socio = act;
+    } catch (e) { /* sin el SQL todavía → registro normal */ }
   }
   return data;
 }
@@ -74,9 +109,21 @@ async function sbSignIn(emailOrUser, password) {
     rut:         profile?.rut         || '',
     universidad: profile?.universidad || '',
     carrera:     profile?.carrera     || '',
-    rol:         profile?.rol         || 'usuario'
+    rol:         profile?.rol         || 'usuario',
+    sexo:        profile?.sexo        || null,
+    extranjero:  !!profile?.extranjero
   };
   Storage.set('frate_session', session);
+  // Aviso a quien esté esperando la sesión (la entrada gratis para miembros
+  // que se eligió antes de entrar). Si nadie escucha, no pasa nada.
+  try { window.dispatchEvent(new CustomEvent('frate:sesion', { detail: session })); } catch (_) {}
+  // Es idempotente y el crédito se da una sola vez, así que también sirve para
+  // la gente que ya tenía cuenta desde antes: la primera vez que entre, se le
+  // pegan sus compras viejas. Best-effort, nunca bloquea el login.
+  try {
+    const { data: act } = await sb.rpc('activar_socio');
+    if (act && act.ok && act.credito > 0) session._bienvenida = act;
+  } catch (e) {}
   return session;
 }
 
@@ -139,7 +186,9 @@ async function sbRestoreSession() {
     rut:         profile?.rut         || '',
     universidad: profile?.universidad || '',
     carrera:     profile?.carrera     || '',
-    rol:         profile?.rol         || 'usuario'
+    rol:         profile?.rol         || 'usuario',
+    sexo:        profile?.sexo        || null,
+    extranjero:  !!profile?.extranjero
   };
   Storage.set('frate_session', session);
   return session;
@@ -159,7 +208,13 @@ async function sbGetEventos() {
 // Acepta items del carrito (tickets de evento, carta y merch unificados).
 // Cada item del carrito puede tener: { tipo, eventoId, ttId, nombre, precio,
 //   cantidad, personas[], fecha, hora, ambiente, productoId, detalle }
-async function sbCrearPedido({ clienteId, nombreCliente, emailCliente, telefono, rut, items, total, feeServicio, metodoPago }) {
+async function sbCrearPedido() {
+  // ⛔ DESACTIVADO por seguridad: creaba el pedido en el navegador con el precio
+  // puesto por el cliente. La compra real va SIEMPRE por la Edge Function
+  // `crear-pago` (recalcula el total en el servidor). No usar esta función.
+  throw new Error('sbCrearPedido está deshabilitada: usa la Edge Function crear-pago.');
+}
+async function _sbCrearPedidoLEGACY({ clienteId, nombreCliente, emailCliente, telefono, rut, items, total, feeServicio, metodoPago }) {
   const totalPagado = total + (feeServicio || 0);
 
   // 1) Insertar pedido

@@ -1,1 +1,6 @@
 .vercel
+.DS_Store
+node_modules/
+*.bak-*
+*.orig
+*.tmp

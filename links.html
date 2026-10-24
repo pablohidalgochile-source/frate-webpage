@@ -1,0 +1,308 @@
+<!doctype html><html lang="es"><head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>FRATE · Links</title>
+<!-- Previsualización al compartir. Sin esto, un link de frate.cl en
+     WhatsApp o Instagram sale sin imagen y parece spam. -->
+<meta property="og:type" content="website" />
+<meta property="og:site_name" content="FRATE" />
+<meta property="og:title" content="FRATE · Links" />
+<meta property="og:description" content="Próximas fechas, cortesías, cumpleaños y reservas. Todo en un solo lugar." />
+<meta property="og:url" content="https://www.frate.cl/links" />
+<meta property="og:image" content="https://www.frate.cl/assets/og.png" />
+<meta property="og:image:width" content="1200" />
+<meta property="og:image:height" content="630" />
+<meta name="twitter:card" content="summary_large_image" />
+<meta name="twitter:title" content="FRATE · Links" />
+<meta name="twitter:description" content="Próximas fechas, cortesías, cumpleaños y reservas. Todo en un solo lugar." />
+<meta name="twitter:image" content="https://www.frate.cl/assets/og.png" />
+
+<meta name="description" content="Fraternidad · Campus Central del carrete universitario. Entradas, eventos y más.">
+<link rel="icon" href="/icon-frate.svg">
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Anton&family=Barlow+Condensed:wght@500;600;700;800;900&family=Inter:wght@400;500;700&display=swap" rel="stylesheet">
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="/frate-afiche.js?v=af9"></script>
+<style>
+:root{--bg:#050506;--rojo:#E8363D;--dorado:#D4A832;--muted:#8b8b93;--border:rgba(255,255,255,.1);--card:rgba(18,18,21,.62);}
+*{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent;}
+body{background:var(--bg);color:#f4f4f5;font-family:'Inter',system-ui,sans-serif;min-height:100vh;overflow-x:hidden;}
+.disp{font-family:'Barlow Condensed',sans-serif;text-transform:uppercase;}
+/* Fondo video */
+.vid{position:fixed;inset:0;z-index:0;background:#050506;overflow:hidden;}
+.vid video{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;filter:saturate(1.05);}
+.vid::after{content:'';position:absolute;inset:0;background:
+  radial-gradient(60% 40% at 50% 0%,rgba(232,54,61,.18),transparent 70%),
+  linear-gradient(180deg,rgba(5,5,6,.62) 0%,rgba(5,5,6,.78) 45%,rgba(5,5,6,.92) 100%);}
+.wrap{position:relative;z-index:2;max-width:500px;margin:0 auto;padding:34px 18px 46px;}
+.item{opacity:0;transform:translateY(14px);animation:rise .6s cubic-bezier(.2,.7,.3,1) forwards;}
+@keyframes rise{to{opacity:1;transform:none;}}
+/* Header */
+.brand{text-align:center;margin-bottom:20px;}
+.mark{font-family:'Anton',sans-serif;font-size:3.1rem;letter-spacing:6px;line-height:.9;text-shadow:0 2px 24px rgba(232,54,61,.35);}
+.mark b{color:var(--rojo);}
+.rule{width:34px;height:3px;background:var(--rojo);margin:12px auto 12px;border-radius:2px;}
+.bio{font-family:'Barlow Condensed',sans-serif;font-weight:600;font-size:0.8rem;letter-spacing:3px;color:#d7d7dd;text-transform:uppercase;line-height:1.7;}
+.socials{display:flex;justify-content:center;gap:10px;margin-top:16px;}
+.socials a{display:inline-flex;align-items:center;gap:6px;color:#e7e7ea;font-size:0.66rem;font-weight:700;letter-spacing:1.5px;text-decoration:none;text-transform:uppercase;padding:8px 15px;border:1px solid var(--border);border-radius:30px;background:rgba(255,255,255,.05);backdrop-filter:blur(4px);transition:.18s;}
+.socials a:hover{border-color:var(--rojo);color:#fff;}
+/* Título de sección */
+.sect{font-family:'Barlow Condensed',sans-serif;font-weight:700;font-size:0.72rem;letter-spacing:4px;color:var(--rojo);text-transform:uppercase;margin:24px 4px 12px;display:flex;align-items:center;gap:9px;}
+.sect::after{content:'';flex:1;height:1px;background:var(--border);}
+/* Evento destacado */
+.ev{position:relative;border-radius:16px;overflow:hidden;border:1px solid var(--border);margin-bottom:12px;display:block;text-decoration:none;color:inherit;background:#141019;box-shadow:0 10px 30px rgba(0,0,0,.4);transition:.2s;}
+.ev:hover{transform:translateY(-2px);border-color:rgba(232,54,61,.5);}
+.temp{position:relative;overflow:hidden;border:1px solid var(--rojo,#E8363D);border-radius:16px;background:#15090d;margin-bottom:12px;cursor:pointer;}
+.temp .marca{position:absolute;inset:0;opacity:.09;color:#E8363D;font-family:'Barlow Condensed',sans-serif;font-weight:900;font-size:1.9rem;line-height:1.2;letter-spacing:1px;pointer-events:none;overflow:hidden;}
+.temp .cab{position:relative;display:flex;gap:12px;align-items:center;padding:16px 18px;}
+.temp .chev{font-size:1.3rem;color:#E8363D;transition:transform .25s;}
+.temp.abierto .chev{transform:rotate(180deg);}
+.temp .noches{position:relative;display:none;padding:0 10px 10px;}
+.temp.abierto .noches{display:block;}
+.temp .n1{display:flex;gap:10px;align-items:center;background:#131316;border:1px solid #1f1f23;border-radius:10px;padding:10px;margin-top:8px;text-decoration:none;}
+.temp .n1:hover{border-color:rgba(232,54,61,.5);}
+.ev .bg{position:absolute;inset:0;background-size:cover;background-position:center;transition:.3s;}
+.ev:hover .bg{transform:scale(1.04);}
+.ev .ov{position:absolute;inset:0;background:linear-gradient(100deg,rgba(5,5,6,.95) 42%,rgba(5,5,6,.35) 78%,rgba(5,5,6,.15));}
+.ev .in{position:relative;display:flex;align-items:stretch;min-height:128px;}
+.dt{text-align:center;padding:16px 16px;display:flex;flex-direction:column;justify-content:center;flex-shrink:0;}
+.dt .dow{font-family:'Barlow Condensed',sans-serif;font-size:0.62rem;letter-spacing:3px;color:var(--rojo);font-weight:800;}
+.dt .day{font-family:'Anton',sans-serif;font-size:2.9rem;line-height:.86;}
+.dt .mon{font-family:'Barlow Condensed',sans-serif;font-size:0.62rem;letter-spacing:3px;color:#d4d4d8;font-weight:700;}
+.dt .ln{width:1px;height:100%;}
+.ev .info{flex:1;padding:16px 14px 16px 4px;display:flex;flex-direction:column;justify-content:center;min-width:0;border-left:1px solid rgba(255,255,255,.12);margin-left:2px;padding-left:16px;}
+.ev .nm{font-family:'Barlow Condensed',sans-serif;font-weight:800;font-size:1.28rem;letter-spacing:.5px;text-transform:uppercase;line-height:1;}
+.ev .hr{font-size:0.66rem;letter-spacing:1px;color:#b6b6bd;margin-top:5px;}
+.badge-vivo{display:inline-block;background:var(--rojo);color:#fff;font-family:'Barlow Condensed',sans-serif;font-size:0.56rem;font-weight:800;letter-spacing:1.5px;padding:2px 7px;border-radius:4px;margin-top:7px;text-transform:uppercase;animation:pulse 1.5s infinite;}
+@keyframes pulse{50%{opacity:.5;}}
+.ev .cta{margin-top:10px;align-self:flex-start;background:var(--rojo);color:#fff;font-family:'Barlow Condensed',sans-serif;font-size:0.64rem;font-weight:800;letter-spacing:1.5px;padding:7px 14px;border-radius:6px;text-transform:uppercase;}
+/* Links tipo tarjeta con portada + ícono */
+.link{position:relative;display:flex;align-items:center;gap:13px;border:1px solid var(--border);border-radius:14px;padding:12px 14px;margin-bottom:11px;background:var(--card);backdrop-filter:blur(6px);text-decoration:none;color:inherit;overflow:hidden;transition:.18s;box-shadow:0 6px 20px rgba(0,0,0,.3);}
+.link:hover{transform:translateY(-2px);border-color:rgba(232,54,61,.55);}
+.link .cover{position:absolute;inset:0;background-size:cover;background-position:center;opacity:.28;}
+.link .cover::after{content:'';position:absolute;inset:0;background:linear-gradient(90deg,rgba(12,12,14,.92),rgba(12,12,14,.5));}
+/* El mosaico ya viene con su propia opacidad: bajarla otra vez lo apagaba */
+.link .cover-mos{opacity:1;}
+.link .cover-mos::after{background:linear-gradient(90deg,rgba(10,10,13,.94) 40%,rgba(10,10,13,.3) 100%);}
+.link .tt-big{font-family:'Barlow Condensed',Impact,sans-serif;font-size:1.28rem;font-weight:800;letter-spacing:.4px;line-height:1.05;text-shadow:0 2px 10px rgba(0,0,0,.7);}
+.link .ico{position:relative;flex-shrink:0;width:46px;height:46px;border-radius:12px;display:flex;align-items:center;justify-content:center;font-size:1.35rem;background:rgba(232,54,61,.14);border:1px solid rgba(232,54,61,.32);}
+.link .txt{position:relative;flex:1;min-width:0;}
+.link .tt{font-family:'Barlow Condensed',sans-serif;font-weight:700;font-size:1.02rem;letter-spacing:.6px;text-transform:uppercase;line-height:1.05;}
+.link .sub{font-size:0.68rem;color:#adadb4;margin-top:2px;letter-spacing:.3px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
+.link .ar{position:relative;flex-shrink:0;color:#8b8b93;font-size:1.1rem;transition:.18s;}
+.link:hover .ar{color:var(--rojo);transform:translateX(3px);}
+.foot{text-align:center;margin-top:28px;font-family:'Barlow Condensed',sans-serif;font-size:0.6rem;letter-spacing:3px;color:#54545c;text-transform:uppercase;}
+.center{text-align:center;padding:70px 20px;color:var(--muted);position:relative;z-index:2;}
+</style></head>
+<body>
+<div class="vid" id="vid"></div>
+<div class="wrap" id="app"><div class="center">Cargando…</div></div>
+<script>
+const sb = window.supabase.createClient('https://ydwlpraoaaijlfssevoh.supabase.co','sb_publishable_-_7GeDU_h84zf2v--lWQaQ_15ZFxOWt');
+const HERO_VIDEO='https://ydwlpraoaaijlfssevoh.supabase.co/storage/v1/object/public/frate-media/hero-video.mp4';
+const DOW=['DOM','LUN','MAR','MIÉ','JUE','VIE','SÁB'], MON=['ENE','FEB','MAR','ABR','MAY','JUN','JUL','AGO','SEP','OCT','NOV','DIC'];
+function parseFecha(f){ if(!f) return null; const [y,m,d]=String(f).split('-').map(Number); return new Date(y,(m||1)-1,d||1); }
+// Inicio/fin reales del evento (fin cruza medianoche si termina antes que empieza)
+function evStartEnd(ev){
+  const [y,m,d]=String(ev.fecha||'').split('-').map(Number); if(!y) return null;
+  const [h1,mi1]=String(ev.hora||'23:00').split(':').map(Number);
+  const [h2,mi2]=String(ev.hora_termino||'05:00').split(':').map(Number);
+  const start=new Date(y,(m||1)-1,d||1,h1||0,mi1||0);
+  let end=new Date(y,(m||1)-1,d||1,h2||0,mi2||0);
+  if(end<=start) end=new Date(end.getTime()+864e5);
+  return {start,end};
+}
+// Hora límite de venta de un ticket (vence_hora). Madrugada (< 12:00) = día siguiente del evento.
+function dtVence(ev, hora){
+  if(!ev.fecha||!hora) return null;
+  const [y,m,d]=String(ev.fecha).split('-').map(Number);
+  const [h,mi]=String(hora).split(':').map(Number);
+  let dt=new Date(y,(m||1)-1,d||1,h||0,mi||0);
+  if((h||0)<12) dt=new Date(dt.getTime()+864e5);
+  return dt;
+}
+// ¿el evento tiene AL MENOS un ticket todavía a la venta? (respeta el vence_hora de cada uno)
+// El título de temporada en Anton: la misma letra de la marca y de las
+// fechas de esta página. Rojo, y el año en blanco debajo.
+function _tempTit(nombre){
+  const m = String(nombre||'').match(/^(.*?)\s*(\d{4})$/);
+  const base = "font-family:'Anton',sans-serif;font-size:clamp(2.1rem,11vw,2.9rem);line-height:.9;letter-spacing:1px;margin-top:3px;text-shadow:0 2px 26px rgba(232,54,61,.45);";
+  if(m) return '<div style="'+base+'color:#E8363D;">'+esc(m[1].toUpperCase())
+             + '<span style="display:block;color:#fff;">'+esc(m[2])+'</span></div>';
+  return '<div style="'+base+'color:#E8363D;">'+esc(String(nombre).toUpperCase())+'</div>';
+}
+function hayVentaEv(ev, tks){
+  const now=Date.now();
+  return (tks||[]).some(t=>{
+    if(t.estado==='Oculto'||t.estado==='Cerrado') return false;
+    if((t.disponible||0)<=0) return false;
+    // ⏳ tramo de preventa fuera de su ventana → no cuenta como venta abierta
+    if(t.venta_desde){ const d=new Date(t.venta_desde); if(!isNaN(+d)&&now<d.getTime()) return false; }
+    if(t.venta_hasta){ const h=new Date(t.venta_hasta); if(!isNaN(+h)&&now>=h.getTime()) return false; }
+    if(t.vence_hora){ const dv=dtVence(ev,t.vence_hora); if(dv && now>dv.getTime()) return false; }
+    return true;
+  });
+}
+const esc=s=>String(s||'').replace(/</g,'&lt;').replace(/"/g,'&quot;');
+function eventoUrl(ev){ return ev.slug ? '/e/'+ev.slug : '/comprar.html?ev='+ev.id; }
+
+async function boot(){
+  // El modo de color y la paleta salen de Configuración General. Si falla,
+  // se queda con el automático y la paleta fluor.
+  try{ if(window.FrateAfiche) await FrateAfiche.cargarConfig(sb); }catch(e){}
+  try{
+    const [{ data:cfgRows }, { data:evs }, { data:links }] = await Promise.all([
+      sb.from('config_valores').select('clave,valor').in('clave',['links_bio','links_video_url','links_instagram','links_titulo','links_logo']),
+      sb.from('eventos').select('*').order('fecha',{ascending:true}),
+      sb.from('link_items').select('*').eq('activo',true).order('orden')
+    ]);
+    const cfg={}; (cfgRows||[]).forEach(r=>cfg[r.clave]=r.valor);
+    // Fondo: el video subido para el linktree, o por defecto el MISMO de la web (hero)
+    const bgVid = cfg.links_video_url || HERO_VIDEO;
+    document.getElementById('vid').innerHTML='<video autoplay muted loop playsinline preload="auto" src="'+esc(bgVid)+'"></video>';
+    const hoy=new Date(); hoy.setHours(0,0,0,0);
+    const eventos=(evs||[]).filter(e=>{
+      const estado=e.estado||(e.activo?'publicado':'creado');
+      if(e.oculto_publico) return false;                                            // 🙈 oculto manual (no aparece en /links, el link directo /e/ igual funciona)
+      if(!['publicado','en_vivo'].includes(estado) || e.archivado) return false;   // solo publicados / en vivo
+      const se=evStartEnd(e); return !se || Date.now() <= se.end.getTime();          // ocultar los que ya terminaron
+    });
+    // Tickets de esos eventos → saber si aún hay venta abierta (por el vence_hora de cada ticket, no por la hora de inicio)
+    let tksByEv={};
+    const evIds=eventos.map(e=>e.id).filter(Boolean);
+    if(evIds.length){ try{ const { data:tks }=await sb.from('tipos_ticket').select('evento_id,estado,disponible,vence_hora,venta_desde,venta_hasta').in('evento_id',evIds); (tks||[]).forEach(t=>{ (tksByEv[t.evento_id]=tksByEv[t.evento_id]||[]).push(t); }); }catch(_){} }
+    // Marcar los enlaces que apuntan a una lista: cerrada → cartel "LISTA CERRADA"; rechazada/borrada → no mostrar
+    try{
+      const codeOf=u=>{ const m=/\/lista\/([^/?#]+)/.exec(u||''); return m?m[1]:null; };
+      const codes=(links||[]).map(l=>codeOf(l.url)).filter(Boolean);
+      if(codes.length){
+        // Función primero (exige los códigos, no deja enumerar); la vista y la
+        // tabla quedan de respaldo por si el SQL de cierre no se corrió aún.
+        let { data:ls, error } = await sb.rpc('listas_estado',{ p_codigos: codes });
+        if(error){ ({ data:ls, error } = await sb.from('v_lista_publica').select('codigo,estado').in('codigo',codes)); }
+        if(error){ ({ data:ls, error } = await sb.from('listas').select('codigo,estado').in('codigo',codes)); }
+        if(!error){ const est={}; (ls||[]).forEach(x=>est[x.codigo]=x.estado);
+          (links||[]).forEach(l=>{ const c=codeOf(l.url); if(c) l._listaEstado = (c in est)?est[c]:'missing'; }); }
+      }
+    }catch(_){}
+    render(cfg, eventos, links||[], tksByEv);
+  }catch(e){ document.getElementById('app').innerHTML='<div class="center">No se pudo cargar. <br><a href="/" style="color:#E8363D;">Ir a frate.cl</a></div>'; }
+}
+function render(cfg, eventos, links, tksByEv){
+  tksByEv = tksByEv || {};
+  let d=0; const anim=()=>`style="animation-delay:${(d++*55)}ms"`;
+  let mark;
+  if(cfg.links_logo) mark='<img src="'+esc(cfg.links_logo)+'" alt="FRATE" style="max-width:72%;max-height:120px;object-fit:contain;filter:drop-shadow(0 2px 20px rgba(0,0,0,.5));">';
+  else if((cfg.links_titulo||'').trim()) mark='<div class="mark disp">'+esc(cfg.links_titulo.trim())+'</div>';
+  else mark='<div class="mark disp">FRAT<b>E</b></div>';
+  let h='<div class="brand item" '+anim()+'>'+mark+'<div class="rule"></div>';
+  h+='<div class="bio">'+esc(cfg.links_bio||'Fraternidad · Campus Central del carrete universitario')+'</div>';
+  const ig=cfg.links_instagram;
+  h+='<div class="socials">'
+    +(ig?'<a href="https://instagram.com/'+esc(ig.replace(/^@/,''))+'" target="_blank">◐ Instagram</a>':'')
+    +'<a href="/" target="_blank">✦ frate.cl</a>'
+    +'</div></div>';
+  // ⏳ Las noches de una temporada especial no se listan sueltas: se pliegan
+  //    bajo un solo bloque que se abre al tocarlo. Se detecta igual que en la
+  //    portada —por la marca ⭐ especial y el nombre de temporada del brief—,
+  //    así que no está escrito para Halloween: cualquier temporada se pliega
+  //    sola, y si no hay ninguna, /links queda exactamente como antes.
+  const _esEsp = ev => !!((ev.brief||{}).especial) && !!((((ev.brief||{}).produccion||{}).temporada||{}).nombre);
+  const _tempNoches = eventos.filter(_esEsp);
+  const _tempNombre = _tempNoches.length >= 2
+    ? ((((_tempNoches[0].brief||{}).produccion||{}).temporada||{}).nombre || '') : '';
+  const _normales = _tempNombre ? eventos.filter(e => !_esEsp(e)) : eventos;
+  // Eventos
+  if(eventos.length){
+    // 🎃 El bloque plegado de la temporada va PRIMERO, antes de las fechas
+    //    sueltas: es lo que se quiere que vean al abrir el link del perfil.
+    if(_tempNombre){
+      const diaN = e => { const d=parseFecha(e.fecha); return d ? String(d.getDate()).padStart(2,'0') : ''; };
+      const dowN = e => { const d=parseFecha(e.fecha); return d ? DOW[d.getDay()] : ''; };
+      const dias = _tempNoches.map(diaN).filter(Boolean);
+      const cuando = dias.length>1 ? dias.slice(0,-1).join(', ')+' y '+dias[dias.length-1] : (dias[0]||'');
+      const mesN = (()=>{ const d=parseFecha(_tempNoches[0].fecha); return d ? MON[d.getMonth()] : ''; })();
+      const marca = (_tempNombre.toUpperCase().replace(/\s+\d{4}$/,'')+' · ').repeat(12);
+      const filas = _tempNoches.map(ev =>
+         '<a class="n1" href="'+eventoUrl(ev)+'">'
+        +  '<div style="background:#E8363D;border-radius:7px;padding:7px 9px;text-align:center;min-width:48px;">'
+        +    '<div style="font-size:0.5rem;letter-spacing:1px;color:#2d0508;font-weight:700;">'+esc(dowN(ev))+'</div>'
+        +    '<div style="font-family:Barlow Condensed,sans-serif;font-weight:900;font-size:1.25rem;color:#2d0508;line-height:1;">'+esc(diaN(ev))+'</div>'
+        +  '</div>'
+        +  '<div style="flex:1;min-width:0;">'
+        +    '<div style="color:#fff;font-size:0.84rem;font-weight:700;">'+esc(ev.nombre)+'</div>'
+        +    (ev.descripcion ? '<div style="color:var(--muted);font-size:0.68rem;margin-top:2px;">'+esc(ev.descripcion)+'</div>' : '')
+        +  '</div>'
+        +  '<div style="color:#E8363D;font-size:0.95rem;">&rarr;</div>'
+        +'</a>').join('');
+      h+='<div class="temp item" '+anim()+' onclick="this.classList.toggle(\'abierto\')">'
+        +  '<div class="marca">'+esc(marca)+'</div>'
+        +  '<div class="cab">'
+        +    '<div style="flex:1;min-width:0;">'
+        +      '<div style="font-size:0.52rem;letter-spacing:3px;text-transform:uppercase;color:#E8363D;">Temporada especial</div>'
+        +      _tempTit(_tempNombre)
+        +      '<div style="font-size:0.7rem;color:var(--muted);margin-top:3px;">'+_tempNoches.length+' noches'+(cuando?' · '+esc(cuando)+(mesN?' de '+esc(mesN):''):'')+'</div>'
+        +    '</div>'
+        +    '<div class="chev">&#8964;</div>'
+        +  '</div>'
+        +  '<div class="noches">'+filas+'</div>'
+        +'</div>';
+    }
+    h+='<div class="sect item" '+anim()+'>Próximas fechas</div>';
+    _normales.forEach(ev=>{
+      const dd=parseFecha(ev.fecha);
+      const se=evStartEnd(ev), now=Date.now();
+      const tks=tksByEv[ev.id];
+      // Venta abierta = hay al menos un ticket a la venta (por su vence_hora). Si no hay data de tickets, cae en "antes del inicio".
+      const venta = (tks && tks.length) ? hayVentaEv(ev, tks) : (se ? now < se.start.getTime() : true);
+      const enVivo = se ? (now>=se.start.getTime() && now<se.end.getTime()) : (ev.estado==='en_vivo');
+      const dt = window.FrateAfiche ? FrateAfiche.fechaHTML(ev,{ancho:96,num:50})
+        : (dd?`<div class="dt"><div class="dow">${DOW[dd.getDay()]}</div><div class="day">${String(dd.getDate()).padStart(2,'0')}</div><div class="mon">${MON[dd.getMonth()]}</div></div>`:'');
+      // Sin foto: la decoración se dibuja con el nombre. El degradado morado
+      // hacía que las tres fechas de la semana se vieran idénticas.
+      const bg=ev.imagen_url
+        ? `<div class="bg" style="background-image:url('${esc(ev.imagen_url)}')"></div>`
+        : (window.FrateAfiche
+            ? `<div class="bg" style="position:absolute;inset:0;">${FrateAfiche.textura(ev.nombre,{w:560,h:170,color:FrateAfiche.colorDe(ev.nombre,(ev.brief||{}).portada),op:.2,tam:7})}</div>`
+            : '<div class="bg" style="background:linear-gradient(150deg,#3a1c5e,#8b1a3a)"></div>');
+      const cta = venta ? '<div class="cta">Comprar entradas →</div>'
+                : enVivo ? '<span class="badge-vivo">● En vivo</span>'
+                : '<span class="badge-vivo" style="background:#3a3a3c;color:#a1a1aa;">Venta cerrada</span>';
+      const nm = window.FrateAfiche
+        ? `<div style="max-width:330px;">${FrateAfiche.titulo(ev.nombre,{w:420})}</div>`
+        : `<div class="nm">${esc(ev.nombre)}</div>`;
+      h+=`<a class="ev item" ${anim()} href="${eventoUrl(ev)}">${bg}<div class="ov"></div><div class="in">${dt}<div class="info">${nm}<div class="hr">${ev.hora||'23:00'} – ${ev.hora_termino||'05:00'} hrs</div>${cta}</div></div></a>`;
+    });
+  } else {
+    h+='<div class="sect item" '+anim()+'>Próximas fechas</div><div class="item" '+anim()+' style="text-align:center;color:var(--muted);font-size:0.78rem;padding:6px 0 14px;letter-spacing:1px;">Pronto anunciamos las próximas fechas 👀</div>';
+  }
+  // Enlaces (tarjetas con portada + ícono)
+  if(links.length){
+    h+='<div class="sect item" '+anim()+'>Enlaces</div>';
+    links.forEach(l=>{
+      const st=l._listaEstado;
+      if(st && st!=='aprobada' && st!=='cerrada') return;   // rechazada / borrada → no se muestra
+      const ext=/^https?:/.test(l.url);
+      // Sin portada, el enlace se decora con el mosaico de SUS emoji
+      // (los que cargó el admin, o los que le tocan por el nombre).
+      const col = l.color || (window.FrateAfiche ? FrateAfiche.colorDe(l.titulo) : '#E8363D');
+      const emos = window.FrateAfiche ? FrateAfiche.emojisDe(l) : [l.emoji||'🔗'];
+      const cover = l.cover
+        ? `<div class="cover" style="background-image:url('${esc(l.cover)}')"></div>`
+        : (window.FrateAfiche
+            ? `<div class="cover cover-mos">${FrateAfiche.mosaico(emos,{w:620,h:92,tam:12,op:.32,papel:'#0f0f12'})}</div>`
+            : '');
+      const ico=l.emoji?esc(l.emoji):(emos[0]||'🔗');
+      if(st==='cerrada'){   // publicada pero cerrada → cartel atenuado, sin poder inscribirse
+        h+=`<div class="link item" ${anim()} style="opacity:.5;cursor:default;">${cover}<div class="ico">🔒</div><div class="txt"><div class="tt">${esc(l.titulo)}</div><div class="sub">🔒 LISTA CERRADA</div></div></div>`;
+        return;
+      }
+      const sub=l.subtitulo?`<div class="sub">${esc(l.subtitulo)}</div>`:'';
+      h+=`<a class="link item" ${anim()} href="${esc(l.url)}"${ext?' target="_blank"':''}>${cover}<div class="ico" style="background:${col}22;border-color:${col};">${ico}</div><div class="txt"><div class="tt tt-big">${esc(l.titulo)}</div>${sub}</div><div class="ar" style="color:${col};">→</div></a>`;
+    });
+  }
+  h+='<div class="foot item" '+anim()+'>frate.cl · '+new Date().getFullYear()+'</div>';
+  document.getElementById('app').innerHTML=h;
+}
+boot();
+</script>
+</body></html>

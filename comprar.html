@@ -1,0 +1,564 @@
+<!doctype html><html lang="es"><head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>Comprar entradas · FRATE</title>
+<!-- Previsualización al compartir. Sin esto, un link de frate.cl en
+     WhatsApp o Instagram sale sin imagen y parece spam. -->
+<meta property="og:type" content="website" />
+<meta property="og:site_name" content="FRATE" />
+<meta property="og:title" content="Comprar entradas · FRATE" />
+<meta property="og:description" content="Elige tus entradas y recibe tu QR al correo. Fraternidad · Campus Central." />
+<meta property="og:url" content="https://www.frate.cl/" />
+<meta property="og:image" content="https://www.frate.cl/assets/og.png" />
+<meta property="og:image:width" content="1200" />
+<meta property="og:image:height" content="630" />
+<meta name="twitter:card" content="summary_large_image" />
+<meta name="twitter:title" content="Comprar entradas · FRATE" />
+<meta name="twitter:description" content="Elige tus entradas y recibe tu QR al correo. Fraternidad · Campus Central." />
+<meta name="twitter:image" content="https://www.frate.cl/assets/og.png" />
+
+<link rel="icon" href="/icon-frate.svg">
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="/frate-cedula.js?v=ced1"></script>
+<script src="/frate-format.js?v=fmt3"></script>
+<script src="/frate-afiche.js?v=af9"></script>
+<script src="/frate-instituciones.js?v=inst1"></script>
+<script src="/frate-perfil-gate.js?v=pg3"></script>
+<style>
+:root{--bg:#050506;--bg2:#0d0d0f;--bg3:#18181b;--border:#1c1c1f;--border2:#2b2b30;--text:#f4f4f5;--muted:#8b8b93;--rojo:#E8363D;--dorado:#D4A832;--verde:#22c55e;}
+*{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent;}
+body{background:var(--bg);color:var(--text);font-family:'Helvetica Neue',Arial,sans-serif;min-height:100vh;}
+.wrap{max-width:520px;margin:0 auto;}
+.hgrid{position:relative;z-index:2;display:flex;align-items:stretch;min-height:190px;}
+.hizq{flex:1;display:flex;flex-direction:column;justify-content:flex-end;padding:30px 16px 15px;min-width:0;}
+/* 66% y no 100%: llenando todo el ancho el título se comía la portada y
+   la decoración de atrás no se veía. */
+.htit{width:66%;min-width:200px;}
+.evsub{font-size:0.66rem;letter-spacing:2px;color:#c9c9d1;margin-top:11px;font-weight:600;}
+.hero{position:relative;min-height:190px;display:flex;align-items:flex-end;overflow:hidden;}
+.hero video,.hero .heroimg{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;}
+.hero .scrim{position:absolute;inset:0;background:linear-gradient(180deg,rgba(5,5,6,.35),var(--bg) 96%);}
+.hero .grad{position:absolute;inset:0;background:linear-gradient(150deg,#3a1c5e,#8b1a3a);}
+.hero-in{position:relative;padding:16px;width:100%;}
+.hero .url{position:absolute;top:12px;left:16px;font-size:0.5rem;letter-spacing:2px;color:rgba(255,255,255,.7);text-transform:uppercase;}
+.datetile{position:absolute;top:12px;right:14px;background:var(--rojo);color:#fff;border-radius:13px;text-align:center;padding:10px 15px;box-shadow:0 8px 26px rgba(232,54,61,.5);z-index:3;}
+.datetile .dow{font-size:0.66rem;letter-spacing:2.5px;font-weight:800;}
+.datetile .day{font-size:2.9rem;font-weight:900;line-height:.92;margin:2px 0;font-family:var(--disp,inherit);}
+.datetile .mon{font-size:0.66rem;letter-spacing:2.5px;font-weight:800;}
+.datetile .hh{font-size:0.6rem;letter-spacing:1.5px;opacity:.9;border-top:1px solid rgba(255,255,255,.32);margin-top:5px;padding-top:4px;}
+.evname{font-weight:800;font-size:1.5rem;letter-spacing:1px;text-transform:uppercase;line-height:1;}
+.evsub{font-size:0.66rem;letter-spacing:1.5px;color:#e4e4e7;margin-top:4px;text-transform:uppercase;}
+.body{padding:16px 16px 40px;}
+.lbl{font-size:0.55rem;letter-spacing:3px;color:#52525b;text-transform:uppercase;margin:16px 0 8px;}
+/* Tarjetas de entrada (mismo look que la web, modo express) */
+.ttc{position:relative;background:#0d0d10;border:1px solid var(--border2);border-radius:12px;padding:12px 13px 12px 17px;margin-bottom:10px;overflow:hidden;}
+.ttc.agot{opacity:.55;}
+/* La decoración va detrás de TODO el contenido de la tarjeta, y el velo
+   tapa solo la izquierda para que el mosaico se vea por la derecha. */
+.tt-deco{position:absolute;inset:0;z-index:0;}
+.tt-deco::after{content:'';position:absolute;inset:0;background:linear-gradient(90deg,rgba(10,10,13,.92) 46%,rgba(10,10,13,.5));}
+.tt-franja{position:absolute;left:0;top:0;bottom:0;width:5px;z-index:2;}
+.tt-rot{font-size:0.6rem;letter-spacing:2.5px;font-weight:900;margin-bottom:3px;}
+.tt-head{position:relative;z-index:1;display:flex;align-items:flex-start;gap:8px;}
+.tt-title{flex:1;min-width:0;font-weight:800;font-size:1.02rem;letter-spacing:.3px;line-height:1.12;text-transform:uppercase;text-shadow:0 2px 10px rgba(0,0,0,.75);}
+.ttc .tt-details,.ttc .tt-foot{position:relative;z-index:1;}
+.tt-pub{font-weight:700;font-size:0.5rem;letter-spacing:.3px;vertical-align:middle;padding:1px 6px;border-radius:20px;white-space:nowrap;}
+.tt-status{flex-shrink:0;font-size:0.52rem;letter-spacing:1.5px;text-transform:uppercase;padding:3px 8px;border-radius:3px;border:1px solid;font-weight:700;white-space:nowrap;}
+.tt-more{display:inline-flex;align-items:center;gap:5px;background:rgba(255,255,255,.05);border:1px solid var(--border2);color:#c7c7cd;font-size:0.62rem;font-weight:700;letter-spacing:.5px;text-transform:uppercase;padding:6px 10px;border-radius:20px;cursor:pointer;}
+.tt-chev{font-size:0.85rem;transition:transform .2s;}
+.ttc.open .tt-more{border-color:var(--dorado);color:var(--dorado);}
+.ttc.open .tt-chev{transform:rotate(180deg);}
+.tt-details{display:none;margin:8px 0 0;padding:8px 10px;background:rgba(212,168,50,0.06);border:1px solid rgba(212,168,50,0.2);border-radius:6px;font-size:0.72rem;color:#d4d4d8;line-height:1.5;}
+.ttc.open .tt-details{display:block;}
+.tt-foot{display:flex;justify-content:space-between;align-items:center;margin-top:9px;gap:10px;}
+.tt-price{font-weight:900;font-size:1.5rem;color:var(--dorado);letter-spacing:.5px;}
+.tt-pocas{font-size:0.68rem;color:#f59e0b;margin-top:7px;font-weight:700;}
+.tk{display:flex;align-items:center;gap:10px;padding:12px 0;border-top:1px solid var(--border);}
+.tk-i{flex:1;min-width:0;}.tk-n{font-weight:600;font-size:0.9rem;letter-spacing:.3px;}.tk-p{font-size:0.76rem;color:var(--dorado);letter-spacing:1px;margin-top:2px;}
+.step{display:flex;align-items:center;gap:12px;}
+.step button{width:30px;height:30px;border:1px solid var(--border2);background:transparent;color:var(--text);border-radius:6px;font-size:1.1rem;cursor:pointer;}
+.step button.plus{border-color:var(--rojo);color:var(--rojo);}
+.step b{min-width:16px;text-align:center;}
+.att{background:var(--bg2);border:1px solid var(--border);border-radius:9px;padding:10px 11px;margin:8px 0;}
+.att-h{font-size:0.6rem;letter-spacing:1px;color:var(--muted);text-transform:uppercase;margin-bottom:7px;}
+input,.inp{width:100%;background:var(--bg3);border:1px solid var(--border2);color:var(--text);padding:10px 11px;border-radius:8px;font-size:0.85rem;font-family:inherit;margin-bottom:7px;}
+input:focus{outline:none;border-color:var(--rojo);}
+.row2{display:flex;gap:7px;}.row2>*{flex:1;}
+.addon{display:flex;align-items:center;gap:11px;padding:11px 0;border-top:1px solid var(--border);}
+.addon .ck{width:19px;height:19px;border-radius:4px;border:1px solid var(--border2);flex-shrink:0;text-align:center;line-height:17px;font-size:0.66rem;color:#fff;}
+.addon.on .ck{background:var(--rojo);border-color:var(--rojo);}
+.addon .an{flex:1;font-size:0.82rem;}.addon .ad{font-size:0.66rem;color:var(--muted);}
+.addon .qb{width:27px;height:27px;border-radius:6px;border:1px solid var(--border2);background:transparent;color:var(--text);font-size:0.95rem;line-height:1;cursor:pointer;}
+.addon .qb:disabled{opacity:.3;cursor:default;}
+.addon .ap{color:var(--dorado);font-size:0.78rem;font-weight:600;}
+.totrow{display:flex;justify-content:space-between;align-items:baseline;padding:16px 0 13px;border-top:1px solid var(--border);margin-top:8px;}
+.totrow .tl{color:var(--muted);font-size:0.62rem;letter-spacing:2px;text-transform:uppercase;}
+.totrow .tv{font-size:1.35rem;font-weight:800;letter-spacing:1px;}
+.pay{width:100%;background:var(--rojo);color:#fff;border:0;font-weight:700;letter-spacing:2px;padding:15px;border-radius:8px;font-size:0.85rem;text-transform:uppercase;cursor:pointer;font-family:inherit;}
+.pay:disabled{opacity:.5;}
+.note{text-align:center;font-size:0.55rem;letter-spacing:1.5px;color:#52525b;margin-top:10px;text-transform:uppercase;}
+.msg{color:var(--rojo);font-size:0.8rem;text-align:center;margin-top:10px;min-height:18px;}
+.center{text-align:center;padding:60px 20px;color:var(--muted);}
+a.back{display:inline-block;margin:16px;color:var(--muted);font-size:0.7rem;letter-spacing:1px;text-decoration:none;text-transform:uppercase;}
+</style></head>
+<body>
+<div class="wrap" id="app"><div class="center">Cargando…</div></div>
+<script src="/frate-email.js"></script>
+<script>
+const sb = window.supabase.createClient('https://ydwlpraoaaijlfssevoh.supabase.co','sb_publishable_-_7GeDU_h84zf2v--lWQaQ_15ZFxOWt');
+// ¿Hay sesión? Hace falta para las entradas solo para miembros.
+window._ses=null; sb.auth.getSession().then(r=>{ window._ses=(r&&r.data&&r.data.session)||null; try{ _avisoCuenta(); }catch(_){} }).catch(()=>{});
+const $=id=>document.getElementById(id);
+const clp=n=>'$'+Number(n||0).toLocaleString('es-CL');
+// RUT chileno: limpiar, formatear (12.345.678-9) y validar dígito verificador
+function _rutClean(r){ return String(r||'').replace(/[^0-9kK]/g,'').toUpperCase(); }
+function _rutFmt(r){ const c=_rutClean(r); if(c.length<2) return c; const dv=c.slice(-1), num=c.slice(0,-1); return num.replace(/\B(?=(\d{3})+(?!\d))/g,'.')+'-'+dv; }
+function _rutOk(r){ const c=_rutClean(r); if(c.length<7||c.length>9) return false; const dv=c.slice(-1), num=c.slice(0,-1); let s=0,m=2; for(let i=num.length-1;i>=0;i--){ s+=parseInt(num[i],10)*m; m=m<7?m+1:2; } const res=11-(s%11); const calc=res===11?'0':res===10?'K':String(res); return calc===dv; }
+const DOW=['DOM','LUN','MAR','MIÉ','JUE','VIE','SÁB'], MON=['ENE','FEB','MAR','ABR','MAY','JUN','JUL','AGO','SEP','OCT','NOV','DIC'];
+const DOWL=['domingo','lunes','martes','miércoles','jueves','viernes','sábado'];
+function parseFecha(f){ if(!f) return null; const [y,m,d]=String(f).split('-').map(Number); return new Date(y,(m||1)-1,d||1); }
+let EV=null, TKS=[], ADDONS=[], sel={}, addonSel={}, att={};
+let TKS_TODOS=[];
+let COM=0.04;  // comisión (se lee de config_valores.comision_pct)
+let RETPCT=10; // retención en devoluciones (config_valores.devolucion_retencion_pct)
+
+const params = new URLSearchParams(location.search);
+// 🏷️ La etiqueta que ve el cliente (PREV 3 MUJER… → MUJER… · PREVENTA 3).
+// El nombre real no se toca: vive en frate-afiche.js, acá sólo se pinta.
+const _etq = n => (window.FrateAfiche && FrateAfiche.etiquetaPublica) ? FrateAfiche.etiquetaPublica(n) : (n||'');
+const slug = (location.pathname.match(/\/e\/([^\/?#]+)/)||[])[1] || params.get('e') || params.get('ev');
+
+async function findEvento(key){
+  // 1) por slug (si la columna ya existe)
+  try{ const { data, error } = await sb.from('eventos').select('*').ilike('slug', key).limit(1); if(!error && data && data[0]) return data[0]; }catch(_){}
+  // 2) fallback por id numérico (sirve antes de correr el SQL del slug)
+  if(/^\d+$/.test(String(key))){ try{ const { data } = await sb.from('eventos').select('*').eq('id', Number(key)).limit(1); if(data && data[0]) return data[0]; }catch(_){} }
+  return null;
+}
+async function boot(){
+  // El modo de color y la paleta salen de Configuración General. Si falla,
+  // se queda con el automático y la paleta fluor.
+  try{ if(window.FrateAfiche) await FrateAfiche.cargarConfig(sb); }catch(e){}
+  if(!slug){ $('app').innerHTML='<div class="center">Link inválido.<br><a class="back" href="/">← Ir a frate.cl</a></div>'; return; }
+  try{
+    EV = await findEvento(slug);
+    if(!EV){ $('app').innerHTML='<div class="center">No encontramos este evento.<br><a class="back" href="/">← Ver todos los eventos</a></div>'; return; }
+    const estado = EV.estado || (EV.activo?'publicado':'creado');
+    // Solo se vende si está publicado o en vivo. Cerrado / planificación / postedición / archivado → NO.
+    if(!['publicado','en_vivo'].includes(estado) || EV.archivado){
+      const yaCerro = (estado==='cerrado' || estado==='postedicion' || EV.archivado);
+      $('app').innerHTML='<div class="center">'+(yaCerro?'Este evento ya no está a la venta.':'Este evento aún no está a la venta.')+'<br><a class="back" href="/">← Ver todos los eventos</a></div>'; return;
+    }
+    const [tks, { data:ads }, { data:comRow }, { data:retRow }] = await Promise.all([
+      (async()=>{ let r=await sb.from('tipos_ticket').select('*').eq('evento_id',EV.id).order('orden').order('id'); if(r.error) r=await sb.from('tipos_ticket').select('*').eq('evento_id',EV.id).order('id'); return r.data||[]; })(),
+      // 🥤 Extras de ESTE evento. `eventos` null = de siempre (todos). Con la lista
+      //    puesta, el extra solo existe en esas noches — es lo que faltaba el 10-oct,
+      //    cuando el transporte aparecia en todos los eventos a la vez.
+      //    Desde el 20-oct el extra NO vive en `addons` sino en `tiendita`: un solo
+      //    producto, un solo stock, y la configuración del producto dice por qué
+      //    puertas se vende. Acá se pide la puerta `en_checkout`.
+      sb.from('tiendita').select('id,nombre,descripcion,precio,stock,eventos,max_por_entrada,imagen_url,emoji')
+        .eq('disponible',true).eq('en_checkout',true)
+        .or('eventos.is.null,eventos.cs.{'+EV.id+'}').order('orden'),
+      sb.from('config_valores').select('valor').eq('clave','comision_pct').maybeSingle(),
+      sb.from('config_valores').select('valor').eq('clave','devolucion_retencion_pct').maybeSingle()
+    ]);
+    { const n=parseFloat(comRow&&comRow.valor); if(!isNaN(n)&&n>=0&&n<=30) COM=n/100; }
+    { const r=parseFloat(retRow&&retRow.valor); if(!isNaN(r)&&r>=0&&r<=100) RETPCT=r; }
+    // Se muestran los vendibles + los "Agotado" (aparecen gris). Ocultos/Cerrados no.
+    // ⏳ Tramos de preventa: sólo el que está en su ventana AHORA. Instantes absolutos,
+    //    se comparan con new Date(). Sin ventana → se vende siempre, como antes.
+    const _ahoraV=new Date();
+    const _enVentana=t=>{ const d=t.venta_desde?new Date(t.venta_desde):null, h=t.venta_hasta?new Date(t.venta_hasta):null;
+                          if(d&&!isNaN(+d)&&_ahoraV<d) return false; if(h&&!isNaN(+h)&&_ahoraV>=h) return false; return true; };
+    // ⚠️ TKS va filtrado por ventana, así que NO sirve para saber si la familia
+    //    se quedó sin nada: un tramo que abre mañana no está acá y parecería que
+    //    no queda nada. Para eso se guarda la lista completa.
+    TKS_TODOS = (tks||[]);
+    TKS = (tks||[]).filter(t=>['Activo','Solo venta WEB','Venta solo RRPP','Agotado'].includes(t.estado) && (t.solo_web!==false) && _enVentana(t));
+    ADDONS = ads||[];
+    render();
+  }catch(e){ $('app').innerHTML='<div class="center">Error al cargar. Intenta de nuevo.<br><a class="back" href="/">← Ir a frate.cl</a></div>'; }
+}
+function heroBg(){
+  // El orden (video → foto/flyer → decoración) lo resuelve frate-afiche.js,
+  // uno solo para las tres portadas: si cada pantalla lo decidiera por su
+  // cuenta, el mismo evento se vería distinto en cada una.
+  try{ if(window.FrateAfiche) return FrateAfiche.fondoHTML(EV,{clase:'heroimg',w:620,h:250}); }catch(e){}
+  if(EV.video_url) return `<video autoplay muted loop playsinline class="heroimg" src="${EV.video_url}"></video><div class="scrim"></div>`;
+  if(EV.imagen_url) return `<img class="heroimg" src="${EV.imagen_url}" alt=""><div class="scrim"></div>`;
+  return `<div class="grad"></div><div class="scrim"></div>`;
+}
+function render(){
+  const d=parseFecha(EV.fecha);
+  // La fecha la arma frate-afiche.js con sus estilos adentro: la usan tres
+  // páginas y no quiero el mismo bloque de CSS copiado en cada una.
+  const dt = (window.FrateAfiche ? FrateAfiche.fechaHTML(EV) : '');
+  const sub = d?`${DOWL[d.getDay()]} ${d.getDate()} ${MON[d.getMonth()].toLowerCase()} · ${EV.hora||'23:00'} – ${EV.hora_termino||'05:00'} hrs`:'';
+  const tw = window.FrateAfiche ? FrateAfiche.titulo(EV.nombre||'FRATE')
+           : `<div class="evname">${(EV.nombre||'').replace(/</g,'&lt;')}</div>`;
+  let html = `<div class="hero">${heroBg()}
+    <div class="url">frate.cl/e/${EV.slug||''}</div>
+    <div class="hgrid"><div class="hizq"><div class="htit">${tw}</div><div class="evsub">${sub}</div></div>${dt}</div>
+  </div><div class="body">`;
+  html += `<div class="lbl">Entradas</div><div id="tks"></div>`;
+  html += `<div id="attn"></div>`;
+  if(ADDONS.length){ html += `<div class="lbl">Extras — opcional</div><div id="ads"></div>`; }
+  html += `<div class="lbl">Tus datos</div>
+    <input id="b-nombre" data-fmt="nombre" placeholder="Nombre y apellido" autocomplete="name" />
+    <div class="row2"><input id="b-email" type="email" placeholder="Correo (ahí llega el QR)" autocomplete="email" /><input id="b-tel" data-fmt="tel" placeholder="Teléfono" inputmode="tel" autocomplete="tel" /></div>
+    <input id="b-email2" type="email" placeholder="Confirma tu correo (ahí llega tu QR)" autocomplete="off" />
+    <div style="font-size:0.66rem;color:var(--muted);margin:2px 2px 4px;">🪪 El <b>RUT de cada asistente</b> se pide arriba (al elegir entradas). Es obligatorio y se verifica en la puerta.</div>`;
+  html += `<div class="totrow"><span class="tl">Total</span><span class="tv" id="tot">$0</span></div>
+    <div id="aviso-cuenta" style="display:none;background:#1c1710;border:1px solid #D4A832;border-radius:10px;padding:13px 14px;margin:4px 0 10px;text-align:center;">
+      <div style="font-weight:800;color:#E6C860;">Esta entrada es solo para miembros</div>
+      <div style="font-size:0.8rem;color:#d4d0c4;margin:4px 0 10px;line-height:1.45;">Crea tu cuenta gratis y vuelves directo acá con tu entrada elegida.</div>
+      <button type="button" class="pay" style="margin:0;" onclick="_irACrearCuenta()">Crear mi cuenta</button>
+      <button type="button" onclick="_irAEntrar()" style="background:none;border:0;color:#E6C860;font-size:0.8rem;margin-top:8px;cursor:pointer;text-decoration:underline;">Ya tengo cuenta</button>
+    </div>
+    <button class="pay" id="paybtn" onclick="pagar()">Pagar con MercadoPago</button>
+    <div class="msg" id="msg"></div>
+    <!-- Solo aparece al apretar pagar: le dice el plazo ANTES de irse a MercadoPago. -->
+    <div id="aviso-plazo" style="display:none;background:#241d06;border:1px solid #e0b53b;border-radius:9px;padding:11px 13px;margin-top:9px;font-size:0.78rem;line-height:1.55;color:#f0e2b0;">
+      ⏳ <b>Te guardamos tus entradas por 30 minutos.</b><br>
+      Si no alcanzas a pagar, no pierdes nada: te mandamos un link para retomarla y las entradas vuelven a estar disponibles para todos.
+    </div>
+    <div class="note" id="nota-fee">Incluye 8% de servicio · Tu QR llega al correo al instante · <b>Tienes 30 min para pagar</b></div>
+    <div class="note" style="margin-top:6px;opacity:.85;">Entradas nominativas. En caso de <b>devolución</b>, se retiene un <b>${RETPCT}%</b> por gastos de gestión y transacción (la comisión de MercadoPago no es reembolsable). Al pagar aceptas esta condición.</div>
+    <div class="note" style="margin-top:6px;opacity:.85;">Al pagar aceptas los <a href="/terminos.html" target="_blank" style="color:#E6C860;text-decoration:underline;">términos y condiciones</a>.</div>
+    <a class="back" href="/">← Ver todos los eventos</a></div>`;
+  $('app').innerHTML = html;
+  try{ const k='frate_sel_'+(EV&&EV.id), g=sessionStorage.getItem(k); if(g){ sessionStorage.removeItem(k); const o=JSON.parse(g)||{}; Object.keys(o).forEach(id=>{ if(TKS.some(t=>String(t.id)===String(id))) sel[id]=o[id]; }); } }catch(_){}
+  renderTks(); renderAddons(); renderAttendees(); recalc();
+  // Al volver de crear la cuenta con la entrada de miembro ya elegida: se lee
+  // el perfil para que la fila salga a nombre de la cuenta desde el inicio.
+  if(window.FratePerfil && TKS.some(t=>t.solo_miembros&&(sel[t.id]||0)>0)){
+    sb.auth.getSession().then(r=>{ window._ses=(r&&r.data&&r.data.session)||null; return window._ses ? FratePerfil.leer() : null; })
+      .then(()=>{ renderAttendees(); _avisoCuenta(); }).catch(()=>{});
+  }
+  try{ if(window.FrateEmail) FrateEmail.attach($('b-email'), {confirm: $('b-email2')}); }catch(e){}
+}
+function _ttToggle(el){ FrateAfiche.toggle(el); }   // se conserva por si algo viejo lo llama
+// Hora límite de venta de un ticket (vence_hora). Madrugada (< 12:00) = día siguiente del evento.
+function dtEv(hora){
+  if(!EV||!EV.fecha||!hora) return null;
+  const [y,m,d]=String(EV.fecha).split('-').map(Number);
+  const [h,mi]=String(hora).split(':').map(Number);
+  let dt=new Date(y,(m||1)-1,d||1,h||0,mi||0);
+  if((h||0)<12) dt=new Date(dt.getTime()+864e5);
+  return dt;
+}
+function renderTks(){
+  if(!TKS.length){ $('tks').innerHTML='<div style="color:var(--muted);font-size:0.82rem;padding:10px 0;">No hay entradas a la venta ahora.</div>'; return; }
+  // La tarjeta la arma frate-afiche.js. Vivía duplicada acá y en
+  // frate-cuenta.js, y por eso el rediseño de hoy entró en una sola.
+  // Lo único que sigue siendo de esta página es CUÁNDO se considera cerrada
+  // (su hora límite se calcula con la fecha del evento).
+  // ¿el local está abierto AHORA? La ventana cruza medianoche y dtEv() ya lo
+  // resuelve (suma un día cuando la hora es de madrugada). Mientras el evento
+  // corre, una entrada bloqueada se compra en la puerta y hay que decirlo.
+  const _ini = dtEv(EV.hora || '23:00'), _fin = dtEv(EV.hora_termino || '05:00');
+  const _ahoraMs = Date.now();
+  const _enVivo = _ahoraMs >= _ini.getTime() && _ahoraMs <= _fin.getTime();
+  $('tks').innerHTML = TKS.map(t=>{
+    const _dv = t.vence_hora ? dtEv(t.vence_hora) : null;
+    const cerrado = !!(_dv && Date.now() > _dv.getTime());
+    const enPuerta = !!(window.FrateAfiche && FrateAfiche.enPuertaPara
+                        && FrateAfiche.enPuertaPara(t, TKS_TODOS, { enVivo: _enVivo }));
+    const max = Math.min(t.disponible||99, t.max_por_compra||10);
+    return FrateAfiche.entradaHTML(t, {
+      cerrado, enPuerta, cantidad: sel[t.id]||0,
+      onMenos: `chg(${t.id},-1)`, onMas: `chg(${t.id},1,${max})`,
+      precioTxt: (t.precio>0 ? clp(t.precio) : 'Gratis')
+    });
+  }).join('');
+}
+function chg(id,d,max){
+  // Entrada de miembro con sesión: se revisa el perfil EN VIVO antes de sumar
+  // (nombre, RUT, sexo o institución). Es una sola, a nombre de la cuenta.
+  const t=TKS.find(x=>String(x.id)===String(id));
+  if(d>0 && t && t.solo_miembros){
+    if((sel[id]||0)>=1){ msg('Tu entrada de miembro es una sola y va a tu nombre.'); return; }
+    if(window._ses && window.FratePerfil){ _chgMiembro(t,id,d,max); return; }
+  }
+  _chgAplicar(id,d,max);
+}
+async function _chgMiembro(t,id,d,max){
+  if(window._gateM) return; window._gateM=true;
+  try{
+    const r=await FratePerfil.exigir(t);
+    if(r.ok){ _prellenarComprador(); _chgAplicar(id,d,max); }
+    else if(r.motivo==='NO_CORRESPONDE') msg(r.texto);
+    else if(r.motivo==='SIN_SESION'){ window._ses=null; _chgAplicar(id,d,max); }
+  }catch(_){ msg('No pudimos revisar tu cuenta. Intenta de nuevo.'); }
+  finally{ window._gateM=false; }
+}
+function _prellenarComprador(){
+  const pm=window.FratePerfil&&FratePerfil.persona(); if(!pm) return;
+  if($('b-nombre')&&!$('b-nombre').value) $('b-nombre').value=pm.nombre;
+  // La confirmación se llena solo si también se llenó el correo (si no, «no coinciden»).
+  if(pm.email && $('b-email') && !$('b-email').value){ $('b-email').value=pm.email; if($('b-email2') && !$('b-email2').value) $('b-email2').value=pm.email; }
+}
+function _chgAplicar(id,d,max){
+  const q=(sel[id]||0)+d;
+  if(q<0) return; if(d>0 && max!=null && q>max){ msg(`Máximo ${max} de esa entrada`); return; }
+  sel[id]=q; if(!q) delete sel[id];
+  const el=$('q'+id); if(el) el.textContent=q;
+  _ajustarAddons(); renderAddons();   // 🥤 el tope de extras es la cantidad de entradas
+  renderAttendees(); recalc();
+}
+function renderAttendees(){
+  const box=$('attn'); if(!box) return;
+  const blocks=[];
+  const pm=(window._ses&&window.FratePerfil&&FratePerfil.persona())||null;
+  TKS.forEach(t=>{ const q=sel[t.id]||0; for(let i=0;i<q;i++){
+    const key=t.id+'_'+i; att[key]=att[key]||{nombre:'',rut:''};
+    if(t.solo_miembros && pm){
+      att[key]={nombre:pm.nombre,rut:pm.rut};
+      const e=v=>String(v||'').replace(/"/g,'&quot;').replace(/</g,'&lt;');
+      blocks.push(`<div class="att" style="border-color:#6b5a1e"><div class="att-h">${e(_etq(t.nombre)||'Entrada')} · <span style="color:#E6C860">🔒 esta entrada es para ti</span></div>
+        <input readonly value="${e(pm.nombre)}" style="opacity:.75" /><input readonly value="${e(pm.rut)}" style="opacity:.75" />
+        <div style="font-size:0.7rem;color:#b4a870;margin-top:4px;">Va a nombre de tu cuenta y no se puede regalar.</div></div>`);
+      continue;
+    }
+    blocks.push(`<div class="att"><div class="att-h">${(_etq(t.nombre)||'Entrada')} · asistente ${i+1}</div>
+      <input data-fmt="nombre" placeholder="Nombre y apellido" value="${(att[key].nombre||'').replace(/"/g,'&quot;')}" oninput="att['${key}'].nombre=this.value" />
+      <input data-fmt="rut" placeholder="RUT (12.345.678-9)" inputmode="text" maxlength="12" value="${(att[key].rut||'').replace(/"/g,'&quot;')}" oninput="att['${key}'].rut=this.value" onchange="att['${key}'].rut=this.value" /></div>`);
+  }});
+  box.innerHTML = blocks.length? `<div class="lbl">Datos de cada asistente</div>`+blocks.join('') : '';
+}
+// 🥤 Cuantas entradas lleva el carrito. Es el tope de los extras: uno por entrada.
+//    Si todavia no elige ninguna, el tope es 0 y el extra no se puede sumar — asi
+//    el «no se vende solo» se cumple sin una regla aparte.
+function _nEntradas(){ let n=0; TKS.forEach(t=>{ n+=(sel[t.id]||0); }); return n; }
+function _topeAddon(a){
+  // El tope lo dice el PRODUCTO (`max_por_entrada`), no el código: así el mismo
+  // extra puede ser «uno por entrada» o libre sin tocar nada acá.
+  // null = sin tope por entrada; 1 = uno por cada entrada del carrito.
+  const porEntrada = (a.max_por_entrada === null || a.max_por_entrada === undefined)
+    ? Infinity
+    : _nEntradas() * Math.max(0, a.max_por_entrada);
+  const porStock   = (a.stock===null||a.stock===undefined) ? Infinity : Math.max(0, a.stock);
+  return Math.min(porEntrada, porStock);
+}
+function renderAddons(){
+  const box=$('ads'); if(!box) return;
+  box.innerHTML = ADDONS.map(a=>{
+    const q = addonSel[a.id]||0, tope = _topeAddon(a);
+    const agotado = (a.stock!==null && a.stock!==undefined && a.stock<=0);
+    const nota = agotado ? '<div class="ad" style="color:#f87171;">Agotado</div>'
+               : (a.stock!==null && a.stock!==undefined && a.stock<=50) ? `<div class="ad" style="color:#E6C860;">Quedan ${a.stock}</div>`
+               : (_nEntradas()===0 ? '<div class="ad" style="color:#8a8a92;">Elige una entrada primero</div>' : '');
+    return `<div class="addon ${q?'on':''}" style="${agotado?'opacity:.45;':''}">
+      <span class="an">${a.emoji||'✨'} ${(a.nombre||'').replace(/</g,'&lt;')}${a.descripcion?`<div class="ad">${a.descripcion.replace(/</g,'&lt;')}</div>`:''}${nota}</span>
+      <b class="ap">+${clp(a.precio)}</b>
+      <span class="qty" style="display:flex;align-items:center;gap:8px;margin-left:10px;">
+        <button type="button" class="qb" onclick="event.stopPropagation();chgAddon(${a.id},-1)" ${q<=0?'disabled':''}>−</button>
+        <b style="min-width:14px;text-align:center;">${q}</b>
+        <button type="button" class="qb" onclick="event.stopPropagation();chgAddon(${a.id},1)" ${(agotado||q>=tope)?'disabled':''}>＋</button>
+      </span></div>`;
+  }).join('');
+}
+function chgAddon(id, d){
+  const a = ADDONS.find(x=>x.id===id); if(!a) return;
+  const q = Math.max(0, Math.min((addonSel[id]||0)+d, _topeAddon(a)));
+  addonSel[id] = q; renderAddons(); recalc();
+}
+// Si saca entradas, los extras bajan con ellas: nunca mas vasos que entradas.
+function _ajustarAddons(){
+  let cambio=false;
+  ADDONS.forEach(a=>{ const t=_topeAddon(a); if((addonSel[a.id]||0) > t){ addonSel[a.id]=t; cambio=true; } });
+  return cambio;
+}
+function recalc(){
+  let sub=0; TKS.forEach(t=>{ sub+=(sel[t.id]||0)*(t.precio||0); });
+  ADDONS.forEach(a=>{ sub += (addonSel[a.id]||0) * (a.precio||0); });
+  const fee=Math.round(sub*COM), tot=sub+fee;
+  const tEl=$('tot'); if(tEl) tEl.textContent=clp(tot);
+  const nEl=$('nota-fee'); if(nEl) nEl.textContent='Incluye '+(Math.round(COM*1000)/10)+'% de servicio · Tu QR llega al correo al instante';
+  // Una entrada de regalo suma $0: deshabilitar por total dejaba el botón
+  // muerto justo en las gratis. Manda cuántas entradas eligió.
+  const nTk=TKS.reduce((s,t)=>s+(sel[t.id]||0),0);
+  const btn=$('paybtn'); if(btn){ btn.disabled = nTk<=0 && sub<=0; btn.textContent=_txtBoton(tot); }
+  if(nEl && tot<=0 && nTk>0) nEl.textContent='Entrada de regalo · Tu QR llega al correo al instante';
+  _avisoCuenta();
+}
+function msg(t){ const m=$('msg'); if(m) m.textContent=t||''; }
+function _txtBoton(tot){
+  // Sin nada elegido el total también es $0: sin esta guarda, cualquier
+  // evento pagado mostraba «Reservar gratis» hasta que elegías una entrada.
+  const nTk = TKS.reduce((s,t)=>s+(sel[t.id]||0),0);
+  if(!nTk) return (TKS.length && TKS.every(t=>!(t.precio>0))) ? 'Reservar gratis' : 'Pagar con MercadoPago';
+  if(tot==null){ let s=0; TKS.forEach(t=>{ s+=(sel[t.id]||0)*(t.precio||0); }); ADDONS.forEach(a=>{ s += (addonSel[a.id]||0)*(a.precio||0); }); tot=s+Math.round(s*COM); }
+  return tot<=0 ? 'Reservar gratis' : 'Pagar con MercadoPago';
+}
+// ¿Eligió una entrada solo para miembros y no ha iniciado sesión?
+function _necesitaCuenta(){ return !window._ses && TKS.some(t=>t.solo_miembros && (sel[t.id]||0)>0); }
+function _avisoCuenta(){ const b=$('aviso-cuenta'); if(b) b.style.display = _necesitaCuenta() ? '' : 'none'; }
+// Se guarda lo elegido para que al volver de crear la cuenta siga ahí.
+function _guardarSel(){ try{ sessionStorage.setItem('frate_sel_'+(EV&&EV.id), JSON.stringify(sel)); }catch(_){} }
+function _irACrearCuenta(){ _guardarSel(); location.href='/cuenta?modo=up&volver='+encodeURIComponent(location.pathname+location.search); }
+function _irAEntrar(){ _guardarSel(); location.href='/cuenta?volver='+encodeURIComponent(location.pathname+location.search); }
+async function pagar(){
+  msg('');
+  const nombre=($('b-nombre').value||'').trim(), email=($('b-email').value||'').trim(), tel=($('b-tel').value||'').trim();
+  const totalTk=TKS.reduce((s,t)=>s+(sel[t.id]||0),0);
+  if(!totalTk){ msg('Elige al menos una entrada'); return; }
+  // La sesión se pide al cargar y tarda un momento: si aprieta antes de que
+  // responda, a alguien CON cuenta le saldría «crea tu cuenta». Se espera acá.
+  if(_necesitaCuenta()){ try{ const r=await sb.auth.getSession(); window._ses=(r&&r.data&&r.data.session)||null; }catch(_){} }
+  if(_necesitaCuenta()){ _avisoCuenta(); msg('Esta entrada es solo para miembros: crea tu cuenta o entra.'); return; }
+  // La cortesía de miembro se reserva sola (el servidor responde NO_MEZCLAR).
+  { const _cortM=t=>t.solo_miembros && !(t.precio>0); const _selT=TKS.filter(t=>(sel[t.id]||0)>0);
+    if(_selT.some(_cortM) && (_selT.some(t=>!_cortM(t)) || ADDONS.some(a=>addonSel[a.id]))){ msg('🎁 Tu cortesía de miembro se reserva sola: deja en 0 las demás entradas y los extras.'); return; }
+    // Al volver de crear la cuenta la selección se restaura sin pasar por chg: se revisa acá.
+    if(window._ses && window.FratePerfil){
+      for(const t of _selT.filter(x=>x.solo_miembros)){
+        let r; try{ r=await FratePerfil.exigir(t); }catch(_){ msg('No pudimos revisar tu cuenta. Intenta de nuevo.'); return; }
+        if(!r.ok){
+          if(r.motivo==='SIN_SESION'){ window._ses=null; _avisoCuenta(); msg('Esta entrada es solo para miembros: crea tu cuenta o entra.'); return; }
+          msg(r.motivo==='NO_CORRESPONDE' ? r.texto : 'Completa tus datos para reservar tu entrada.'); return;
+        }
+      }
+      if(_selT.some(x=>x.solo_miembros)){ _prellenarComprador(); renderAttendees(); }
+    }
+  }
+  const nombre2=($('b-nombre').value||'').trim()||nombre, email2=($('b-email').value||'').trim()||email;
+  if(!nombre2||!email2||!tel){ msg('Completa tus datos (nombre, correo y teléfono)'); return; }
+  // Verificación de correo: formato + coinciden + dominio real (para que SÍ llegue el QR)
+  if(window.FrateEmail){
+    const ev=FrateEmail.validate($('b-email'), $('b-email2')); if(!ev.ok){ msg('⚠️ '+ev.msg); return; }
+    try{ const chk=await FrateEmail.checkMX(email2); if(chk && chk.mx===false){ msg('❌ Ese correo no existe ('+email2+'). Corrígelo para recibir tu QR.'); return; } }catch(_){}
+  }
+  // items: tickets nominativos + addons
+  const items=[];
+  for(const t of TKS){ const q=sel[t.id]||0; if(!q) continue;
+    const _pm=(t.solo_miembros&&window._ses&&window.FratePerfil)?FratePerfil.persona():null;
+    const personas=[]; for(let i=0;i<q;i++){ if(_pm){ personas.push({nombre:_pm.nombre,rut:_pm.rut}); continue; } const p=att[t.id+'_'+i]||{}; if(!String(p.nombre||'').trim()){ msg('Falta el nombre de cada asistente'); return; } if(!_rutOk(p.rut)){ msg('Ingresa un RUT válido para cada asistente (ej: 12.345.678-9)'); return; } personas.push({nombre:p.nombre.trim(),rut:_rutFmt(p.rut)}); }
+    items.push({ tipo:t.nombre, ttId:t.id, eventoId:EV.id, nombre:t.nombre, precio:t.precio, cantidad:q, personas });
+  }
+  // Viaja como `merch` porque ahora ES un producto de la tiendita. El servidor
+  // aplica el tope que trae el producto, venga por la puerta que venga.
+  ADDONS.forEach(a=>{ const q=addonSel[a.id]||0; if(q>0) items.push({ tipo:'merch', productoId:a.id, nombre:a.nombre, precio:a.precio, cantidad:q, eventoId:EV.id }); });
+  const btn=$('paybtn'); const _gratis=_txtBoton()==='Reservar gratis'; btn.disabled=true; btn.textContent=_gratis?'Reservando…':'Redirigiendo a pago…';
+  // Decirle el plazo ANTES, no después. Nadie sabía que tenía un tiempo límite:
+  // salía a buscar la tarjeta, volvía a los 40 minutos y su compra ya no estaba.
+  try{ const av=document.getElementById('aviso-plazo'); if(av && !_gratis) av.style.display=''; }catch(_){}
+  try{
+    // El RUT del comprador es el del primer asistente (es la misma persona en la
+    // práctica). Ya está validado con dígito verificador más arriba. Con esto la
+    // orden queda amarrada a una identidad real, no solo a un correo.
+    // `items` sí está en este alcance; `personas` vive dentro del for de arriba.
+    const _1er = items.find(i => Array.isArray(i.personas) && i.personas.length);
+    const _rutComprador = (_1er && _1er.personas[0] && _1er.personas[0].rut) || '';
+    const { data, error } = await sb.functions.invoke('crear-pago', { body:{ items, comprador:{ nombre:nombre2, email:email2, tel, rut:_rutComprador } } });
+    if(error){
+      // error.message es siempre «Edge Function returned a non-2xx status code».
+      // El motivo real viene en el cuerpo de la respuesta.
+      let m=error.message||'No se pudo iniciar el pago', code='', faltan=null;
+      try{ const c=await error.context?.json?.(); if(c?.error) m=c.error; code=(c&&c.code)||''; faltan=(c&&c.faltan)||null; }catch(_){}
+      if(code==='REQUIERE_CUENTA'){ window._ses=null; _avisoCuenta(); msg(m); btn.disabled=false; btn.textContent=_txtBoton(); return; }
+      if(code && window.FratePerfil && FratePerfil.esCodigo(code)){
+        btn.disabled=false; btn.textContent=_txtBoton();
+        const tM=TKS.find(t=>t.solo_miembros&&(sel[t.id]||0)>0);
+        const listo=await FratePerfil.manejarCodigo(code,m,faltan,tM);
+        if(listo){ renderAttendees(); msg('Datos guardados. Aprieta el botón otra vez.'); } else msg(m);
+        return;
+      }
+      throw new Error(m);
+    }
+    if(data?.error) throw new Error(data.error);
+    if(data?.freeOrder){ location.href='/pago-exitoso.html?external_reference='+data.pedidoId; return; }
+    if(!data?.initPoint) throw new Error('MercadoPago no devolvió link de pago');
+    // ── Se deja rastro ANTES de irse a MercadoPago ──────────────
+    // El checkout redirige y esta página deja de existir, así que un reloj acá
+    // no serviría. Lo que sí sirve: guardar hasta cuándo vale el cupo, para
+    // que al VOLVER (botón atrás, o entrando de nuevo a frate.cl) la persona
+    // vea cuánto le queda y pueda retomar sin empezar de cero.
+    try{
+      localStorage.setItem('frate_pend', JSON.stringify({
+        id: data.pedidoId, expira: data.expiraEn || null,
+        min: data.minutosParaPagar || 30, email: email2, evento: (EV&&EV.nombre)||'',
+      }));
+    }catch(_){}
+    location.href=data.initPoint;
+  }catch(e){ let m=e.message||'Error al iniciar el pago'; if(m.includes('SIN_STOCK')) m=m.replace(/.*SIN_STOCK:\s*/,'')+' — se agotó recién.'; msg('⚠️ '+m); btn.disabled=false; btn.textContent=_txtBoton(); }
+}
+// ── AL VOLVER SIN HABER PAGADO ──────────────────────────────
+// Si la persona aprieta atrás en MercadoPago, o vuelve a entrar a frate.cl,
+// se le muestra cuánto le queda y un botón para retomar. Antes se encontraba
+// con el checkout en blanco y no sabía si su compra existía o no.
+function _pendMirar(){
+  let p; try{ p=JSON.parse(localStorage.getItem('frate_pend')||'null'); }catch(_){ return; }
+  if(!p || !p.id) return;
+  const fin = p.expira ? new Date(p.expira).getTime() : 0;
+  const queda = fin ? fin - Date.now() : 0;
+  // Más de 2 horas vencida: ya no tiene sentido mostrarla.
+  if(fin && queda < -2*3600*1000){ try{ localStorage.removeItem('frate_pend'); }catch(_){} return; }
+
+  let box=document.getElementById('pend-box');
+  if(!box){
+    box=document.createElement('div'); box.id='pend-box';
+    box.style.cssText='position:fixed;left:0;right:0;bottom:0;z-index:9999;padding:13px 16px;'
+      +'background:#141416;border-top:2px solid #e0b53b;box-shadow:0 -6px 24px rgba(0,0,0,.5);'
+      +'display:flex;gap:12px;align-items:center;flex-wrap:wrap;font-size:0.82rem;color:#EDEBEF;'
+      +'padding-bottom:calc(13px + env(safe-area-inset-bottom,0px));';
+    document.body.appendChild(box);
+  }
+  const pintar=()=>{
+    const q = fin ? fin - Date.now() : 0;
+    const vivo = q > 0;
+    const mm = Math.floor(q/60000), ss = Math.floor((q%60000)/1000);
+    box.style.borderTopColor = vivo ? (q < 5*60000 ? '#FF3B3B' : '#e0b53b') : '#FF3B3B';
+    box.innerHTML = vivo
+      ? `<span style="font-size:1.35rem;font-family:ui-monospace,monospace;font-weight:700;color:${q<5*60000?'#FF3B3B':'#e0b53b'};">${mm}:${String(ss).padStart(2,'0')}</span>
+         <span style="flex:1;min-width:170px;line-height:1.4;"><b>Tu compra está esperando el pago</b><br>
+           <span style="opacity:.75;">Después de esto tus entradas vuelven a estar disponibles.</span></span>
+         <button onclick="_pendRetomar()" style="background:#E8363D;border:0;color:#fff;font-weight:800;padding:10px 17px;border-radius:8px;cursor:pointer;font-size:0.82rem;">Terminar de pagar</button>
+         <button onclick="_pendCerrar()" style="background:transparent;border:1px solid #3a3a42;color:#83808C;padding:9px 12px;border-radius:8px;cursor:pointer;font-size:0.78rem;">Después</button>`
+      : `<span style="flex:1;min-width:170px;line-height:1.4;"><b>Se soltó tu cupo</b><br>
+           <span style="opacity:.75;">No perdiste nada — revisamos si todavía hay lugar y te armamos el pago de nuevo.</span></span>
+         <button onclick="_pendRetomar()" style="background:#E8363D;border:0;color:#fff;font-weight:800;padding:10px 17px;border-radius:8px;cursor:pointer;font-size:0.82rem;">Recuperar mi compra</button>
+         <button onclick="_pendCerrar()" style="background:transparent;border:1px solid #3a3a42;color:#83808C;padding:9px 12px;border-radius:8px;cursor:pointer;font-size:0.78rem;">Cerrar</button>`;
+  };
+  pintar();
+  if(window._pendTimer) clearInterval(window._pendTimer);
+  window._pendTimer=setInterval(pintar, 1000);
+}
+function _pendCerrar(){
+  if(window._pendTimer) clearInterval(window._pendTimer);
+  const b=document.getElementById('pend-box'); if(b) b.remove();
+}
+async function _pendRetomar(){
+  let p; try{ p=JSON.parse(localStorage.getItem('frate_pend')||'null'); }catch(_){ return; }
+  if(!p || !p.id) return;
+  const b=document.getElementById('pend-box');
+  if(b) b.innerHTML='<span style="flex:1;">Revisando si quedan cupos…</span>';
+  try{
+    const { data, error }=await sb.functions.invoke('reanudar-pago',{ body:{ pedidoId:p.id, medio:'mercadopago', email:p.email||'' } });
+    if(error){
+      let m=error.message||'No se pudo';
+      try{ const c=await error.context?.json?.(); if(c?.error) m=c.error; }catch(_){}
+      throw new Error(m);
+    }
+    if(data?.error) throw new Error(data.error);
+    if(!data?.initPoint) throw new Error('No se pudo generar el pago');
+    try{ localStorage.setItem('frate_pend', JSON.stringify({...p, expira:data.expiraEn||null})); }catch(_){}
+    location.href=data.initPoint;
+  }catch(e){
+    const m=String(e.message||e);
+    // El caso feo pero honesto: se agotó mientras dudaba.
+    if(b) b.innerHTML=`<span style="flex:1;min-width:170px;line-height:1.45;color:#ffb4b4;">
+      <b>${/agot|stock|cupo/i.test(m)?'😢 Se agotaron mientras lo pensabas':'No se pudo retomar'}</b><br>
+      <span style="opacity:.8;">${m.replace(/[<>]/g,'')}</span></span>
+      <a href="/" style="background:#E8363D;color:#fff;text-decoration:none;font-weight:800;padding:10px 17px;border-radius:8px;font-size:0.82rem;">Ver otras fechas</a>
+      <button onclick="_pendCerrar()" style="background:transparent;border:1px solid #3a3a42;color:#83808C;padding:9px 12px;border-radius:8px;cursor:pointer;font-size:0.78rem;">Cerrar</button>`;
+  }
+}
+// Al volver a la pestaña también se revisa: el caso típico es apretar atrás en MercadoPago.
+window.addEventListener('pageshow', _pendMirar);
+document.addEventListener('visibilitychange', ()=>{ if(!document.hidden) _pendMirar(); });
+
+boot();
+_pendMirar();
+</script>
+</body></html>
