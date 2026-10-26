@@ -8060,6 +8060,8 @@ async function renderFormularios(){
     // 💳 Cobros de las fichas a la vista: UNA consulta en lote. Llega después del
     // pintado y solo repinta chips y alertas; si falla, todo se ve como antes.
     if(view!=='memoria' && view!=='informe') _fmCobrosCargar(rows.map(f=>f.id)).then(ok=>{ if(ok) _fmChipsRefrescar(); });
+    // Y de paso: ¿alguna ficha promete una lista que ya no existe?
+    _fmListasVivasCargar(rows).then(ok=>{ if(ok && typeof _fmRender==='function' && window._fmCurId) { try{ _fmRender(); }catch(_){} } });
     const show=(id,on)=>{ const e=document.getElementById(id); if(e) e.style.display = on?'':'none'; };
     show('fm-lista', view==='lista'); show('fm-kanban', view==='kanban'); show('fm-agenda', view==='agenda');
     show('fm-memoria', view==='memoria'); show('fm-informe', view==='informe'); show('fm-calendario', view==='calendario');
@@ -8820,7 +8822,14 @@ function _fmRender(){
       </div>
       <div style="margin-top:14px;background:var(--bg2);border:1px solid var(--border);border-radius:9px;padding:11px 13px;">
         <div style="font-size:0.62rem;letter-spacing:1px;text-transform:uppercase;color:var(--dorado);margin-bottom:6px;">🎟️ Lista de invitados (puerta)</div>
-        ${g.lista_link
+        ${g.lista_link && _fmListaMuerta(g)
+          ? `<div style="font-size:0.8rem;background:rgba(239,68,68,.12);border:1px solid var(--rojo);border-radius:8px;padding:10px 12px;">
+              <b style="color:var(--rojo);">⚠️ Esta lista YA NO EXISTE</b><br>
+              <span style="color:var(--muted);font-size:0.74rem;">El código <b>${esc(g.lista_codigo||'')}</b> está en la ficha pero la lista fue borrada. El link que tiene el cliente no funciona.</span>
+              <div style="margin-top:8px;"><button class="btn btn-p btn-sm" onclick="_fmCrearLista(${f.id})">🎟️ Crear la lista de nuevo</button></div>
+              <div style="margin-top:6px;color:var(--muted);font-size:0.68rem;">Ojo: al recrearla sale un código NUEVO, así que hay que reenviarle el link.</div>
+             </div>`
+          : g.lista_link
           ? `<div style="font-size:0.8rem;">✅ Creada: <b>${esc(g.lista_codigo||'')}</b> · <a href="${esc(g.lista_link)}" target="_blank" rel="noopener" style="color:var(--azul);">abrir ↗</a> · cupos: <b>${g.invitados||0}</b>
               <div style="display:flex;gap:6px;margin-top:8px;flex-wrap:wrap;">
                 <button class="btn btn-sm" style="background:#25D366;color:#0a2a12;border:0;font-weight:800;" onclick="_fmWaLista(${f.id})">💬 Enviar link al cumpleañer@</button>
@@ -9122,14 +9131,19 @@ function _wzEmitir(){
   const cupos=(parseInt(gv('g-inv'))||0)+(parseInt(gv('g-extra-n'))||0);
   const zona=gv('g-mesa'); const esCumple=f.tipo==='cumple';
   const fl=_fmFechaLarga(_fmFechaDe(f));
-  box.innerHTML = g.lista_link
+  box.innerHTML = (g.lista_link && _fmListaMuerta(g))
+    ? `<div style="background:rgba(239,68,68,.12);border:1px solid var(--rojo);border-left:3px solid var(--rojo);border-radius:0 8px 8px 0;padding:11px 13px;font-size:0.78rem;line-height:1.6;">
+         <b style="color:var(--rojo);">⚠️ La lista ${_fmEsc(g.lista_codigo||'')} ya no existe</b><br>
+         <span style="color:var(--muted);font-size:0.74rem;">Fue borrada. El link que tiene el cliente está muerto.</span>
+       </div>`
+    : g.lista_link
     ? `<div style="background:var(--bg3);border:1px solid var(--border);border-left:3px solid var(--verde);border-radius:0 8px 8px 0;padding:11px 13px;font-size:0.78rem;line-height:1.6;">
-         ✅ Lista creada: <b>${_chatEsc(g.lista_codigo||'')}</b><br>
-         <a href="${_chatEsc(g.lista_link)}" target="_blank" rel="noopener" style="color:var(--azul);word-break:break-all;">${_chatEsc(g.lista_link)}</a>
+         ✅ Lista creada: <b>${_fmEsc(g.lista_codigo||'')}</b><br>
+         <a href="${_fmEsc(g.lista_link)}" target="_blank" rel="noopener" style="color:var(--azul);word-break:break-all;">${_fmEsc(g.lista_link)}</a>
        </div>
        <div style="display:flex;gap:6px;margin-top:9px;flex-wrap:wrap;">
          <button class="btn btn-p btn-sm" onclick="_fmWaLista(${f.id})">💬 Mandársela por WhatsApp</button>
-         <button class="btn btn-g btn-sm" onclick="navigator.clipboard.writeText('${_chatEsc(g.lista_link)}');showToast('🔗 Copiado')">🔗 Copiar</button>
+         <button class="btn btn-g btn-sm" onclick="navigator.clipboard.writeText('${_fmEsc(g.lista_link)}');showToast('🔗 Copiado')">🔗 Copiar</button>
        </div>`
     : `<div style="background:var(--bg3);border:1px solid var(--border);border-left:3px solid var(--dorado);border-radius:0 8px 8px 0;padding:11px 13px;font-size:0.76rem;color:var(--muted);line-height:1.65;">
          <b style="color:var(--dorado);">Al apretar «Crear la lista» pasa esto:</b><br>
@@ -9893,6 +9907,35 @@ function _fmCobrosGuardar(id, lec, seq){
 // solo de las que no se leyeron hace menos de 15 s (el tiempo real las mantiene).
 // Tolerante: si falla, el mapa queda como estaba y no se reintenta en 1 minuto.
 // Devuelve true si llegó algo.
+// Escapado PLANO para atributos y strings de JS. NO usar _chatEsc acá: esa
+// convierte las URL en <a>, y metida dentro de href="…" cerraba el atributo
+// antes de tiempo y el resto del tag salía impreso como texto en pantalla.
+function _fmEsc(t){ return String(t==null?'':t).replace(/&/g,'&amp;').replace(/"/g,'&quot;').replace(/'/g,'&#39;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
+
+// 🔗 ¿La lista que promete la ficha EXISTE todavía?
+// Una lista se puede borrar desde Comunidad → Listas y la ficha no se entera:
+// sigue mostrando «✅ Creada» con un link muerto. Así le pasó a una clienta que
+// ya había pagado y nadie lo supo en 14 días. Esto lo detecta y lo pinta en rojo.
+// Mismo patrón que _fmCobrosCargar: una consulta en lote, después de pintar.
+async function _fmListasVivasCargar(rows){
+  const cods=[...new Set((rows||[]).map(f=>((f.gestion||{}).lista_codigo||'').trim()).filter(Boolean))];
+  if(!cods.length){ window._fmListasVivas=new Set(); return true; }
+  try{
+    const vivas=new Set();
+    for(let i=0;i<cods.length;i+=200){
+      const { data, error } = await sb.from('listas').select('codigo').in('codigo', cods.slice(i,i+200));
+      if(error) throw error;
+      (data||[]).forEach(l=>vivas.add(String(l.codigo)));
+    }
+    window._fmListasVivas=vivas; return true;
+  }catch(e){ console.warn('[fichas] listas vivas:', e); window._fmListasVivas=null; return false; }
+}
+// true solo cuando YA se comprobó y la lista no está. Mientras no se sabe, no alarma.
+function _fmListaMuerta(g){
+  const c=((g||{}).lista_codigo||'').trim();
+  return !!(c && window._fmListasVivas instanceof Set && !window._fmListasVivas.has(c));
+}
+
 async function _fmCobrosCargar(ids, forzar){
   const m=window._fmCobrosMap;
   if(!forzar && window._fmCobrosFalla && Date.now()-window._fmCobrosFalla<60000) return false;
@@ -11115,7 +11158,10 @@ async function _fmCrearLista(id, opts){
     // Se anota sobre la ficha FRESCA. Si no se puede leer, va la caché: la lista
     // YA se creó y perder su link en la ficha sería peor (terminaría duplicada).
     const fr=await _fmFresca(id);
-    const gest={...(fr?fr.gestion:g), lista_id:resp.id||null, lista_codigo:resp.codigo||codigo, lista_link:link, invitados:cupos};
+    // ⚠️ El servidor devuelve `lista_web_id`, NO `id` (crm-solicitud, crear_lista_abierta).
+    //    Leer `resp.id` dejaba `lista_id` en null SIEMPRE: 285 de 286 fichas quedaron
+    //    sin amarrar a su lista, y por eso nadie pudo detectar una lista borrada.
+    const gest={...(fr?fr.gestion:g), lista_id:(resp.lista_web_id ?? resp.id ?? null), lista_codigo:resp.codigo||codigo, lista_link:link, invitados:cupos};
     const hist=(fr?fr.historial:(Array.isArray(f.historial)?f.historial:[])).slice(); hist.push({ts:new Date().toISOString(), ev:'lista creada: '+(resp.codigo||codigo)});
     await sb.from('formularios').update({ gestion:gest, historial:hist, updated_at:new Date().toISOString() }).eq('id',id);
     f.gestion=gest; f.historial=hist;
@@ -17909,13 +17955,29 @@ async function cambiarEstadoLista(estado){
     showToast('✅ Lista: '+estado); adminLista(id); renderCRM();
   }catch(e){ showToast('Error: '+(e.message||e),true); }
 }
+// 🗑️ Borrar una lista YA NO DESTRUYE NADA.
+// Antes esto hacía `delete` de verdad sobre `listas` y `lista_inscritos`: la fila
+// desaparecía sin dejar `eliminada_at`, sin historial y sin una línea en la
+// bitácora (0 borrados registrados en toda la historia). Una ficha de cumpleaños
+// PAGADA siguió mostrando «✅ Lista creada» con un link muerto durante 14 días y
+// nadie se enteró hasta que la clienta reclamó.
+// La papelera ya existía y funcionaba —el RPC `lista_papelera` marca
+// `eliminada_at` y deja constancia—, pero este botón se la saltaba. Era el ÚNICO
+// camino destructivo del sistema. Ahora usa el mismo RPC que la fila de la lista,
+// así que se recupera con el botón «↩️ Recuperar» de 🗑️ Papelera.
 async function borrarLista(id){
   const l=window._miLista||{};
   const { count } = await sb.from('lista_inscritos').select('*',{count:'exact',head:true}).eq('lista_id',id);
-  if(!confirm(`Esto borra la lista "${l.nombre||''}" Y sus ${count||0} inscritos. ¿Seguro? No se puede deshacer.`)) return;
-  try{ await sb.from('lista_inscritos').delete().eq('lista_id',id); await sb.from('listas').delete().eq('id',id);
-    closeModal('modal-inscritos'); showToast('✅ Lista borrada'); renderCRM(); }
-  catch(e){ showToast('Error: '+(e.message||e),true); }
+  if(!confirm(`Mandar a la papelera la lista "${l.nombre||''}" y sus ${count||0} inscritos.\n\nSale de todas las vistas y su link deja de funcionar, pero NO se destruye: la recuperas desde 🗑️ Papelera.\n\n¿Seguro?`)) return;
+  try{
+    const { data:r, error }=await sb.rpc('lista_papelera',{ p_lista_id:id, p_borrar:true });
+    if(error) throw error;
+    if(!r || r.ok===false) throw new Error((r&&r.error)||'No se pudo');
+    closeModal('modal-inscritos'); showToast('🗑️ A la papelera — se puede recuperar'); renderCRM();
+  }catch(e){
+    const m=String(e.message||e);
+    showToast(/does not exist|function/i.test(m)?'Falta correr frate-estados-listas.sql':m, true);
+  }
 }
 // ── Nombres tipo "(CUMPLEAÑER@) INVITAD@" → se separan al ENTRAR ──────
 // En las listas de cumpleaños cada invitad@ viene anotad@ con el nombre del
